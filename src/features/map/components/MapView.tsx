@@ -1,16 +1,16 @@
 import type { ReactNode } from 'react';
-import { MapContainer, TileLayer, WMSTileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import { useLayersStore } from '@/features/layers';
 import { useCoverageStore } from '@/shared/store/useCoverageStore';
 import {
   DEFAULT_ZOOM,
   GEOPORTAL_WMS_OPTIONS,
   MAX_ZOOM,
-  NMT_SHADED_WMS_URL,
-  ORTHO_WMS_URL,
+  ORTHO_WMTS_URL,
   OSM_LAYER,
   POLAND_CENTER,
 } from '../config/mapLayers';
+import { NmtShadedLayer } from '../layers/NmtShadedLayer';
 import { CoverageLayer } from './CoverageLayer';
 import { CustomLayers } from './CustomLayers';
 import { DraftMarker } from './DraftMarker';
@@ -47,24 +47,16 @@ export function MapView({ children }: MapViewProps) {
           maxZoom={MAX_ZOOM}
         />
       ) : (
-        <WMSTileLayer
+        <TileLayer
           key="ortho"
-          url={ORTHO_WMS_URL}
-          {...GEOPORTAL_WMS_OPTIONS}
+          url={ORTHO_WMTS_URL}
+          attribution={GEOPORTAL_WMS_OPTIONS.attribution}
+          maxNativeZoom={19}
           maxZoom={MAX_ZOOM}
         />
       )}
       <CustomLayers />
-      {nmtOn && (
-        <WMSTileLayer
-          url={NMT_SHADED_WMS_URL}
-          {...GEOPORTAL_WMS_OPTIONS}
-          transparent
-          opacity={nmtOpacity}
-          maxZoom={MAX_ZOOM}
-          zIndex={50}
-        />
-      )}
+      {nmtOn && <NmtShadedLayer opacity={nmtOpacity} zIndex={50} maxZoom={MAX_ZOOM} />}
       <ZoneLayers />
       {showCoverage ? <CoverageLayer /> : <TrackLines />}
       <GuidanceLine />
