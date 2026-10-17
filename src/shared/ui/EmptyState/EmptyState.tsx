@@ -14,7 +14,10 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   return (
-    <Stack spacing={1.5} sx={{ alignItems: 'center', textAlign: 'center', py: 4, px: 2 }}>
+    <Stack
+      spacing={1.5}
+      sx={{ alignItems: 'center', textAlign: 'center', py: { xs: 2.5, md: 4 }, px: 2 }}
+    >
       <Box
         sx={(theme) => ({
           width: 56,

@@ -74,7 +74,20 @@ export function createAppTheme(mode: PaletteMode): Theme {
         styleOverrides: { root: { backgroundImage: 'none' } },
       },
       MuiAlert: {
-        styleOverrides: { root: { borderRadius: 10 } },
+        styleOverrides: {
+          // soft tint in the severity colour instead of MUI's heavy dark-mode blocks
+          root: ({ theme, ownerState }) => {
+            const color = theme.palette[ownerState.severity ?? 'info'].main;
+            return {
+              borderRadius: 10,
+              ...(ownerState.variant === 'standard' && {
+                backgroundColor: alpha(color, theme.palette.mode === 'dark' ? 0.16 : 0.1),
+                color: theme.palette.text.primary,
+                '& .MuiAlert-icon': { color },
+              }),
+            };
+          },
+        },
       },
       MuiChip: {
         styleOverrides: {
