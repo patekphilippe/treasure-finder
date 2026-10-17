@@ -19,6 +19,7 @@ import { CandidateDetails } from './CandidateDetails';
 import { CandidateFiltersBar } from './CandidateFiltersBar';
 import { CandidateList } from './CandidateList';
 import { CandidateMarkers } from './CandidateMarkers';
+import { FieldResultsSummary } from './FieldResultsSummary';
 import { ImportCandidatesButton } from './ImportCandidatesButton';
 import { NoteDialog } from './NoteDialog';
 
@@ -118,6 +119,7 @@ export function AnalysisView() {
         ) : (
           <>
             {showFilters && <CandidateFiltersBar />}
+            <FieldResultsSummary />
             {selected && (
               <CandidateDetails
                 candidate={selected}

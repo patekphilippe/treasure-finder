@@ -3,6 +3,7 @@ import Typography from '@mui/material/Typography';
 import type { Candidate } from '@/shared/types/domain';
 import { LIST_LIMIT } from '../config/filters';
 import { useCandidateActions } from '../hooks/useCandidateActions';
+import { useFieldStatus } from '../hooks/useFieldStatus';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { CandidateListItem } from './CandidateListItem';
 
@@ -13,6 +14,7 @@ interface CandidateListProps {
 export function CandidateList({ candidates }: CandidateListProps) {
   const selectedId = useAnalysisStore((s) => s.selectedId);
   const { focus } = useCandidateActions();
+  const fieldStatus = useFieldStatus();
 
   if (candidates.length === 0) {
     return (
@@ -28,6 +30,7 @@ export function CandidateList({ candidates }: CandidateListProps) {
           key={c.id}
           candidate={c}
           selected={c.id === selectedId}
+          fieldStatus={fieldStatus.get(c.id)}
           onClick={() => focus(c)}
         />
       ))}

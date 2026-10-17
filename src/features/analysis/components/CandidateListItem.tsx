@@ -4,7 +4,8 @@ import Stack from '@mui/material/Stack';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef } from 'react';
-import type { Candidate } from '@/shared/types/domain';
+import { POINT_STATUS_LABELS } from '@/features/points';
+import type { Candidate, PointStatus } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
 import { FORM_META, PROTECTED_COLOR } from '../config/forms';
 import { describeCandidate } from '../utils/describeCandidate';
@@ -12,10 +13,17 @@ import { describeCandidate } from '../utils/describeCandidate';
 interface CandidateListItemProps {
   candidate: Candidate;
   selected: boolean;
+  /** result of checking the accepted candidate in the field */
+  fieldStatus?: PointStatus;
   onClick: () => void;
 }
 
-export function CandidateListItem({ candidate: c, selected, onClick }: CandidateListItemProps) {
+export function CandidateListItem({
+  candidate: c,
+  selected,
+  fieldStatus,
+  onClick,
+}: CandidateListItemProps) {
   const ref = useRef<HTMLButtonElement>(null);
   const meta = FORM_META[c.form];
   const color = c.protectedLikely ? PROTECTED_COLOR : meta.color;
@@ -66,7 +74,9 @@ export function CandidateListItem({ candidate: c, selected, onClick }: Candidate
           )}
         </Typography>
         <Typography variant="caption" color="text.secondary" noWrap>
-          {describeCandidate(c)}
+          {fieldStatus && fieldStatus !== 'do_sprawdzenia'
+            ? `Teren: ${POINT_STATUS_LABELS[fieldStatus].toLowerCase()} · ${describeCandidate(c)}`
+            : describeCandidate(c)}
         </Typography>
       </Stack>
       <Typography
