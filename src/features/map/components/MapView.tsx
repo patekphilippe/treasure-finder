@@ -10,6 +10,7 @@ import {
   POLAND_CENTER,
 } from '../config/mapLayers';
 import { DraftMarker } from './DraftMarker';
+import { GuidanceLine } from './GuidanceLine';
 import { MapEvents } from './MapEvents';
 import { PointMarkers } from './PointMarkers';
 import { PositionMarker } from './PositionMarker';
@@ -52,6 +53,7 @@ export function MapView() {
         />
       )}
       <TrackLines />
+      <GuidanceLine />
       <PointMarkers />
       <DraftMarker />
       <PositionMarker />

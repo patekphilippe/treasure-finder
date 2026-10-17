@@ -14,11 +14,14 @@ interface FieldState {
   heading: number | null;
   following: boolean;
   recordingTrackId: string | null;
+  /** point the user is being guided to */
+  navigationTargetId: string | null;
   setPosition: (fix: GpsFix | null) => void;
   setGpsError: (error: string | null) => void;
   setHeading: (heading: number | null) => void;
   setFollowing: (following: boolean) => void;
   setRecordingTrackId: (id: string | null) => void;
+  setNavigationTarget: (id: string | null) => void;
 }
 
 export const useFieldStore = create<FieldState>((set) => ({
@@ -27,9 +30,11 @@ export const useFieldStore = create<FieldState>((set) => ({
   heading: null,
   following: false,
   recordingTrackId: null,
+  navigationTargetId: null,
   setPosition: (position) => set({ position }),
   setGpsError: (gpsError) => set({ gpsError }),
   setHeading: (heading) => set({ heading }),
   setFollowing: (following) => set({ following }),
   setRecordingTrackId: (recordingTrackId) => set({ recordingTrackId }),
+  setNavigationTarget: (navigationTargetId) => set({ navigationTargetId }),
 }));
