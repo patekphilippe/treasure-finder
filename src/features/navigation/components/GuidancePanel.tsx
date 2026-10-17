@@ -5,6 +5,7 @@ import Stack from '@mui/material/Stack';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { formatDistance } from '@/shared/lib/format';
+import { useZoneAlertStore } from '@/features/zones';
 import { useFieldStore } from '@/shared/store/useFieldStore';
 import { glass, Icon } from '@/shared/ui';
 import { useGuidance } from '../hooks/useGuidance';
@@ -13,6 +14,7 @@ import { useGuidance } from '../hooks/useGuidance';
 export function GuidancePanel() {
   const guidance = useGuidance();
   const setTarget = useFieldStore((s) => s.setNavigationTarget);
+  const alertShown = useZoneAlertStore((s) => s.alert !== null);
   if (!guidance) return null;
 
   const { target, distM, relative, bearing, arrived } = guidance;
@@ -31,7 +33,7 @@ export function GuidancePanel() {
         zIndex: 1100,
         left: '50%',
         transform: 'translateX(-50%)',
-        top: 'calc(env(safe-area-inset-top, 0px) + 104px)',
+        top: `calc(env(safe-area-inset-top, 0px) + ${alertShown ? 172 : 104}px)`,
         width: 'min(calc(100% - 24px), 440px)',
         borderRadius: '16px',
         p: 1.5,

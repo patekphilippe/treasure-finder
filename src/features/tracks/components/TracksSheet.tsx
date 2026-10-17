@@ -1,6 +1,8 @@
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
+import { useZoneAlertStore } from '@/features/zones';
+import { formatDate } from '@/shared/lib/format';
 import { useFieldStore } from '@/shared/store/useFieldStore';
 import type { Track } from '@/shared/types/domain';
 import { ConfirmDialog, EmptyState, Sheet, useToastStore } from '@/shared/ui';
@@ -19,13 +21,27 @@ export function TracksSheet({ onClose }: TracksSheetProps) {
   const recordingId = useFieldStore((s) => s.recordingTrackId);
   const showToast = useToastStore((s) => s.show);
   const [toDelete, setToDelete] = useState<Track | null>(null);
+  const [startWarning, setStartWarning] = useState<string | null>(null);
 
   const active = tracks.find((t) => t.id === recordingId) ?? null;
   const saved = tracks.filter((t) => t.id !== recordingId);
 
-  const start = async () => {
+  const startNow = async () => {
+    setStartWarning(null);
     await trackRecorder.start();
     showToast('Nagrywanie trasy rozpoczęte');
+  };
+  const start = () => {
+    // legal check: the plan requires a warning when a track starts outside a valid permit zone
+    const alert = useZoneAlertStore.getState().alert;
+    if (alert?.kind === 'zakaz') setStartWarning(`Jesteś w strefie zakazu: ${alert.zone.name}.`);
+    else if (alert?.kind === 'zgoda_wygasla')
+      setStartWarning(
+        `Zgoda dla „${alert.zone.name}” wygasła${alert.zone.validUntil ? ` ${formatDate(alert.zone.validUntil)}` : ''}.`,
+      );
+    else if (alert?.kind === 'poza_zgoda')
+      setStartWarning('Trasa zaczyna się poza strefą ze zgodą właściciela.');
+    else void startNow();
   };
   const stop = async () => {
     await trackRecorder.stop();
@@ -57,6 +73,14 @@ export function TracksSheet({ onClose }: TracksSheetProps) {
           )}
         </Stack>
       </Stack>
+      <ConfirmDialog
+        open={startWarning !== null}
+        title="Poza ważną strefą zgody"
+        message={`${startWarning ?? ''} Poszukiwania wymagają zgłoszenia i zgody właściciela gruntu.`}
+        confirmLabel="Rozpocznij mimo to"
+        onConfirm={startNow}
+        onCancel={() => setStartWarning(null)}
+      />
       <ConfirmDialog
         open={toDelete !== null}
         title="Usunąć trasę?"

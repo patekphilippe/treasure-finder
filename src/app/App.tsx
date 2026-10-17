@@ -4,7 +4,7 @@ import { lazy, Suspense } from 'react';
 import { useCompass, useGeolocation } from '@/features/gps';
 import { useLoadPoints } from '@/features/points';
 import { useTrackRecorder } from '@/features/tracks';
-import { useLoadZones } from '@/features/zones';
+import { useLoadZones, useZoneAlerts } from '@/features/zones';
 import { Toast } from '@/shared/ui';
 import { AppGlobalStyles } from './components/AppGlobalStyles';
 import { FieldLayout } from './components/FieldLayout';
@@ -24,6 +24,7 @@ export function App() {
   useTrackRecorder();
   useLoadPoints();
   useLoadZones();
+  useZoneAlerts();
   const mode = useUiStore((s) => s.mode);
 
   return (

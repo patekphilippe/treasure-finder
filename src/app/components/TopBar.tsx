@@ -1,4 +1,5 @@
 import Stack from '@mui/material/Stack';
+import { ZoneAlertBar } from '@/features/zones';
 import { StatusChips } from '@/shared/ui';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { ModeSwitch } from './ModeSwitch';
@@ -22,6 +23,7 @@ export function TopBar() {
         '& > *': { pointerEvents: 'auto' },
       }}
     >
+      {mode === 'field' && <ZoneAlertBar />}
       <ModeSwitch />
       {mode === 'field' && <StatusChips />}
     </Stack>
