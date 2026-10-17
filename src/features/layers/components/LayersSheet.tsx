@@ -1,3 +1,4 @@
+import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
@@ -5,16 +6,31 @@ import Switch from '@mui/material/Switch';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
+import { useState } from 'react';
 import { Icon, Sheet } from '@/shared/ui';
 import { BASE_LAYER_OPTIONS } from '../config/baseLayers';
 import { useLayersStore } from '../store/useLayersStore';
+import { CustomLayerForm } from './CustomLayerForm';
+import { CustomLayerItem } from './CustomLayerItem';
 
 interface LayersSheetProps {
   onClose: () => void;
 }
 
 export function LayersSheet({ onClose }: LayersSheetProps) {
-  const { baseLayer, nmtOn, nmtOpacity, setBaseLayer, setNmtOn, setNmtOpacity } = useLayersStore();
+  const {
+    baseLayer,
+    nmtOn,
+    nmtOpacity,
+    customLayers,
+    setBaseLayer,
+    setNmtOn,
+    setNmtOpacity,
+    addCustomLayer,
+    updateCustomLayer,
+    removeCustomLayer,
+  } = useLayersStore();
+  const [adding, setAdding] = useState(false);
 
   return (
     <Sheet title="Warstwy" onClose={onClose}>
@@ -72,9 +88,44 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
 
         <Divider />
 
-        <Typography variant="body2" color="text.secondary">
-          Własne warstwy XYZ i WMS — do przeniesienia z wersji 1 (Etap 0, krok 3).
-        </Typography>
+        <Stack>
+          <Stack direction="row" sx={{ alignItems: 'center' }}>
+            <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>
+              Własne warstwy
+            </Typography>
+            {!adding && (
+              <Button
+                size="small"
+                startIcon={<Icon name="plus" size={16} />}
+                onClick={() => setAdding(true)}
+              >
+                Dodaj
+              </Button>
+            )}
+          </Stack>
+          {customLayers.length === 0 && !adding && (
+            <Typography variant="body2" color="text.secondary">
+              Dodaj podkład XYZ lub usługę WMS, np. mapę archiwalną z własnego serwera kafelków.
+            </Typography>
+          )}
+          {customLayers.map((layer) => (
+            <CustomLayerItem
+              key={layer.id}
+              layer={layer}
+              onChange={(patch) => updateCustomLayer(layer.id, patch)}
+              onDelete={() => removeCustomLayer(layer.id)}
+            />
+          ))}
+          {adding && (
+            <CustomLayerForm
+              onAdd={(layer) => {
+                addCustomLayer(layer);
+                setAdding(false);
+              }}
+              onCancel={() => setAdding(false)}
+            />
+          )}
+        </Stack>
       </Stack>
     </Sheet>
   );

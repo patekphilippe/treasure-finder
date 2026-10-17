@@ -9,6 +9,7 @@ import {
   OSM_LAYER,
   POLAND_CENTER,
 } from '../config/mapLayers';
+import { CustomLayers } from './CustomLayers';
 import { DraftMarker } from './DraftMarker';
 import { GuidanceLine } from './GuidanceLine';
 import { MapEvents } from './MapEvents';
@@ -43,6 +44,7 @@ export function MapView() {
           maxZoom={MAX_ZOOM}
         />
       )}
+      <CustomLayers />
       {nmtOn && (
         <WMSTileLayer
           url={NMT_SHADED_WMS_URL}
@@ -50,6 +52,7 @@ export function MapView() {
           transparent
           opacity={nmtOpacity}
           maxZoom={MAX_ZOOM}
+          zIndex={50}
         />
       )}
       <TrackLines />
