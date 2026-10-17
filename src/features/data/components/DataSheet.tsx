@@ -1,4 +1,6 @@
-import { EmptyState, Sheet } from '@/shared/ui';
+import Stack from '@mui/material/Stack';
+import { Sheet } from '@/shared/ui';
+import { ExportSection } from './ExportSection';
 
 interface DataSheetProps {
   onClose: () => void;
@@ -7,11 +9,9 @@ interface DataSheetProps {
 export function DataSheet({ onClose }: DataSheetProps) {
   return (
     <Sheet title="Dane" onClose={onClose}>
-      <EmptyState
-        icon="database"
-        title="Eksport i import"
-        description="Kopia ZIP, import kopii z wersji 1 i GeoJSON z QGIS — Etap 0, krok 6."
-      />
+      <Stack spacing={2.5}>
+        <ExportSection />
+      </Stack>
     </Sheet>
   );
 }
