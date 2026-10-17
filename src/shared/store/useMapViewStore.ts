@@ -11,12 +11,21 @@ export interface FlyTarget extends LatLng {
   offsetY?: number;
 }
 
+export interface Bounds {
+  south: number;
+  west: number;
+  north: number;
+  east: number;
+}
+
 interface MapViewState {
   center: LatLng;
   zoom: number;
+  /** visible area, for "analyse this view" */
+  bounds: Bounds | null;
   /** one-shot request for the map to fly somewhere; consumed by the map */
   flyTarget: FlyTarget | null;
-  setView: (center: LatLng, zoom: number) => void;
+  setView: (center: LatLng, zoom: number, bounds?: Bounds) => void;
   flyTo: (target: FlyTarget) => void;
   clearFly: () => void;
 }
@@ -24,8 +33,9 @@ interface MapViewState {
 export const useMapViewStore = create<MapViewState>((set) => ({
   center: { lat: 52.1, lng: 19.4 },
   zoom: 6,
+  bounds: null,
   flyTarget: null,
-  setView: (center, zoom) => set({ center, zoom }),
+  setView: (center, zoom, bounds) => set({ center, zoom, bounds: bounds ?? null }),
   flyTo: (flyTarget) => set({ flyTarget }),
   clearFly: () => set({ flyTarget: null }),
 }));

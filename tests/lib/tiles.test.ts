@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { NMT_WMTS_2180 } from '@/features/map/config/geoportalWmts2180';
-import { chooseLevel } from '@/features/map/utils/chooseLevel';
-import { sourceTileRange } from '@/features/map/utils/sourceTileRange';
-import { applyAffine, metresToTilePixels } from '@/features/map/utils/tileAffine';
+import { NMT_WMTS_2180 } from '@/shared/config/geoportalWmts2180';
+import { applyAffine, chooseLevel, metresToTilePixels, sourceTileRange } from '@/shared/lib/tiles';
 
 describe('metresToTilePixels', () => {
   it('inverts a rotated, scaled grid exactly at the three anchors', () => {

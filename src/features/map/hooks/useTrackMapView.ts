@@ -10,7 +10,13 @@ export function useTrackMapView(): void {
   useEffect(() => {
     const update = () => {
       const c = map.getCenter();
-      setView({ lat: c.lat, lng: c.lng }, map.getZoom());
+      const b = map.getBounds();
+      setView({ lat: c.lat, lng: c.lng }, map.getZoom(), {
+        south: b.getSouth(),
+        west: b.getWest(),
+        north: b.getNorth(),
+        east: b.getEast(),
+      });
     };
     update();
     map.on('moveend', update);

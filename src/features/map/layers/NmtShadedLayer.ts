@@ -1,5 +1,5 @@
 import { createLayerComponent, type LayerProps } from '@react-leaflet/core';
-import { NMT_WMTS_2180 } from '../config/geoportalWmts2180';
+import { NMT_WMTS_2180 } from '@/shared/config/geoportalWmts2180';
 import { Wmts2180GridLayer } from './Wmts2180GridLayer';
 
 interface NmtShadedLayerProps extends LayerProps {

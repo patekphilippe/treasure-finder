@@ -7,6 +7,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
+import { RoughnessSection } from '@/features/roughness';
 import { useZonesStore } from '@/features/zones';
 import { SWATH_MAX_M, SWATH_MIN_M, useCoverageStore } from '@/shared/store/useCoverageStore';
 import { useUiStore } from '@/shared/store/useUiStore';
@@ -91,6 +92,10 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
             />
           </Stack>
         </Stack>
+
+        <Divider />
+
+        <RoughnessSection />
 
         <Divider />
 

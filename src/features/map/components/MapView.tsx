@@ -17,6 +17,7 @@ import { DraftMarker } from './DraftMarker';
 import { GuidanceLine } from './GuidanceLine';
 import { MapEvents } from './MapEvents';
 import { PointMarkers } from './PointMarkers';
+import { RoughnessOverlay } from './RoughnessOverlay';
 import { PositionMarker } from './PositionMarker';
 import { TrackLines } from './TrackLines';
 import { ZoneLayers } from './ZoneLayers';
@@ -56,6 +57,7 @@ export function MapView({ children }: MapViewProps) {
         />
       )}
       <CustomLayers />
+      <RoughnessOverlay />
       {nmtOn && <NmtShadedLayer opacity={nmtOpacity} zIndex={50} maxZoom={MAX_ZOOM} />}
       <ZoneLayers />
       {showCoverage ? <CoverageLayer /> : <TrackLines />}

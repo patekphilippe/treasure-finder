@@ -1,9 +1,12 @@
 import L from 'leaflet';
-import { getProj4 } from '@/shared/lib/geo/crs';
-import { NMT_WMTS_2180 } from '../config/geoportalWmts2180';
-import { chooseLevel } from '../utils/chooseLevel';
-import { sourceTileRange } from '../utils/sourceTileRange';
-import { metresToTilePixels, type XY } from '../utils/tileAffine';
+import { NMT_WMTS_2180 } from '@/shared/config/geoportalWmts2180';
+import {
+  chooseLevel,
+  metresToTilePixels,
+  projectedImageTransform,
+  sourceTileRange,
+} from '@/shared/lib/tiles';
+import { tileCorners2180 } from '../utils/tileCorners2180';
 
 type Config = typeof NMT_WMTS_2180;
 
@@ -32,17 +35,7 @@ export class Wmts2180GridLayer extends L.GridLayer {
     canvas.height = size.y * dpr;
 
     const map = (this as unknown as { _map: L.Map })._map;
-    const proj = getProj4();
-    const nw = coords.scaleBy(size);
-    const toMetres = (px: number, py: number): XY => {
-      const ll = map.unproject([nw.x + px, nw.y + py], coords.z);
-      const [x, y] = proj('EPSG:4326', 'EPSG:2180', [ll.lng, ll.lat]) as [number, number];
-      return { x, y };
-    };
-    const p0 = toMetres(0, 0);
-    const p1 = toMetres(size.x, 0);
-    const p2 = toMetres(0, size.y);
-    const p3 = toMetres(size.x, size.y);
+    const [p0, p1, p2, p3] = tileCorners2180(map, coords, size);
     const bbox = {
       minE: Math.min(p0.x, p1.x, p2.x, p3.x),
       maxE: Math.max(p0.x, p1.x, p2.x, p3.x),
@@ -87,14 +80,8 @@ export class Wmts2180GridLayer extends L.GridLayer {
           new Promise<void>((resolve) => {
             img.onload = () => {
               // source pixel (u, v) → metres (e0 + u·res, n0 − v·res) → tile pixel via m, × dpr
-              ctx.setTransform(
-                m.a * res * dpr,
-                m.b * res * dpr,
-                -m.c * res * dpr,
-                -m.d * res * dpr,
-                (m.a * e0 + m.c * n0 + m.e) * dpr,
-                (m.b * e0 + m.d * n0 + m.f) * dpr,
-              );
+              const t = projectedImageTransform(m, e0, n0, res, dpr);
+              ctx.setTransform(t.a, t.b, t.c, t.d, t.e, t.f);
               // half-pixel overlap hides hairline seams between source tiles
               ctx.drawImage(img, -0.5, -0.5, cfg.tileSize + 1, cfg.tileSize + 1);
               resolve();
