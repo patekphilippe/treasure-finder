@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { MapContainer, TileLayer, WMSTileLayer } from 'react-leaflet';
 import { useLayersStore } from '@/features/layers';
+import { useCoverageStore } from '@/shared/store/useCoverageStore';
 import {
   DEFAULT_ZOOM,
   GEOPORTAL_WMS_OPTIONS,
@@ -10,6 +11,7 @@ import {
   OSM_LAYER,
   POLAND_CENTER,
 } from '../config/mapLayers';
+import { CoverageLayer } from './CoverageLayer';
 import { CustomLayers } from './CustomLayers';
 import { DraftMarker } from './DraftMarker';
 import { GuidanceLine } from './GuidanceLine';
@@ -26,6 +28,7 @@ interface MapViewProps {
 
 export function MapView({ children }: MapViewProps) {
   const { baseLayer, nmtOn, nmtOpacity } = useLayersStore();
+  const showCoverage = useCoverageStore((s) => s.showCoverage);
 
   return (
     <MapContainer
@@ -63,7 +66,7 @@ export function MapView({ children }: MapViewProps) {
         />
       )}
       <ZoneLayers />
-      <TrackLines />
+      {showCoverage ? <CoverageLayer /> : <TrackLines />}
       <GuidanceLine />
       <PointMarkers />
       <DraftMarker />

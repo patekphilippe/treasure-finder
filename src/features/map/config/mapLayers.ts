@@ -31,3 +31,5 @@ export const FOLLOW_ZOOM = 17;
 export const POSITION_COLOR = '#2563eb';
 /** Colour of finished tracks. */
 export const PAST_TRACK_COLOR = '#f59e0b';
+/** Searched strips in coverage mode. */
+export const COVERAGE_COLOR = '#facc15';

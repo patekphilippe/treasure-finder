@@ -5,7 +5,7 @@ import TextField from '@mui/material/TextField';
 import { useState } from 'react';
 import { useMountTime } from '@/shared/hooks/useMountTime';
 import { useUiStore } from '@/shared/store/useUiStore';
-import type { Zone } from '@/shared/types/domain';
+import type { Track, Zone } from '@/shared/types/domain';
 import { ConfirmDialog, Icon, Sheet, useToastStore } from '@/shared/ui';
 import { useZonesStore } from '../store/useZonesStore';
 import { dateInputValue } from '../utils/dateInputValue';
@@ -14,9 +14,11 @@ import { ZoneCoverage } from './ZoneCoverage';
 
 interface ZoneDetailsSheetProps {
   onClose: () => void;
+  /** recorded tracks, for the coverage of a permit zone */
+  tracks: readonly Track[];
 }
 
-export function ZoneDetailsSheet({ onClose }: ZoneDetailsSheetProps) {
+export function ZoneDetailsSheet({ onClose, tracks }: ZoneDetailsSheetProps) {
   const zoneId = useUiStore((s) => s.selectedZoneId);
   const zone = useZonesStore((s) => s.zones.find((z) => z.id === zoneId));
   const { save, remove } = useZonesStore();
@@ -73,7 +75,7 @@ export function ZoneDetailsSheet({ onClose }: ZoneDetailsSheetProps) {
               }
               slotProps={{ inputLabel: { shrink: true } }}
             />
-            <ZoneCoverage zone={zone} />
+            <ZoneCoverage zone={zone} tracks={tracks} />
           </>
         )}
         <Stack direction="row" sx={{ gap: 1 }}>

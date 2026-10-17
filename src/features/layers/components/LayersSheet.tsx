@@ -8,6 +8,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { useZonesStore } from '@/features/zones';
+import { SWATH_MAX_M, SWATH_MIN_M, useCoverageStore } from '@/shared/store/useCoverageStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon, Sheet } from '@/shared/ui';
 import { BASE_LAYER_OPTIONS } from '../config/baseLayers';
@@ -35,6 +36,7 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
   const [adding, setAdding] = useState(false);
   const zoneCount = useZonesStore((s) => s.zones.length);
   const showSheet = useUiStore((s) => s.showSheet);
+  const { swathM, showCoverage, setSwathM, setShowCoverage } = useCoverageStore();
 
   return (
     <Sheet title="Warstwy" onClose={onClose}>
@@ -86,6 +88,35 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
               onChange={(_, value) => setNmtOpacity(value as number)}
               valueLabelDisplay="auto"
               valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
+            />
+          </Stack>
+        </Stack>
+
+        <Divider />
+
+        <Stack spacing={1}>
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+            <Icon name="route" size={22} />
+            <Stack sx={{ flex: 1 }}>
+              <Typography variant="subtitle2">Mapa pokrycia</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Trasy jako przeszukane pasy — widać luki
+              </Typography>
+            </Stack>
+            <Switch checked={showCoverage} onChange={(e) => setShowCoverage(e.target.checked)} />
+          </Stack>
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 4.5, pr: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 92 }}>
+              Pas {swathM.toLocaleString('pl-PL', { maximumFractionDigits: 1 })} m
+            </Typography>
+            <Slider
+              size="small"
+              min={SWATH_MIN_M}
+              max={SWATH_MAX_M}
+              step={0.1}
+              value={swathM}
+              onChange={(_, v) => setSwathM(v as number)}
+              aria-label="Szerokość pasa przeszukania"
             />
           </Stack>
         </Stack>
