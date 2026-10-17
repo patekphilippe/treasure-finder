@@ -2,8 +2,9 @@ import Button from '@mui/material/Button';
 import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import type { PointType } from '@/shared/types/domain';
+import { UnexplodedOrdnanceScreen } from '@/features/safety';
 import { useToastStore } from '@/shared/ui';
 import { usePhotoUrl } from '../hooks/usePhotoUrl';
 import { compressPhoto } from '../utils/compressPhoto';
@@ -27,6 +28,10 @@ interface PointFormProps {
   namePlaceholder: (type: PointType) => string;
   submitLabel: string;
   disabled?: boolean;
+  /** where the point is, shown on the unexploded-ordnance screen */
+  coords?: { lat: number; lng: number } | null;
+  /** shown above the form (e.g. a legal reminder) */
+  notice?: ReactNode;
   onSubmit: (values: PointFormValues) => void;
 }
 
@@ -36,6 +41,8 @@ export function PointForm({
   namePlaceholder,
   submitLabel,
   disabled = false,
+  coords = null,
+  notice,
   onSubmit,
 }: PointFormProps) {
   const showToast = useToastStore((s) => s.show);
@@ -46,6 +53,7 @@ export function PointForm({
   const [photo, setPhoto] = useState<Blob | null>(null);
   const [removePhoto, setRemovePhoto] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uxoOpen, setUxoOpen] = useState(false);
   const previewUrl = usePhotoUrl(photo ?? (removePhoto ? null : existingPhotoId));
 
   const pickPhoto = async (file: File) => {
@@ -74,7 +82,14 @@ export function PointForm({
 
   return (
     <Stack spacing={2}>
-      <PointTypePicker value={type} onChange={setType} />
+      {notice}
+      <PointTypePicker
+        value={type}
+        onChange={(t) => {
+          setType(t);
+          if (t === 'niewybuch') setUxoOpen(true);
+        }}
+      />
       <TextField
         label="Nazwa"
         size="small"
@@ -113,6 +128,7 @@ export function PointForm({
       <Button variant="contained" size="large" disabled={disabled || busy} onClick={submit}>
         {submitLabel}
       </Button>
+      <UnexplodedOrdnanceScreen open={uxoOpen} coords={coords} onClose={() => setUxoOpen(false)} />
     </Stack>
   );
 }

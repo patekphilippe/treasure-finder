@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import { BACKUP_VERSION, photoPath, ZIP_FILES, type BackupV2, type ExportData } from './backup';
 import { toCandidatesGeoJSON } from './toCandidatesGeoJSON';
+import { toFindsCsv } from './toFindsCsv';
 import { toGpx } from './toGpx';
 import { toPointsGeoJSON } from './toPointsGeoJSON';
 import { toTracksGeoJSON } from './toTracksGeoJSON';
@@ -29,6 +30,7 @@ export async function buildExportZip(
   zip.file(ZIP_FILES.tracks, json(toTracksGeoJSON(data.tracks)));
   zip.file(ZIP_FILES.zones, json(toZonesGeoJSON(data.zones)));
   zip.file(ZIP_FILES.gpx, toGpx(data.points, data.tracks));
+  zip.file(ZIP_FILES.finds, toFindsCsv(data.points));
   zip.folder(ZIP_FILES.photosDir);
   for (const [id, blob] of photos) {
     zip.file(photoPath(id), new Uint8Array(await blob.arrayBuffer()), { binary: true });

@@ -23,6 +23,7 @@ export const ZIP_FILES = {
   tracks: 'trasy.geojson',
   zones: 'strefy.geojson',
   gpx: 'poszukiwania.gpx',
+  finds: 'znaleziska.csv',
   photosDir: 'zdjecia/',
 } as const;
 

@@ -1,3 +1,4 @@
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
@@ -5,12 +6,14 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
+import { FIND_REMINDER, PROTECTED_REMINDER } from '@/features/safety';
 import { formatDate, formatDistance } from '@/shared/lib/format';
-import type { FieldPoint } from '@/shared/types/domain';
+import type { FieldPoint, PointStatus } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
 import { POINT_STATUS_LABELS, POINT_TYPES } from '../config/pointTypes';
 import { usePhotoUrl } from '../hooks/usePhotoUrl';
 import { InfoRow } from './InfoRow';
+import { StatusButtons } from './StatusButtons';
 
 interface PointDetailsViewProps {
   point: FieldPoint;
@@ -19,6 +22,8 @@ interface PointDetailsViewProps {
   onEdit: () => void;
   onDelete: () => void;
   onCopyCoords: () => void;
+  onStatus: (status: PointStatus) => void;
+  onShowUxo: () => void;
 }
 
 export function PointDetailsView({
@@ -28,6 +33,8 @@ export function PointDetailsView({
   onEdit,
   onDelete,
   onCopyCoords,
+  onStatus,
+  onShowUxo,
 }: PointDetailsViewProps) {
   const meta = POINT_TYPES[point.type];
   const photoUrl = usePhotoUrl(point.photoId);
@@ -60,6 +67,27 @@ export function PointDetailsView({
           sx={{ borderRadius: '8px' }}
         />
       </Stack>
+      {point.type === 'niewybuch' && (
+        <Button
+          color="error"
+          variant="contained"
+          startIcon={<Icon name="bomb" size={20} />}
+          onClick={onShowUxo}
+        >
+          Niewybuch — co robić
+        </Button>
+      )}
+      <StatusButtons status={point.status} onChange={onStatus} />
+      {point.status === 'znalezisko' && (
+        <Alert severity="warning" icon={<Icon name="gem" size={20} />}>
+          {FIND_REMINDER}
+        </Alert>
+      )}
+      {point.status === 'chroniony' && (
+        <Alert severity="error" icon={<Icon name="shield-alt" size={20} />}>
+          {PROTECTED_REMINDER}
+        </Alert>
+      )}
       {point.desc && (
         <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
           {point.desc}

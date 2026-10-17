@@ -1,12 +1,15 @@
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import { useState } from 'react';
+import Alert from '@mui/material/Alert';
 import { requestCompassPermission } from '@/features/gps';
+import { FIND_REMINDER, UnexplodedOrdnanceScreen } from '@/features/safety';
 import { photosRepo } from '@/shared/db';
 import { createId } from '@/shared/lib/createId';
 import { haversine } from '@/shared/lib/geo';
 import { useFieldStore } from '@/shared/store/useFieldStore';
 import { useUiStore } from '@/shared/store/useUiStore';
+import type { PointStatus } from '@/shared/types/domain';
 import { ConfirmDialog, Sheet, useToastStore } from '@/shared/ui';
 import { usePointsStore } from '../store/usePointsStore';
 import { defaultPointName } from '../utils/defaultPointName';
@@ -25,6 +28,8 @@ export function PointDetailsSheet({ onClose }: PointDetailsSheetProps) {
   const showToast = useToastStore((s) => s.show);
   const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [uxoOpen, setUxoOpen] = useState(false);
+  const [findFlow, setFindFlow] = useState(false);
 
   const point = points.find((p) => p.id === selectedId);
   if (!point) return null;
@@ -67,7 +72,17 @@ export function PointDetailsSheet({ onClose }: PointDetailsSheetProps) {
       updated: Date.now(),
     });
     setEditing(false);
+    setFindFlow(false);
     showToast('Zapisano zmiany');
+  };
+
+  const setStatus = async (status: PointStatus) => {
+    await save({ ...point, status, updated: Date.now() });
+    if (status === 'znalezisko') {
+      // a find: record depth and a photo for the report right away
+      setFindFlow(true);
+      setEditing(true);
+    }
   };
 
   const deletePoint = async () => {
@@ -94,9 +109,17 @@ export function PointDetailsSheet({ onClose }: PointDetailsSheetProps) {
               )
             }
             submitLabel="Zapisz zmiany"
+            coords={point}
+            notice={findFlow ? <Alert severity="warning">{FIND_REMINDER}</Alert> : undefined}
             onSubmit={submitEdit}
           />
-          <Button color="inherit" onClick={() => setEditing(false)}>
+          <Button
+            color="inherit"
+            onClick={() => {
+              setEditing(false);
+              setFindFlow(false);
+            }}
+          >
             Anuluj
           </Button>
         </Stack>
@@ -108,8 +131,11 @@ export function PointDetailsSheet({ onClose }: PointDetailsSheetProps) {
           onEdit={() => setEditing(true)}
           onDelete={() => setConfirmDelete(true)}
           onCopyCoords={copyCoords}
+          onStatus={setStatus}
+          onShowUxo={() => setUxoOpen(true)}
         />
       )}
+      <UnexplodedOrdnanceScreen open={uxoOpen} coords={point} onClose={() => setUxoOpen(false)} />
       <ConfirmDialog
         open={confirmDelete}
         title="Usunąć punkt?"

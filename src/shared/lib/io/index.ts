@@ -14,6 +14,7 @@ export { normalizePoint } from './normalizePoint';
 export { normalizeTrack } from './normalizeTrack';
 export { ImportError, parseBackup, type ParsedBackup } from './parseBackup';
 export { toCandidatesGeoJSON } from './toCandidatesGeoJSON';
+export { toFindsCsv } from './toFindsCsv';
 export { toGpx } from './toGpx';
 export { toPointsGeoJSON } from './toPointsGeoJSON';
 export { toTracksGeoJSON } from './toTracksGeoJSON';

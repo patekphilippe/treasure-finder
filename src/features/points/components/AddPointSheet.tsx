@@ -23,6 +23,8 @@ export function AddPointSheet({ onClose }: AddPointSheetProps) {
   const { source, location, picking, reset } = usePointDraftStore();
   const showToast = useToastStore((s) => s.show);
   const [saving, setSaving] = useState(false);
+  const position = useFieldStore((s) => s.position);
+  const coords = source === 'gps' ? position : location;
 
   // a fresh draft every time the sheet is closed
   useEffect(() => () => reset(), [reset]);
@@ -76,6 +78,7 @@ export function AddPointSheet({ onClose }: AddPointSheetProps) {
           <PointForm
             namePlaceholder={(type) => defaultPointName(type, points)}
             submitLabel="Zapisz punkt"
+            coords={coords}
             disabled={saving}
             onSubmit={submit}
           />

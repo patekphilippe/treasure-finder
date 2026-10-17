@@ -3,6 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { lazy, Suspense } from 'react';
 import { useCompass, useGeolocation } from '@/features/gps';
 import { useLoadPoints } from '@/features/points';
+import { LegalIntroDialog } from '@/features/safety';
 import { useTrackRecorder } from '@/features/tracks';
 import { useLoadZones, useZoneAlerts } from '@/features/zones';
 import { Toast } from '@/shared/ui';
@@ -41,6 +42,7 @@ export function App() {
         )}
         <TopBar />
         <Toast />
+        <LegalIntroDialog />
       </div>
     </ThemeProvider>
   );

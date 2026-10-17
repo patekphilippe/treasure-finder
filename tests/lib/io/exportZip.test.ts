@@ -23,6 +23,7 @@ describe('buildExportZip', () => {
       'trasy.geojson',
       'zdjecia/',
       'zdjecia/ph1.jpg',
+      'znaleziska.csv',
     ]);
     const backup = JSON.parse(await read.file('kopia.json')!.async('string')) as BackupV2;
     expect(backup.wersja).toBe(2);
