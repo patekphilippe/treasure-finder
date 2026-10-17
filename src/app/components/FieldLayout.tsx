@@ -1,6 +1,7 @@
 import Box from '@mui/material/Box';
 import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { GuidancePanel } from '@/features/navigation';
+import { RoughnessLegend } from '@/features/roughness';
 import { Dock } from '@/shared/ui';
 import { DOCK_ITEMS } from '../config/dockItems';
 import { useUiStore } from '@/shared/store/useUiStore';
@@ -16,6 +17,7 @@ export function FieldLayout() {
       <MapCrosshair />
       <FollowButton />
       <GuidancePanel />
+      <RoughnessLegend />
       <SheetHost />
       <Dock items={DOCK_ITEMS} activeId={activeSheet} onSelect={toggleSheet} />
     </Box>

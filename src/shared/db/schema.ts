@@ -1,6 +1,7 @@
 import type { DBSchema } from 'idb';
 import type {
   Candidate,
+  RoughArea,
   ContextFeature,
   FieldPoint,
   RasterRecord,
@@ -10,7 +11,7 @@ import type {
 } from '@/shared/types/domain';
 
 export const DB_NAME = 'mapa-poszukiwan';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 export interface AppDB extends DBSchema {
   points: { key: string; value: FieldPoint; indexes: { byCandidate: string } };
@@ -21,4 +22,5 @@ export interface AppDB extends DBSchema {
   zones: { key: string; value: Zone };
   photos: { key: string; value: Blob };
   rasters: { key: string; value: RasterRecord; indexes: { bySheet: string } };
+  areas: { key: string; value: RoughArea };
 }

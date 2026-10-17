@@ -3,6 +3,7 @@ import { fromEpsg2180, toEpsg2180 } from '@/shared/lib/geo';
 import { sourceTileRange } from '@/shared/lib/tiles';
 import { HOTSPOT_LIST_LIMIT, LEVELS, MAX_TILES } from '../config/roughness';
 import type { RoughnessRequest, RoughnessResponse } from '../workers/messages';
+import { buildingMask } from './buildingMask';
 import { ViewTooLargeError, type RoughnessResult } from './types';
 
 export interface ViewBounds {
@@ -81,7 +82,7 @@ export async function analyzeView(
       break;
     }
   }
-  if (!picked) throw new ViewTooLargeError('Przybliż mapę — analizuję obszar do ok. 8 × 8 km');
+  if (!picked) throw new ViewTooLargeError('Przybliż mapę. Analizuję obszar do ok. 8 × 8 km');
 
   const { level, range } = picked;
   const res = cfg.resolutions[level]!;
@@ -103,6 +104,9 @@ export async function analyzeView(
   );
 
   const { data, width: w, height: h } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const originE = cfg.originEasting + range.col0 * ts * res;
+  const originN = cfg.originNorthing - range.row0 * ts * res;
+  const built = await buildingMask(originE, originN, res, w, h);
   const gray = new Float32Array(w * h);
   const valid = new Uint8Array(w * h);
   for (let i = 0; i < w * h; i++) {
@@ -111,16 +115,21 @@ export async function analyzeView(
     const b = data[i * 4 + 2]!;
     const a = data[i * 4 + 3]!;
     gray[i] = 0.299 * r + 0.587 * g + 0.114 * b;
-    valid[i] = a > 0 && !(r > 250 && g > 250 && b > 250) ? 1 : 0; // blank = no NMT
+    // blank = no NMT; buildings and yards are not analysed (bumps left by removed buildings)
+    valid[i] = a > 0 && !(r > 250 && g > 250 && b > 250) && !built[i] ? 1 : 0;
   }
 
   const reply = await runWorker({ gray, valid, w, h, res });
-  const originE = cfg.originEasting + range.col0 * ts * res;
-  const originN = cfg.originNorthing - range.row0 * ts * res;
   const image = await createImageBitmap(new ImageData(reply.rgba, w, h));
   const top = reply.hotspots.slice(0, HOTSPOT_LIST_LIMIT).map((s) => {
     const [lat, lng] = fromEpsg2180(originE + (s.col + 0.5) * res, originN - (s.row + 0.5) * res);
-    return { lat, lng, areaM2: s.areaPx * res * res, strength: Math.round(s.meanScore * 100) };
+    return {
+      lat,
+      lng,
+      areaM2: s.areaPx * res * res,
+      strength: Math.round(s.meanScore * 100),
+      elongation: s.elongation,
+    };
   });
   return { raster: { image, originE, originN, res }, hotspots: top, analysedAt: Date.now() };
 }

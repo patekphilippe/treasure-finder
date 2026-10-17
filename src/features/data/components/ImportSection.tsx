@@ -40,7 +40,7 @@ export function ImportSection() {
       </Typography>
       <Typography variant="body2" color="text.secondary">
         Kopia ZIP z tej aplikacji lub z wersji 1, sam plik kopia.json albo punkty GeoJSON z QGIS
-        (układ EPSG:4326). Dane są łączone — nic nie zostanie usunięte.
+        (układ EPSG:4326). Dane są łączone, nic nie zostanie usunięte.
       </Typography>
       <input
         ref={inputRef}

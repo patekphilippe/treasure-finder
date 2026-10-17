@@ -52,5 +52,5 @@ export const FORM_META: Record<FormClass, FormMeta> = {
 export const PROTECTED_COLOR = '#9ca3af';
 
 export const PROTECTED_MESSAGE =
-  'Prawdopodobnie stanowisko archeologiczne — nie może być celem poszukiwań. ' +
+  'Prawdopodobnie stanowisko archeologiczne, nie może być celem poszukiwań. ' +
   'Jeśli to nieznane stanowisko, zgłoś je wojewódzkiemu konserwatorowi zabytków.';

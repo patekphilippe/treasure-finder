@@ -19,7 +19,7 @@ export function CandidateList({ candidates }: CandidateListProps) {
   if (candidates.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary" sx={{ px: 2.5, py: 2 }}>
-        Żaden kandydat nie spełnia filtrów — obniż minimalną ocenę.
+        Żaden kandydat nie spełnia filtrów. Obniż minimalną ocenę.
       </Typography>
     );
   }
@@ -36,7 +36,7 @@ export function CandidateList({ candidates }: CandidateListProps) {
       ))}
       {candidates.length > LIST_LIMIT && (
         <Typography variant="caption" color="text.secondary" sx={{ px: 2.5, py: 1.5 }}>
-          Pokazano {LIST_LIMIT} najlepszych z {candidates.length} — na mapie są wszystkie. Zawęź
+          Pokazano {LIST_LIMIT} najlepszych z {candidates.length}, na mapie są wszystkie. Zawęź
           filtry, aby zobaczyć resztę.
         </Typography>
       )}

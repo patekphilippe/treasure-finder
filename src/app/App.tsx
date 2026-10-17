@@ -3,6 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { lazy, Suspense } from 'react';
 import { useCompass, useGeolocation } from '@/features/gps';
 import { useLoadPoints } from '@/features/points';
+import { useLoadAreas } from '@/features/roughness';
 import { LegalIntroDialog } from '@/features/safety';
 import { useTrackRecorder } from '@/features/tracks';
 import { useLoadZones, useZoneAlerts } from '@/features/zones';
@@ -26,6 +27,7 @@ export function App() {
   useLoadPoints();
   useLoadZones();
   useZoneAlerts();
+  useLoadAreas();
   const mode = useUiStore((s) => s.mode);
 
   return (

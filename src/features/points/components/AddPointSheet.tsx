@@ -37,7 +37,7 @@ export function AddPointSheet({ onClose }: AddPointSheetProps) {
         : location && { ...location, accM: null };
     if (!where) {
       showToast(
-        source === 'gps' ? 'Brak sygnału GPS — wskaż punkt na mapie' : 'Wskaż miejsce na mapie',
+        source === 'gps' ? 'Brak sygnału GPS. Wskaż punkt na mapie' : 'Wskaż miejsce na mapie',
       );
       return;
     }

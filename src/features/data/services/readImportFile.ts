@@ -30,7 +30,7 @@ export async function readImportFile(file: File, now = Date.now()): Promise<Impo
   try {
     json = JSON.parse(new TextDecoder().decode(buffer));
   } catch {
-    throw new ImportError('Nieobsługiwany plik — wybierz kopię ZIP, kopia.json albo GeoJSON');
+    throw new ImportError('Nieobsługiwany plik. Wybierz kopię ZIP, kopia.json albo GeoJSON');
   }
   if (isCandidatesGeoJSON(json)) {
     const { candidates, skipped } = importCandidatesGeoJSON(json);

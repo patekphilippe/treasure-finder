@@ -144,3 +144,27 @@ export interface RasterRecord {
   data: Float32Array | Blob;
   created: number;
 }
+
+/** Categories of places found by the uneven-ground analysis (the first three are auto-suggested). */
+export type AreaCategory =
+  'skupisko' | 'liniowe' | 'pojedyncze' | 'wyrobisko' | 'naturalne' | 'ciekawe' | 'nieistotne';
+
+/** store: areas, a place marked by the uneven-ground analysis */
+export interface RoughArea {
+  id: string;
+  /** sequential number shown on the map and in the list */
+  no: number;
+  lat: number;
+  lng: number;
+  areaM2: number;
+  /** 0–100 mean intensity */
+  strength: number;
+  /** length / width of the place (1 = round) */
+  elongation: number;
+  category: AreaCategory;
+  /** category still the automatic suggestion (not set by the user) */
+  auto: boolean;
+  note: string;
+  created: number;
+  updated: number;
+}

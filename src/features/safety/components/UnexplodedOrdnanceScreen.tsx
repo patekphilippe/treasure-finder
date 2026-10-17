@@ -40,7 +40,7 @@ export function UnexplodedOrdnanceScreen({ open, coords, onClose }: UnexplodedOr
         <Stack sx={{ alignItems: 'center', gap: 1, textAlign: 'center' }}>
           <Icon name="bomb" size={64} />
           <Typography variant="h4" sx={{ fontWeight: 800, letterSpacing: '-0.02em' }}>
-            Niewybuch — nie dotykaj!
+            Niewybuch! Nie dotykaj!
           </Typography>
         </Stack>
         <Stack component="ol" sx={{ m: 0, pl: 3, gap: 1.5 }}>

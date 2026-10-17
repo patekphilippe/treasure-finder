@@ -89,3 +89,17 @@ describe('hotspots', () => {
     expect(spots[0]!.row).toBeLessThan(130);
   });
 });
+
+describe('hotspot elongation', () => {
+  it('is ~1 for a blob and large for a strip', () => {
+    const w = 100;
+    const score = new Float32Array(w * w);
+    for (let y = 10; y < 30; y++) for (let x = 10; x < 30; x++) score[y * w + x] = 1; // 20 × 20 blob
+    for (let y = 60; y < 64; y++) for (let x = 5; x < 95; x++) score[y * w + x] = 1; // 90 × 4 strip
+    const spots = hotspots(score, w, w, 0.5, 10);
+    const blob = spots.find((s) => s.row < 40)!;
+    const strip = spots.find((s) => s.row > 50)!;
+    expect(blob.elongation).toBeCloseTo(1, 1);
+    expect(strip.elongation).toBeGreaterThan(15);
+  });
+});

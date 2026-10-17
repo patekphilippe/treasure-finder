@@ -103,7 +103,7 @@ export function AnalysisView() {
           >
             <Icon name="info-circle" size={18} sx={{ mt: '1px' }} />
             <Typography variant="caption" sx={{ lineHeight: 1.5 }}>
-              Ocena pokazuje potencjał miejsca — ślad dawnej działalności człowieka, a nie
+              Ocena pokazuje potencjał miejsca: ślad dawnej działalności człowieka, a nie
               przewidywanie znaleziska.
             </Typography>
           </Stack>

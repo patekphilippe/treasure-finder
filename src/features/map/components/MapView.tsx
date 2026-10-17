@@ -11,6 +11,7 @@ import {
   POLAND_CENTER,
 } from '../config/mapLayers';
 import { NmtShadedLayer } from '../layers/NmtShadedLayer';
+import { AreaMarkers } from './AreaMarkers';
 import { CoverageLayer } from './CoverageLayer';
 import { CustomLayers } from './CustomLayers';
 import { DraftMarker } from './DraftMarker';
@@ -62,6 +63,7 @@ export function MapView({ children }: MapViewProps) {
       <ZoneLayers />
       {showCoverage ? <CoverageLayer /> : <TrackLines />}
       <GuidanceLine />
+      <AreaMarkers />
       <PointMarkers />
       <DraftMarker />
       {children}

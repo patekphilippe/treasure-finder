@@ -40,7 +40,7 @@ export function ZoneDetailsSheet({ onClose, tracks }: ZoneDetailsSheetProps) {
       <Stack spacing={2}>
         {expired && (
           <Alert severity="error">
-            Termin zgody minął — przed poszukiwaniami odnów zgłoszenie i zgodę.
+            Termin zgody minął. Przed poszukiwaniami odnów zgłoszenie i zgodę.
           </Alert>
         )}
         <TextField

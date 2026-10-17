@@ -10,11 +10,11 @@ export const FIND_REMINDER =
   '(lub wójtowi, burmistrzowi). Zabytki archeologiczne należą do Skarbu Państwa.';
 
 export const PROTECTED_REMINDER =
-  'Możliwe stanowisko archeologiczne — nie prowadź tu dalszych poszukiwań i zgłoś je wojewódzkiemu ' +
+  'Możliwe stanowisko archeologiczne. Nie prowadź tu dalszych poszukiwań i zgłoś je wojewódzkiemu ' +
   'konserwatorowi zabytków.';
 
 export const INTRO_POINTS = [
-  'Od 1 stycznia 2027 r. poszukiwania zgłaszasz w rządowej aplikacji mobilnej albo przez e-PUAP — i potrzebujesz zgody właściciela gruntu.',
+  'Od 1 stycznia 2027 r. poszukiwania zgłaszasz w rządowej aplikacji mobilnej albo przez e-PUAP. Potrzebujesz też zgody właściciela gruntu.',
   'Na stanowiskach archeologicznych, kurhanach i grodziskach nie szukasz. Aplikacja oznacza takie miejsca jako chronione.',
   'Znaleziony zabytek zabezpieczasz i niezwłocznie zgłaszasz. Zabytki archeologiczne należą do Skarbu Państwa.',
   'Niewybuchu nie dotykasz: oznacz miejsce, odejdź i zadzwoń pod 112.',
@@ -28,7 +28,7 @@ export const INTRO_SEEN_KEY = 'mapa.legalIntroSeen';
 
 export const UXO_STEPS = [
   'Nie dotykaj, nie przesuwaj i nie odkopuj.',
-  'Oznacz miejsce — zapisz punkt z pozycją GPS.',
+  'Oznacz miejsce: zapisz punkt z pozycją GPS.',
   'Odejdź na bezpieczną odległość i nie pozwól nikomu podchodzić.',
   'Zadzwoń pod 112 i podaj współrzędne.',
 ];

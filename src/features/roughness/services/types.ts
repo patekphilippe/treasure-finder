@@ -4,6 +4,8 @@ export interface RoughnessHotspot {
   areaM2: number;
   /** 0–100 */
   strength: number;
+  /** length / width (1 = round) */
+  elongation: number;
 }
 
 /** Heat image on the EPSG:2180 grid of the analysed mosaic. */

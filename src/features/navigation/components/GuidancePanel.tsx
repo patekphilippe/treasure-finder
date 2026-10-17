@@ -72,7 +72,7 @@ export function GuidancePanel() {
             {target.name}
           </Typography>
           <Typography variant="h5" sx={{ lineHeight: 1.2 }}>
-            {distM === null ? '—' : formatDistance(distM)}
+            {distM === null ? 'brak GPS' : formatDistance(distM)}
           </Typography>
           <Typography variant="caption" color={arrived ? 'primary.main' : 'text.secondary'} noWrap>
             {hint}

@@ -19,4 +19,8 @@ export function migrate(db: IDBPDatabase<AppDB>, oldVersion: number): void {
     const rasters = db.createObjectStore('rasters', { keyPath: 'id' });
     rasters.createIndex('bySheet', 'sheetId');
   }
+  if (oldVersion < 2) {
+    // places marked by the uneven-ground analysis
+    db.createObjectStore('areas', { keyPath: 'id' });
+  }
 }

@@ -22,7 +22,7 @@ export function describeImport(s: ImportSummary): string[] {
   if (updated.length) lines.push(`Zaktualizowane: ${updated.join(', ')}`);
   if (s.candidatesAdded || s.candidatesUpdated) {
     lines.push(
-      `Kandydaci: ${countCandidates(s.candidatesAdded)} nowych, ${s.candidatesUpdated} zaktualizowanych — zobacz w trybie Analiza`,
+      `Kandydaci: ${countCandidates(s.candidatesAdded)} nowych, ${s.candidatesUpdated} zaktualizowanych (zobacz w trybie Analiza)`,
     );
   }
   if (s.photos) lines.push(`Wczytano ${countPhotos(s.photos)}`);

@@ -5,7 +5,7 @@ export const MAX_TILES = 36;
 /** Hotspots: score threshold and minimum area. */
 export const HOTSPOT_THRESHOLD = 0.35;
 export const HOTSPOT_MIN_AREA_M2 = 400;
-export const HOTSPOT_LIST_LIMIT = 8;
+export const HOTSPOT_LIST_LIMIT = 20;
 /** Heat colours: transparent below `from`, then yellow → orange → red. */
 export const HEAT = {
   from: 0.15,
@@ -15,3 +15,28 @@ export const HEAT = {
     { at: 1, rgba: [220, 38, 38, 200] },
   ],
 } as const;
+
+/**
+ * Buildings and built-up land from the BDOT10k WMS (CORS-enabled). Building layers by type
+ * (farm, residential, industrial, public use, ruins) plus industrial/storage areas, squares
+ * and cemeteries. The buffer covers yards around farm buildings.
+ */
+export const BUILDINGS_WMS = {
+  url: 'https://mapy.geoportal.gov.pl/wss/service/pub/guest/kompozycja_BDOT10k_WMS/MapServer/WMSServer',
+  layers: [
+    'BudGo',
+    'BudMJ',
+    'BudMW',
+    'BudMWy',
+    'BudU',
+    'BudUWy',
+    'BudP1',
+    'BudP2',
+    'BudPWy',
+    'BudZr',
+    'TPrz',
+    'Pl1',
+    'TerCm',
+  ],
+};
+export const BUILDING_BUFFER_M = 25;

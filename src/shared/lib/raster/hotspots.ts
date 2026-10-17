@@ -4,6 +4,8 @@ export interface Hotspot {
   col: number;
   areaPx: number;
   meanScore: number;
+  /** length / width from the area's second moments (1 = round) */
+  elongation: number;
   /** ranking value: mean score × √area */
   strength: number;
 }
@@ -24,7 +26,7 @@ export function hotspots(
     let top = 0;
     stack[top++] = start;
     seen[start] = 1;
-    let count = 0, sumR = 0, sumC = 0, sumS = 0; // prettier-ignore
+    let count = 0, sumR = 0, sumC = 0, sumS = 0, sRR = 0, sCC = 0, sRC = 0; // prettier-ignore
     while (top > 0) {
       const i = stack[--top]!;
       const y = Math.floor(i / w);
@@ -33,6 +35,9 @@ export function hotspots(
       sumR += y;
       sumC += x;
       sumS += score[i]!;
+      sRR += y * y;
+      sCC += x * x;
+      sRC += x * y;
       for (let dy = -1; dy <= 1; dy++) {
         const yy = y + dy;
         if (yy < 0 || yy >= h) continue;
@@ -49,11 +54,20 @@ export function hotspots(
     }
     if (count < minPixels) continue;
     const meanScore = sumS / count;
+    const mr = sumR / count;
+    const mc = sumC / count;
+    const vrr = sRR / count - mr * mr;
+    const vcc = sCC / count - mc * mc;
+    const vrc = sRC / count - mr * mc;
+    const half = Math.sqrt(((vrr - vcc) / 2) ** 2 + vrc * vrc);
+    const l1 = (vrr + vcc) / 2 + half;
+    const l2 = Math.max((vrr + vcc) / 2 - half, 1e-6);
     out.push({
-      row: sumR / count,
-      col: sumC / count,
+      row: mr,
+      col: mc,
       areaPx: count,
       meanScore,
+      elongation: Math.sqrt(l1 / l2),
       strength: meanScore * Math.sqrt(count),
     });
   }

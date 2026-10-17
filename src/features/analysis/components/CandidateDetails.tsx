@@ -54,7 +54,7 @@ export function CandidateDetails({ candidate: c, onNote, onClose }: CandidateDet
             disabled
             startIcon={<Icon name="check" size={18} />}
           >
-            Przyjęty — punkt do sprawdzenia
+            Przyjęty jako punkt do sprawdzenia
           </Button>
         ) : (
           <Button

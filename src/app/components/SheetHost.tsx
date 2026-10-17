@@ -1,6 +1,7 @@
 import { DataSheet } from '@/features/data';
 import { LayersSheet } from '@/features/layers';
 import { AddPointSheet, PointDetailsSheet, PointsListSheet } from '@/features/points';
+import { AreaSheet } from '@/features/roughness';
 import { TracksSheet, useTracksStore } from '@/features/tracks';
 import { ZoneDetailsSheet, ZonesSheet } from '@/features/zones';
 import { useUiStore } from '@/shared/store/useUiStore';
@@ -11,6 +12,7 @@ export function SheetHost() {
   const selectedPointId = useUiStore((s) => s.selectedPointId);
   const selectedZoneId = useUiStore((s) => s.selectedZoneId);
   const tracks = useTracksStore((s) => s.tracks);
+  const selectedAreaId = useUiStore((s) => s.selectedAreaId);
 
   switch (activeSheet) {
     case 'tracks':
@@ -25,6 +27,8 @@ export function SheetHost() {
       return <ZonesSheet onClose={closeSheet} />;
     case 'zoneDetails':
       return <ZoneDetailsSheet key={selectedZoneId} onClose={closeSheet} tracks={tracks} />;
+    case 'area':
+      return <AreaSheet key={selectedAreaId} onClose={closeSheet} />;
     case 'layers':
       return <LayersSheet onClose={closeSheet} />;
     case 'data':

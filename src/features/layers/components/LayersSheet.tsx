@@ -105,7 +105,7 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
             <Stack sx={{ flex: 1 }}>
               <Typography variant="subtitle2">Mapa pokrycia</Typography>
               <Typography variant="caption" color="text.secondary">
-                Trasy jako przeszukane pasy — widać luki
+                Trasy jako przeszukane pasy, widać luki
               </Typography>
             </Stack>
             <Switch checked={showCoverage} onChange={(e) => setShowCoverage(e.target.checked)} />
@@ -134,7 +134,7 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
             <Typography variant="subtitle2">Strefy</Typography>
             <Typography variant="caption" color="text.secondary">
               {zoneCount
-                ? `${zoneCount} — zgody właścicieli i zakazy`
+                ? `${zoneCount}: zgody właścicieli i zakazy`
                 : 'Zgody właścicieli i miejsca zakazane'}
             </Typography>
           </Stack>

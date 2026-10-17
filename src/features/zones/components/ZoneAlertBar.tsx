@@ -14,10 +14,10 @@ export function ZoneAlertBar() {
   let detail: string;
   if (alert.kind === 'zakaz') {
     title = `Strefa zakazu: ${alert.zone.name}`;
-    detail = 'Nie prowadź tu poszukiwań — wyjdź poza strefę.';
+    detail = 'Nie prowadź tu poszukiwań. Wyjdź poza strefę.';
   } else if (alert.kind === 'zgoda_wygasla') {
     title = 'Zgoda wygasła';
-    detail = `${alert.zone.name}${alert.zone.validUntil ? ` — ważna do ${formatDate(alert.zone.validUntil)}` : ''}`;
+    detail = `${alert.zone.name}${alert.zone.validUntil ? `, ważna do ${formatDate(alert.zone.validUntil)}` : ''}`;
   } else {
     title = 'Poza strefą zgody';
     detail = 'Tu nie masz zgody właściciela ani zgłoszenia.';

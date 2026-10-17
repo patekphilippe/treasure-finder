@@ -74,7 +74,7 @@ export function PointDetailsView({
           startIcon={<Icon name="bomb" size={20} />}
           onClick={onShowUxo}
         >
-          Niewybuch — co robić
+          Niewybuch: co robić
         </Button>
       )}
       <StatusButtons status={point.status} onChange={onStatus} />
@@ -95,7 +95,9 @@ export function PointDetailsView({
       )}
       <Stack>
         {distM !== null && <InfoRow label="Odległość">{formatDistance(distM)}</InfoRow>}
-        <InfoRow label="Głębokość">{point.depthCm !== null ? `${point.depthCm} cm` : '—'}</InfoRow>
+        <InfoRow label="Głębokość">
+          {point.depthCm !== null ? `${point.depthCm} cm` : 'brak'}
+        </InfoRow>
         <InfoRow label="Współrzędne">
           <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
             <span>
