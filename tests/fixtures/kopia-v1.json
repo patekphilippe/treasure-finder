@@ -1,0 +1,51 @@
+{
+  "wersja": 1,
+  "points": [
+    {
+      "id": "v1-p1",
+      "type": "znalezisko",
+      "name": "Guzik mundurowy",
+      "desc": "przy miedzy",
+      "depth": 15,
+      "lat": 52.2301,
+      "lng": 21.0105,
+      "acc": 4.2,
+      "src": "gps",
+      "created": 1690000000000,
+      "updated": 1690000500000,
+      "photo": "ph-v1-1"
+    },
+    {
+      "id": "v1-p2",
+      "type": "anomalia",
+      "name": "Sygnał",
+      "desc": "",
+      "depth": null,
+      "lat": 52.231,
+      "lng": 21.011,
+      "acc": null,
+      "src": "mapa",
+      "created": 1690001000000,
+      "updated": 1690001000000,
+      "photo": null
+    },
+    { "id": "broken", "lat": "x", "lng": 21 }
+  ],
+  "tracks": [
+    {
+      "id": "v1-t1",
+      "name": "Las za wsią",
+      "start": 1690000000000,
+      "end": 1690003600000,
+      "active": true,
+      "dist": 1234.5,
+      "segments": [
+        [
+          [52.23, 21.01, 1690000000000, 5],
+          [52.2305, 21.0102, 1690000060000, 6]
+        ],
+        [[52.231, 21.0105, 1690001000000, 4]]
+      ]
+    }
+  ]
+}
