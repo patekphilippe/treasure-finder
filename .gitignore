@@ -15,9 +15,9 @@ coverage/
 
 # private data — repo is public (GitHub Pages), never commit terrain sheets,
 # tiles or exports with locations
-data/
+/data/
 *.asc
 *.tif
 *.tiff
 *.zip
-tiles/
+/tiles/
