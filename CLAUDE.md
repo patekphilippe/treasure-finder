@@ -54,13 +54,15 @@ src/
 tests/                      testy Vitest, struktura odpowiada src/
 ```
 
-Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `analysis`
-(później `zones`, `coverage`, `offline`).
+Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `analysis`, `zones`, `safety`
+(później `offline`).
 
 - `services/` — logika poza Reactem (np. `tracks/services/trackRecorder.ts`, import/eksport w `data/services/`).
 - Stan współdzielony między funkcjami jest w `src/shared/store/`: `useUiStore` (tryb, otwarty arkusz,
-  wybrany punkt), `useFieldStore` (GPS, kompas, nagrywanie, cel prowadzenia), `usePointDraftStore`,
-  `useMapViewStore`. Funkcje nie importują z `app/`.
+  wybrany punkt/strefa), `useFieldStore` (GPS, kompas, nagrywanie, cel prowadzenia), `usePointDraftStore`,
+  `useMapViewStore` (w tym fly-to z przesunięciem nad arkusz), `useCoverageStore` (szerokość pasa).
+  Funkcje nie importują z `app/`. `zones` i `safety` nie importują innych funkcji (unikamy cykli).
+- Komunikaty prawne są w `features/safety/config/legal.ts` — krótkie, rzeczowe, z linkiem do źródła.
 - Ciężkie biblioteki (JSZip, proj4) ładujemy dynamicznie (`import()`), żeby start na telefonie był lekki.
   `src/shared/lib/geo/crs.ts` rejestruje EPSG:2180 leniwie — bez efektów ubocznych przy imporcie.
 - Testy, które potrzebują DOM, mają na początku `// @vitest-environment jsdom`; reszta działa w `node`.
