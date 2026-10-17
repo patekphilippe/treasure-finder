@@ -1,0 +1,26 @@
+import CssBaseline from '@mui/material/CssBaseline';
+import { ThemeProvider } from '@mui/material/styles';
+import { AnalysisView } from '@/features/analysis';
+import { Toast } from '@/shared/ui';
+import { AppGlobalStyles } from './components/AppGlobalStyles';
+import { FieldLayout } from './components/FieldLayout';
+import { TopBar } from './components/TopBar';
+import { useAppTheme } from './hooks/useAppTheme';
+import { useUiStore } from './store/useUiStore';
+
+export function App() {
+  const theme = useAppTheme();
+  const mode = useUiStore((s) => s.mode);
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline enableColorScheme />
+      <AppGlobalStyles />
+      <div style={{ position: 'relative', height: '100%', overflow: 'hidden' }}>
+        {mode === 'field' ? <FieldLayout /> : <AnalysisView />}
+        <TopBar />
+        <Toast />
+      </div>
+    </ThemeProvider>
+  );
+}

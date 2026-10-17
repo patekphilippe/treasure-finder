@@ -1,0 +1,23 @@
+# dependencies & build
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+
+# editors / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# logs
+*.log
+
+# private data — repo is public (GitHub Pages), never commit terrain sheets,
+# tiles or exports with locations
+data/
+*.asc
+*.tif
+*.tiff
+*.zip
+tiles/
