@@ -2,6 +2,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import { AnalysisView } from '@/features/analysis';
 import { useCompass, useGeolocation } from '@/features/gps';
+import { useTrackRecorder } from '@/features/tracks';
 import { Toast } from '@/shared/ui';
 import { AppGlobalStyles } from './components/AppGlobalStyles';
 import { FieldLayout } from './components/FieldLayout';
@@ -13,6 +14,7 @@ export function App() {
   const theme = useAppTheme();
   useGeolocation();
   useCompass();
+  useTrackRecorder();
   const mode = useUiStore((s) => s.mode);
 
   return (

@@ -29,3 +29,5 @@ export const NMT_SHADED_WMS_URL =
 export const FOLLOW_ZOOM = 17;
 /** Colour of the own-position dot (kept blue by convention, distinct from point markers). */
 export const POSITION_COLOR = '#2563eb';
+/** Colour of finished tracks. */
+export const PAST_TRACK_COLOR = '#f59e0b';

@@ -11,6 +11,7 @@ import {
 } from '../config/mapLayers';
 import { FollowController } from './FollowController';
 import { PositionMarker } from './PositionMarker';
+import { TrackLines } from './TrackLines';
 
 export function MapView() {
   const { baseLayer, nmtOn, nmtOpacity } = useLayersStore();
@@ -48,6 +49,7 @@ export function MapView() {
           maxZoom={MAX_ZOOM}
         />
       )}
+      <TrackLines />
       <PositionMarker />
       <FollowController />
     </MapContainer>
