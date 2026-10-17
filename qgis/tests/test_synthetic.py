@@ -59,3 +59,32 @@ class SyntheticTerrain(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Calibration(unittest.TestCase):
+    """Fixes found on real sheets (Lower Silesia, 2026-10)."""
+
+    def test_two_touching_craters_are_split(self):
+        dem = t.plane(2) + t.cone_crater(cx=46.5) + t.cone_crater(cx=53.5)
+        found = run(dem)
+        self.assertEqual([c["form"] for c in found], ["zaglebienie_okragle"] * 2)
+
+    def test_long_trench_is_not_split(self):
+        found = run(t.plane(2) + t.trench() + 0.3 * t.cone_crater(cx=40) + 0.3 * t.cone_crater(cx=60))
+        self.assertEqual(len([c for c in found if c["form"] == "row_liniowy"]), 1)
+
+    def test_small_mounds_do_not_make_a_barrow_cemetery(self):
+        dem = t.plane(1) + sum(t.gaussian_mound(height=0.6, radius=3, cx=cx) for cx in (35, 50, 65))
+        found = run(dem)
+        self.assertEqual(len(found), 3)
+        self.assertFalse(any(c["protectedLikely"] for c in found))
+
+    def test_ring_with_broken_rim_is_still_a_ring(self):
+        found = run(t.plane(1) + t.ring_with_gap(gap_m=1.0))
+        self.assertIn("pierscien", [c["form"] for c in found])
+
+    def test_excluded_area_yields_nothing(self):
+        import numpy as np
+        exclude = np.zeros((t.N, t.N), bool)
+        exclude[80:120, 80:120] = True  # 20 × 20 m around the crater
+        self.assertEqual(analyse(t.grid(t.plane(2) + t.cone_crater()), "TEST", exclude=exclude).candidates, [])

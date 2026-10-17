@@ -28,7 +28,34 @@ RULES = {
 # Probably an archaeological monument — never a search target.
 PROTECTED_MOUND = {"min_diameter_m": 8, "min_height_m": 0.5}
 PROTECTED_CLASSES = {"pierscien"}
-BARROW_CEMETERY = {"min_count": 3, "radius_m": 50}
+# The plan counts any 3 mounds within 50 m; on real sheets small bumps (garden
+# objects, building artifacts) made hundreds of false "cemeteries", so only
+# barrow-sized mounds count.
+BARROW_CEMETERY = {"min_count": 3, "radius_m": 50, "min_diameter_m": 6, "min_height_m": 0.3}
+
+# A ring's rim is often broken by a few cells; close gaps this wide before looking for the hole.
+RING_CLOSING_CELLS = 2
+
+# Neighbouring pits merge into one blob; compact blobs are split at their separate
+# minima (watershed). Elongated ones (trenches, banks) are never split.
+SPLIT = {"min_area_m2": 25, "max_elongation": 3, "min_separation_m": 3, "min_depth_factor": 1.5}
+
+# Buffer for extra exclusion layers given with --exclude.
+EXCLUDE_BUFFER_M = 15.0
+
+# BDOT10k layers excluded with --bdot, with buffers in metres. On real sheets these
+# produced most false positives: building-removal artifacts in villages, drainage
+# ditches broken into "pits", spoil banks along streams, road ditches.
+BDOT_EXCLUDE = {
+    "OT_BUBD_A": 15,  # buildings
+    "OT_PTZB_A": 15,  # built-up areas
+    "OT_SWRM_L": 8,  # drainage ditches
+    "OT_SWRS_L": 8,  # rivers and streams
+    "OT_PTWP_A": 5,  # surface water
+    "OT_SKDR_L": 8,  # roads
+    "OT_SKJZ_L": 8,  # carriageways
+    "OT_SKTR_L": 10,  # railways
+}
 
 # Score 0–100 = relief·w + shape·w + context·w
 WEIGHTS = {"relief": 40, "shape": 25, "context": 35}

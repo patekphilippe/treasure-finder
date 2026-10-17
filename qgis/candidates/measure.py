@@ -33,7 +33,12 @@ def crofton_perimeter(mask: np.ndarray, cell: float) -> float:
     return math.pi / 8 * (n0 + n90 + (n45 + n135) / math.sqrt(2)) * cell
 
 
-def count_holes(mask: np.ndarray, min_cells: int) -> int:
+def count_holes(mask: np.ndarray, min_cells: int, closing_cells: int = 0) -> int:
+    """Enclosed background areas; small gaps in the rim are closed first."""
+    if closing_cells > 0:
+        pad = closing_cells + 1
+        mask = ndimage.binary_closing(np.pad(mask, pad), structure=np.ones((3, 3), bool),
+                                      iterations=closing_cells)[pad:-pad, pad:-pad]
     holes = ndimage.binary_fill_holes(mask) & ~mask
     labels, n = ndimage.label(holes)
     if n == 0:
@@ -43,7 +48,7 @@ def count_holes(mask: np.ndarray, min_cells: int) -> int:
 
 
 def measure(mask: np.ndarray, lrm: np.ndarray, offset: tuple[int, int], cell: float,
-            min_hole_m2: float) -> Measurement:
+            min_hole_m2: float, ring_closing_cells: int = 0) -> Measurement:
     """`mask` and `lrm` are crops around the component; `offset` = crop's (row, col) in the sheet."""
     rows, cols = np.nonzero(mask)
     n = rows.size
@@ -76,6 +81,6 @@ def measure(mask: np.ndarray, lrm: np.ndarray, offset: tuple[int, int], cell: fl
         circularity=min(1.0, 4 * math.pi * area / perimeter**2) if perimeter else 0.0,
         elongation=length / width,
         rectangularity=min(1.0, area / (length * width)),
-        holes=count_holes(mask, max(1, round(min_hole_m2 / (cell * cell)))),
+        holes=count_holes(mask, max(1, round(min_hole_m2 / (cell * cell))), ring_closing_cells),
         equivalent_diameter_m=2 * math.sqrt(area / math.pi),
     )

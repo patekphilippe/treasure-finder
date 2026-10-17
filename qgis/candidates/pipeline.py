@@ -7,11 +7,11 @@ from scipy import ndimage
 from shapely.geometry.base import BaseGeometry
 
 from . import config
-from .classify import classify, neighbours_within, protected_by_shape
+from .classify import barrow_sized, classify, neighbours_within, protected_by_shape
 from .grid import Grid, fill_nodata, local_relief, valid_zone
 from .measure import Measurement, measure
 from .score import context_component, score
-from .segment import components, masks, open_mask
+from .segment import components, masks, open_mask, split_component
 
 
 @dataclass
@@ -40,18 +40,22 @@ def _to_wgs84():
 
 
 def analyse(grid: Grid, sheet_id: str, context: list[BaseGeometry] | None = None,
-            params: Params | None = None) -> Result:
+            params: Params | None = None, exclude: np.ndarray | None = None) -> Result:
+    """`exclude`: cells to ignore (buildings, built-up areas) — see candidates.exclude."""
     p = params or Params()
     cell = grid.cell
     radius = max(1, round(p.lrm_radius_m / cell))
     lrm = local_relief(fill_nodata(grid.dem), radius)
     ok = valid_zone(grid.nodata, radius)
+    if exclude is not None:
+        ok &= ~exclude
     convex, concave = masks(lrm, ok, p.threshold_m)
 
     min_cells = p.min_area_m2 / (cell * cell)
     max_cells = p.max_area_m2 / (cell * cell)
     found: list[tuple[Measurement, str, np.ndarray, tuple]] = []
-    for mask in (convex, concave):
+    split = config.SPLIT
+    for sign, mask in ((1, convex), (-1, concave)):
         labels, n = components(open_mask(mask, p.opening_radius_cells))
         if n == 0:
             continue
@@ -59,9 +63,19 @@ def analyse(grid: Grid, sheet_id: str, context: list[BaseGeometry] | None = None
         for idx, slc in enumerate(ndimage.find_objects(labels), start=1):
             if slc is None or not (min_cells <= sizes[idx] <= max_cells):
                 continue
+            offset = (slc[0].start, slc[1].start)
             comp = labels[slc] == idx
-            m = measure(comp, lrm[slc], (slc[0].start, slc[1].start), cell, config.MIN_HOLE_M2)
-            found.append((m, classify(m), comp, slc))
+            m = measure(comp, lrm[slc], offset, cell, config.MIN_HOLE_M2, config.RING_CLOSING_CELLS)
+            parts = [comp]
+            if m.area_m2 >= split["min_area_m2"] and m.elongation < split["max_elongation"] and m.holes == 0:
+                parts = split_component(comp, lrm[slc], sign, p.threshold_m, cell,
+                                        split["min_separation_m"], split["min_depth_factor"])
+            for part in parts:
+                if len(parts) > 1:
+                    if np.count_nonzero(part) < min_cells:
+                        continue
+                    m = measure(part, lrm[slc], offset, cell, config.MIN_HOLE_M2, config.RING_CLOSING_CELLS)
+                found.append((m, classify(m), part, slc))
 
     xy = [grid.cell_center(m.row, m.col) for m, *_ in found]
     forms = [f for _, f, *_ in found]
@@ -71,9 +85,10 @@ def analyse(grid: Grid, sheet_id: str, context: list[BaseGeometry] | None = None
     for i, (m, form, comp, slc) in enumerate(found):
         same = [f == form for f in forms]
         protected = protected_by_shape(form, m)
-        if form == "kopiec_okragly":
+        if barrow_sized(form, m):
             bc = config.BARROW_CEMETERY
-            protected = protected or neighbours_within(xy, i, bc["radius_m"], same) >= bc["min_count"]
+            barrows = [barrow_sized(f, mm) for (mm, f, *_) in found]
+            protected = protected or neighbours_within(xy, i, bc["radius_m"], barrows) >= bc["min_count"]
         clustered = neighbours_within(xy, i, config.CLUSTER["radius_m"], same) >= config.CLUSTER["min_count"]
         ctx = context_component(*xy[i], context or [], clustered)
         lng, lat, _ = tr.TransformPoint(*xy[i])

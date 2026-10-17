@@ -51,3 +51,11 @@ def ring(outer=36.0, inner=26.0, height=1.0, cx=50.0, cy=50.0) -> np.ndarray:
 
 def noise(sigma=0.05, seed=1) -> np.ndarray:
     return np.random.default_rng(seed).normal(0, sigma, (N, N))
+
+
+def ring_with_gap(gap_m=1.0, **kw) -> np.ndarray:
+    """Ring whose rim is broken by a cut across it (as on real sheets)."""
+    x, y = xy()
+    r = ring(**kw)
+    r[(np.abs(y - 50.25) <= gap_m / 2) & (x > 50)] = 0
+    return r

@@ -13,6 +13,7 @@ import sys
 import time
 
 from candidates import config
+from candidates.exclude import bdot_layers, exclusion_mask
 from candidates.grid import read_grid
 from candidates.output import load_context, write_candidates_geojson, write_outlines
 from candidates.pipeline import Params, analyse
@@ -39,6 +40,9 @@ def main() -> int:
     ap.add_argument("--radius", type=float, default=config.LRM_RADIUS_M, help="LRM radius in metres")
     ap.add_argument("--threshold", type=float, default=config.THRESHOLD_M, help="LRM threshold in metres")
     ap.add_argument("--opening", type=int, default=config.OPENING_RADIUS_CELLS, help="opening radius in cells")
+    ap.add_argument("--bdot", help="folder with unpacked BDOT10k GeoPackages; layers from config.BDOT_EXCLUDE are excluded")
+    ap.add_argument("--exclude", action="append", default=[], help="extra vector layer (EPSG:2180) to exclude")
+    ap.add_argument("--exclude-buffer", type=float, default=config.EXCLUDE_BUFFER_M, help="buffer in metres")
     ap.add_argument("--top", type=int, default=20)
     args = ap.parse_args()
 
@@ -48,16 +52,21 @@ def main() -> int:
         os.remove(gpkg)
     context = load_context(args.context) if args.context else []
     params = Params(lrm_radius_m=args.radius, threshold_m=args.threshold, opening_radius_cells=args.opening)
+    exclude_layers = (bdot_layers(args.bdot) if args.bdot else []) + [(p, args.exclude_buffer) for p in args.exclude]
+    if args.bdot and not exclude_layers:
+        print(f"Uwaga: brak warstw BDOT10k ({', '.join(config.BDOT_EXCLUDE)}) w {args.bdot}", file=sys.stderr)
 
     all_candidates = []
     for path in args.sheets:
         t0 = time.time()
         sid = sheet_id(path)
         grid = read_grid(path)
-        result = analyse(grid, sid, context, params)
+        exclude = exclusion_mask(grid, exclude_layers) if exclude_layers else None
+        result = analyse(grid, sid, context, params, exclude)
         write_outlines(result.labels, grid, result.candidates, gpkg, f"kontury_{sid}")
         all_candidates += result.candidates
-        print(f"{sid}: {len(result.candidates)} kandydatów, {time.time() - t0:.1f} s")
+        excluded = f", wykluczono {exclude.mean() * 100:.0f}% powierzchni (BDOT10k)" if exclude is not None else ""
+        print(f"{sid}: {len(result.candidates)} kandydatów{excluded}, {time.time() - t0:.1f} s")
 
     write_candidates_geojson(all_candidates, os.path.join(args.out, "kandydaci.geojson"))
 

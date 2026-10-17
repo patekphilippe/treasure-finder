@@ -43,6 +43,12 @@ def protected_by_shape(form: str, m: Measurement) -> bool:
             and abs(m.relief_m) >= p["min_height_m"])
 
 
+def barrow_sized(form: str, m: Measurement) -> bool:
+    bc = config.BARROW_CEMETERY
+    return (form == "kopiec_okragly" and m.equivalent_diameter_m >= bc["min_diameter_m"]
+            and abs(m.relief_m) >= bc["min_height_m"])
+
+
 def neighbours_within(xy: list[tuple[float, float]], i: int, radius: float, same: list[bool]) -> int:
     """How many items (including i) of the same group lie within `radius` of item i."""
     x0, y0 = xy[i]
