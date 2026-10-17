@@ -7,6 +7,7 @@ export {
 } from './importCandidatesGeoJSON';
 export { CRS_HINT, importGeoJSON, type GeoJSONImport } from './importGeoJSON';
 export { importZip, type ImportBundle } from './importZip';
+export { importZonesGeoJSON } from './importZonesGeoJSON';
 export { mergeCandidates, type CandidateMerge } from './mergeCandidates';
 export { mergeRecords, type MergeResult } from './mergeRecords';
 export { normalizePoint } from './normalizePoint';

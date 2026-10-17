@@ -1,5 +1,6 @@
 import { usePointsStore } from '@/features/points';
 import { useTracksStore } from '@/features/tracks';
+import { useZonesStore } from '@/features/zones';
 import { getDb } from '@/shared/db';
 import { mergeCandidates } from '@/shared/lib/io/mergeCandidates';
 import { mergeRecords } from '@/shared/lib/io/mergeRecords';
@@ -69,7 +70,11 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
     tx.done,
   ]);
 
-  await Promise.all([usePointsStore.getState().load(), useTracksStore.getState().load()]);
+  await Promise.all([
+    usePointsStore.getState().load(),
+    useTracksStore.getState().load(),
+    useZonesStore.getState().load(),
+  ]);
 
   return {
     pointsAdded: p.added,

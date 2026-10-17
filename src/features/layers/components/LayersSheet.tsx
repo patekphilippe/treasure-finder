@@ -7,6 +7,8 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
+import { useZonesStore } from '@/features/zones';
+import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon, Sheet } from '@/shared/ui';
 import { BASE_LAYER_OPTIONS } from '../config/baseLayers';
 import { useLayersStore } from '../store/useLayersStore';
@@ -31,6 +33,8 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
     removeCustomLayer,
   } = useLayersStore();
   const [adding, setAdding] = useState(false);
+  const zoneCount = useZonesStore((s) => s.zones.length);
+  const showSheet = useUiStore((s) => s.showSheet);
 
   return (
     <Sheet title="Warstwy" onClose={onClose}>
@@ -84,6 +88,23 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
               valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
             />
           </Stack>
+        </Stack>
+
+        <Divider />
+
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+          <Icon name="draw-polygon" size={22} />
+          <Stack sx={{ flex: 1 }}>
+            <Typography variant="subtitle2">Strefy</Typography>
+            <Typography variant="caption" color="text.secondary">
+              {zoneCount
+                ? `${zoneCount} — zgody właścicieli i zakazy`
+                : 'Zgody właścicieli i miejsca zakazane'}
+            </Typography>
+          </Stack>
+          <Button size="small" onClick={() => showSheet('zones')}>
+            Zarządzaj
+          </Button>
         </Stack>
 
         <Divider />

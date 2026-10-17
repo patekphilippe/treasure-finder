@@ -17,6 +17,7 @@ import { MapEvents } from './MapEvents';
 import { PointMarkers } from './PointMarkers';
 import { PositionMarker } from './PositionMarker';
 import { TrackLines } from './TrackLines';
+import { ZoneLayers } from './ZoneLayers';
 
 interface MapViewProps {
   /** extra layers from other features (e.g. analysis candidates) */
@@ -61,6 +62,7 @@ export function MapView({ children }: MapViewProps) {
           zIndex={50}
         />
       )}
+      <ZoneLayers />
       <TrackLines />
       <GuidanceLine />
       <PointMarkers />
