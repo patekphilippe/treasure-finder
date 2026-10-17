@@ -9,6 +9,8 @@ import {
   OSM_LAYER,
   POLAND_CENTER,
 } from '../config/mapLayers';
+import { FollowController } from './FollowController';
+import { PositionMarker } from './PositionMarker';
 
 export function MapView() {
   const { baseLayer, nmtOn, nmtOpacity } = useLayersStore();
@@ -46,6 +48,8 @@ export function MapView() {
           maxZoom={MAX_ZOOM}
         />
       )}
+      <PositionMarker />
+      <FollowController />
     </MapContainer>
   );
 }

@@ -1,6 +1,7 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import { AnalysisView } from '@/features/analysis';
+import { useCompass, useGeolocation } from '@/features/gps';
 import { Toast } from '@/shared/ui';
 import { AppGlobalStyles } from './components/AppGlobalStyles';
 import { FieldLayout } from './components/FieldLayout';
@@ -10,6 +11,8 @@ import { useUiStore } from './store/useUiStore';
 
 export function App() {
   const theme = useAppTheme();
+  useGeolocation();
+  useCompass();
   const mode = useUiStore((s) => s.mode);
 
   return (

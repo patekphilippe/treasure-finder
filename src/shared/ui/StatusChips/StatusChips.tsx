@@ -6,6 +6,7 @@ import { glass } from '../styles/glass';
 
 export function StatusChips() {
   const position = useFieldStore((s) => s.position);
+  const gpsError = useFieldStore((s) => s.gpsError);
   const recording = useFieldStore((s) => s.recordingTrackId !== null);
 
   return (
@@ -13,7 +14,7 @@ export function StatusChips() {
       <Chip
         size="small"
         icon={<Icon name="crosshairs" size={16} />}
-        label={position ? `±${Math.round(position.accM)} m` : 'Brak GPS'}
+        label={position ? `±${Math.round(position.accM)} m` : (gpsError ?? 'Brak GPS')}
         sx={(theme) => ({
           ...glass(theme),
           color: position ? 'primary.main' : 'text.secondary',

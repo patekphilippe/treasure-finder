@@ -24,3 +24,8 @@ export const ORTHO_WMS_URL =
 
 export const NMT_SHADED_WMS_URL =
   'https://mapy.geoportal.gov.pl/wss/service/PZGIK/NMT/GRID1/WMS/ShadedRelief';
+
+/** Zoom used when the map starts following the user. */
+export const FOLLOW_ZOOM = 17;
+/** Colour of the own-position dot (kept blue by convention, distinct from point markers). */
+export const POSITION_COLOR = '#2563eb';
