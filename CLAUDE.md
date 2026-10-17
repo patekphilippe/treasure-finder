@@ -42,14 +42,22 @@ src/
 └─ shared/                  kod używany przez wiele funkcji
    ├─ ui/                   Dock, Sheet, Toast, StatusChips, Icon, EmptyState, glass
    ├─ lib/                  czyste algorytmy: geo/, raster/, detect/, io/
-   ├─ db/                   schemat IndexedDB (idb) i migracje
-   ├─ store/                useFieldStore (stan terenu współdzielony przez funkcje)
+   ├─ db/                   schemat IndexedDB (idb), migracje, repozytoria
+   ├─ store/                stan współdzielony: useUiStore, useFieldStore, usePointDraftStore, useMapViewStore
    └─ types/                model danych z docs/PLAN.md
 tests/                      testy Vitest, struktura odpowiada src/
 ```
 
-Funkcje: `map`, `tracks`, `points`, `layers`, `data`, `analysis`
+Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `analysis`
 (później `zones`, `coverage`, `offline`).
+
+- `services/` — logika poza Reactem (np. `tracks/services/trackRecorder.ts`, import/eksport w `data/services/`).
+- Stan współdzielony między funkcjami jest w `src/shared/store/`: `useUiStore` (tryb, otwarty arkusz,
+  wybrany punkt), `useFieldStore` (GPS, kompas, nagrywanie, cel prowadzenia), `usePointDraftStore`,
+  `useMapViewStore`. Funkcje nie importują z `app/`.
+- Ciężkie biblioteki (JSZip, proj4) ładujemy dynamicznie (`import()`), żeby start na telefonie był lekki.
+  `src/shared/lib/geo/crs.ts` rejestruje EPSG:2180 leniwie — bez efektów ubocznych przy imporcie.
+- Testy, które potrzebują DOM, mają na początku `// @vitest-environment jsdom`; reszta działa w `node`.
 
 - **Jedna funkcja na plik komponentu.** Plik `.tsx` ma dokładnie jedną funkcję
   najwyższego poziomu: komponent. Pomocnicze funkcje idą do `utils/` lub `hooks/`

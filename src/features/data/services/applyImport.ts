@@ -1,7 +1,7 @@
 import { usePointsStore } from '@/features/points';
 import { useTracksStore } from '@/features/tracks';
 import { getDb } from '@/shared/db';
-import { mergeRecords } from '@/shared/lib/io';
+import { mergeRecords } from '@/shared/lib/io/mergeRecords';
 import type { Track } from '@/shared/types/domain';
 import type { ImportPayload } from './readImportFile';
 

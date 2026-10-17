@@ -1,6 +1,6 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
-import { AnalysisView } from '@/features/analysis';
+import { lazy, Suspense } from 'react';
 import { useCompass, useGeolocation } from '@/features/gps';
 import { useLoadPoints } from '@/features/points';
 import { useTrackRecorder } from '@/features/tracks';
@@ -10,6 +10,11 @@ import { FieldLayout } from './components/FieldLayout';
 import { TopBar } from './components/TopBar';
 import { useAppTheme } from './hooks/useAppTheme';
 import { useUiStore } from '@/shared/store/useUiStore';
+
+// analysis (laptop) is loaded only when opened — keeps the field app light on phones
+const AnalysisView = lazy(() =>
+  import('@/features/analysis').then((m) => ({ default: m.AnalysisView })),
+);
 
 export function App() {
   const theme = useAppTheme();
@@ -24,7 +29,13 @@ export function App() {
       <CssBaseline enableColorScheme />
       <AppGlobalStyles />
       <div style={{ position: 'relative', height: '100%', overflow: 'hidden' }}>
-        {mode === 'field' ? <FieldLayout /> : <AnalysisView />}
+        {mode === 'field' ? (
+          <FieldLayout />
+        ) : (
+          <Suspense fallback={null}>
+            <AnalysisView />
+          </Suspense>
+        )}
         <TopBar />
         <Toast />
       </div>

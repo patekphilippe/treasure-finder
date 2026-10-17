@@ -12,6 +12,27 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   worker: { format: 'es' },
+  build: {
+    rolldownOptions: {
+      output: {
+        // libraries change rarely — separate chunks stay cached between deploys
+        codeSplitting: {
+          groups: [
+            { name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/ },
+            {
+              name: 'mui',
+              test: /node_modules[\\/](@mui|@emotion|@popperjs|react-transition-group)[\\/]/,
+            },
+            {
+              name: 'leaflet',
+              test: /node_modules[\\/](leaflet|react-leaflet|@react-leaflet)[\\/]/,
+            },
+            { name: 'files', test: /node_modules[\\/](jszip|pako|proj4|geotiff)[\\/]/ },
+          ],
+        },
+      },
+    },
+  },
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],

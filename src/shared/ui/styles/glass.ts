@@ -8,6 +8,6 @@ export function glass(theme: Theme): SystemStyleObject<Theme> {
     backdropFilter: 'blur(20px) saturate(180%)',
     WebkitBackdropFilter: 'blur(20px) saturate(180%)',
     border: `1px solid ${theme.palette.divider}`,
-    boxShadow: theme.shadows[1],
+    boxShadow: theme.shadows[8],
   };
 }

@@ -9,6 +9,7 @@ const TOKENS = {
     textSecondary: '#71717a',
     divider: 'rgba(24, 24, 27, 0.08)',
     shadow: '0 1px 2px rgba(24, 24, 27, 0.06), 0 8px 32px rgba(24, 24, 27, 0.10)',
+    shadowSmall: '0 1px 3px rgba(24, 24, 27, 0.18)',
   },
   dark: {
     primary: '#34d399',
@@ -18,6 +19,7 @@ const TOKENS = {
     textSecondary: '#a1a1aa',
     divider: 'rgba(255, 255, 255, 0.08)',
     shadow: '0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 32px rgba(0, 0, 0, 0.45)',
+    shadowSmall: '0 1px 3px rgba(0, 0, 0, 0.5)',
   },
 } as const;
 
@@ -43,7 +45,12 @@ export function createAppTheme(mode: PaletteMode): Theme {
       button: { textTransform: 'none', fontWeight: 600, letterSpacing: 0 },
       caption: { letterSpacing: 0 },
     },
-    shadows: ['none', ...Array<string>(24).fill(t.shadow)] as Theme['shadows'],
+    // levels 1–4: small controls (switch thumb, slider); 5+: floating panels and dialogs
+    shadows: [
+      'none',
+      ...Array<string>(4).fill(t.shadowSmall),
+      ...Array<string>(20).fill(t.shadow),
+    ] as Theme['shadows'],
     components: {
       MuiButtonBase: { defaultProps: { disableRipple: true } },
       MuiButton: {

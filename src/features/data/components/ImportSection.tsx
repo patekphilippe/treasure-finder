@@ -4,7 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
-import { ImportError } from '@/shared/lib/io';
+import { ImportError } from '@/shared/lib/io/parseBackup';
 import { Icon } from '@/shared/ui';
 import { applyImport } from '../services/applyImport';
 import { readImportFile } from '../services/readImportFile';
