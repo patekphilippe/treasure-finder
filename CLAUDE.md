@@ -11,6 +11,12 @@ Wersja 1 do przeniesienia: legacy/index.html.
 - npm run lint ESLint (w tym reguła architektury)
 - npm run build build produkcyjny, musi przejść przed każdym commitem
 
+## Analiza NMT (QGIS)
+
+Wykrywanie kandydatów działa w Pythonie z QGIS, nie w przeglądarce — zob. `qgis/README.md`.
+Progi w `qgis/candidates/config.py`. Testy: `npm run test:qgis` (wymaga QGIS LTR, nie działa w CI).
+Wynik `kandydaci.geojson` ma pola modelu `Candidate` z docs/PLAN.md.
+
 ## Zasady
 
 - Interfejs po polsku. Nazwy w kodzie po angielsku, wartości typów

@@ -21,3 +21,5 @@ coverage/
 *.tiff
 *.zip
 /tiles/
+__pycache__/
+*.pyc

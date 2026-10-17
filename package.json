@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:qgis": "qgis/run.sh -m unittest discover -s qgis/tests -t qgis"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
