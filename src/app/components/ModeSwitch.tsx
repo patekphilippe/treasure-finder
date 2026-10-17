@@ -2,7 +2,7 @@ import Paper from '@mui/material/Paper';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { glass, Icon } from '@/shared/ui';
-import { useUiStore, type AppMode } from '../store/useUiStore';
+import { useUiStore, type AppMode } from '@/shared/store/useUiStore';
 
 export function ModeSwitch() {
   const mode = useUiStore((s) => s.mode);

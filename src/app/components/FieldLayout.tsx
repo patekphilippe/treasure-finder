@@ -1,20 +1,21 @@
 import Box from '@mui/material/Box';
-import { FollowButton, MapView } from '@/features/map';
+import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { Dock } from '@/shared/ui';
 import { DOCK_ITEMS } from '../config/dockItems';
-import { useUiStore } from '../store/useUiStore';
+import { useUiStore } from '@/shared/store/useUiStore';
 import { SheetHost } from './SheetHost';
 
 export function FieldLayout() {
   const activeSheet = useUiStore((s) => s.activeSheet);
-  const openSheet = useUiStore((s) => s.openSheet);
+  const toggleSheet = useUiStore((s) => s.toggleSheet);
 
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <MapView />
+      <MapCrosshair />
       <FollowButton />
       <SheetHost />
-      <Dock items={DOCK_ITEMS} activeId={activeSheet} onSelect={openSheet} />
+      <Dock items={DOCK_ITEMS} activeId={activeSheet} onSelect={toggleSheet} />
     </Box>
   );
 }

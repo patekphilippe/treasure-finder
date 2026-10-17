@@ -12,10 +12,12 @@ interface SheetProps {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  /** keeps the sheet (and its state) mounted but invisible */
+  hidden?: boolean;
 }
 
 /** Floating card that slides up above the dock. */
-export function Sheet({ title, onClose, children }: SheetProps) {
+export function Sheet({ title, onClose, children, hidden = false }: SheetProps) {
   return (
     <Slide direction="up" in mountOnEnter appear>
       <Box
@@ -25,7 +27,7 @@ export function Sheet({ title, onClose, children }: SheetProps) {
           left: 12,
           right: 12,
           bottom: 'calc(env(safe-area-inset-bottom, 0px) + 92px)',
-          display: 'flex',
+          display: hidden ? 'none' : 'flex',
           justifyContent: 'center',
           pointerEvents: 'none',
         }}

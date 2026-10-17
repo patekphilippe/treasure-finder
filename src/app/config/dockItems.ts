@@ -1,5 +1,5 @@
 import type { DockItem } from '@/shared/ui';
-import type { SheetId } from '../store/useUiStore';
+import type { SheetId } from '@/shared/store/useUiStore';
 
 export const DOCK_ITEMS: readonly DockItem<SheetId>[] = [
   { id: 'tracks', icon: 'route', label: 'Trasa' },

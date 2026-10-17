@@ -2,7 +2,7 @@ import { DataSheet } from '@/features/data';
 import { LayersSheet } from '@/features/layers';
 import { AddPointSheet, PointsListSheet } from '@/features/points';
 import { TracksSheet } from '@/features/tracks';
-import { useUiStore } from '../store/useUiStore';
+import { useUiStore } from '@/shared/store/useUiStore';
 
 export function SheetHost() {
   const activeSheet = useUiStore((s) => s.activeSheet);

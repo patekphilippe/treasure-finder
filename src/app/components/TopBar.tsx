@@ -1,6 +1,6 @@
 import Stack from '@mui/material/Stack';
 import { StatusChips } from '@/shared/ui';
-import { useUiStore } from '../store/useUiStore';
+import { useUiStore } from '@/shared/store/useUiStore';
 import { ModeSwitch } from './ModeSwitch';
 
 /** Floating controls in the top-left corner, above the map. */

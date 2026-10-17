@@ -9,7 +9,9 @@ import {
   OSM_LAYER,
   POLAND_CENTER,
 } from '../config/mapLayers';
-import { FollowController } from './FollowController';
+import { DraftMarker } from './DraftMarker';
+import { MapEvents } from './MapEvents';
+import { PointMarkers } from './PointMarkers';
 import { PositionMarker } from './PositionMarker';
 import { TrackLines } from './TrackLines';
 
@@ -50,8 +52,10 @@ export function MapView() {
         />
       )}
       <TrackLines />
+      <PointMarkers />
+      <DraftMarker />
       <PositionMarker />
-      <FollowController />
+      <MapEvents />
     </MapContainer>
   );
 }
