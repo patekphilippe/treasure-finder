@@ -4,7 +4,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { applyImport } from '@/features/data/services/applyImport';
 import { readImportFile } from '@/features/data/services/readImportFile';
 import { usePointsStore } from '@/features/points';
-import { photosRepo, pointsRepo, tracksRepo } from '@/shared/db';
+import { candidatesRepo, photosRepo, pointsRepo, tracksRepo } from '@/shared/db';
+import { candidatesGeoJSON, makeCandidate } from '../../helpers/candidates';
 import v1 from '../../fixtures/kopia-v1.json';
 import { clearDb } from '../../helpers/clearDb';
 import { makePoint, makeTrack } from '../../helpers/fixtures';
@@ -82,5 +83,21 @@ describe('import flow', () => {
     await expect(readImportFile(new File(['hello'], 'notatki.txt'))).rejects.toThrow(
       /Nieobsługiwany/,
     );
+  });
+
+  it('imports kandydaci.geojson and keeps decisions on re-import', async () => {
+    const file = (score: number) =>
+      new File(
+        [JSON.stringify(candidatesGeoJSON([makeCandidate({ id: 'c1', score })]))],
+        'kandydaci.geojson',
+      );
+    const first = await readImportFile(file(70));
+    expect(first.kind).toBe('candidates');
+    expect((await applyImport(first)).candidatesAdded).toBe(1);
+
+    await candidatesRepo.put({ ...(await candidatesRepo.getAll())[0]!, decision: 'odrzucony' });
+    const again = await applyImport(await readImportFile(file(55)));
+    expect(again).toMatchObject({ candidatesAdded: 0, candidatesUpdated: 1 });
+    expect((await candidatesRepo.getAll())[0]).toMatchObject({ score: 55, decision: 'odrzucony' });
   });
 });

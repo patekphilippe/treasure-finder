@@ -1,7 +1,13 @@
 export { BACKUP_VERSION, photoPath, ZIP_FILES, type BackupV2, type ExportData } from './backup';
 export { buildExportZip } from './buildExportZip';
+export {
+  FORM_VALUES,
+  importCandidatesGeoJSON,
+  isCandidatesGeoJSON,
+} from './importCandidatesGeoJSON';
 export { CRS_HINT, importGeoJSON, type GeoJSONImport } from './importGeoJSON';
 export { importZip, type ImportBundle } from './importZip';
+export { mergeCandidates, type CandidateMerge } from './mergeCandidates';
 export { mergeRecords, type MergeResult } from './mergeRecords';
 export { normalizePoint } from './normalizePoint';
 export { normalizeTrack } from './normalizeTrack';

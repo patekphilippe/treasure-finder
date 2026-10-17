@@ -1,22 +1,50 @@
+import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import { useState } from 'react';
 import { MapView } from '@/features/map';
-import { EmptyState, glass, Icon, useToastStore } from '@/shared/ui';
+import type { Candidate } from '@/shared/types/domain';
+import { EmptyState, glass, Icon } from '@/shared/ui';
+import { useCandidateShortcuts } from '../hooks/useCandidateShortcuts';
+import { useLoadCandidates } from '../hooks/useLoadCandidates';
+import { useVisibleCandidates } from '../hooks/useVisibleCandidates';
+import { setCandidateNote } from '../services/candidateDecisions';
 import { useAnalysisStore } from '../store/useAnalysisStore';
+import { CandidateDetails } from './CandidateDetails';
+import { CandidateFiltersBar } from './CandidateFiltersBar';
+import { CandidateList } from './CandidateList';
+import { CandidateMarkers } from './CandidateMarkers';
+import { ImportCandidatesButton } from './ImportCandidatesButton';
+import { NoteDialog } from './NoteDialog';
 
 export function AnalysisView() {
-  const candidates = useAnalysisStore((s) => s.candidates);
-  const showToast = useToastStore((s) => s.show);
+  useLoadCandidates();
+  const all = useAnalysisStore((s) => s.candidates);
+  const selectedId = useAnalysisStore((s) => s.selectedId);
+  const select = useAnalysisStore((s) => s.select);
+  const visible = useVisibleCandidates();
+  const [noteFor, setNoteFor] = useState<Candidate | null>(null);
   const isPhone = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  const [filtersOpen, setFiltersOpen] = useState<boolean | null>(null);
+  const showFilters = filtersOpen ?? !isPhone;
+  const activeFilters = useAnalysisStore(
+    (s) =>
+      s.filters.forms.length + (s.filters.showRejected ? 1 : 0) + (s.filters.showProtected ? 0 : 1),
+  );
+  useCandidateShortcuts(visible, setNoteFor);
+
+  const selected = all.find((c) => c.id === selectedId) ?? null;
 
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
-      <MapView />
+      <MapView>
+        <CandidateMarkers candidates={visible} />
+      </MapView>
       <Paper
         component="aside"
         sx={(theme) => ({
@@ -32,20 +60,33 @@ export function AnalysisView() {
           // phone: bottom sheet sized to its content; laptop: full-height side panel
           left: { xs: 12, md: 'auto' },
           top: { xs: 'auto', md: 12 },
-          width: { md: 384 },
+          width: { md: 400 },
           maxHeight: { xs: '60vh', md: 'none' },
         })}
       >
         <Stack spacing={1.5} sx={{ px: 2.5, pt: 2, pb: 1.5 }}>
           <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-            <Typography variant="h6" sx={{ flex: 1 }}>
-              Kandydaci
-            </Typography>
+            <Typography variant="h6">Kandydaci</Typography>
             <Chip
               size="small"
-              label={candidates.length}
-              sx={{ borderRadius: '8px', minWidth: 32 }}
+              label={all.length ? `${visible.length} / ${all.length}` : 0}
+              sx={{ borderRadius: '8px' }}
             />
+            <Box sx={{ flex: 1 }} />
+            {all.length > 0 && (
+              <IconButton
+                size="small"
+                aria-label="Filtry"
+                aria-pressed={showFilters}
+                onClick={() => setFiltersOpen(!showFilters)}
+                sx={{ color: showFilters ? 'primary.main' : 'text.secondary' }}
+              >
+                <Badge color="primary" variant="dot" invisible={activeFilters === 0}>
+                  <Icon name="filter" size={20} />
+                </Badge>
+              </IconButton>
+            )}
+            {all.length > 0 && <ImportCandidatesButton />}
           </Stack>
           <Stack
             direction="row"
@@ -66,25 +107,49 @@ export function AnalysisView() {
             </Typography>
           </Stack>
         </Stack>
-        <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
-          {candidates.length === 0 && (
-            <EmptyState
-              icon="file-upload"
-              title="Wczytaj arkusz NMT"
-              description={`ESRI ASCII Grid (.asc) lub GeoTIFF, EPSG:2180, siatka 1 m lub 0,5 m.${isPhone ? ' Analiza działa najlepiej na laptopie.' : ''}`}
-              action={
-                <Button
-                  variant="contained"
-                  startIcon={<Icon name="file-upload" size={18} />}
-                  onClick={() => showToast('Analiza NMT pojawi się w Etapie 1')}
-                >
-                  Wybierz plik
-                </Button>
-              }
-            />
-          )}
-        </Box>
+
+        {all.length === 0 ? (
+          <EmptyState
+            icon="file-import"
+            title="Wczytaj kandydatów z QGIS"
+            description="Plik kandydaci.geojson tworzy skrypt qgis/detect.py z arkuszy NMT. Przyjęci kandydaci trafiają do terenu jako punkty do sprawdzenia."
+            action={<ImportCandidatesButton variant="full" />}
+          />
+        ) : (
+          <>
+            {showFilters && <CandidateFiltersBar />}
+            {selected && (
+              <CandidateDetails
+                candidate={selected}
+                onNote={() => setNoteFor(selected)}
+                onClose={() => select(null)}
+              />
+            )}
+            <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+              <CandidateList candidates={visible} />
+            </Box>
+            {!isPhone && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ px: 2.5, py: 1, borderTop: 1, borderColor: 'divider' }}
+              >
+                J / K następny · A przyjmij · R odrzuć · N notatka
+              </Typography>
+            )}
+          </>
+        )}
       </Paper>
+      {noteFor && (
+        <NoteDialog
+          initial={noteFor.note}
+          onClose={() => setNoteFor(null)}
+          onSave={async (note) => {
+            await setCandidateNote(noteFor, note);
+            setNoteFor(null);
+          }}
+        />
+      )}
     </Box>
   );
 }

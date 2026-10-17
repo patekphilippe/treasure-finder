@@ -1,3 +1,4 @@
+import L from 'leaflet';
 import { useEffect } from 'react';
 import { useMap } from 'react-leaflet';
 import { useFieldStore } from '@/shared/store/useFieldStore';
@@ -13,13 +14,13 @@ export function useFlyTo(): void {
   useEffect(() => {
     if (!flyTarget) return;
     useFieldStore.getState().setFollowing(false);
-    map.flyTo(
-      [flyTarget.lat, flyTarget.lng],
-      flyTarget.zoom ?? Math.max(map.getZoom(), FOLLOW_ZOOM),
-      {
-        duration: 0.6,
-      },
-    );
+    const zoom = flyTarget.zoom ?? Math.max(map.getZoom(), FOLLOW_ZOOM);
+    let center = L.latLng(flyTarget.lat, flyTarget.lng);
+    if (flyTarget.offsetY) {
+      // move the view centre below the target so the target ends up offsetY px higher
+      center = map.unproject(map.project(center, zoom).add([0, flyTarget.offsetY]), zoom);
+    }
+    map.flyTo(center, zoom, { duration: 0.6 });
     clearFly();
   }, [flyTarget, map, clearFly]);
 }

@@ -1,5 +1,6 @@
 import Stack from '@mui/material/Stack';
 import { useMemo } from 'react';
+import { bottomSheetOffset } from '@/shared/lib/bottomSheetOffset';
 import { useFieldStore } from '@/shared/store/useFieldStore';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
@@ -35,7 +36,7 @@ export function PointsListSheet({ onClose }: PointsListSheetProps) {
               point={point}
               distM={distM}
               onClick={() => {
-                flyTo({ lat: point.lat, lng: point.lng });
+                flyTo({ lat: point.lat, lng: point.lng, offsetY: bottomSheetOffset() });
                 showPoint(point.id);
               }}
             />

@@ -1,26 +1,33 @@
 import { create } from 'zustand';
+import { candidatesRepo } from '@/shared/db';
 import type { AnalysisParams, Candidate } from '@/shared/types/domain';
 import { DEFAULT_ANALYSIS_PARAMS } from '../config/defaultParams';
+import { DEFAULT_FILTERS, type CandidateFilters } from '../config/filters';
 
 interface AnalysisState {
   params: AnalysisParams;
-  /** 0–100 while the worker runs, null when idle */
-  progress: number | null;
   candidates: Candidate[];
   selectedId: string | null;
+  filters: CandidateFilters;
   setParams: (params: Partial<AnalysisParams>) => void;
-  setProgress: (progress: number | null) => void;
-  setCandidates: (candidates: Candidate[]) => void;
+  load: () => Promise<void>;
+  /** persist one changed candidate (decision, note) */
+  update: (candidate: Candidate) => Promise<void>;
   select: (id: string | null) => void;
+  setFilters: (filters: Partial<CandidateFilters>) => void;
 }
 
 export const useAnalysisStore = create<AnalysisState>((set) => ({
   params: DEFAULT_ANALYSIS_PARAMS,
-  progress: null,
   candidates: [],
   selectedId: null,
+  filters: DEFAULT_FILTERS,
   setParams: (params) => set((s) => ({ params: { ...s.params, ...params } })),
-  setProgress: (progress) => set({ progress }),
-  setCandidates: (candidates) => set({ candidates }),
+  load: async () => set({ candidates: await candidatesRepo.getAll() }),
+  update: async (candidate) => {
+    await candidatesRepo.put(candidate);
+    set((s) => ({ candidates: s.candidates.map((c) => (c.id === candidate.id ? candidate : c)) }));
+  },
   select: (selectedId) => set({ selectedId }),
+  setFilters: (filters) => set((s) => ({ filters: { ...s.filters, ...filters } })),
 }));

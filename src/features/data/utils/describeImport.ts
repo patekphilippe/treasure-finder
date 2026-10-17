@@ -1,4 +1,10 @@
-import { countPhotos, countPoints, countTracks, pluralPl } from '@/shared/lib/format';
+import {
+  countCandidates,
+  countPhotos,
+  countPoints,
+  countTracks,
+  pluralPl,
+} from '@/shared/lib/format';
 import type { ImportSummary } from '../services/applyImport';
 
 /** Human summary lines, e.g. ["Nowe: 42 punkty, 3 trasy", "Zdjęcia: 17"]. */
@@ -14,6 +20,11 @@ export function describeImport(s: ImportSummary): string[] {
   ].filter(Boolean);
   if (added.length) lines.push(`Nowe: ${added.join(', ')}`);
   if (updated.length) lines.push(`Zaktualizowane: ${updated.join(', ')}`);
+  if (s.candidatesAdded || s.candidatesUpdated) {
+    lines.push(
+      `Kandydaci: ${countCandidates(s.candidatesAdded)} nowych, ${s.candidatesUpdated} zaktualizowanych — zobacz w trybie Analiza`,
+    );
+  }
   if (s.photos) lines.push(`Wczytano ${countPhotos(s.photos)}`);
   if (s.unchanged) lines.push(`Bez zmian (już są na urządzeniu): ${s.unchanged}`);
   if (s.skipped)

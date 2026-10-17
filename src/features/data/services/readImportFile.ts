@@ -2,15 +2,24 @@ import { createId } from '@/shared/lib/createId';
 import type { ImportBundle } from '@/shared/lib/io';
 
 export interface ImportPayload extends Omit<ImportBundle, 'version'> {
-  kind: 'backup-v1' | 'backup-v2' | 'geojson';
+  kind: 'backup-v1' | 'backup-v2' | 'geojson' | 'candidates';
 }
+
+const EMPTY = { points: [], tracks: [], candidates: [], zones: [], context: [] };
 
 const isZip = (bytes: Uint8Array) => bytes[0] === 0x50 && bytes[1] === 0x4b; // "PK"
 
 /** Detects the file type (ZIP backup, kopia.json or GeoJSON) and parses it. */
 export async function readImportFile(file: File, now = Date.now()): Promise<ImportPayload> {
   // JSZip & co. load only when importing
-  const { importGeoJSON, ImportError, importZip, parseBackup } = await import('@/shared/lib/io');
+  const {
+    importCandidatesGeoJSON,
+    importGeoJSON,
+    ImportError,
+    importZip,
+    isCandidatesGeoJSON,
+    parseBackup,
+  } = await import('@/shared/lib/io');
   const buffer = await file.arrayBuffer();
   if (isZip(new Uint8Array(buffer, 0, Math.min(2, buffer.byteLength)))) {
     const { version, ...bundle } = await importZip(buffer);
@@ -22,6 +31,10 @@ export async function readImportFile(file: File, now = Date.now()): Promise<Impo
     json = JSON.parse(new TextDecoder().decode(buffer));
   } catch {
     throw new ImportError('Nieobsługiwany plik — wybierz kopię ZIP, kopia.json albo GeoJSON');
+  }
+  if (isCandidatesGeoJSON(json)) {
+    const { candidates, skipped } = importCandidatesGeoJSON(json);
+    return { ...EMPTY, kind: 'candidates', candidates, photos: new Map(), skipped };
   }
   const type = (json as { type?: unknown } | null)?.type;
   if (type === 'FeatureCollection' || type === 'Feature') {

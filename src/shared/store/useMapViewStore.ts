@@ -5,13 +5,19 @@ interface LatLng {
   lng: number;
 }
 
+export interface FlyTarget extends LatLng {
+  zoom?: number;
+  /** show the target this many pixels above the map centre (e.g. above a bottom sheet) */
+  offsetY?: number;
+}
+
 interface MapViewState {
   center: LatLng;
   zoom: number;
   /** one-shot request for the map to fly somewhere; consumed by the map */
-  flyTarget: (LatLng & { zoom?: number }) | null;
+  flyTarget: FlyTarget | null;
   setView: (center: LatLng, zoom: number) => void;
-  flyTo: (target: LatLng & { zoom?: number }) => void;
+  flyTo: (target: FlyTarget) => void;
   clearFly: () => void;
 }
 

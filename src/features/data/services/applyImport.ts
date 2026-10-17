@@ -1,6 +1,7 @@
 import { usePointsStore } from '@/features/points';
 import { useTracksStore } from '@/features/tracks';
 import { getDb } from '@/shared/db';
+import { mergeCandidates } from '@/shared/lib/io/mergeCandidates';
 import { mergeRecords } from '@/shared/lib/io/mergeRecords';
 import type { Track } from '@/shared/types/domain';
 import type { ImportPayload } from './readImportFile';
@@ -10,6 +11,8 @@ export interface ImportSummary {
   pointsUpdated: number;
   tracksAdded: number;
   tracksUpdated: number;
+  candidatesAdded: number;
+  candidatesUpdated: number;
   photos: number;
   unchanged: number;
   skipped: number;
@@ -20,7 +23,8 @@ const trackTime = (t: Track) => t.end ?? t.start;
 /**
  * Merges imported data into IndexedDB by id:
  * points — newer `updated` wins; tracks — later `end` wins, a track being
- * recorded here is never overwritten; candidates/zones/context — only new ids.
+ * recorded here is never overwritten; candidates — new data, but decisions and notes made
+ * here are kept; zones/context — only new ids.
  */
 export async function applyImport(payload: ImportPayload): Promise<ImportSummary> {
   const db = await getDb();
@@ -40,7 +44,7 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
     (a, b) => !b.active && trackTime(a) > trackTime(b),
   );
   const onlyNew = () => false;
-  const c = mergeRecords(candidates, payload.candidates, onlyNew);
+  const c = mergeCandidates(candidates, payload.candidates);
   const z = mergeRecords(zones, payload.zones, onlyNew);
   const x = mergeRecords(context, payload.context, onlyNew);
 
@@ -72,6 +76,8 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
     pointsUpdated: p.updated,
     tracksAdded: t.added,
     tracksUpdated: t.updated,
+    candidatesAdded: c.added,
+    candidatesUpdated: c.updated,
     photos: photos.length,
     unchanged: p.unchanged + t.unchanged,
     skipped: payload.skipped,

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { MapContainer, TileLayer, WMSTileLayer } from 'react-leaflet';
 import { useLayersStore } from '@/features/layers';
 import {
@@ -17,7 +18,12 @@ import { PointMarkers } from './PointMarkers';
 import { PositionMarker } from './PositionMarker';
 import { TrackLines } from './TrackLines';
 
-export function MapView() {
+interface MapViewProps {
+  /** extra layers from other features (e.g. analysis candidates) */
+  children?: ReactNode;
+}
+
+export function MapView({ children }: MapViewProps) {
   const { baseLayer, nmtOn, nmtOpacity } = useLayersStore();
 
   return (
@@ -59,6 +65,7 @@ export function MapView() {
       <GuidanceLine />
       <PointMarkers />
       <DraftMarker />
+      {children}
       <PositionMarker />
       <MapEvents />
     </MapContainer>

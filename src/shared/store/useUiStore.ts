@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 export type AppMode = 'field' | 'analysis';
 export type SheetId = 'tracks' | 'points' | 'addPoint' | 'pointDetails' | 'layers' | 'data';
@@ -16,13 +17,23 @@ interface UiState {
   closeSheet: () => void;
 }
 
-export const useUiStore = create<UiState>((set) => ({
-  mode: 'field',
-  activeSheet: null,
-  selectedPointId: null,
-  setMode: (mode) => set({ mode, activeSheet: null }),
-  toggleSheet: (sheet) => set((s) => ({ activeSheet: s.activeSheet === sheet ? null : sheet })),
-  showSheet: (sheet) => set({ activeSheet: sheet }),
-  showPoint: (id) => set({ activeSheet: 'pointDetails', selectedPointId: id }),
-  closeSheet: () => set({ activeSheet: null }),
-}));
+export const useUiStore = create<UiState>()(
+  persist(
+    (set) => ({
+      mode: 'field',
+      activeSheet: null,
+      selectedPointId: null,
+      setMode: (mode) => set({ mode, activeSheet: null }),
+      toggleSheet: (sheet) => set((s) => ({ activeSheet: s.activeSheet === sheet ? null : sheet })),
+      showSheet: (sheet) => set({ activeSheet: sheet }),
+      showPoint: (id) => set({ activeSheet: 'pointDetails', selectedPointId: id }),
+      closeSheet: () => set({ activeSheet: null }),
+    }),
+    {
+      // remember Teren / Analiza between visits (laptop reopens in Analiza)
+      name: 'mapa.ui',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (s) => ({ mode: s.mode }),
+    },
+  ),
+);
