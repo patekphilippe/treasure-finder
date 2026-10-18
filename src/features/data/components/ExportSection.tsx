@@ -34,7 +34,7 @@ export function ExportSection() {
   };
 
   return (
-    <Stack spacing={1.25}>
+    <Stack data-tour="data-export" spacing={1.25}>
       <Typography variant="overline" color="text.secondary">
         Eksport
       </Typography>

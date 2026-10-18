@@ -6,6 +6,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { useEffect } from 'react';
 import { Icon } from '@/shared/ui';
 import {
   INTRO_DISCLAIMER,
@@ -15,9 +16,17 @@ import {
 } from '../config/legal';
 import { useIntroSeen } from '../hooks/useIntroSeen';
 
+interface LegalIntroDialogProps {
+  /** called once the intro is out of the way: confirmed now or on an earlier visit */
+  onSeen?: () => void;
+}
+
 /** Shown once on first launch: search legally, the app is not legal advice. */
-export function LegalIntroDialog() {
+export function LegalIntroDialog({ onSeen }: LegalIntroDialogProps) {
   const [seen, confirm] = useIntroSeen();
+  useEffect(() => {
+    if (seen) onSeen?.();
+  }, [seen, onSeen]);
 
   return (
     <Dialog

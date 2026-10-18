@@ -34,7 +34,7 @@ export function ImportSection() {
   };
 
   return (
-    <Stack spacing={1.25}>
+    <Stack data-tour="data-import" spacing={1.25}>
       <Typography variant="overline" color="text.secondary">
         Import
       </Typography>

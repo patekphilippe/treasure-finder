@@ -36,7 +36,7 @@ export function RoughnessSection() {
   const sorted = [...areas].sort((a, b) => b.strength - a.strength);
 
   return (
-    <Stack spacing={1.25}>
+    <Stack data-tour="layers-roughness" spacing={1.25}>
       <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
         <Icon name="fire" size={22} />
         <Stack sx={{ flex: 1 }}>

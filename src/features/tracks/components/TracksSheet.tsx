@@ -56,7 +56,7 @@ export function TracksSheet({ onClose }: TracksSheetProps) {
     <Sheet title="Trasa" onClose={onClose}>
       <Stack spacing={2.5}>
         <RecordingPanel track={active} onStart={start} onStop={stop} />
-        <Stack>
+        <Stack data-tour="saved-tracks">
           <Typography variant="overline" color="text.secondary">
             Zapisane trasy
           </Typography>

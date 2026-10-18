@@ -12,7 +12,13 @@ interface PointTypePickerProps {
 
 export function PointTypePicker({ value, onChange }: PointTypePickerProps) {
   return (
-    <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }} role="radiogroup" aria-label="Rodzaj">
+    <Stack
+      data-tour="point-type"
+      direction="row"
+      sx={{ flexWrap: 'wrap', gap: 1 }}
+      role="radiogroup"
+      aria-label="Rodzaj"
+    >
       {POINT_TYPE_ORDER.map((type) => {
         const meta = POINT_TYPES[type];
         const selected = type === value;

@@ -20,6 +20,7 @@ export function RecordingPanel({ track, onStart, onStop }: RecordingPanelProps) 
   if (!track) {
     return (
       <Button
+        data-tour="recording"
         fullWidth
         size="large"
         variant="contained"
@@ -33,6 +34,7 @@ export function RecordingPanel({ track, onStart, onStop }: RecordingPanelProps) 
 
   return (
     <Box
+      data-tour="recording"
       sx={(theme) => ({
         p: 2,
         borderRadius: '12px',

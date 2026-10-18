@@ -90,41 +90,43 @@ export function PointForm({
           if (t === 'niewybuch') setUxoOpen(true);
         }}
       />
-      <TextField
-        label="Nazwa"
-        size="small"
-        value={name}
-        placeholder={namePlaceholder(type)}
-        onChange={(e) => setName(e.target.value)}
-        slotProps={{ inputLabel: { shrink: true } }}
-      />
-      <TextField
-        label="Opis"
-        size="small"
-        multiline
-        minRows={2}
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-      />
-      <TextField
-        label="Głębokość"
-        size="small"
-        value={depth}
-        onChange={(e) => setDepth(e.target.value.replace(/[^\d.,]/g, ''))}
-        slotProps={{
-          htmlInput: { inputMode: 'decimal' },
-          input: { endAdornment: <InputAdornment position="end">cm</InputAdornment> },
-        }}
-      />
-      <PhotoInput
-        previewUrl={previewUrl}
-        busy={busy}
-        onPick={pickPhoto}
-        onRemove={() => {
-          setPhoto(null);
-          setRemovePhoto(true);
-        }}
-      />
+      <Stack data-tour="point-details" spacing={2}>
+        <TextField
+          label="Nazwa"
+          size="small"
+          value={name}
+          placeholder={namePlaceholder(type)}
+          onChange={(e) => setName(e.target.value)}
+          slotProps={{ inputLabel: { shrink: true } }}
+        />
+        <TextField
+          label="Opis"
+          size="small"
+          multiline
+          minRows={2}
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+        <TextField
+          label="Głębokość"
+          size="small"
+          value={depth}
+          onChange={(e) => setDepth(e.target.value.replace(/[^\d.,]/g, ''))}
+          slotProps={{
+            htmlInput: { inputMode: 'decimal' },
+            input: { endAdornment: <InputAdornment position="end">cm</InputAdornment> },
+          }}
+        />
+        <PhotoInput
+          previewUrl={previewUrl}
+          busy={busy}
+          onPick={pickPhoto}
+          onRemove={() => {
+            setPhoto(null);
+            setRemovePhoto(true);
+          }}
+        />
+      </Stack>
       <Button variant="contained" size="large" disabled={disabled || busy} onClick={submit}>
         {submitLabel}
       </Button>

@@ -24,6 +24,7 @@ export function FollowButton() {
 
   return (
     <IconButton
+      data-tour="follow"
       aria-label={following ? 'Wyłącz śledzenie pozycji' : 'Śledź pozycję'}
       aria-pressed={following}
       onClick={onClick}

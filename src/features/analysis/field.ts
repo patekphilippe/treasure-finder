@@ -4,3 +4,4 @@
  */
 export { AcceptedZonesLayer } from './components/AcceptedZonesLayer';
 export { useLoadCandidates } from './hooks/useLoadCandidates';
+export { useAnalysisStore } from './store/useAnalysisStore';

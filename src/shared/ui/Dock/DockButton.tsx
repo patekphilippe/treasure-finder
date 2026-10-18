@@ -7,14 +7,17 @@ import { Icon } from '../Icon/Icon';
 interface DockButtonProps {
   icon: string;
   label: string;
+  /** `data-tour` anchor for the guided tour */
+  tourId?: string;
   active: boolean;
   primary: boolean;
   onClick: () => void;
 }
 
-export function DockButton({ icon, label, active, primary, onClick }: DockButtonProps) {
+export function DockButton({ icon, label, tourId, active, primary, onClick }: DockButtonProps) {
   return (
     <ButtonBase
+      data-tour={tourId}
       onClick={onClick}
       aria-pressed={active}
       aria-label={label}

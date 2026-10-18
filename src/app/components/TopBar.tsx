@@ -1,4 +1,5 @@
 import Stack from '@mui/material/Stack';
+import { TutorialButton } from '@/features/tutorial';
 import { ZoneAlertBar } from '@/features/zones';
 import { StatusChips } from '@/shared/ui';
 import { useUiStore } from '@/shared/store/useUiStore';
@@ -24,7 +25,10 @@ export function TopBar() {
       }}
     >
       {mode === 'field' && <ZoneAlertBar />}
-      <ModeSwitch />
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+        <ModeSwitch />
+        <TutorialButton />
+      </Stack>
       {mode === 'field' && <StatusChips />}
     </Stack>
   );

@@ -21,6 +21,7 @@ export function Dock<Id extends string>({ items, activeId, onSelect }: DockProps
   return (
     <Paper
       component="nav"
+      data-tour="dock"
       sx={(theme) => ({
         ...glass(theme),
         position: 'absolute',
@@ -39,6 +40,7 @@ export function Dock<Id extends string>({ items, activeId, onSelect }: DockProps
       {items.map((item) => (
         <DockButton
           key={item.id}
+          tourId={`dock-${item.id}`}
           icon={item.icon}
           label={item.label}
           primary={item.primary ?? false}

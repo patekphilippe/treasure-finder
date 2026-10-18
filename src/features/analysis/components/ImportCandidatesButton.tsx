@@ -52,6 +52,7 @@ export function ImportCandidatesButton({ variant = 'compact' }: ImportCandidates
             <IconButton
               size="small"
               disabled={busy}
+              data-tour="import-candidates"
               aria-label="Wczytaj kandydatów"
               onClick={() => inputRef.current?.click()}
             >
@@ -61,6 +62,7 @@ export function ImportCandidatesButton({ variant = 'compact' }: ImportCandidates
         </Tooltip>
       ) : (
         <Button
+          data-tour="import-candidates"
           variant="contained"
           disabled={busy}
           startIcon={busy ? <CircularProgress size={14} /> : <Icon name="file-import" size={18} />}

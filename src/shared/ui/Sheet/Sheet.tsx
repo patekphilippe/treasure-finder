@@ -34,6 +34,7 @@ export function Sheet({ title, onClose, children, hidden = false }: SheetProps) 
       >
         <Paper
           component="section"
+          data-tour="sheet"
           aria-label={title}
           sx={(theme) => ({
             ...glass(theme),

@@ -60,6 +60,7 @@ export function AnalysisView() {
       </MapView>
       <Paper
         component="aside"
+        data-tour="analysis-panel"
         sx={(theme) => ({
           ...glass(theme),
           position: 'absolute',
@@ -90,6 +91,7 @@ export function AnalysisView() {
               <IconButton
                 size="small"
                 aria-label="Filtry"
+                data-tour="analysis-filters"
                 aria-pressed={showFilters}
                 onClick={() => setFiltersOpen(!showFilters)}
                 sx={{ color: showFilters ? 'primary.main' : 'text.secondary' }}
@@ -153,7 +155,7 @@ export function AnalysisView() {
                 onClose={() => select(null)}
               />
             )}
-            <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
+            <Box data-tour="candidate-list" sx={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
               <CandidateList candidates={visible} />
             </Box>
             {!isPhone && (

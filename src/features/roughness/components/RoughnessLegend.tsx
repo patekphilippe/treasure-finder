@@ -19,6 +19,7 @@ export function RoughnessLegend() {
 
   return (
     <Paper
+      data-tour="legend"
       sx={(theme) => ({
         ...glass(theme),
         position: 'absolute',

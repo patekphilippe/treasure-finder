@@ -44,7 +44,7 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
   return (
     <Sheet title="Warstwy" onClose={onClose}>
       <Stack spacing={2.5}>
-        <Stack spacing={1}>
+        <Stack data-tour="layers-base" spacing={1}>
           <Typography variant="overline" color="text.secondary">
             Podkład
           </Typography>
@@ -66,7 +66,7 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
 
         <Divider />
 
-        <Stack spacing={1}>
+        <Stack data-tour="layers-nmt" spacing={1}>
           <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
             <Icon name="mountain" size={22} />
             <Stack sx={{ flex: 1 }}>
@@ -97,7 +97,11 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
 
         <Divider />
 
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+        <Stack
+          data-tour="layers-search-zones"
+          direction="row"
+          sx={{ alignItems: 'center', gap: 1.5 }}
+        >
           <Icon name="bullseye" size={22} />
           <Stack sx={{ flex: 1 }}>
             <Typography variant="subtitle2">Strefy poszukiwań</Typography>
@@ -114,7 +118,7 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
 
         <Divider />
 
-        <Stack spacing={1}>
+        <Stack data-tour="layers-coverage" spacing={1}>
           <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
             <Icon name="route" size={22} />
             <Stack sx={{ flex: 1 }}>
@@ -143,7 +147,7 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
 
         <Divider />
 
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+        <Stack data-tour="layers-zones" direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
           <Icon name="draw-polygon" size={22} />
           <Stack sx={{ flex: 1 }}>
             <Typography variant="subtitle2">Strefy</Typography>
@@ -160,7 +164,7 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
 
         <Divider />
 
-        <Stack>
+        <Stack data-tour="layers-custom">
           <Stack direction="row" sx={{ alignItems: 'center' }}>
             <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>
               Własne warstwy

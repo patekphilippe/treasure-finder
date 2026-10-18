@@ -75,13 +75,20 @@ export function LoadSheetButton({ variant = 'compact' }: LoadSheetButtonProps) {
       {variant === 'compact' ? (
         <Tooltip title="Wczytaj arkusz NMT (.asc, GeoTIFF)">
           <span>
-            <IconButton size="small" aria-label="Wczytaj arkusz NMT" disabled={busy} onClick={open}>
+            <IconButton
+              size="small"
+              data-tour="load-sheet"
+              aria-label="Wczytaj arkusz NMT"
+              disabled={busy}
+              onClick={open}
+            >
               <Icon name="file-upload" size={20} />
             </IconButton>
           </span>
         </Tooltip>
       ) : (
         <Button
+          data-tour="load-sheet"
           variant="contained"
           disabled={busy}
           startIcon={<Icon name="file-upload" size={18} />}

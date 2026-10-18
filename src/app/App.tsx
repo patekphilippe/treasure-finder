@@ -7,6 +7,7 @@ import { useLoadPoints } from '@/features/points';
 import { useLoadAreas } from '@/features/roughness';
 import { LegalIntroDialog } from '@/features/safety';
 import { useTrackRecorder } from '@/features/tracks';
+import { TutorialTour, useTutorialStore } from '@/features/tutorial';
 import { useLoadZones, useZoneAlerts } from '@/features/zones';
 import { Toast } from '@/shared/ui';
 import { AppGlobalStyles } from './components/AppGlobalStyles';
@@ -31,6 +32,7 @@ export function App() {
   useLoadAreas();
   useLoadCandidates();
   const mode = useUiStore((s) => s.mode);
+  const startTourIfNew = useTutorialStore((s) => s.startIfNew);
 
   return (
     <ThemeProvider theme={theme}>
@@ -46,7 +48,8 @@ export function App() {
         )}
         <TopBar />
         <Toast />
-        <LegalIntroDialog />
+        <LegalIntroDialog onSeen={startTourIfNew} />
+        <TutorialTour />
       </div>
     </ThemeProvider>
   );

@@ -20,7 +20,7 @@ export function LocationPicker() {
   else info = coords ? `Celownik: ${coords}` : 'Ustaw celownik na mapie';
 
   return (
-    <Stack spacing={1}>
+    <Stack data-tour="location-picker" spacing={1}>
       <ToggleButtonGroup
         exclusive
         fullWidth

@@ -9,7 +9,7 @@ export function ModeSwitch() {
   const setMode = useUiStore((s) => s.setMode);
 
   return (
-    <Paper sx={(theme) => ({ ...glass(theme), p: 0.5, borderRadius: 999 })}>
+    <Paper data-tour="mode-switch" sx={(theme) => ({ ...glass(theme), p: 0.5, borderRadius: 999 })}>
       <ToggleButtonGroup
         exclusive
         size="small"
