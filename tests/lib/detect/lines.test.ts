@@ -90,4 +90,28 @@ describe('line features', () => {
     );
     expect(f.angleToSlopeDeg).toBeGreaterThan(80);
   });
+
+  it('real bends vs zigzag teeth: an L-shaped trench has one major bend, a zigzag none', () => {
+    const l = features(
+      new Terrain().add(
+        trench(
+          [
+            [30, 150],
+            [110, 150],
+            [110, 40],
+          ],
+          1.5,
+          1,
+          0,
+        ),
+      ),
+      70,
+      150,
+    );
+    expect(l.majorTurns.length).toBeGreaterThanOrEqual(1);
+    const near = l.majorTurns.some(([x, y]) => Math.hypot(x - 110, y + 150) < 20);
+    expect(near).toBe(true);
+    const z = features(new Terrain().add(trench(zigzag, 1.5, 1, -1)), 25, 95);
+    expect(z.majorTurns).toHaveLength(0);
+  });
 });

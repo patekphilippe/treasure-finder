@@ -566,7 +566,8 @@ function zoneFor(
       return { zone: { kind: 'hull', points, bufferM: Z.dugoutBufferM }, exclusion: null };
     case 'okop': {
       const f = it.line!;
-      const circles = [...f.turns, ...f.junctions];
+      // circles at real bends and junctions; zigzag teeth would cover both sides
+      const circles = [...f.majorTurns, ...f.junctions];
       return {
         zone: f.parapetSide
           ? {

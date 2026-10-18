@@ -17,8 +17,10 @@ export interface LineFeatures {
   tortuosity: number;
   /** turns > 30° per 10 m */
   zigzagPer10m: number;
-  /** where the axis turns > 30° */
+  /** where the axis turns > 30° (zigzag teeth included) */
   turns: XY[];
+  /** real bends of the trench: turns > 30° of the axis smoothed over 20 m (not zigzag teeth) */
+  majorTurns: XY[];
   junctions: XY[];
   endpoints: XY[];
   /** share of monotonic steps of the bottom elevation along the axis */
@@ -107,6 +109,25 @@ export function lineFeatures(s: Scene, c: Component, cfg = interpretConfig): Lin
     if (prevHeading !== null && (angleDiff(hd, prevHeading) * 180) / Math.PI > L.zigzagTurnDeg)
       turns.push(axis[k - segN]!);
     prevHeading = hd;
+  }
+
+  // major bends: smooth the axis over ~20 m (removes zigzag teeth), then 20 m segments
+  const half20 = Math.max(1, Math.round(10 / L.sampleStepM));
+  const smooth20 = axis.map((_, k) => {
+    const a = axis.slice(Math.max(0, k - half20), k + half20 + 1);
+    return [
+      a.reduce((x, p) => x + p[0], 0) / a.length,
+      a.reduce((x, p) => x + p[1], 0) / a.length,
+    ] as XY;
+  });
+  const seg20 = 2 * half20;
+  const majorTurns: XY[] = [];
+  let prevMajor: number | null = null;
+  for (let k = seg20; k < smooth20.length; k += seg20) {
+    const hd = heading(smooth20[k - seg20]!, smooth20[k]!);
+    if (prevMajor !== null && (angleDiff(hd, prevMajor) * 180) / Math.PI > L.zigzagTurnDeg)
+      majorTurns.push(axis[k - seg20]!);
+    prevMajor = hd;
   }
 
   // bottom elevation along the axis, smoothed over 3 m
@@ -198,6 +219,7 @@ export function lineFeatures(s: Scene, c: Component, cfg = interpretConfig): Lin
     tortuosity: chord ? lengthM / chord : 1,
     zigzagPer10m: lengthM ? (turns.length / lengthM) * 10 : 0,
     turns,
+    majorTurns,
     junctions: g.junctions.map((k) => toLocal(s, toSheet(k))),
     endpoints: g.endpoints.map((k) => toLocal(s, toSheet(k))),
     monotonicShare,
