@@ -36,6 +36,16 @@ export default defineConfig({
         globIgnores: ['**/la-*.svg', '**/*.eot', '**/*.ttf', '**/*.woff'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
+        // map tiles: a downloaded area (Cache Storage, features/offline) first, then the network.
+        // Nothing is stored here, so browsing never fills the phone.
+        runtimeCaching: [
+          {
+            urlPattern: ({ request, url, sameOrigin }) =>
+              !sameOrigin &&
+              (request.destination === 'image' || url.hostname.endsWith('geoportal.gov.pl')),
+            handler: async ({ request }) => (await caches.match(request.url)) ?? fetch(request),
+          },
+        ],
       },
     }),
   ],

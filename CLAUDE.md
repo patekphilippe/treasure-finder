@@ -69,6 +69,9 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   atrybut `data-tour`; nowy element UI dostaje krok i atrybut (test sprawdza, że każdy cel istnieje).
 - PWA: `vite-plugin-pwa` w `vite.config.ts` (manifest, precache całej aplikacji). Aktualizacja tylko
   po kliknięciu „Odśwież” (`offline/components/UpdatePrompt.tsx`), żeby nie przerwać nagrywania trasy.
+- Mapy offline: `features/offline` pobiera kafelki obszaru do Cache Storage (osobny cache na obszar).
+  Service worker podaje kafelki z tych cache przed siecią i sam nic nie zapisuje. Kafelki NMT wybiera
+  `shared/lib/tiles/pickSourceTiles.ts`, wspólne dla warstwy i pobierania: zmiana w jednym miejscu.
 - Komunikaty prawne są w `features/safety/config/legal.ts` — krótkie, rzeczowe, z linkiem do źródła.
 - Ciężkie biblioteki (JSZip, proj4) ładujemy dynamicznie (`import()`), żeby start na telefonie był lekki.
   `src/shared/lib/geo/crs.ts` rejestruje EPSG:2180 leniwie — bez efektów ubocznych przy imporcie.
