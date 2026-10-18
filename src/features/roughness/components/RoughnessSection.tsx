@@ -1,9 +1,12 @@
 import Button from '@mui/material/Button';
+import ButtonBase from '@mui/material/ButtonBase';
+import Collapse from '@mui/material/Collapse';
 import LinearProgress from '@mui/material/LinearProgress';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
+import { useState } from 'react';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon, useToastStore } from '@/shared/ui';
@@ -22,6 +25,7 @@ export function RoughnessSection() {
   const setPlacesVisible = useAreasStore((s) => s.setVisible);
   const showArea = useUiStore((s) => s.showArea);
   const showToast = useToastStore((s) => s.show);
+  const [listOpen, setListOpen] = useState(false);
 
   const analyse = async () => {
     const bounds = useMapViewStore.getState().bounds;
@@ -101,22 +105,31 @@ export function RoughnessSection() {
       {areas.length > 0 && (
         <Stack>
           <Stack direction="row" sx={{ alignItems: 'center' }}>
-            <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>
-              Oznaczone miejsca ({areas.length})
-            </Typography>
+            <ButtonBase
+              onClick={() => setListOpen(!listOpen)}
+              aria-expanded={listOpen}
+              sx={{ flex: 1, justifyContent: 'flex-start', gap: 0.5, borderRadius: '8px' }}
+            >
+              <Typography variant="overline" color="text.secondary">
+                Oznaczone miejsca ({areas.length})
+              </Typography>
+              <Icon name={listOpen ? 'angle-up' : 'angle-down'} size={16} />
+            </ButtonBase>
             <Switch
               size="small"
               checked={placesVisible}
               onChange={(e) => setPlacesVisible(e.target.checked)}
             />
           </Stack>
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
-            Wskazówki, gdzie patrzeć. Rozpoznanie form wymaga wczytania arkusza NMT w trybie
-            Analiza.
-          </Typography>
-          {sorted.slice(0, LIST_LIMIT).map((a) => (
-            <AreaListItem key={a.id} area={a} onClick={() => showArea(a.id)} />
-          ))}
+          <Collapse in={listOpen}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              Wskazówki, gdzie patrzeć. Rozpoznanie form wymaga wczytania arkusza NMT w trybie
+              Analiza.
+            </Typography>
+            {sorted.slice(0, LIST_LIMIT).map((a) => (
+              <AreaListItem key={a.id} area={a} onClick={() => showArea(a.id)} />
+            ))}
+          </Collapse>
         </Stack>
       )}
     </Stack>

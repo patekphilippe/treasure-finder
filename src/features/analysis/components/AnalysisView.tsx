@@ -138,7 +138,7 @@ export function AnalysisView() {
             action={
               <Stack spacing={1} sx={{ alignItems: 'center' }}>
                 <LoadSheetButton variant="full" />
-                <ImportCandidatesButton />
+                <ImportCandidatesButton variant="full" />
               </Stack>
             }
           />
