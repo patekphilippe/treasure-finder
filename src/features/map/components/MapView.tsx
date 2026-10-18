@@ -21,6 +21,7 @@ import { MapEvents } from './MapEvents';
 import { PointMarkers } from './PointMarkers';
 import { RoughnessOverlay } from './RoughnessOverlay';
 import { PositionMarker } from './PositionMarker';
+import { TileProgressBar } from './TileProgressBar';
 import { TrackLines } from './TrackLines';
 import { ZoneLayers } from './ZoneLayers';
 
@@ -69,6 +70,7 @@ export function MapView({ children }: MapViewProps) {
       <DraftMarker />
       {children}
       <PositionMarker />
+      <TileProgressBar />
       <MapEvents />
     </MapContainer>
   );
