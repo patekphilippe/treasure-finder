@@ -8,8 +8,10 @@ import { toJoyrideSteps } from './toJoyrideSteps';
 export function buildTourSteps(): Step[] {
   const roughness = useRoughnessStore.getState();
   const areas = useAreasStore.getState();
+  const analysis = useAnalysisStore.getState();
   return toJoyrideSteps(TOUR_STEPS, {
-    candidates: useAnalysisStore.getState().candidates.length > 0,
+    candidates: analysis.candidates.length > 0,
+    exclusion: analysis.exclusion !== null,
     legend:
       (roughness.result !== null && roughness.visible) || (areas.visible && areas.areas.length > 0),
   });

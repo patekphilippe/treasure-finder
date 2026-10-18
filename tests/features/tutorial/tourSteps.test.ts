@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { TOUR_STEPS } from '@/features/tutorial/config/tourSteps';
 import { toJoyrideSteps } from '@/features/tutorial/utils/toJoyrideSteps';
 
-const ids = (c: { candidates: boolean; legend: boolean }) =>
-  toJoyrideSteps(TOUR_STEPS, c).map((s) => s.id);
+const ids = (c: { candidates: boolean; legend: boolean; exclusion?: boolean }) =>
+  toJoyrideSteps(TOUR_STEPS, { exclusion: false, ...c }).map((s) => s.id);
 
 describe('guided tour', () => {
   it('shows the candidate steps only when there are candidates', () => {
@@ -19,6 +19,11 @@ describe('guided tour', () => {
   it('shows the legend step only when the legend is on the map', () => {
     expect(ids({ candidates: false, legend: true })).toContain('legend');
     expect(ids({ candidates: false, legend: false })).not.toContain('legend');
+  });
+
+  it('shows the BDOT10k summary step only after an analysis', () => {
+    expect(ids({ candidates: true, legend: false, exclusion: true })).toContain('exclusion');
+    expect(ids({ candidates: true, legend: false })).not.toContain('exclusion');
   });
 
   it('starts with the welcome and ends on the help button', () => {

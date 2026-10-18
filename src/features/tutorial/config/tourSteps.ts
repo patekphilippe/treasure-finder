@@ -12,7 +12,7 @@ export interface TourStep {
   sheet?: SheetId;
   placement?: Step['placement'];
   /** step only makes sense when its element exists */
-  when?: 'candidates' | 'noCandidates' | 'legend';
+  when?: 'candidates' | 'noCandidates' | 'legend' | 'exclusion';
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
@@ -204,7 +204,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'data-import',
     title: 'Import',
     content:
-      'Wczytaj kopię z innego urządzenia albo punkty GeoJSON z QGIS. Dane są łączone, nic nie zostanie usunięte.',
+      'Wczytaj kopię z innego urządzenia albo GeoJSON z QGIS: punkty, kontekst z map archiwalnych lub wody z BDOT10k. Dane są łączone, nic nie zostanie usunięte.',
     mode: 'field',
     sheet: 'data',
   },
@@ -230,6 +230,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: 'Wczytaj kandydatów',
     content: 'Plik kandydaci.geojson, np. z analizy zrobionej na innym komputerze albo w QGIS.',
     mode: 'analysis',
+  },
+  {
+    id: 'exclusion',
+    target: 'exclusion-summary',
+    title: 'Pominięte z BDOT10k',
+    content:
+      'Co analiza ostatniego arkusza pominęła: zabudowę, drogi i kolej oraz wody. Przełącznik Na mapie pokazuje te obszary kolorami z listy.',
+    mode: 'analysis',
+    when: 'exclusion',
   },
   {
     id: 'filters',

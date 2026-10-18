@@ -5,12 +5,14 @@ import { showTourView } from './showTourView';
 export interface TourConditions {
   candidates: boolean;
   legend: boolean;
+  exclusion: boolean;
 }
 
 const applies = (step: TourStep, c: TourConditions) => {
   if (step.when === 'candidates') return c.candidates;
   if (step.when === 'noCandidates') return !c.candidates;
   if (step.when === 'legend') return c.legend;
+  if (step.when === 'exclusion') return c.exclusion;
   return true;
 };
 

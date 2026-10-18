@@ -16,7 +16,7 @@ export function ExclusionSummary() {
   const failed = exclusion.groups.some((g) => g.status === 'error');
 
   return (
-    <Box sx={{ px: 2.5, pb: 1 }}>
+    <Box data-tour="exclusion-summary" sx={{ px: 2.5, pb: 1 }}>
       <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="subtitle2" noWrap title={exclusion.sheetId}>
           Pominięte z BDOT10k
