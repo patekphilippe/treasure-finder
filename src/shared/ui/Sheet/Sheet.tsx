@@ -41,7 +41,9 @@ export function Sheet({ title, onClose, children, hidden = false }: SheetProps) 
             pointerEvents: 'auto',
             width: '100%',
             maxWidth: 440,
-            maxHeight: '60vh',
+            // dvh: on phones vh includes the hidden browser bars; keep below the top bar (~110 px)
+            maxHeight:
+              'min(60dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 92px - 110px))',
             display: 'flex',
             flexDirection: 'column',
             borderRadius: '16px',

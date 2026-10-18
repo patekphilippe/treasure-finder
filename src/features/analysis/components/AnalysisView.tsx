@@ -75,7 +75,11 @@ export function AnalysisView() {
           left: { xs: 12, md: 'auto' },
           top: { xs: 'auto', md: 12 },
           width: { md: 400 },
-          maxHeight: { xs: '60vh', md: 'none' },
+          // dvh: on phones vh includes the hidden browser bars; keep below the mode switch
+          maxHeight: {
+            xs: 'min(60dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 84px))',
+            md: 'none',
+          },
         })}
       >
         <Stack spacing={1.5} sx={{ px: 2.5, pt: 2, pb: 1.5 }}>
