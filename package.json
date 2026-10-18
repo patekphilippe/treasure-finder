@@ -24,6 +24,7 @@
     "jszip": "^3.10.2",
     "leaflet": "^1.9.4",
     "line-awesome": "^2.0.1",
+    "polygon-clipping": "^0.15.7",
     "proj4": "^2.22.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
