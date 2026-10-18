@@ -23,14 +23,16 @@ import {
   type ContextKind,
 } from '../config/contextKinds';
 import { useContextStore } from '../store/useContextStore';
+import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { createContextPoint } from '../utils/createContextPoint';
 import { representativePoint } from '../utils/representativePoint';
+import { OwnMapsSection } from './OwnMapsSection';
 
 interface HistorySheetProps {
   onClose: () => void;
 }
 
-/** Objects from archival maps: show them, add one at the crosshair, open the list. */
+/** Own historical maps and objects from archival maps: add, show, mark at the crosshair. */
 export function HistorySheet({ onClose }: HistorySheetProps) {
   const { features, visible, setVisible, add } = useContextStore();
   const historical = findHistoricalLayer(useLayersStore((s) => s.historicalId));
@@ -40,7 +42,12 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
   const flyTo = useMapViewStore((s) => s.flyTo);
   const showToast = useToastStore((s) => s.show);
   const [kind, setKind] = useState<ContextKind | null>(null);
-  const source = historical ? `${historical.label} (${historical.years})` : MANUAL_SOURCE;
+  const ownMap = useOwnMapsStore((s) => s.maps.find((m) => m.visible));
+  const source = ownMap
+    ? `${ownMap.name} (własna mapa)`
+    : historical
+      ? `${historical.label} (${historical.years})`
+      : MANUAL_SOURCE;
 
   // "Gotowe" on the crosshair bar sets a location: save it with the chosen kind
   useEffect(
@@ -68,8 +75,12 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
   return (
     <>
       {picking && <PickLocationBar />}
-      <Sheet title="Obiekty z map archiwalnych" onClose={onClose} hidden={picking}>
+      <Sheet title="Mapy i obiekty historyczne" onClose={onClose} hidden={picking}>
         <Stack spacing={2}>
+          <OwnMapsSection />
+
+          <Divider />
+
           <Typography variant="body2" color="text.secondary">
             Dawne osady, młyny, karczmy, brody i drogi. Kandydaci z analizy NMT blisko nich dostają
             wyższy wynik. Zaznacz je, patrząc na mapę historyczną.

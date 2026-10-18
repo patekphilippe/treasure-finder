@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useState } from 'react';
+import { OwnMapsLayer } from '@/features/history';
 import { MapView } from '@/features/map';
 import type { Candidate } from '@/shared/types/domain';
 import { EmptyState, glass, Icon } from '@/shared/ui';
@@ -59,6 +60,7 @@ export function AnalysisView() {
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <MapView>
         <ExclusionMaskLayer />
+        <OwnMapsLayer />
         <SheetReliefLayer />
         <CandidateZones candidates={visible} />
         <CandidateMarkers candidates={visible} />

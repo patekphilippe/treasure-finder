@@ -153,11 +153,20 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'layers',
   },
   {
+    id: 'own-maps',
+    target: 'own-maps',
+    title: 'Własne mapy',
+    content:
+      'Wczytaj własną dawną mapę: GeoTIFF albo skan z PZGiK, SLUB czy mapywig.org. Skan dopasujesz, przeciągając 4 narożniki na ortofotomapę; dla Messtischblatt i WIG wystarczy numer arkusza na start. Mapa zostaje w telefonie i działa bez internetu.',
+    mode: 'field',
+    sheet: 'history',
+  },
+  {
     id: 'history-add',
     target: 'history-add',
     title: 'Obiekty z map archiwalnych',
     content:
-      'Widzisz na dawnej mapie młyn, karczmę albo wieś, której dziś nie ma? Wybierz rodzaj i wskaż miejsce celownikiem. Kandydaci z analizy NMT w pobliżu dostaną wyższy wynik.',
+      'Widzisz na dawnej mapie młyn, karczmę albo wieś, której dziś nie ma? Wybierz rodzaj i wskaż miejsce celownikiem. Kandydaci z analizy NMT w pobliżu od razu dostaną wyższy wynik; liczy się rodzaj obiektu (osada działa najdalej).',
     mode: 'field',
     sheet: 'history',
   },

@@ -101,7 +101,7 @@ export function HistoricalSection() {
         onClick={() => showSheet('history')}
         sx={{ alignSelf: 'flex-start' }}
       >
-        Obiekty z map archiwalnych
+        Własne mapy i obiekty
       </Button>
     </Stack>
   );

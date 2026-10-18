@@ -1,6 +1,12 @@
 import Box from '@mui/material/Box';
 import { AcceptedZonesLayer, SheetReliefLayer } from '@/features/analysis/field';
-import { ContextLayer } from '@/features/history';
+import {
+  ContextLayer,
+  FitCornersBar,
+  FitCornersLayer,
+  OwnMapsLayer,
+  useOwnMapsStore,
+} from '@/features/history';
 import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { GuidancePanel } from '@/features/navigation';
 import { AreaDownloadBar, AreaSelectFrame, useOfflineStore } from '@/features/offline';
@@ -18,9 +24,11 @@ export function FieldLayout() {
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <MapView>
+        <OwnMapsLayer />
         <SheetReliefLayer />
         <AcceptedZonesLayer />
         <ContextLayer />
+        <FitCornersLayer />
         {selectingArea && <AreaSelectFrame />}
       </MapView>
       <MapCrosshair />
@@ -29,6 +37,7 @@ export function FieldLayout() {
       <RoughnessLegend />
       <SheetHost />
       {selectingArea && <AreaDownloadBar />}
+      <FitCornersBar />
       <Dock
         items={DOCK_ITEMS}
         activeId={activeSheet}
@@ -37,6 +46,8 @@ export function FieldLayout() {
           const offline = useOfflineStore.getState();
           if (offline.selecting && offline.progress) return;
           offline.stopSelecting();
+          // the same for fitting a scan: opening a sheet cancels it
+          useOwnMapsStore.getState().cancelFit();
           toggleSheet(id);
         }}
       />

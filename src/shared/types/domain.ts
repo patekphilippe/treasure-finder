@@ -203,6 +203,24 @@ export interface CustomLayer {
   on: boolean;
 }
 
+/** store: maps — a historical map from the user's own file, placed on the map */
+export interface OwnMap {
+  id: string;
+  name: string;
+  created: number;
+  /** the image, downscaled to at most ~16 Mpx (phone canvas limit) */
+  image: Blob;
+  width: number;
+  height: number;
+  /** image pixel (0,0 = top-left corner) → coordinates in `epsg`, homography row-major */
+  pixelToSource: number[];
+  epsg: number;
+  /** how it was placed: GeoTIFF keys, a world file, or four corners dragged on the map */
+  method: 'geotiff' | 'worldfile' | 'corners';
+  visible: boolean;
+  opacity: number;
+}
+
 /** store: rasters — derived analysis rasters cached between reloads */
 export type ReliefKind = 'hillshade' | 'slope' | 'lrm';
 

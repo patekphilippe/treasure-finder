@@ -4,6 +4,7 @@ import type {
   RoughArea,
   ContextFeature,
   FieldPoint,
+  OwnMap,
   RasterRecord,
   Sheet,
   Track,
@@ -12,7 +13,7 @@ import type {
 } from '@/shared/types/domain';
 
 export const DB_NAME = 'mapa-poszukiwan';
-export const DB_VERSION = 4;
+export const DB_VERSION = 5;
 
 export interface AppDB extends DBSchema {
   points: { key: string; value: FieldPoint; indexes: { byCandidate: string } };
@@ -25,4 +26,5 @@ export interface AppDB extends DBSchema {
   rasters: { key: string; value: RasterRecord; indexes: { bySheet: string } };
   areas: { key: string; value: RoughArea };
   water: { key: string; value: WaterFeature };
+  maps: { key: string; value: OwnMap };
 }

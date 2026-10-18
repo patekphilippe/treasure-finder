@@ -70,4 +70,8 @@ export async function migrate(
     // water from BDOT10k for the analysis
     db.createObjectStore('water', { keyPath: 'id' });
   }
+  if (oldVersion < 5 && !db.objectStoreNames.contains('maps')) {
+    // own historical maps (images with their georeference)
+    db.createObjectStore('maps', { keyPath: 'id' });
+  }
 }

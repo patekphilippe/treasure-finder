@@ -7,3 +7,4 @@ export { pointInPolygon } from './pointInPolygon';
 export { toEpsg2180 } from './toEpsg2180';
 export { geometryCentroid } from './geometryCentroid';
 export { geometryTo2180 } from './geometryTo2180';
+export { crsTransform, MAP_CRS, type CrsTransform } from './crsDefs';
