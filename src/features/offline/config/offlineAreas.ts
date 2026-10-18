@@ -5,8 +5,8 @@ export const AREA_MAX_ZOOM = 19;
 export const MAX_AREA_TILES = 3000;
 /** Average tile sizes measured on Geoportal (bytes), for the estimate before downloading. */
 export const AVG_TILE_BYTES = { ortho: 8_000, nmt: 180_000, topo: 30_000, custom: 20_000 } as const;
-/** Parallel requests while downloading. */
-export const DOWNLOAD_CONCURRENCY = 6;
+/** Parallel requests while downloading: Geoportal has no stated limit, its servers are often busy. */
+export const DOWNLOAD_CONCURRENCY = 4;
 /** Each area has its own Cache Storage cache, so deleting one never breaks another. */
 export const AREA_CACHE_PREFIX = 'mapa-obszar-';
 /** Area description stored inside its cache next to the tiles. */

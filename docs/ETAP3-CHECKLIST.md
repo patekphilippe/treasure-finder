@@ -15,6 +15,14 @@ Stan po krokach 1–3 (18.10.2026).
 3. Włącz tryb samolotowy, otwórz aplikację z ikony, przewiń do obszaru i przybliżaj od 12 do 19.
 4. Nagraj krótką trasę i dodaj punkt bez zasięgu.
 
+## Warunki Geoportalu (sprawdzone 18.10.2026)
+
+- Ortofotomapa i dane Geoportalu są „dostępne bezpłatnie i możliwe do dowolnego wykorzystania”.
+- Regulamin serwisu wymaga tylko podania źródła; nie określa limitów ani zakazu zapisywania kafelków.
+  Mapa pokazuje „© GUGiK”.
+- Aplikacja i tak pobiera grzecznie: 4 zapytania naraz, najwyżej 3000 kafelków na obszar.
+  Przy zmianie zasad: sigservicedesk@geoportal.gov.pl.
+
 ## Ograniczenia
 
 - Limit 3000 kafelków na obszar: około 4 km² z ortofotomapą i cieniowaniem (ok. 90 MB). Większy teren pobierz w kilku obszarach.
