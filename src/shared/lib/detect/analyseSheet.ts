@@ -95,26 +95,31 @@ export function toCandidates(
   cfg = interpretConfig,
 ): Candidate[] {
   const context = (opts.context ?? []).map((g) => toLocalGeometry(g, grid));
-  const roads = detections.filter((d) => d.interpretation === 'dawna_droga');
+  // roads as sampled points (every ~5th cell) for fast distance checks
+  const roads = detections
+    .filter((d) => d.interpretation === 'dawna_droga')
+    .map((d) => ({
+      d,
+      pts: d.cells
+        .filter((_, k) => k % 5 === 0)
+        .map((i): XY => [
+          ((i % grid.w) + 0.5) * grid.cell,
+          -(((i / grid.w) | 0) + 0.5) * grid.cell,
+        ]),
+    }));
   const ranked = [...detections].sort((a, b) => b.confidence - a.confidence);
   return ranked.map((d, k) => {
     const archivalM = context.length
       ? Math.min(...context.map((g) => distanceToGeometry(d.centre, g)))
       : Infinity;
-    const roadM = Math.min(
-      Infinity,
-      ...roads
-        .filter((r) => r !== d)
-        .map((r) =>
-          Math.min(
-            ...r.cells.slice(0, 4000).map((i) => {
-              const x = ((i % grid.w) + 0.5) * grid.cell;
-              const y = -(((i / grid.w) | 0) + 0.5) * grid.cell;
-              return Math.hypot(x - d.centre[0], y - d.centre[1]);
-            }),
-          ),
-        ),
-    );
+    let roadM = Infinity;
+    for (const r of roads) {
+      if (r.d === d) continue;
+      for (const [x, y] of r.pts) {
+        const dd = Math.hypot(x - d.centre[0], y - d.centre[1]);
+        if (dd < roadM) roadM = dd;
+      }
+    }
     const waterM = distanceToWater(d.centre, waterLocal).d;
     const ctx = contextScore(d.interpretation, { archivalM, roadM, waterM }, cfg);
     const reasons = [...d.reasons];

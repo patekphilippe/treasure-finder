@@ -61,3 +61,41 @@ export function uphillCutM2(
     }
   return cells * s.cell * s.cell;
 }
+
+/**
+ * How much the ground just outside a mound (2–6 m from its edge) still stands above the far
+ * surroundings (10–15 m), as a share of the mound's height there. A barrow ends at its edge
+ * (≈ 0); a broad natural swell keeps going past the mask (high).
+ */
+export function flankShare(s: Scene, c: Component, cfg = interpretConfig): number {
+  const margin = Math.ceil(15 / s.cell) + 1;
+  const win = windowAround(c, s.w, s.h, margin);
+  const dist = distanceToCells(c.cells, s.w, win);
+  const far = { xs: [] as number[], ys: [] as number[], zs: [] as number[] };
+  const near: [number, number, number][] = [];
+  for (let y = 0; y < win.rows; y++)
+    for (let x = 0; x < win.cols; x++) {
+      const dm = dist[y * win.cols + x]! * s.cell;
+      const i = (y + win.row0) * s.w + x + win.col0;
+      const px = (x + win.col0) * s.cell;
+      const py = -(y + win.row0) * s.cell;
+      if (dm >= 10 && dm <= 15) {
+        far.xs.push(px);
+        far.ys.push(py);
+        far.zs.push(s.dem[i]!);
+      } else if (dm >= cfg.profile.planeRingFromM && dm <= cfg.profile.planeRingToM)
+        near.push([px, py, s.dem[i]!]);
+    }
+  const plane = fitPlane(far.xs, far.ys, far.zs);
+  if (!plane || near.length === 0) return 0;
+  let top = 0;
+  for (const i of c.cells) {
+    const h =
+      s.dem[i]! - (plane.a * (i % s.w) * s.cell + plane.b * -((i / s.w) | 0) * s.cell + plane.c);
+    if (h > top) top = h;
+  }
+  if (top <= 0) return 0;
+  const nearMean =
+    near.reduce((a, [x, y, z]) => a + (z - (plane.a * x + plane.b * y + plane.c)), 0) / near.length;
+  return Math.max(0, nearMean / top);
+}

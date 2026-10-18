@@ -17,7 +17,7 @@ import {
   nearestNeighbourStats,
 } from './features/groups';
 import { lineFeatures, toLocal, type LineFeatures, type XY } from './features/lines';
-import { topRoughness, uphill, uphillCutM2 } from './features/mound';
+import { flankShare, topRoughness, uphill, uphillCutM2 } from './features/mound';
 import { profileAgainstSurroundings, spoilAround, type Spoil } from './features/pit';
 import { ringShape, type RingShape } from './features/ringShape';
 import { distanceToWater, isWaterLine } from './features/water';
@@ -67,6 +67,9 @@ interface Item {
   extra: string[];
   priority?: Priority;
   spoil?: Spoil;
+  /** pits: robust depth and flat-bottom share */
+  depthM?: number;
+  flatShare?: number;
   line?: LineFeatures;
   ring?: RingShape;
   /** for groups: member centres and spoil directions */
@@ -158,7 +161,7 @@ export function detectForms(
     if (usedConcave.has(k)) return;
     const shape = concaveShapes[k]!;
     const centre = centreOf(s, shape);
-    if (shape.elongation >= C.lines.elongationMin) {
+    if (shape.elongation >= C.lines.elongationMin && shape.lengthM >= C.lines.minLengthM) {
       const line = lineFeatures(s, c, cfg);
       if (isWaterLine(line, cfg)) water.push(...line.axis);
       items.push({
@@ -185,6 +188,8 @@ export function detectForms(
       shape,
       extra: [],
       spoil,
+      depthM: profile.maxM,
+      flatShare: profile.deepShare,
     });
   });
 
@@ -192,7 +197,7 @@ export function detectForms(
     if (usedConvex.has(k)) return;
     const shape = convexShapes[k]!;
     const centre = centreOf(s, shape);
-    const ring = ringShape(c, s.w, cfg);
+    const ring = ringShape(c, s.w, s.lrm, cfg);
     if (
       ring.innerShare >= C.ring.innerShareMin &&
       ring.coveredSectors >= C.ring.horseshoeSectorsMin
@@ -237,7 +242,14 @@ export function detectForms(
       kind: 'mound',
       form: rough <= C.profile.flatTopRmsMax ? 'platforma' : 'pojedynczy_kopiec',
       options: moundOptions(
-        { shape, profile, topRoughness: rough, cutM2: cut, uphillDir: up },
+        {
+          shape,
+          profile,
+          topRoughness: rough,
+          flankShare: flankShare(s, c, cfg),
+          cutM2: cut,
+          uphillDir: up,
+        },
         cfg,
       ),
       cells: cellsOf(c),
@@ -293,7 +305,7 @@ function groupFiringPositions(items: Item[], cfg: typeof interpretConfig) {
       it.kind === 'pit' &&
       !it.consumed &&
       it.spoil?.direction != null &&
-      has(it, 'stanowiska_strzeleckie', 0.2),
+      has(it, 'stanowiska_strzeleckie', 0.1),
   );
   for (const idx of clusters(
     pits.map((p) => p.centre),
@@ -386,26 +398,41 @@ function groupSettlements(items: Item[], cfg: typeof interpretConfig) {
   const G = cfg.groups;
   const S = cfg.sizes;
   const natural = (it: Item) => INTERPRETATIONS[top(it)!].priority === 'naturalne';
-  // small pits of a few cells always look rectangular on a 1 m grid: only house-sized features
-  // (4–15 m) make a settlement; cellars (2–4 m) only add to it
-  const rect = items.filter(
-    (it) =>
-      !it.consumed &&
-      !natural(it) &&
-      (it.kind === 'pit' || it.form === 'platforma') &&
-      it.shape.rectangularity > 0.75 &&
-      it.shape.lengthM >= S.cellarM[0] &&
-      it.shape.lengthM <= S.settlementFeatureM[1],
+  const free = items.filter(
+    (it) => !it.consumed && !natural(it) && (it.kind === 'pit' || it.form === 'platforma'),
   );
-  const houseSized = (it: Item) => it.shape.lengthM >= S.settlementFeatureM[0];
+  // a house: rectangular, 4–15 m, flat bottom (or a platform), clearly deep; small pits of a few
+  // cells always look rectangular on a 1 m grid, so only houses start a settlement
+  const isHouse = (it: Item) =>
+    it.shape.rectangularity > 0.8 &&
+    it.shape.lengthM >= S.settlementFeatureM[0] &&
+    it.shape.lengthM <= S.settlementFeatureM[1] &&
+    (it.form === 'platforma' ||
+      ((it.flatShare ?? 0) > cfg.profile.flatBottomMin && (it.depthM ?? 0) >= G.houseMinDepthM));
+  const houses = free.filter(isHouse);
   for (const idx of clusters(
-    rect.map((p) => p.centre),
-    G.settlementRadiusM / 2,
+    houses.map((p) => p.centre),
+    G.settlementLinkM,
   )) {
-    const ms = idx.map((k) => rect[k]!);
-    const houses = ms.filter(houseSized).length;
-    if (ms.length < G.settlementMin || houses < 2) continue;
-    const cellars = ms.length - houses;
+    const hs = idx.map((k) => houses[k]!);
+    if (hs.length < G.settlementHousesMin) continue;
+    const near = (p: Item) =>
+      hs.some(
+        (h) =>
+          Math.hypot(h.centre[0] - p.centre[0], h.centre[1] - p.centre[1]) <= G.cellarNearHouseM,
+      );
+    const cellars = free.filter(
+      (p) =>
+        !isHouse(p) &&
+        !p.consumed &&
+        p.shape.rectangularity > 0.75 &&
+        p.shape.lengthM >= S.cellarM[0] &&
+        p.shape.lengthM <= S.cellarM[1] &&
+        (p.depthM ?? 0) >= G.houseMinDepthM &&
+        near(p),
+    );
+    const ms = [...hs, ...cellars];
+    if (ms.length < G.settlementMin) continue;
     ms.forEach((p) => (p.consumed = true));
     items.push({
       kind: 'group',
@@ -413,10 +440,12 @@ function groupSettlements(items: Item[], cfg: typeof interpretConfig) {
       options: [
         {
           interpretation: 'zaginiona_osada',
-          confidence: 0.55 + (cellars > 0 ? 0.15 : 0),
+          confidence: 0.55 + (cellars.length > 0 ? 0.15 : 0),
           reasons: [
-            `${houses} prostokątne zagłębienia lub platformy wielkości budynku w jednym miejscu`,
-            ...(cellars ? [`${cellars} małe zagłębienia jak piwniczki`] : []),
+            `${hs.length} prostokątne zagłębienia lub platformy wielkości budynku w jednym miejscu`,
+            ...(cellars.length
+              ? [`${cellars.length} małe zagłębienia jak piwniczki obok nich`]
+              : []),
           ],
         },
         { interpretation: 'oboz', confidence: 0.3, reasons: [] },

@@ -12,10 +12,19 @@ export interface RingShape {
   /** inner area centroid, cells */
   row: number;
   col: number;
+  /** mean LRM of the wall minus mean LRM of the inside, metres */
+  wallAboveInnerM: number;
+  /** convex hull area in cells (≈ m² at 1 m; scaled by the caller) */
+  hullAreaM2?: number;
 }
 
 /** Wall around an inner area: closed ring, horseshoe or neither. */
-export function ringShape(c: Component, w: number, cfg = interpretConfig): RingShape {
+export function ringShape(
+  c: Component,
+  w: number,
+  lrm?: Float32Array,
+  cfg = interpretConfig,
+): RingShape {
   const pts: [number, number][] = [];
   const inComp = new Set<number>();
   for (const i of c.cells) {
@@ -26,15 +35,28 @@ export function ringShape(c: Component, w: number, cfg = interpretConfig): RingS
   let inner = 0;
   let sr = 0;
   let sc = 0;
+  let innerLrm = 0;
   for (let row = c.row0; row <= c.row1; row++)
     for (let col = c.col0; col <= c.col1; col++) {
       if (inComp.has(row * w + col) || !pointInRing(col, row, hull)) continue;
       inner++;
       sr += row;
       sc += col;
+      if (lrm) innerLrm += lrm[row * w + col]!;
     }
   const innerShare = inner / (inner + c.cells.length);
-  if (inner === 0) return { innerShare: 0, coveredSectors: 0, openingDir: null, row: 0, col: 0 };
+  if (inner === 0)
+    return {
+      innerShare: 0,
+      coveredSectors: 0,
+      openingDir: null,
+      row: 0,
+      col: 0,
+      wallAboveInnerM: 0,
+    };
+  let wallLrm = 0;
+  if (lrm) for (const i of c.cells) wallLrm += lrm[i]!;
+  const wallAboveInnerM = lrm ? wallLrm / c.cells.length - innerLrm / inner : 1;
   const row = sr / inner;
   const col = sc / inner;
   const n = cfg.spoil.sectors;
@@ -53,5 +75,13 @@ export function ringShape(c: Component, w: number, cfg = interpretConfig): RingS
     }
   });
   const openingDir = coveredSectors < n && Math.hypot(gx, gy) > 1e-9 ? Math.atan2(gy, gx) : null;
-  return { innerShare, coveredSectors, openingDir, row, col };
+  return {
+    innerShare,
+    coveredSectors,
+    openingDir,
+    row,
+    col,
+    wallAboveInnerM,
+    hullAreaM2: inner + c.cells.length,
+  };
 }

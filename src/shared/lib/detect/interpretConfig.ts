@@ -63,16 +63,28 @@ export const interpretConfig = {
     /** sectors (of 8) with wall: 8 = closed, 5–7 = horseshoe */
     closedSectors: 8,
     horseshoeSectorsMin: 5,
+    /** calibration: dunes and field corners read as hillforts; a hillfort ring encloses a large inside */
+    hillfortInnerShareMin: 0.4,
+    /** hull area / circle of the same length: round enough */
+    hillfortRoundnessMin: 0.6,
+    /** calibration: irregular blobs looked like horseshoes; a wall stands above its inside */
+    wallAboveInnerM: 0.2,
+    wallMinHeightM: 0.3,
   },
 
   /** linear forms */
   lines: {
     elongationMin: 4,
+    /** shorter elongated bits are not lines (calibration: 3–4 m scraps were read as trenches) */
+    minLengthM: 15,
     /** resampling step of the axis and the window of the zigzag index */
     sampleStepM: 1,
     headingSegmentM: 5,
     zigzagTurnDeg: 30,
-    /** turns > 30° per 10 m above this: zigzag (trench) */
+    /**
+     * turns > 30° per 10 m above this: zigzag. A trench needs it: on real sheets a straight
+     * ditch with a bank on one side was always a roadside ditch, never a trench.
+     */
     zigzagPer10mMin: 0.3,
     /** straight: tortuosity (path / chord) below this */
     straightTortuosityMax: 1.08,
@@ -110,6 +122,11 @@ export const interpretConfig = {
     campWaterM: 200,
     settlementMin: 4,
     settlementRadiusM: 150,
+    /** calibration: noise pits and field drains merged into 'settlements' */
+    settlementHousesMin: 3,
+    settlementLinkM: 40,
+    houseMinDepthM: 0.4,
+    cellarNearHouseM: 30,
     barrowCemeteryMin: 3,
     barrowCemeteryRadiusM: 50,
   },
@@ -141,9 +158,16 @@ export const interpretConfig = {
     roadWidthM: [2, 6],
     fieldRidgeHeightM: [0.1, 0.4],
     charcoalKilnM: [8, 15],
+    /** calibration: an elongated bank along a road read as a kiln platform */
+    charcoalKilnMinCircularity: 0.7,
     pitM: [10, Infinity],
     barrowM: [8, 30],
     barrowMinHeightM: 0.4,
+    /** calibration: broad low swells in fields are natural; a barrow is at least 4 % as high as wide */
+    barrowMinHeightRatio: 0.04,
+    barrowMinCircularity: 0.75,
+    /** ground 2–6 m outside a barrow is flat (synthetic barrow 0.01, broad swell 0.13) */
+    barrowMaxFlankShare: 0.08,
     hillfortM: [30, 200],
     windthrowM: [1.5, 5],
     naturalMinAreaM2: 600,

@@ -1,5 +1,6 @@
 import { NMT_WMTS_2180 } from '@/shared/config/geoportalWmts2180';
 import { fromEpsg2180, toEpsg2180 } from '@/shared/lib/geo';
+import { BDOT_EXCLUSION } from '@/shared/config/bdotWms';
 import { fetchBuildingMask, sourceTileRange } from '@/shared/lib/tiles';
 import { HOTSPOT_LIST_LIMIT, LEVELS, MAX_TILES } from '../config/roughness';
 import type { RoughnessRequest, RoughnessResponse } from '../workers/messages';
@@ -105,7 +106,7 @@ export async function analyzeView(
   const { data, width: w, height: h } = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const originE = cfg.originEasting + range.col0 * ts * res;
   const originN = cfg.originNorthing - range.row0 * ts * res;
-  const built = await fetchBuildingMask(originE, originN, res, w, h);
+  const built = await fetchBuildingMask(originE, originN, res, w, h, [BDOT_EXCLUSION[0]!]);
   const gray = new Float32Array(w * h);
   const valid = new Uint8Array(w * h);
   for (let i = 0; i < w * h; i++) {

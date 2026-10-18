@@ -17,7 +17,7 @@ self.onmessage = async (event: MessageEvent<AnalysisRequest>) => {
     const grid: DemGrid = /\.tiff?$/i.test(name) ? await readGeoTiff(buffer) : readAsc(buffer);
     let exclude: Uint8Array | undefined;
     if (excludeBuildings) {
-      reply({ type: 'progress', share: 0.03, step: 'Pobieranie zabudowy (BDOT10k)' });
+      reply({ type: 'progress', share: 0.03, step: 'Pobieranie zabudowy, dróg i wód (BDOT10k)' });
       exclude = await fetchBuildingMask(grid.originE, grid.originN, grid.cell, grid.w, grid.h);
     }
     const sheetId = sheetIdFromName(name);

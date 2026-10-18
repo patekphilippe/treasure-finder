@@ -67,10 +67,11 @@ export function pitOptions(
     );
   }
 
-  // a lone firing pit looks like a windthrow; only a regular line of them decides (group rule)
+  // a lone firing pit looks like a windthrow: only a regular line of them makes firing positions
+  // (group rule); alone it stays an alternative, below 'nieokreslona'
   if (within(d, S.firingPitM) && oneSided) {
     out.push(
-      opt('stanowiska_strzeleckie', 0.3, [`mały dół ${m(d)} z hałdą ${side(spoil.direction!)}`]),
+      opt('stanowiska_strzeleckie', 0.15, [`mały dół ${m(d)} z hałdą ${side(spoil.direction!)}`]),
     );
   }
 
@@ -117,13 +118,15 @@ export interface MoundInput {
   shape: Shape;
   profile: Profile;
   topRoughness: number;
+  /** ground just outside still above the far surroundings (share of the height): broad swell */
+  flankShare: number;
   cutM2: number;
   uphillDir: number | null;
 }
 
 /** A compact convex form: dome or platform. */
 export function moundOptions(
-  { shape, profile, topRoughness, cutM2, uphillDir }: MoundInput,
+  { shape, profile, topRoughness, flankShare, cutM2, uphillDir }: MoundInput,
   cfg = interpretConfig,
 ): InterpretationOption[] {
   const S = cfg.sizes;
@@ -132,7 +135,11 @@ export function moundOptions(
   const flatTop = topRoughness <= cfg.profile.flatTopRmsMax;
   const out: InterpretationOption[] = [];
 
-  if (within(d, S.barrowM) && height >= S.barrowMinHeightM && !flatTop) {
+  const barrowShape =
+    height >= Math.max(S.barrowMinHeightM, S.barrowMinHeightRatio * d) &&
+    shape.circularity >= S.barrowMinCircularity &&
+    flankShare <= S.barrowMaxFlankShare;
+  if (within(d, S.barrowM) && barrowShape && !flatTop) {
     out.push(
       opt('kurhan', 0.6 + (shape.circularity > 0.8 ? 0.15 : 0) + (height >= 0.8 ? 0.1 : 0), [
         `okrągła kopuła ${m(d)}, wysokość ${m(height)}`,
@@ -140,7 +147,7 @@ export function moundOptions(
       ]),
     );
   }
-  if (within(d, S.charcoalKilnM) && flatTop) {
+  if (within(d, S.charcoalKilnM) && flatTop && shape.circularity >= S.charcoalKilnMinCircularity) {
     out.push(
       opt('mielerz', 0.55 + (cutM2 > 2 ? 0.25 : 0) + (shape.circularity > 0.8 ? 0.1 : 0), [
         `płaska okrągła platforma ${m(d)}`,
@@ -181,8 +188,9 @@ export function lineOptions(
   const zigzag = f.zigzagPer10m >= L.zigzagPer10mMin;
   const parapet = f.parapetSide !== 0 && f.parapetDir !== null;
   if (within(f.widthM, S.trenchWidthM) && (zigzag || parapet)) {
+    // a parapet alone (straight ditch, bank on one side) is usually a roadside ditch
     out.push(
-      opt('okop', 0.4 + (zigzag ? 0.3 : 0) + (parapet ? 0.2 : 0), [
+      opt('okop', zigzag ? 0.6 + (parapet ? 0.25 : 0) : 0.15, [
         `rów szerokości ${m(f.widthM)} na długości ${m(f.lengthM, 0)}`,
         ...(zigzag ? [`zygzak: ${f.turns.length} zmian kierunku na ${m(f.lengthM, 0)}`] : []),
         ...(parapet ? [`wał przedpiersia tylko ${side(f.parapetDir!)}`] : []),
@@ -203,7 +211,7 @@ export function lineOptions(
 
   const straight = f.tortuosity < L.straightTortuosityMax;
   const steadyFall = f.monotonicShare >= L.monotonicShareMin && f.gradient >= L.minGradient;
-  if (straight && steadyFall && !zigzag && !parapet) {
+  if (straight && steadyFall && !zigzag) {
     out.push(
       opt('row_melioracyjny_graniczny', 0.6 + (f.monotonicShare > 0.95 ? 0.15 : 0), [
         'prosty rów bez zakrętów',
@@ -225,8 +233,19 @@ export function ringOptions(
   const S = cfg.sizes;
   const d = shape.lengthM;
   const out: InterpretationOption[] = [];
+  // calibration: irregular blobs looked like horseshoes; a real wall stands above its inside
+  const realWall =
+    ring.wallAboveInnerM >= cfg.ring.wallAboveInnerM && shape.reliefM >= cfg.ring.wallMinHeightM;
+  if (!realWall) return [opt('nieokreslona', 0.2, [`nieregularne wzniesienie ${m(d)}`])];
   const closed = ring.coveredSectors >= cfg.ring.closedSectors || shape.holes > 0;
-  if ((closed || ring.coveredSectors >= 7) && d >= S.hillfortM[0] && d <= S.hillfortM[1]) {
+  const roundness = (ring.hullAreaM2 ?? 0) / (Math.PI * (d / 2) ** 2);
+  if (
+    (closed || ring.coveredSectors >= 7) &&
+    d >= S.hillfortM[0] &&
+    d <= S.hillfortM[1] &&
+    ring.innerShare >= cfg.ring.hillfortInnerShareMin &&
+    roundness >= cfg.ring.hillfortRoundnessMin
+  ) {
     out.push(
       opt('grodzisko_waly', closed ? 0.75 : 0.6, [
         `${closed ? 'zamknięty' : 'prawie zamknięty'} wał pierścieniowy ${m(d, 0)}`,

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { detectForms, type Detection } from '@/shared/lib/detect/pipeline';
 import { buildScene } from '@/shared/lib/detect/scene';
 import { scenarios } from '../../helpers/scenarios';
-import { rectPit, Terrain } from '../../helpers/terrain';
+import { dome, rectPit, Terrain, trench } from '../../helpers/terrain';
 
 const run = (t: Terrain) => detectForms(buildScene(t.grid()));
 const brief = (ds: Detection[]) =>
@@ -109,6 +109,68 @@ describe('the 12 synthetic models', () => {
     const d = only(run(t), 'zaginiona_osada');
     expect(d.priority).toBe('najwyzszy');
     expect(d.reasons.join(' ')).toMatch(/piwniczki/);
+  });
+
+  describe('calibration on real sheets (2026-10)', () => {
+    it('a straight ditch with a bank on one side is not a trench (roadside ditch)', () => {
+      const ds = run(
+        new Terrain().add(
+          trench(
+            [
+              [20, 100],
+              [180, 100],
+            ],
+            1.5,
+            1,
+            -1,
+          ),
+        ),
+      );
+      expect(
+        ds.some((d) => d.interpretation === 'okop'),
+        brief(ds),
+      ).toBe(false);
+    });
+
+    it('a broad low swell is not a barrow', () => {
+      const ds = run(new Terrain().add(dome(100, 100, 26, 0.7)));
+      expect(
+        ds.some((d) => d.interpretation === 'kurhan'),
+        brief(ds),
+      ).toBe(false);
+    });
+
+    it('short elongated scraps are not lines', () => {
+      const ds = run(
+        new Terrain().add(
+          trench(
+            [
+              [100, 100],
+              [104, 100],
+            ],
+            1,
+            0.8,
+            -1,
+          ),
+        ),
+      );
+      expect(
+        ds.some((d) => d.form === 'linia'),
+        brief(ds),
+      ).toBe(false);
+    });
+
+    it('a lone pit with spoil on one side is never firing positions', () => {
+      const ds = run(
+        new Terrain()
+          .add((x, y) => (Math.hypot(x - 100, y - 100) < 1 ? -0.8 : 0))
+          .add(dome(100, 98, 3, 0.5)),
+      );
+      expect(
+        ds.some((d) => d.interpretation === 'stanowiska_strzeleckie'),
+        brief(ds),
+      ).toBe(false);
+    });
   });
 
   it('every detection explains itself in plain Polish without long dashes', () => {
