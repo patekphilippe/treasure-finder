@@ -4,3 +4,4 @@ export const countPoints = (n: number) => pluralPl(n, 'punkt', 'punkty', 'punkt�
 export const countTracks = (n: number) => pluralPl(n, 'trasa', 'trasy', 'tras');
 export const countPhotos = (n: number) => pluralPl(n, 'zdjęcie', 'zdjęcia', 'zdjęć');
 export const countCandidates = (n: number) => pluralPl(n, 'kandydat', 'kandydaci', 'kandydatów');
+export const countTiles = (n: number) => pluralPl(n, 'kafelek', 'kafelki', 'kafelków');

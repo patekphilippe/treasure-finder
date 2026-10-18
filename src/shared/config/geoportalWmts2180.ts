@@ -32,3 +32,9 @@ export const NMT_WMTS_2180 = {
     [5685, 5352],
   ] as const,
 } as const;
+
+/** GetTile URL of one hillshade tile; the map layer, the analysis and the offline cache share it. */
+export const nmtTileUrl = (level: number, row: number, col: number) =>
+  `${NMT_WMTS_2180.url}?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${NMT_WMTS_2180.layer}` +
+  `&STYLE=default&TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:${level}&TILEROW=${row}` +
+  `&TILECOL=${col}&FORMAT=${encodeURIComponent(NMT_WMTS_2180.format)}`;

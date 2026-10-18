@@ -2,6 +2,7 @@ import Box from '@mui/material/Box';
 import { AcceptedZonesLayer } from '@/features/analysis/field';
 import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { GuidancePanel } from '@/features/navigation';
+import { AreaDownloadBar, AreaSelectFrame, useOfflineStore } from '@/features/offline';
 import { RoughnessLegend } from '@/features/roughness';
 import { Dock } from '@/shared/ui';
 import { DOCK_ITEMS } from '../config/dockItems';
@@ -11,18 +12,31 @@ import { SheetHost } from './SheetHost';
 export function FieldLayout() {
   const activeSheet = useUiStore((s) => s.activeSheet);
   const toggleSheet = useUiStore((s) => s.toggleSheet);
+  const selectingArea = useOfflineStore((s) => s.selecting);
 
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <MapView>
         <AcceptedZonesLayer />
+        {selectingArea && <AreaSelectFrame />}
       </MapView>
       <MapCrosshair />
       <FollowButton />
       <GuidancePanel />
       <RoughnessLegend />
       <SheetHost />
-      <Dock items={DOCK_ITEMS} activeId={activeSheet} onSelect={toggleSheet} />
+      {selectingArea && <AreaDownloadBar />}
+      <Dock
+        items={DOCK_ITEMS}
+        activeId={activeSheet}
+        onSelect={(id) => {
+          // a sheet and the area bar share the bottom: leave framing unless a download runs
+          const offline = useOfflineStore.getState();
+          if (offline.selecting && offline.progress) return;
+          offline.stopSelecting();
+          toggleSheet(id);
+        }}
+      />
     </Box>
   );
 }

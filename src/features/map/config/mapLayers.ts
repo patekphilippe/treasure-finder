@@ -19,11 +19,7 @@ export const GEOPORTAL_WMS_OPTIONS = {
   attribution: GEOPORTAL_ATTRIBUTION,
 } as const;
 
-/** Orthophoto as WMTS in Web Mercator — pre-rendered tiles, much faster than the WMS. */
-export const ORTHO_WMTS_URL =
-  'https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMTS/StandardResolution?SERVICE=WMTS&REQUEST=GetTile' +
-  '&VERSION=1.0.0&LAYER=ORTOFOTOMAPA&STYLE=default&TILEMATRIXSET=EPSG:3857&TILEMATRIX=EPSG:3857:{z}' +
-  '&TILEROW={y}&TILECOL={x}&FORMAT=image/jpeg';
+export { ORTHO_MAX_NATIVE_ZOOM, ORTHO_WMTS_URL } from '@/shared/config/geoportalOrtho';
 
 export const ORTHO_WMS_URL =
   'https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/StandardResolution';

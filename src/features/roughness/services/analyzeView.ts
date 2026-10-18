@@ -1,4 +1,4 @@
-import { NMT_WMTS_2180 } from '@/shared/config/geoportalWmts2180';
+import { NMT_WMTS_2180, nmtTileUrl } from '@/shared/config/geoportalWmts2180';
 import { fromEpsg2180, toEpsg2180 } from '@/shared/lib/geo';
 import { BDOT_EXCLUSION } from '@/shared/config/bdotWms';
 import { fetchBuildingMask, sourceTileRange } from '@/shared/lib/tiles';
@@ -21,10 +21,7 @@ function loadTile(level: number, row: number, col: number): Promise<HTMLImageEle
     img.crossOrigin = 'anonymous'; // Geoportal allows CORS, so the pixels can be read
     img.onload = () => resolve(img);
     img.onerror = () => resolve(null);
-    img.src =
-      `${cfg.url}?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${cfg.layer}&STYLE=default` +
-      `&TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:${level}&TILEROW=${row}&TILECOL=${col}` +
-      `&FORMAT=${encodeURIComponent(cfg.format)}`;
+    img.src = nmtTileUrl(level, row, col);
   });
 }
 

@@ -209,6 +209,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'data',
   },
   {
+    id: 'data-offline',
+    target: 'data-offline',
+    title: 'Mapy offline',
+    content:
+      'Zapisz ortofotomapę i cieniowanie NMT wybranego obszaru, zanim pojedziesz w teren bez zasięgu. Ustawiasz obszar w ramce na mapie, aplikacja pokazuje liczbę kafelków i rozmiar przed pobraniem.',
+    mode: 'field',
+    sheet: 'data',
+  },
+  {
     id: 'analysis',
     target: 'analysis-panel',
     title: 'Tryb Analiza',

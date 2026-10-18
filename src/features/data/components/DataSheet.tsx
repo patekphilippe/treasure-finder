@@ -1,5 +1,6 @@
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
+import { OfflineAreasSection } from '@/features/offline';
 import { Sheet } from '@/shared/ui';
 import { ExportSection } from './ExportSection';
 import { ImportSection } from './ImportSection';
@@ -15,6 +16,8 @@ export function DataSheet({ onClose }: DataSheetProps) {
         <ExportSection />
         <Divider />
         <ImportSection />
+        <Divider />
+        <OfflineAreasSection />
       </Stack>
     </Sheet>
   );

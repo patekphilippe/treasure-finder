@@ -1,17 +1,14 @@
 import L from 'leaflet';
-import { NMT_WMTS_2180 } from '@/shared/config/geoportalWmts2180';
+import { NMT_WMTS_2180, nmtTileUrl } from '@/shared/config/geoportalWmts2180';
 import {
-  chooseLevel,
+  canvasDpr,
   metresToTilePixels,
+  pickSourceTiles,
   projectedImageTransform,
-  sourceTileRange,
 } from '@/shared/lib/tiles';
 import { tileCorners2180 } from '../utils/tileCorners2180';
 
 type Config = typeof NMT_WMTS_2180;
-
-/** At low zooms one map tile spans many source tiles — step to coarser levels beyond this. */
-const MAX_SOURCE_TILES = 12;
 
 /**
  * Shows an EPSG:2180 WMTS on the Web Mercator map: every map tile is a canvas onto which
@@ -29,41 +26,20 @@ export class Wmts2180GridLayer extends L.GridLayer {
   protected override createTile(coords: L.Coords, done: L.DoneCallback): HTMLElement {
     const cfg = this.config;
     const size = this.getTileSize();
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const dpr = canvasDpr();
     const canvas = document.createElement('canvas');
     canvas.width = size.x * dpr;
     canvas.height = size.y * dpr;
 
     const map = (this as unknown as { _map: L.Map })._map;
-    const [p0, p1, p2, p3] = tileCorners2180(map, coords, size);
-    const bbox = {
-      minE: Math.min(p0.x, p1.x, p2.x, p3.x),
-      maxE: Math.max(p0.x, p1.x, p2.x, p3.x),
-      minN: Math.min(p0.y, p1.y, p2.y, p3.y),
-      maxN: Math.max(p0.y, p1.y, p2.y, p3.y),
-    };
-
-    let level = chooseLevel(Math.hypot(p1.x - p0.x, p1.y - p0.y) / (size.x * dpr), cfg.resolutions);
-    let range = null;
-    for (; level >= 0; level--) {
-      const span = cfg.tileSize * cfg.resolutions[level]!;
-      range = sourceTileRange(
-        bbox,
-        cfg.originEasting,
-        cfg.originNorthing,
-        span,
-        cfg.matrixSize[level]!,
-      );
-      if (
-        !range ||
-        (range.col1 - range.col0 + 1) * (range.row1 - range.row0 + 1) <= MAX_SOURCE_TILES
-      )
-        break;
-    }
-    if (!range || level < 0) {
+    const corners = tileCorners2180(map, coords, size);
+    const picked = pickSourceTiles(corners, size.x, dpr, cfg);
+    if (!picked) {
       queueMicrotask(() => done(undefined, canvas));
       return canvas;
     }
+    const { level, range } = picked;
+    const [p0, p1, p2] = corners;
 
     const res = cfg.resolutions[level]!;
     const span = cfg.tileSize * res;
@@ -89,10 +65,7 @@ export class Wmts2180GridLayer extends L.GridLayer {
             img.onerror = () => resolve();
           }),
         );
-        img.src =
-          `${cfg.url}?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${cfg.layer}&STYLE=default` +
-          `&TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:${level}&TILEROW=${row}&TILECOL=${col}` +
-          `&FORMAT=${encodeURIComponent(cfg.format)}`;
+        img.src = nmtTileUrl(level, row, col);
       }
     }
     void Promise.all(loads).then(() => done(undefined, canvas));

@@ -10,3 +10,6 @@ export {
   type ExclusionRequest,
   type GridRef,
 } from './bdotExclusion';
+export { pickSourceTiles, type Wmts2180Grid } from './pickSourceTiles';
+export { latLngToTile, tileToLatLng } from './webMercator';
+export { canvasDpr } from './canvasDpr';

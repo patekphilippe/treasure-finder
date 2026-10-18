@@ -6,6 +6,7 @@ import {
   DEFAULT_ZOOM,
   GEOPORTAL_WMS_OPTIONS,
   MAX_ZOOM,
+  ORTHO_MAX_NATIVE_ZOOM,
   ORTHO_WMTS_URL,
   OSM_LAYER,
   POLAND_CENTER,
@@ -53,7 +54,7 @@ export function MapView({ children }: MapViewProps) {
           key="ortho"
           url={ORTHO_WMTS_URL}
           attribution={GEOPORTAL_WMS_OPTIONS.attribution}
-          maxNativeZoom={19}
+          maxNativeZoom={ORTHO_MAX_NATIVE_ZOOM}
           maxZoom={MAX_ZOOM}
         />
       )}
