@@ -11,7 +11,7 @@ declare const self: DedicatedWorkerGlobalScope;
 const reply = (msg: AnalysisResponse) => self.postMessage(msg);
 
 self.onmessage = async (event: MessageEvent<AnalysisRequest>) => {
-  const { name, buffer, context, water, excludeBuildings } = event.data;
+  const { name, buffer, context, water, forbidden, excludeBuildings } = event.data;
   try {
     reply({ type: 'progress', share: 0.01, step: 'Wczytywanie arkusza' });
     const grid: DemGrid = /\.tiff?$/i.test(name) ? await readGeoTiff(buffer) : readAsc(buffer);
@@ -25,6 +25,7 @@ self.onmessage = async (event: MessageEvent<AnalysisRequest>) => {
       sheetId,
       context,
       water,
+      forbidden,
       exclude,
       onProgress: (share, step) => reply({ type: 'progress', share: 0.05 + share * 0.95, step }),
     });

@@ -164,6 +164,13 @@ export interface ContextFeature {
   source: string;
 }
 
+/** store: water, lines and areas of water from BDOT10k (public data, not in the backup) */
+export interface WaterFeature {
+  id: string;
+  geometry: Geometry;
+  source: string;
+}
+
 /** store: zones (stage 2) */
 export interface Zone {
   id: string;

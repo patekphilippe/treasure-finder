@@ -156,6 +156,14 @@ interface ContextFeature {
   source: string;
 }
 
+interface WaterFeature {
+  // magazyn: water, cieki, kanały i wody powierzchniowe z BDOT10k (bez rowów melioracyjnych);
+  // dane publiczne, nie wchodzą do kopii, import GeoJSON z polem x_kod lub kind = 'woda'
+  id: string;
+  geometry: GeoJSON.Geometry;
+  source: string;
+}
+
 interface Zone {
   // magazyn: zones, etap 2
   id: string;

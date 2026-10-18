@@ -8,6 +8,8 @@ export interface AnalysisRequest {
   context: Geometry[];
   /** extra water (e.g. BDOT10k rivers), WGS84 */
   water: Geometry[];
+  /** forbidden zones ('zakaz'), WGS84 */
+  forbidden: Geometry[];
   /** skip buildings and yards (BDOT10k WMS) */
   excludeBuildings: boolean;
 }

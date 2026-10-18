@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { getDb } from '@/shared/db/getDb';
 
 describe('IndexedDB schema v1', () => {
-  it('creates all stores (v2 adds areas)', async () => {
+  it('creates all stores (v2 adds areas, v4 water)', async () => {
     const db = await getDb();
     expect([...db.objectStoreNames].sort()).toEqual([
       'areas',
@@ -14,6 +14,7 @@ describe('IndexedDB schema v1', () => {
       'rasters',
       'sheets',
       'tracks',
+      'water',
       'zones',
     ]);
   });

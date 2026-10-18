@@ -5,7 +5,8 @@ import type { Candidate, Zone } from '@/shared/types/domain';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { mergeSheetCandidates } from '../utils/mergeSheetCandidates';
 
-const exclusionPrefix = (sheetId: string) => `wyklucz-${sheetId}-`;
+/** Id prefix of the forbidden zones made from the protected forms of a sheet. */
+export const exclusionPrefix = (sheetId: string) => `wyklucz-${sheetId}-`;
 
 /**
  * Stores the candidates of an analysed sheet (re-runs keep decisions and notes) and turns the

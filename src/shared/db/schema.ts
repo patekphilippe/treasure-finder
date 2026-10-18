@@ -7,11 +7,12 @@ import type {
   RasterRecord,
   Sheet,
   Track,
+  WaterFeature,
   Zone,
 } from '@/shared/types/domain';
 
 export const DB_NAME = 'mapa-poszukiwan';
-export const DB_VERSION = 3;
+export const DB_VERSION = 4;
 
 export interface AppDB extends DBSchema {
   points: { key: string; value: FieldPoint; indexes: { byCandidate: string } };
@@ -23,4 +24,5 @@ export interface AppDB extends DBSchema {
   photos: { key: string; value: Blob };
   rasters: { key: string; value: RasterRecord; indexes: { bySheet: string } };
   areas: { key: string; value: RoughArea };
+  water: { key: string; value: WaterFeature };
 }

@@ -13,6 +13,7 @@ export interface SheetMerge {
 /**
  * Re-running a sheet: the same place keeps its id, decision and note; new places get the next
  * free id; undecided old candidates not found again are removed; decided ones always stay.
+ * A place accepted earlier that is now protected goes back to 'nowy' (it cannot be a target).
  */
 export function mergeSheetCandidates(
   old: readonly Candidate[],
@@ -32,7 +33,9 @@ export function mergeSheetCandidates(
     const k = pool.findIndex((o) => haversine(o.lat, o.lng, c.lat, c.lng) <= SAME_PLACE_M);
     if (k < 0) return { ...c, id: nextId(c.sheetId) };
     const prev = pool.splice(k, 1)[0]!;
-    return { ...c, id: prev.id, decision: prev.decision, note: prev.note };
+    const decision =
+      c.priority === 'chroniony' && prev.decision === 'przyjety' ? 'nowy' : prev.decision;
+    return { ...c, id: prev.id, decision, note: prev.note };
   });
   return { toWrite, toDelete: pool.filter((o) => o.decision === 'nowy').map((o) => o.id) };
 }

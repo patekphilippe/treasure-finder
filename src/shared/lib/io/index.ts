@@ -21,3 +21,10 @@ export { toPointsGeoJSON } from './toPointsGeoJSON';
 export { toSearchZonesGeoJSON } from './toSearchZonesGeoJSON';
 export { toTracksGeoJSON } from './toTracksGeoJSON';
 export { toZonesGeoJSON } from './toZonesGeoJSON';
+export {
+  CONTEXT_KIND_VALUES,
+  contextKind,
+  importContextGeoJSON,
+  isContextGeoJSON,
+} from './importContextGeoJSON';
+export { importWaterGeoJSON, isWaterGeoJSON } from './importWaterGeoJSON';
