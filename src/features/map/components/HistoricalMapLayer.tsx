@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { WMSTileLayer } from 'react-leaflet';
 import { findHistoricalLayer, historicalWmsParams, useLayersStore } from '@/features/layers';
 import { MAX_ZOOM } from '../config/mapLayers';
+import { PoliteWmsTileLayer } from '../layers/PoliteWmsTileLayer';
 
 /** The chosen historical map (WMS, online only), above the base map and below custom layers. */
 export function HistoricalMapLayer() {
@@ -22,12 +22,13 @@ export function HistoricalMapLayer() {
 
   if (!layer) return null;
   return (
-    <WMSTileLayer
+    <PoliteWmsTileLayer
       key={layer.id}
       url={layer.url}
       params={params}
       attribution={layer.attribution}
       tileSize={512}
+      maxParallel={layer.maxParallel}
       opacity={opacity}
       minZoom={layer.minZoom}
       maxNativeZoom={layer.maxNativeZoom}

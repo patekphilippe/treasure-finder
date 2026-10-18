@@ -15,6 +15,8 @@ export interface HistoricalLayer {
   termsUrl: string;
   /** the service draws nothing when zoomed out further (MaxScaleDenominator) */
   minZoom?: number;
+  /** requests in flight at once; slow servers drop tiles when asked for too many */
+  maxParallel?: number;
   /** WMS with a TIME dimension: the user picks a year */
   yearRange?: { min: number; max: number };
 }
@@ -32,6 +34,8 @@ const umwd = (id: string, label: string, years: string): HistoricalLayer => ({
   url: `https://geoportal.dolnyslask.pl/gpservices/${id}/MapServer/WMSServer`,
   layers: '1',
   maxNativeZoom: 17,
+  // 12 tiles at once: 4 answered 400; 3 at once plus retries loads them all
+  maxParallel: 3,
   attribution: UMWD_ATTRIBUTION,
   termsUrl: UMWD_TERMS,
 });
