@@ -1,6 +1,6 @@
 import type { Geometry } from 'geojson';
 import type { ExclusionGroupResult } from '@/shared/lib/tiles';
-import type { Candidate } from '@/shared/types/domain';
+import type { Candidate, ReliefKind } from '@/shared/types/domain';
 
 export interface AnalysisRequest {
   name: string;
@@ -30,6 +30,14 @@ export interface ExclusionResult {
   groups: ExclusionGroupResult[];
 }
 
+/** one relief layer of the sheet, as an image on its EPSG:2180 grid */
+export interface ReliefImage {
+  kind: ReliefKind;
+  blob: Blob;
+  /** metres per image pixel (the sheet's cell, or coarser for big sheets) */
+  res: number;
+}
+
 export type AnalysisResponse =
   | { type: 'progress'; share: number; step: string }
   | {
@@ -38,5 +46,6 @@ export type AnalysisResponse =
       candidates: Candidate[];
       /** null when BDOT10k exclusion was off */
       exclusion: ExclusionResult | null;
+      reliefs: ReliefImage[];
     }
   | { type: 'error'; message: string };

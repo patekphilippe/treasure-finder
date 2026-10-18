@@ -1,6 +1,9 @@
 import type { ExclusionGroup } from '../../config/bdotWms';
 import { applyExclusion, exclusionRequests } from './bdotExclusion';
 
+/** A slow Geoportal (it can take a minute to fail) must not hold the analysis up. */
+const REQUEST_TIMEOUT_MS = 30_000;
+
 export interface ExclusionGroupResult {
   label: string;
   /** bit of this group in the mask */
@@ -30,7 +33,7 @@ export async function fetchExclusionMask(
     exclusionRequests(g, groups).map(async (req): Promise<ExclusionGroupResult> => {
       const result = { label: req.label, bit: req.bit, share: 0 };
       try {
-        const response = await fetch(req.url);
+        const response = await fetch(req.url, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
         // Geoportal answers images with 404
         if (!response.ok && response.status !== 404) return { ...result, status: 'error' };
         const bitmap = await createImageBitmap(await response.blob());
@@ -41,7 +44,7 @@ export async function fetchExclusionMask(
         const cells = applyExclusion(mask, ctx.getImageData(0, 0, req.mw, req.mh).data, req, g);
         return { ...result, status: cells ? 'ok' : 'empty', share: cells / (w * h) };
       } catch {
-        // offline, blocked or not an image (e.g. a WMS error document)
+        // offline, blocked, too slow, or not an image (e.g. a WMS error document)
         return { ...result, status: 'error' };
       }
     }),

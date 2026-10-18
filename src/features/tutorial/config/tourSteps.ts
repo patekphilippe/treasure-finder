@@ -16,7 +16,7 @@ export interface TourStep {
   sheet?: SheetId;
   placement?: Step['placement'];
   /** step only makes sense when its element exists */
-  when?: 'candidates' | 'noCandidates' | 'legend' | 'exclusion' | 'notInstalled';
+  when?: 'candidates' | 'noCandidates' | 'legend' | 'exclusion' | 'notInstalled' | 'relief';
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
@@ -244,6 +244,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: 'Wczytaj kandydatów',
     content: 'Plik kandydaci.geojson, np. z analizy zrobionej na innym komputerze albo w QGIS.',
     mode: 'analysis',
+  },
+  {
+    id: 'sheet-relief',
+    target: 'sheet-relief',
+    title: 'Relief z arkusza',
+    content:
+      'Warstwy policzone z Twojego arkusza: LRM (niebieskie dołki, czerwone garby), cieniowanie z 16 kierunków i nachylenie. Zostają w telefonie, więc działają bez internetu; ten sam wybór jest w Warstwach w trybie Teren.',
+    mode: 'analysis',
+    when: 'relief',
   },
   {
     id: 'exclusion',

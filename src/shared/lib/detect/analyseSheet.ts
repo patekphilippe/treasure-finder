@@ -6,7 +6,7 @@ import type { XY } from './features/lines';
 import { distanceToWater } from './features/water';
 import { interpretConfig } from './interpretConfig';
 import { detectForms, type Detection } from './pipeline';
-import { buildScene } from './scene';
+import { buildScene, type Scene } from './scene';
 import { contextPriority, contextScore, distanceToGeometry, score } from './score';
 import { forbiddenAreas, touchesAreas, withoutAreas } from './protection';
 import { buildExclusionLocal, buildZoneLocal, hullBuffer, toWgs84 } from './searchZone';
@@ -22,6 +22,8 @@ export interface AnalyseOptions {
   /** cells to skip (buildings, roads…), same size as the grid */
   exclude?: Uint8Array;
   onProgress?: (share: number, step: string) => void;
+  /** the filled DEM and LRM, for drawing the sheet's relief layers without recomputing */
+  onScene?: (scene: Scene) => void;
 }
 
 /** WGS84 geometry → local metres of the sheet. */
@@ -218,6 +220,7 @@ export function analyseSheet(
 ): Candidate[] {
   opts.onProgress?.(0.05, 'Relief lokalny');
   const scene = buildScene(grid, opts.exclude, cfg);
+  opts.onScene?.(scene);
   opts.onProgress?.(0.35, 'Rozpoznawanie form');
   const margin = Math.max(cfg.score.waterBonusDistanceM, cfg.groups.campWaterM) + 50;
   const box = [-margin, -grid.h * grid.cell - margin, grid.w * grid.cell + margin, margin] as const;

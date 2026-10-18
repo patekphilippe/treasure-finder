@@ -6,6 +6,7 @@ import type {
   AnalysisRequest,
   AnalysisResponse,
   ExclusionResult,
+  ReliefImage,
   SheetInfo,
 } from '../workers/messages';
 import { exclusionPrefix } from './saveSheetResults';
@@ -30,7 +31,12 @@ export function cancelSheetAnalysis(): void {
 export async function runSheetAnalysis(
   file: File,
   excludeBuildings = true,
-): Promise<{ sheet: SheetInfo; candidates: Candidate[]; exclusion: ExclusionResult | null }> {
+): Promise<{
+  sheet: SheetInfo;
+  candidates: Candidate[];
+  exclusion: ExclusionResult | null;
+  reliefs: ReliefImage[];
+}> {
   cancelSheetAnalysis();
   const setRun = useAnalysisStore.getState().setRun;
   setRun({ name: file.name, share: 0, step: 'Wczytywanie pliku' });
@@ -58,7 +64,12 @@ export async function runSheetAnalysis(
         const msg = e.data;
         if (msg.type === 'progress') setRun({ name: file.name, share: msg.share, step: msg.step });
         else if (msg.type === 'done')
-          resolve({ sheet: msg.sheet, candidates: msg.candidates, exclusion: msg.exclusion });
+          resolve({
+            sheet: msg.sheet,
+            candidates: msg.candidates,
+            exclusion: msg.exclusion,
+            reliefs: msg.reliefs,
+          });
         else reject(new Error(msg.message));
       };
       worker.onerror = (e) => reject(new Error(e.message || 'Analiza nie powiodła się'));

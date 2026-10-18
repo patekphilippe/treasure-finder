@@ -6,7 +6,9 @@ import { bottomSheetOffset } from '@/shared/lib/bottomSheetOffset';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { Icon, useToastStore } from '@/shared/ui';
 import { AnalysisCancelled, runSheetAnalysis } from '../services/runSheetAnalysis';
+import { saveSheetReliefs } from '../services/saveSheetReliefs';
 import { saveSheetResults } from '../services/saveSheetResults';
+import { useReliefStore } from '../store/useReliefStore';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 
 interface LoadSheetButtonProps {
@@ -21,7 +23,7 @@ export function LoadSheetButton({ variant = 'compact' }: LoadSheetButtonProps) {
 
   const analyse = async (file: File) => {
     try {
-      const { sheet, candidates, exclusion } = await runSheetAnalysis(file);
+      const { sheet, candidates, exclusion, reliefs } = await runSheetAnalysis(file);
       useAnalysisStore.getState().setExclusion(
         exclusion && {
           ...exclusion,
@@ -34,6 +36,9 @@ export function LoadSheetButton({ variant = 'compact' }: LoadSheetButtonProps) {
         },
       );
       const { added } = await saveSheetResults(sheet.sheetId, candidates);
+      await saveSheetReliefs(sheet, reliefs);
+      // the first analysed sheet shows its LRM right away
+      if (useReliefStore.getState().kind === null) useReliefStore.getState().setKind('lrm');
       const best = useAnalysisStore
         .getState()
         .candidates.filter(

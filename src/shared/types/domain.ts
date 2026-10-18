@@ -195,11 +195,18 @@ export interface CustomLayer {
 }
 
 /** store: rasters — derived analysis rasters cached between reloads */
+export type ReliefKind = 'hillshade' | 'slope' | 'lrm';
+
 export interface RasterRecord {
   id: string;
   sheetId: string;
-  kind: 'hillshade' | 'slope' | 'lrm';
+  kind: ReliefKind;
+  /** an image (WebP or PNG) on the sheet's EPSG:2180 grid */
   data: Float32Array | Blob;
+  /** EPSG:2180 of the image's top-left corner and metres per image pixel */
+  originE?: number;
+  originN?: number;
+  res?: number;
   created: number;
 }
 

@@ -1,9 +1,10 @@
 /// <reference lib="webworker" />
 // NMT interpretation runs here, never on the UI thread. Cancelling = worker.terminate().
-import { analyseSheet } from '@/shared/lib/detect';
+import { analyseSheet, type Scene } from '@/shared/lib/detect';
 import { readAsc, readGeoTiff, type DemGrid } from '@/shared/lib/raster';
 import { fetchExclusionMask } from '@/shared/lib/tiles';
 import { sheetIdFromName } from '../utils/sheetIdFromName';
+import { encodeReliefs } from './encodeReliefs';
 import type { AnalysisRequest, AnalysisResponse } from './messages';
 
 declare const self: DedicatedWorkerGlobalScope;
@@ -22,14 +23,31 @@ self.onmessage = async (event: MessageEvent<AnalysisRequest>) => {
       exclusion = await fetchExclusionMask(grid.originE, grid.originN, grid.cell, grid.w, grid.h);
     }
     const sheetId = sheetIdFromName(name);
+    let scene: Scene | null = null;
     const candidates = analyseSheet(grid, {
       sheetId,
       context,
       water,
       forbidden,
       exclude: exclusion?.mask,
-      onProgress: (share, step) => reply({ type: 'progress', share: 0.05 + share * 0.95, step }),
+      onProgress: (share, step) => reply({ type: 'progress', share: 0.05 + share * 0.85, step }),
+      onScene: (s) => {
+        scene = s;
+      },
     });
+    const steps = {
+      lrm: 'Warstwa LRM',
+      hillshade: 'Cieniowanie z 16 kierunków',
+      slope: 'Nachylenie',
+    };
+    const shares = { lrm: 0.91, hillshade: 0.94, slope: 0.97 };
+    const reliefs = scene
+      ? await encodeReliefs(
+          scene,
+          (i) => Number.isNaN(grid.dem[i]!),
+          (kind) => reply({ type: 'progress', share: shares[kind], step: steps[kind] }),
+        )
+      : [];
     reply(
       {
         type: 'done',
@@ -43,6 +61,7 @@ self.onmessage = async (event: MessageEvent<AnalysisRequest>) => {
         },
         candidates,
         exclusion,
+        reliefs,
       },
       exclusion ? [exclusion.mask.buffer] : [],
     );

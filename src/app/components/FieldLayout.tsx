@@ -1,5 +1,5 @@
 import Box from '@mui/material/Box';
-import { AcceptedZonesLayer } from '@/features/analysis/field';
+import { AcceptedZonesLayer, SheetReliefLayer } from '@/features/analysis/field';
 import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { GuidancePanel } from '@/features/navigation';
 import { AreaDownloadBar, AreaSelectFrame, useOfflineStore } from '@/features/offline';
@@ -17,6 +17,7 @@ export function FieldLayout() {
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <MapView>
+        <SheetReliefLayer />
         <AcceptedZonesLayer />
         {selectingArea && <AreaSelectFrame />}
       </MapView>

@@ -27,6 +27,8 @@ import { FieldResultsSummary } from './FieldResultsSummary';
 import { ImportCandidatesButton } from './ImportCandidatesButton';
 import { LoadSheetButton } from './LoadSheetButton';
 import { NoteDialog } from './NoteDialog';
+import { SheetReliefLayer } from './SheetReliefLayer';
+import { SheetReliefSection } from './SheetReliefSection';
 
 export function AnalysisView() {
   useLoadCandidates();
@@ -55,6 +57,7 @@ export function AnalysisView() {
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <MapView>
         <ExclusionMaskLayer />
+        <SheetReliefLayer />
         <CandidateZones candidates={visible} />
         <CandidateMarkers candidates={visible} />
       </MapView>
@@ -126,6 +129,7 @@ export function AnalysisView() {
               przewidywanie znaleziska.
             </Typography>
           </Stack>
+          <SheetReliefSection />
         </Stack>
 
         <AnalysisProgress />

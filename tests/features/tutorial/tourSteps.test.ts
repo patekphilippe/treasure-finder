@@ -9,6 +9,7 @@ const base: Conditions = {
   legend: false,
   exclusion: false,
   installed: false,
+  relief: false,
   platform: 'android',
 };
 const ids = (c: Partial<Conditions>) =>

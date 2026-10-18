@@ -7,6 +7,7 @@ export interface TourConditions {
   legend: boolean;
   exclusion: boolean;
   installed: boolean;
+  relief: boolean;
   platform: Platform;
 }
 
@@ -16,6 +17,7 @@ const applies = (step: TourStep, c: TourConditions) => {
   if (step.when === 'legend') return c.legend;
   if (step.when === 'exclusion') return c.exclusion;
   if (step.when === 'notInstalled') return !c.installed;
+  if (step.when === 'relief') return c.relief;
   return true;
 };
 
