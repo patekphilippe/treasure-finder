@@ -8,6 +8,7 @@ import { interpretConfig } from './interpretConfig';
 import { detectForms, type Detection } from './pipeline';
 import { buildScene } from './scene';
 import { contextPriority, contextScore, distanceToGeometry, score } from './score';
+import { forbiddenAreas, touchesAreas, withoutAreas } from './protection';
 import { buildExclusionLocal, buildZoneLocal, hullBuffer, toWgs84 } from './searchZone';
 
 export interface AnalyseOptions {
@@ -16,6 +17,8 @@ export interface AnalyseOptions {
   context?: Geometry[];
   /** extra water lines / areas in WGS84 (e.g. BDOT10k rivers) */
   water?: Geometry[];
+  /** forbidden zones in WGS84 (user's 'zakaz' zones, protected forms of other sheets) */
+  forbidden?: Geometry[];
   /** cells to skip (buildings, roads…), same size as the grid */
   exclude?: Uint8Array;
   onProgress?: (share: number, step: string) => void;
@@ -86,11 +89,15 @@ function samplePoints(g: Geometry): XY[] {
 
 const pad = (n: number) => String(n).padStart(4, '0');
 
-/** Detections → app candidates: context, score, priority, outline and zones in WGS84. */
+/**
+ * Detections → app candidates: context, score, priority, outline and zones in WGS84.
+ * A form touching a forbidden area (exclusion zone of a protected form, a 'zakaz' zone) is
+ * protected too; search zones never reach into forbidden areas.
+ */
 export function toCandidates(
   grid: DemGrid,
   detections: Detection[],
-  opts: Pick<AnalyseOptions, 'sheetId' | 'context' | 'water'>,
+  opts: Pick<AnalyseOptions, 'sheetId' | 'context' | 'water' | 'forbidden'>,
   waterLocal: XY[],
   cfg = interpretConfig,
 ): Candidate[] {
@@ -107,6 +114,10 @@ export function toCandidates(
           -(((i / grid.w) | 0) + 0.5) * grid.cell,
         ]),
     }));
+  const forbidden = forbiddenAreas(
+    detections.map((d) => buildExclusionLocal(d.exclusion)),
+    (opts.forbidden ?? []).map((g) => toLocalGeometry(g, grid)),
+  );
   const ranked = [...detections].sort((a, b) => b.confidence - a.confidence);
   return ranked.map((d, k) => {
     const archivalM = context.length
@@ -127,13 +138,22 @@ export function toCandidates(
       reasons.push(`obiekt z mapy archiwalnej ${Math.round(archivalM)} m dalej`);
     if (roadM <= cfg.score.roadBonusDistanceM)
       reasons.push(`dawna droga ${Math.round(roadM)} m dalej`);
-    const priority = contextPriority(d.priority, ctx, cfg);
+    let priority = contextPriority(d.priority, ctx, cfg);
     if (priority !== d.priority) reasons.push('silny kontekst historyczny podnosi priorytet');
-    const [lat, lng] = fromEpsg2180(grid.originE + d.centre[0], grid.originN + d.centre[1]);
     const cellPts: XY[] = d.cells.map((i) => [
       ((i % grid.w) + 0.5) * grid.cell,
       -(((i / grid.w) | 0) + 0.5) * grid.cell,
     ]);
+    if (
+      d.exclusion === null &&
+      priority !== 'chroniony' &&
+      priority !== 'naturalne' &&
+      touchesAreas([d.centre, ...cellPts], forbidden)
+    ) {
+      priority = 'chroniony';
+      reasons.push('leży w strefie zakazu (prawdopodobne stanowisko), nie może być celem');
+    }
+    const [lat, lng] = fromEpsg2180(grid.originE + d.centre[0], grid.originN + d.centre[1]);
     const ring = cellPts.length >= 3 ? hullBuffer(cellPts, grid.cell / 2) : null;
     const outline = ring ? toWgs84([[[...ring, ring[0]!]]], grid.originE, grid.originN) : null;
     return {
@@ -160,7 +180,7 @@ export function toCandidates(
       searchZone:
         priority === 'chroniony' || priority === 'naturalne'
           ? null
-          : toWgs84(buildZoneLocal(d.zone), grid.originE, grid.originN),
+          : toWgs84(withoutAreas(buildZoneLocal(d.zone), forbidden), grid.originE, grid.originN),
       exclusionZone: toWgs84(buildExclusionLocal(d.exclusion), grid.originE, grid.originN),
       decision: 'nowy',
       note: '',

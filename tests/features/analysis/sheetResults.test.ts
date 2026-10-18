@@ -67,6 +67,15 @@ describe('mergeSheetCandidates (re-running a sheet)', () => {
     expect(r.toWrite[1]!.id).toBe('S-0004'); // 0002 and 0003 still exist
     expect(r.toDelete).toEqual(['S-0002']);
   });
+
+  it('a place accepted earlier that is now protected goes back to nowy', () => {
+    const old = [makeCandidate({ id: 'S-0001', sheetId: 'S', decision: 'przyjety', note: 'x' })];
+    const fresh = [makeCandidate({ id: 'S-0001', sheetId: 'S', priority: 'chroniony' })];
+    expect(mergeSheetCandidates(old, fresh).toWrite[0]).toMatchObject({
+      decision: 'nowy',
+      note: 'x',
+    });
+  });
 });
 
 describe('saving results and accepting', () => {

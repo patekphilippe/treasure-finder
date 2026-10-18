@@ -1,7 +1,9 @@
 import { getDb } from '@/shared/db';
 import type { Candidate } from '@/shared/types/domain';
 import { useAnalysisStore } from '../store/useAnalysisStore';
+import { sheetIdFromName } from '../utils/sheetIdFromName';
 import type { AnalysisRequest, AnalysisResponse, SheetInfo } from '../workers/messages';
+import { exclusionPrefix } from './saveSheetResults';
 
 export class AnalysisCancelled extends Error {}
 
@@ -16,7 +18,10 @@ export function cancelSheetAnalysis(): void {
   useAnalysisStore.getState().setRun(null);
 }
 
-/** Analyses an NMT sheet file in a worker; archival context features come from the database. */
+/**
+ * Analyses an NMT sheet file in a worker. Archival context features and forbidden zones come
+ * from the database; the sheet's own exclusion zones are left out, the analysis rebuilds them.
+ */
 export async function runSheetAnalysis(
   file: File,
   excludeBuildings = true,
@@ -24,12 +29,18 @@ export async function runSheetAnalysis(
   cancelSheetAnalysis();
   const setRun = useAnalysisStore.getState().setRun;
   setRun({ name: file.name, share: 0, step: 'Wczytywanie pliku' });
-  const context = (await (await getDb()).getAll('context')).map((c) => c.geometry);
+  const db = await getDb();
+  const context = (await db.getAll('context')).map((c) => c.geometry);
+  const own = exclusionPrefix(sheetIdFromName(file.name));
+  const forbidden = (await db.getAll('zones'))
+    .filter((z) => z.kind === 'zakaz' && !z.id.startsWith(own))
+    .map((z) => z.geometry);
   const request: AnalysisRequest = {
     name: file.name,
     buffer: await file.arrayBuffer(),
     context,
     water: [],
+    forbidden,
     excludeBuildings,
   };
   const worker = new Worker(new URL('../workers/analysis.worker.ts', import.meta.url), {
