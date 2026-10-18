@@ -12,6 +12,7 @@ import {
   POLAND_CENTER,
 } from '../config/mapLayers';
 import { NmtShadedLayer } from '../layers/NmtShadedLayer';
+import { TopoLayer } from '../layers/TopoLayer';
 import { AreaMarkers } from './AreaMarkers';
 import { CoverageLayer } from './CoverageLayer';
 import { CustomLayers } from './CustomLayers';
@@ -42,7 +43,7 @@ export function MapView({ children }: MapViewProps) {
       maxZoom={MAX_ZOOM}
       zoomControl={false}
     >
-      {baseLayer === 'osm' ? (
+      {baseLayer === 'osm' && (
         <TileLayer
           key="osm"
           url={OSM_LAYER.url}
@@ -50,7 +51,8 @@ export function MapView({ children }: MapViewProps) {
           maxNativeZoom={OSM_LAYER.maxNativeZoom}
           maxZoom={MAX_ZOOM}
         />
-      ) : (
+      )}
+      {baseLayer === 'ortho' && (
         <TileLayer
           key="ortho"
           url={ORTHO_WMTS_URL}
@@ -59,6 +61,7 @@ export function MapView({ children }: MapViewProps) {
           maxZoom={MAX_ZOOM}
         />
       )}
+      {baseLayer === 'topo' && <TopoLayer key="topo" maxZoom={MAX_ZOOM} />}
       <CustomLayers />
       <RoughnessOverlay />
       {nmtOn && <NmtShadedLayer opacity={nmtOpacity} zIndex={50} maxZoom={MAX_ZOOM} />}

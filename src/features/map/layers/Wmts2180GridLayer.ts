@@ -1,14 +1,12 @@
 import L from 'leaflet';
-import { NMT_WMTS_2180, nmtTileUrl } from '@/shared/config/geoportalWmts2180';
 import {
   canvasDpr,
   metresToTilePixels,
   pickSourceTiles,
   projectedImageTransform,
+  type Wmts2180Source,
 } from '@/shared/lib/tiles';
 import { tileCorners2180 } from '../utils/tileCorners2180';
-
-type Config = typeof NMT_WMTS_2180;
 
 /**
  * Shows an EPSG:2180 WMTS on the Web Mercator map: every map tile is a canvas onto which
@@ -16,9 +14,9 @@ type Config = typeof NMT_WMTS_2180;
  * across one tile matches the true reprojection to well under a pixel.
  */
 export class Wmts2180GridLayer extends L.GridLayer {
-  private readonly config: Config;
+  private readonly config: Wmts2180Source;
 
-  constructor(config: Config, options?: L.GridLayerOptions) {
+  constructor(config: Wmts2180Source, options?: L.GridLayerOptions) {
     super(options);
     this.config = config;
   }
@@ -65,7 +63,7 @@ export class Wmts2180GridLayer extends L.GridLayer {
             img.onerror = () => resolve();
           }),
         );
-        img.src = nmtTileUrl(level, row, col);
+        img.src = cfg.tileUrl(level, row, col);
       }
     }
     void Promise.all(loads).then(() => done(undefined, canvas));

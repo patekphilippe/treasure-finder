@@ -13,3 +13,4 @@ export {
 export { pickSourceTiles, type Wmts2180Grid } from './pickSourceTiles';
 export { latLngToTile, tileToLatLng } from './webMercator';
 export { canvasDpr } from './canvasDpr';
+export type { Wmts2180Source } from './wmts2180Source';

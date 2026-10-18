@@ -4,7 +4,7 @@ import { planAreaTiles } from '@/features/offline/utils/planAreaTiles';
 
 // about 1 km × 1 km near Legnica
 const small = { south: 51.29, west: 16.12, north: 51.299, east: 16.134 };
-const none = { ortho: false, nmt: false, custom: [] };
+const none = { ortho: false, nmt: false, topo: false, custom: [] };
 
 describe('planAreaTiles', () => {
   it('lists orthophoto tiles for zooms 12–19 without duplicates', () => {
@@ -23,6 +23,13 @@ describe('planAreaTiles', () => {
     expect(plan.counts.nmt).toBeLessThan(plan.counts.ortho + 400);
     expect(plan.urls.every((u) => u.includes('TILEMATRIXSET=EPSG:2180'))).toBe(true);
     // the finest level shows up at the highest zooms
+    expect(plan.urls.some((u) => u.includes('TILEMATRIX=EPSG:2180:12&'))).toBe(true);
+  });
+
+  it('lists the topographic map tiles on its own EPSG:2180 grid', () => {
+    const plan = planAreaTiles(small, { ...none, topo: true }, 2);
+    expect(plan.counts.topo).toBeGreaterThan(0);
+    expect(plan.urls.every((u) => u.includes('wmts/TOPO?'))).toBe(true);
     expect(plan.urls.some((u) => u.includes('TILEMATRIX=EPSG:2180:12&'))).toBe(true);
   });
 

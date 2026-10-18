@@ -4,7 +4,7 @@ export const AREA_MAX_ZOOM = 19;
 /** Most tiles one area may hold: keeps a download to a few km² and polite to Geoportal. */
 export const MAX_AREA_TILES = 3000;
 /** Average tile sizes measured on Geoportal (bytes), for the estimate before downloading. */
-export const AVG_TILE_BYTES = { ortho: 8_000, nmt: 180_000, custom: 20_000 } as const;
+export const AVG_TILE_BYTES = { ortho: 8_000, nmt: 180_000, topo: 30_000, custom: 20_000 } as const;
 /** Parallel requests while downloading. */
 export const DOWNLOAD_CONCURRENCY = 6;
 /** Each area has its own Cache Storage cache, so deleting one never breaks another. */

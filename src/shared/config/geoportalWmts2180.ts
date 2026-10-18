@@ -38,3 +38,6 @@ export const nmtTileUrl = (level: number, row: number, col: number) =>
   `${NMT_WMTS_2180.url}?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=${NMT_WMTS_2180.layer}` +
   `&STYLE=default&TILEMATRIXSET=EPSG:2180&TILEMATRIX=EPSG:2180:${level}&TILEROW=${row}` +
   `&TILECOL=${col}&FORMAT=${encodeURIComponent(NMT_WMTS_2180.format)}`;
+
+/** The hillshade grid with its tile URLs, as the EPSG:2180 tile layer and the offline cache take it. */
+export const NMT_SOURCE = { ...NMT_WMTS_2180, tileUrl: nmtTileUrl };

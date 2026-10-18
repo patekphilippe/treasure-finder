@@ -16,12 +16,13 @@ export function useAreaPlan(): { plan: AreaPlan | null; layerNames: string[] } {
     const layerNames = [
       ...(layers.ortho ? ['Ortofotomapa'] : []),
       ...(layers.nmt ? ['Cieniowanie NMT'] : []),
+      ...(layers.topo ? ['Mapa topograficzna'] : []),
       ...custom.map((l) => l.name),
     ];
     if (!selection || layerNames.length === 0) return { plan: null, layerNames };
     const plan = planAreaTiles(
       selection,
-      { ortho: layers.ortho, nmt: layers.nmt, custom },
+      { ortho: layers.ortho, nmt: layers.nmt, topo: layers.topo, custom },
       canvasDpr(),
     );
     return { plan, layerNames };

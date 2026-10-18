@@ -78,6 +78,7 @@ export function AreaDownloadBar() {
         <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
           {toggle(layers.ortho, 'Ortofotomapa', () => setLayers({ ortho: !layers.ortho }))}
           {toggle(layers.nmt, 'Cieniowanie NMT', () => setLayers({ nmt: !layers.nmt }))}
+          {toggle(layers.topo, 'Mapa topograficzna', () => setLayers({ topo: !layers.topo }))}
           {customLayers.map((l) => {
             const on = layers.custom.includes(l.id);
             return toggle(on, l.name, () =>

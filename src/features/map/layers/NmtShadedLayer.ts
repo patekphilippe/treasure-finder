@@ -1,5 +1,5 @@
 import { createLayerComponent, type LayerProps } from '@react-leaflet/core';
-import { NMT_WMTS_2180 } from '@/shared/config/geoportalWmts2180';
+import { NMT_SOURCE } from '@/shared/config/geoportalWmts2180';
 import { Wmts2180GridLayer } from './Wmts2180GridLayer';
 
 interface NmtShadedLayerProps extends LayerProps {
@@ -11,7 +11,7 @@ interface NmtShadedLayerProps extends LayerProps {
 /** Geoportal NMT hillshade from its fast EPSG:2180 WMTS, reprojected tile by tile. */
 export const NmtShadedLayer = createLayerComponent<Wmts2180GridLayer, NmtShadedLayerProps>(
   ({ opacity, zIndex, maxZoom, ...options }, ctx) => ({
-    instance: new Wmts2180GridLayer(NMT_WMTS_2180, {
+    instance: new Wmts2180GridLayer(NMT_SOURCE, {
       ...options,
       opacity,
       zIndex,
