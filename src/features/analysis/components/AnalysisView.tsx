@@ -21,6 +21,8 @@ import { CandidateList } from './CandidateList';
 import { AnalysisProgress } from './AnalysisProgress';
 import { CandidateMarkers } from './CandidateMarkers';
 import { CandidateZones } from './CandidateZones';
+import { ExclusionMaskLayer } from './ExclusionMaskLayer';
+import { ExclusionSummary } from './ExclusionSummary';
 import { FieldResultsSummary } from './FieldResultsSummary';
 import { ImportCandidatesButton } from './ImportCandidatesButton';
 import { LoadSheetButton } from './LoadSheetButton';
@@ -52,6 +54,7 @@ export function AnalysisView() {
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <MapView>
+        <ExclusionMaskLayer />
         <CandidateZones candidates={visible} />
         <CandidateMarkers candidates={visible} />
       </MapView>
@@ -120,6 +123,7 @@ export function AnalysisView() {
         </Stack>
 
         <AnalysisProgress />
+        <ExclusionSummary />
         {all.length === 0 ? (
           <EmptyState
             icon="file-upload"

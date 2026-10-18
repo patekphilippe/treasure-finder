@@ -21,7 +21,18 @@ export function LoadSheetButton({ variant = 'compact' }: LoadSheetButtonProps) {
 
   const analyse = async (file: File) => {
     try {
-      const { sheet, candidates } = await runSheetAnalysis(file);
+      const { sheet, candidates, exclusion } = await runSheetAnalysis(file);
+      useAnalysisStore.getState().setExclusion(
+        exclusion && {
+          ...exclusion,
+          sheetId: sheet.sheetId,
+          originE: sheet.originE,
+          originN: sheet.originN,
+          res: sheet.cell,
+          w: sheet.cols,
+          h: sheet.rows,
+        },
+      );
       const { added } = await saveSheetResults(sheet.sheetId, candidates);
       const best = useAnalysisStore
         .getState()
@@ -36,7 +47,11 @@ export function LoadSheetButton({ variant = 'compact' }: LoadSheetButtonProps) {
         useMapViewStore
           .getState()
           .flyTo({ lat: best.lat, lng: best.lng, zoom: 15, offsetY: bottomSheetOffset() });
-      showToast(`Arkusz ${sheet.sheetId}: ${candidates.length} form, nowych ${Math.max(0, added)}`);
+      const failed = exclusion?.groups.filter((g) => g.status === 'error').map((g) => g.label);
+      showToast(
+        `Arkusz ${sheet.sheetId}: ${candidates.length} form, nowych ${Math.max(0, added)}` +
+          (failed?.length ? `. BDOT10k nie pobrano: ${failed.join(', ')}` : ''),
+      );
     } catch (e) {
       if (!(e instanceof AnalysisCancelled))
         showToast(e instanceof Error ? e.message : 'Analiza nie powiodła się');
