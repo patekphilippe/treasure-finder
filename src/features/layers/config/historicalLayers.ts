@@ -1,5 +1,6 @@
 /**
- * Historical map layers (docs/MAPY_HISTORYCZNE.md). All are WMS in EPSG:3857 and online only:
+ * Historical map layers (docs/MAPY_HISTORYCZNE.md). WMS (in EPSG:3857, or EPSG:2180 where the
+ * service places that one correctly), online only:
  * none of the providers allows bulk tile download, so they are not offered for offline areas.
  */
 export interface HistoricalLayer {
@@ -19,6 +20,11 @@ export interface HistoricalLayer {
   maxParallel?: number;
   /** WMS with a TIME dimension: the user picks a year */
   yearRange?: { min: number; max: number };
+  /**
+   * ask the service in EPSG:2180 and warp: its own Web Mercator output is misplaced
+   * (Lower Silesian Messtischblatt ~150 m off against OSM and the NMT; checked 18.10.2026)
+   */
+  ask2180?: boolean;
 }
 
 const UMWD_ATTRIBUTION =
@@ -36,6 +42,7 @@ const umwd = (id: string, label: string, years: string): HistoricalLayer => ({
   maxNativeZoom: 17,
   // 12 tiles at once: 4 answered 400; 3 at once plus retries loads them all
   maxParallel: 3,
+  ask2180: true,
   attribution: UMWD_ATTRIBUTION,
   termsUrl: UMWD_TERMS,
 });

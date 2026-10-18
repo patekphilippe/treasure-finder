@@ -1,5 +1,6 @@
 import L from 'leaflet';
-import { createLimiter, type Limiter } from '@/shared/lib/async/createLimiter';
+import type { Limiter } from '@/shared/lib/async/createLimiter';
+import { hostLimiter } from '../utils/hostLimiter';
 
 export interface PoliteWmsOptions extends L.WMSOptions {
   /** requests in flight to this host at once */
@@ -11,18 +12,6 @@ const RETRY_DELAYS_MS = [800, 2000, 4000];
 
 /** a request that hangs longer than this frees its slot and counts as failed */
 const LOAD_TIMEOUT_MS = 30_000;
-
-const limiters = new Map<string, Limiter>();
-
-function hostLimiter(url: string, max: number): Limiter {
-  const key = `${new URL(url, location.href).host}|${max}`;
-  let limiter = limiters.get(key);
-  if (!limiter) {
-    limiter = createLimiter(max);
-    limiters.set(key, limiter);
-  }
-  return limiter;
-}
 
 /**
  * WMS for slow public servers: a few requests at a time per host, and failed tiles retried.

@@ -71,3 +71,6 @@ mapy szczegółowej Polski 1:25 000 WIG_ (PPK 2014), OSM wiki (siatka MTB).
    wyłączone do czasu zgody; wpisy były w commicie b9a2caf.
 3. SLUB jako opcja dla ostrzejszych arkuszy Messtischblatt na dawnych ziemiach niemieckich.
 4. W aplikacji przy każdej warstwie: atrybucja, rok, link do warunków.
+5. Messtischblatt z geoportalu Dolnego Śląska pobieramy w EPSG:2180 i przeliczamy na mapę
+   (`Wms2180GridLayer`). Ta sama usługa w EPSG:3857 jest przesunięta o ok. 150 m względem OSM
+   i NMT (sprawdzone 18.10.2026 w Budnikach i na wrocławskim Rynku); w EPSG:2180 pokrywa się.
