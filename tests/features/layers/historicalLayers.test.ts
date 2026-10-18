@@ -10,6 +10,10 @@ describe('historical layers', () => {
     for (const l of HISTORICAL_LAYERS.filter((x) => x.url.includes('cenagis'))) {
       expect(l.layers).toMatch(/_3857$/);
     }
+    for (const l of HISTORICAL_LAYERS.filter((x) => x.url.includes('dolnyslask'))) {
+      expect(l.url).toContain(`/${l.id}/MapServer/WMSServer`);
+      expect(l.attribution).toMatch(/^Źródło danych: /);
+    }
   });
 
   it('finds a layer by id and ignores unknown or null ids', () => {

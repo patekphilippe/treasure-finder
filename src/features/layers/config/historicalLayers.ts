@@ -42,11 +42,30 @@ const ihpan = (
   termsUrl: IHPAN_TERMS,
 });
 
+const UMWD_ATTRIBUTION =
+  'Źródło danych: <a href="https://geoportal.dolnyslask.pl/" target="_blank" rel="noreferrer">Urząd Marszałkowski Województwa Dolnośląskiego</a>';
+const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
+
+/** Lower Silesian geoportal, ArcGIS WMS: layer "1" is the image (2 and 3 are footprints). */
+const umwd = (id: string, label: string, years: string): HistoricalLayer => ({
+  id,
+  label,
+  years,
+  coverage: 'Dolny Śląsk',
+  url: `https://geoportal.dolnyslask.pl/gpservices/${id}/MapServer/WMSServer`,
+  layers: '1',
+  maxNativeZoom: 17,
+  attribution: UMWD_ATTRIBUTION,
+  termsUrl: UMWD_TERMS,
+});
+
 export const ORTHO_ARCHIVE_ID = 'orto-archiwalna';
 
 export const HISTORICAL_LAYERS: readonly HistoricalLayer[] = [
   ihpan('m25k', 'Messtischblatt 1:25 000', '1870–1945', 'Dawne ziemie niemieckie', 17),
-  ihpan('wig25k', 'WIG 1:25 000', '1918–1939', 'Część II RP', 17),
+  umwd('UMWD_Messtischblat_starsze', 'Messtischblatt Dolny Śląsk, starsze wydania', '1883–1942'),
+  umwd('UMWD_Messtischblat_nowsze', 'Messtischblatt Dolny Śląsk, nowsze wydania', '1905–1944'),
+  ihpan('wig25k','WIG 1:25 000', '1918–1939', 'Część II RP', 17),
   ihpan('wig100k', 'WIG 1:100 000', '1918–1939', 'Cała Polska', 15),
   ihpan('kdr', 'Karte des Deutschen Reiches 1:100 000', 'ok. 1900', 'Cała Polska', 15),
   ihpan('kdwr', 'Karte des Westlichen Russlands 1:100 000', '1914–1921', 'Dawny zabór rosyjski', 15),
