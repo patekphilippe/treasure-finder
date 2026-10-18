@@ -8,3 +8,5 @@ export { detectForms, type Detection, type DetectOptions } from './pipeline';
 export type { ExclusionSpec, ZoneSpec } from './zoneSpec';
 export { FLAGS } from './vocabulary';
 export { areaCentroid, buildExclusionLocal, buildZoneLocal, toWgs84 } from './searchZone';
+export { analyseSheet, toCandidates, type AnalyseOptions } from './analyseSheet';
+export { contextPriority, contextScore, distanceToGeometry, score } from './score';
