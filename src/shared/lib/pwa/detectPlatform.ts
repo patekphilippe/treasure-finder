@@ -1,4 +1,4 @@
-import type { Platform } from '../config/tourSteps';
+export type Platform = 'ios' | 'android' | 'desktop';
 
 /** Which install instructions fit this device (iPadOS reports itself as a Mac with touch). */
 export function detectPlatform(): Platform {

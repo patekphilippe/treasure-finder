@@ -1,7 +1,8 @@
 import type { Step } from 'react-joyride';
+import type { Platform } from '@/shared/lib/pwa/detectPlatform';
 import type { AppMode, SheetId } from '@/shared/store/useUiStore';
 
-export type Platform = 'ios' | 'android' | 'desktop';
+export type { Platform };
 
 export interface TourStep {
   id: string;
@@ -203,6 +204,16 @@ export const TOUR_STEPS: readonly TourStep[] = [
     content: 'Dodaj podkład XYZ albo usługę WMS, np. mapę archiwalną z własnego serwera.',
     mode: 'field',
     sheet: 'layers',
+  },
+  {
+    id: 'data-install',
+    target: 'data-install',
+    title: 'Aplikacja na ekranie głównym',
+    content:
+      'Zainstaluj aplikację jak zwykłą: dostaniesz ikonę na ekranie głównym, pełny ekran i działanie bez internetu. Na iPhonie przycisk pokaże, co kliknąć w Safari.',
+    mode: 'field',
+    sheet: 'data',
+    when: 'notInstalled',
   },
   {
     id: 'data-export',
