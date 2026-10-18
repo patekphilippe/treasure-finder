@@ -25,8 +25,10 @@ export function TutorialTooltip({
       elevation={8}
       sx={{
         width: 'min(calc(100vw - 32px), 360px)',
+        maxHeight: 'calc(100dvh - 24px)',
         borderRadius: '16px',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',
         border: 1,
         borderColor: 'divider',
         backgroundImage: 'none',

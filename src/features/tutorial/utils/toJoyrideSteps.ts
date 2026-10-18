@@ -32,6 +32,9 @@ export function toJoyrideSteps(steps: readonly TourStep[], c: TourConditions): S
           spotlightRadius: 16,
         }),
         placement: s.target ? (s.placement ?? 'auto') : 'center',
+        // tall targets (sheets, the analysis panel) leave no room above or below on a phone:
+        // shift the card back into the viewport even if it then covers part of the target
+        floatingOptions: { shiftOptions: { crossAxis: true, padding: 12 } },
         title: s.title,
         content: s.content,
         before: () => showTourView(s.mode, s.sheet ?? null, target),
