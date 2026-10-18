@@ -2,7 +2,12 @@ import { getDb } from '@/shared/db';
 import type { Candidate } from '@/shared/types/domain';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { sheetIdFromName } from '../utils/sheetIdFromName';
-import type { AnalysisRequest, AnalysisResponse, SheetInfo } from '../workers/messages';
+import type {
+  AnalysisRequest,
+  AnalysisResponse,
+  ExclusionResult,
+  SheetInfo,
+} from '../workers/messages';
 import { exclusionPrefix } from './saveSheetResults';
 
 export class AnalysisCancelled extends Error {}
@@ -25,7 +30,7 @@ export function cancelSheetAnalysis(): void {
 export async function runSheetAnalysis(
   file: File,
   excludeBuildings = true,
-): Promise<{ sheet: SheetInfo; candidates: Candidate[] }> {
+): Promise<{ sheet: SheetInfo; candidates: Candidate[]; exclusion: ExclusionResult | null }> {
   cancelSheetAnalysis();
   const setRun = useAnalysisStore.getState().setRun;
   setRun({ name: file.name, share: 0, step: 'Wczytywanie pliku' });
@@ -52,7 +57,8 @@ export async function runSheetAnalysis(
       worker.onmessage = (e: MessageEvent<AnalysisResponse>) => {
         const msg = e.data;
         if (msg.type === 'progress') setRun({ name: file.name, share: msg.share, step: msg.step });
-        else if (msg.type === 'done') resolve({ sheet: msg.sheet, candidates: msg.candidates });
+        else if (msg.type === 'done')
+          resolve({ sheet: msg.sheet, candidates: msg.candidates, exclusion: msg.exclusion });
         else reject(new Error(msg.message));
       };
       worker.onerror = (e) => reject(new Error(e.message || 'Analiza nie powiodła się'));
