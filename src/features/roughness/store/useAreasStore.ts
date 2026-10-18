@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { areasRepo } from '@/shared/db';
 import { createId } from '@/shared/lib/createId';
-import type { AreaCategory, RoughArea } from '@/shared/types/domain';
+import type { RoughArea } from '@/shared/types/domain';
 import type { RoughnessHotspot } from '../services/types';
 import { mergeAreas } from '../utils/mergeAreas';
 
@@ -13,7 +13,6 @@ interface AreasState {
   /** saves the areas of an analysis as places; returns how many are new */
   saveFromAnalysis: (found: readonly RoughnessHotspot[]) => Promise<number>;
   update: (area: RoughArea) => Promise<void>;
-  setCategory: (id: string, category: AreaCategory) => Promise<void>;
   remove: (id: string) => Promise<void>;
   setVisible: (visible: boolean) => void;
 }
@@ -33,10 +32,6 @@ export const useAreasStore = create<AreasState>((set, get) => ({
   update: async (area) => {
     await areasRepo.put(area);
     set((s) => ({ areas: s.areas.map((a) => (a.id === area.id ? area : a)) }));
-  },
-  setCategory: async (id, category) => {
-    const area = get().areas.find((a) => a.id === id);
-    if (area) await get().update({ ...area, category, auto: false, updated: Date.now() });
   },
   remove: async (id) => {
     await areasRepo.remove(id);

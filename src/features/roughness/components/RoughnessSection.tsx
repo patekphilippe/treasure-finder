@@ -33,11 +33,7 @@ export function RoughnessSection() {
     }
   };
 
-  const sorted = [...areas].sort(
-    (a, b) =>
-      Number(a.category === 'nieistotne') - Number(b.category === 'nieistotne') ||
-      b.strength - a.strength,
-  );
+  const sorted = [...areas].sort((a, b) => b.strength - a.strength);
 
   return (
     <Stack spacing={1.25}>
@@ -115,7 +111,8 @@ export function RoughnessSection() {
             />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5 }}>
-            Dotknij miejsca, aby nadać mu kategorię. „auto” oznacza typ rozpoznany z kształtu.
+            Wskazówki, gdzie patrzeć. Rozpoznanie form wymaga wczytania arkusza NMT w trybie
+            Analiza.
           </Typography>
           {sorted.slice(0, LIST_LIMIT).map((a) => (
             <AreaListItem key={a.id} area={a} onClick={() => showArea(a.id)} />

@@ -1,9 +1,9 @@
 import { Marker } from 'react-leaflet';
-import { AREA_CATEGORIES, useAreasStore } from '@/features/roughness';
+import { PLACE_COLOR, useAreasStore } from '@/features/roughness';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { areaIcon } from '../utils/areaIcon';
 
-/** Places marked by the uneven-ground analysis, numbered and coloured by category. */
+/** Places marked by the uneven-ground map, numbered. */
 export function AreaMarkers() {
   const areas = useAreasStore((s) => s.areas);
   const visible = useAreasStore((s) => s.visible);
@@ -15,13 +15,8 @@ export function AreaMarkers() {
     <Marker
       key={a.id}
       position={[a.lat, a.lng]}
-      icon={areaIcon(
-        a.no,
-        AREA_CATEGORIES[a.category].color,
-        a.category === 'nieistotne',
-        a.id === selectedId,
-      )}
-      title={`Miejsce ${a.no}: ${AREA_CATEGORIES[a.category].label}`}
+      icon={areaIcon(a.no, PLACE_COLOR, false, a.id === selectedId)}
+      title={`Obszar do sprawdzenia ${a.no}`}
       zIndexOffset={a.id === selectedId ? 900 : -100}
       eventHandlers={{ click: () => showArea(a.id) }}
     />

@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { glass, Icon } from '@/shared/ui';
-import { AREA_CATEGORIES, AREA_CATEGORY_ORDER } from '../config/areaCategories';
+import { PLACE_COLOR } from '../config/places';
 import { useAreasStore } from '../store/useAreasStore';
 import { useRoughnessStore } from '../store/useRoughnessStore';
 
@@ -16,9 +16,6 @@ export function RoughnessLegend() {
   const placesShown = useAreasStore((s) => s.visible) && areas.length > 0;
   const [open, setOpen] = useState(false);
   if (!heatShown && !placesShown) return null;
-
-  const counts = new Map<string, number>();
-  for (const a of areas) counts.set(a.category, (counts.get(a.category) ?? 0) + 1);
 
   return (
     <Paper
@@ -68,32 +65,22 @@ export function RoughnessLegend() {
             </Stack>
           )}
           {placesShown && (
-            <Stack spacing={0.5}>
-              <Typography variant="caption" color="text.secondary">
-                Miejsca (numer na mapie)
+            <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '50%',
+                  bgcolor: PLACE_COLOR,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography variant="caption" sx={{ flex: 1 }}>
+                Obszar do sprawdzenia (numer)
               </Typography>
-              {AREA_CATEGORY_ORDER.map((cat) => {
-                const meta = AREA_CATEGORIES[cat];
-                return (
-                  <Stack key={cat} direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-                    <Box
-                      sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: '50%',
-                        bgcolor: meta.color,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <Typography variant="caption" sx={{ flex: 1 }}>
-                      {meta.label}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {counts.get(cat) ?? 0}
-                    </Typography>
-                  </Stack>
-                );
-              })}
+              <Typography variant="caption" color="text.secondary">
+                {areas.length}
+              </Typography>
             </Stack>
           )}
         </Stack>

@@ -12,7 +12,6 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:qgis": "qgis/run.sh -m unittest discover -s qgis/tests -t qgis",
     "calibrate": "tsx --tsconfig tsconfig.app.json scripts/calibrate.ts"
   },
   "dependencies": {

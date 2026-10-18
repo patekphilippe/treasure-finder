@@ -11,11 +11,14 @@ Wersja 1 do przeniesienia: legacy/index.html.
 - npm run lint ESLint (w tym reguła architektury)
 - npm run build build produkcyjny, musi przejść przed każdym commitem
 
-## Analiza NMT (QGIS)
+## Analiza NMT
 
-Wykrywanie kandydatów działa w Pythonie z QGIS, nie w przeglądarce — zob. `qgis/README.md`.
-Progi w `qgis/candidates/config.py`. Testy: `npm run test:qgis` (wymaga QGIS LTR, nie działa w CI).
-Wynik `kandydaci.geojson` ma pola modelu `Candidate` z docs/PLAN.md.
+Rozpoznawanie form: `src/shared/lib/detect/` (czyste funkcje, w aplikacji w Web Workerze).
+Wszystkie progi w `interpretConfig.ts`; kalibracja: `npm run calibrate -- data/*.asc`,
+wyniki i otwarte sprawy w `docs/KALIBRACJA.md`. Model wyniku: forma, interpretacja z pewnością
+i alternatywami, priorytet, flagi (UXO, groby wojenne), powody po polsku, strefa poszukiwań.
+Testy syntetyczne (12 modeli ze specyfikacji): `tests/lib/detect/interpret.test.ts`.
+`qgis/` ma już tylko narzędzia do oglądania reliefu w QGIS.
 
 ## Zasady
 

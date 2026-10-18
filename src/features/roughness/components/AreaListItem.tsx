@@ -3,7 +3,7 @@ import ButtonBase from '@mui/material/ButtonBase';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { RoughArea } from '@/shared/types/domain';
-import { AREA_CATEGORIES } from '../config/areaCategories';
+import { PLACE_COLOR } from '../config/places';
 import { describeShape } from '../utils/describeShape';
 
 interface AreaListItemProps {
@@ -12,7 +12,6 @@ interface AreaListItemProps {
 }
 
 export function AreaListItem({ area, onClick }: AreaListItemProps) {
-  const meta = AREA_CATEGORIES[area.category];
   return (
     <ButtonBase
       onClick={onClick}
@@ -33,26 +32,19 @@ export function AreaListItem({ area, onClick }: AreaListItemProps) {
           height: 26,
           flexShrink: 0,
           borderRadius: '50%',
-          bgcolor: meta.color,
+          bgcolor: PLACE_COLOR,
           color: '#fff',
           display: 'grid',
           placeItems: 'center',
           fontSize: 12,
           fontWeight: 700,
-          opacity: area.category === 'nieistotne' ? 0.5 : 1,
         }}
       >
         {area.no}
       </Box>
       <Stack sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-          {meta.label}
-          {area.auto && (
-            <Typography component="span" variant="caption" color="text.secondary">
-              {' '}
-              (auto)
-            </Typography>
-          )}
+          Obszar do sprawdzenia
         </Typography>
         <Typography variant="caption" color="text.secondary" noWrap>
           {describeShape(area)}
