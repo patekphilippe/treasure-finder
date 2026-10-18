@@ -1,4 +1,3 @@
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
@@ -7,9 +6,10 @@ import Typography from '@mui/material/Typography';
 import type { Candidate } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
 import { INTERPRETATIONS, PRIORITIES } from '@/shared/lib/detect';
-import { INTERPRETATION_STYLE, PROTECTED_MESSAGE } from '../config/interpretationStyle';
+import { INTERPRETATION_STYLE } from '../config/interpretationStyle';
 import { useCandidateActions } from '../hooks/useCandidateActions';
 import { describeCandidate } from '../utils/describeCandidate';
+import { CandidateWhy } from './CandidateWhy';
 
 interface CandidateDetailsProps {
   candidate: Candidate;
@@ -27,7 +27,8 @@ export function CandidateDetails({ candidate: c, onNote, onClose }: CandidateDet
       <Stack direction="row" sx={{ alignItems: 'flex-start', gap: 1 }}>
         <Stack sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 650 }}>
-            {label} · {PRIORITIES[c.priority].label.toLowerCase()} · ocena {c.score}
+            {label} ({Math.round(c.confidence * 100)}%) ·{' '}
+            {PRIORITIES[c.priority].label.toLowerCase()} · ocena {c.score}
           </Typography>
           <Typography variant="caption" color="text.secondary">
             {describeCandidate(c)} · {hint}
@@ -37,11 +38,7 @@ export function CandidateDetails({ candidate: c, onNote, onClose }: CandidateDet
           <Icon name="times" size={18} />
         </IconButton>
       </Stack>
-      {c.priority === 'chroniony' && (
-        <Alert severity="warning" icon={<Icon name="shield-alt" size={18} />} sx={{ mt: 1, py: 0 }}>
-          {PROTECTED_MESSAGE}
-        </Alert>
-      )}
+      <CandidateWhy candidate={c} />
       {c.note && (
         <Typography variant="body2" sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
           {c.note}
@@ -56,7 +53,7 @@ export function CandidateDetails({ candidate: c, onNote, onClose }: CandidateDet
             disabled
             startIcon={<Icon name="check" size={18} />}
           >
-            Przyjęty jako punkt do sprawdzenia
+            Przyjęty: strefa i punkt w terenie
           </Button>
         ) : (
           <Button

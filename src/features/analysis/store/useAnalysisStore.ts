@@ -1,28 +1,33 @@
 import { create } from 'zustand';
 import { candidatesRepo } from '@/shared/db';
-import type { AnalysisParams, Candidate } from '@/shared/types/domain';
-import { DEFAULT_ANALYSIS_PARAMS } from '../config/defaultParams';
+import type { Candidate } from '@/shared/types/domain';
 import { DEFAULT_FILTERS, type CandidateFilters } from '../config/filters';
 
+export interface RunState {
+  /** file being analysed */
+  name: string;
+  share: number;
+  step: string;
+}
+
 interface AnalysisState {
-  params: AnalysisParams;
   candidates: Candidate[];
   selectedId: string | null;
   filters: CandidateFilters;
-  setParams: (params: Partial<AnalysisParams>) => void;
+  run: RunState | null;
   load: () => Promise<void>;
   /** persist one changed candidate (decision, note) */
   update: (candidate: Candidate) => Promise<void>;
   select: (id: string | null) => void;
   setFilters: (filters: Partial<CandidateFilters>) => void;
+  setRun: (run: RunState | null) => void;
 }
 
 export const useAnalysisStore = create<AnalysisState>((set) => ({
-  params: DEFAULT_ANALYSIS_PARAMS,
   candidates: [],
   selectedId: null,
   filters: DEFAULT_FILTERS,
-  setParams: (params) => set((s) => ({ params: { ...s.params, ...params } })),
+  run: null,
   load: async () => set({ candidates: await candidatesRepo.getAll() }),
   update: async (candidate) => {
     await candidatesRepo.put(candidate);
@@ -30,4 +35,5 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
   },
   select: (selectedId) => set({ selectedId }),
   setFilters: (filters) => set((s) => ({ filters: { ...s.filters, ...filters } })),
+  setRun: (run) => set({ run }),
 }));

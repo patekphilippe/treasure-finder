@@ -18,9 +18,12 @@ import { useAnalysisStore } from '../store/useAnalysisStore';
 import { CandidateDetails } from './CandidateDetails';
 import { CandidateFiltersBar } from './CandidateFiltersBar';
 import { CandidateList } from './CandidateList';
+import { AnalysisProgress } from './AnalysisProgress';
 import { CandidateMarkers } from './CandidateMarkers';
+import { CandidateZones } from './CandidateZones';
 import { FieldResultsSummary } from './FieldResultsSummary';
 import { ImportCandidatesButton } from './ImportCandidatesButton';
+import { LoadSheetButton } from './LoadSheetButton';
 import { NoteDialog } from './NoteDialog';
 
 export function AnalysisView() {
@@ -44,10 +47,12 @@ export function AnalysisView() {
   useCandidateShortcuts(visible, setNoteFor);
 
   const selected = all.find((c) => c.id === selectedId) ?? null;
+  const recompute = all.filter((c) => c.needsRecompute).length;
 
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
       <MapView>
+        <CandidateZones candidates={visible} />
         <CandidateMarkers candidates={visible} />
       </MapView>
       <Paper
@@ -91,6 +96,7 @@ export function AnalysisView() {
                 </Badge>
               </IconButton>
             )}
+            <LoadSheetButton />
             {all.length > 0 && <ImportCandidatesButton />}
           </Stack>
           <Stack
@@ -113,15 +119,27 @@ export function AnalysisView() {
           </Stack>
         </Stack>
 
+        <AnalysisProgress />
         {all.length === 0 ? (
           <EmptyState
-            icon="file-import"
-            title="Wczytaj kandydatów z QGIS"
-            description="Wczytaj arkusz NMT, aby rozpoznać formy terenu. Przyjęci kandydaci trafiają do terenu jako strefy i punkty do sprawdzenia."
-            action={<ImportCandidatesButton variant="full" />}
+            icon="file-upload"
+            title="Wczytaj arkusz NMT"
+            description="Plik .asc lub GeoTIFF z Geoportalu (EPSG:2180). Aplikacja rozpozna formy terenu, wskaże strefy poszukiwań i pominie zabudowę. Przyjęte strefy trafiają do trybu Teren."
+            action={
+              <Stack spacing={1} sx={{ alignItems: 'center' }}>
+                <LoadSheetButton variant="full" />
+                <ImportCandidatesButton />
+              </Stack>
+            }
           />
         ) : (
           <>
+            {recompute > 0 && (
+              <Typography variant="caption" color="warning.main" sx={{ px: 2.5, pb: 1 }}>
+                {recompute} kandydatów pochodzi ze starej analizy. Wczytaj ich arkusz ponownie, aby
+                rozpoznać formy.
+              </Typography>
+            )}
             {showFilters && <CandidateFiltersBar />}
             <FieldResultsSummary />
             {selected && (

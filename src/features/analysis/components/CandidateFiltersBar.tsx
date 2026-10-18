@@ -1,13 +1,18 @@
+import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
+import ListItemText from '@mui/material/ListItemText';
+import MenuItem from '@mui/material/MenuItem';
+import Select from '@mui/material/Select';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { PRIORITIES } from '@/shared/lib/detect';
-import type { Priority } from '@/shared/types/domain';
+import { INTERPRETATIONS, PRIORITIES } from '@/shared/lib/detect';
+import type { Interpretation, Priority } from '@/shared/types/domain';
 import { PRIORITY_COLOR } from '../config/interpretationStyle';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 
 const SEARCHABLE: Priority[] = ['najwyzszy', 'wysoki', 'sredni', 'niski'];
+const ALL_INTERPRETATIONS = Object.keys(INTERPRETATIONS) as Interpretation[];
 
 export function CandidateFiltersBar() {
   const filters = useAnalysisStore((s) => s.filters);
@@ -45,6 +50,27 @@ export function CandidateFiltersBar() {
           aria-label="Minimalna ocena"
         />
       </Stack>
+      <Select
+        multiple
+        size="small"
+        displayEmpty
+        value={filters.interpretations}
+        onChange={(e) => setFilters({ interpretations: e.target.value as Interpretation[] })}
+        renderValue={(v) =>
+          v.length === 0
+            ? 'Wszystkie interpretacje'
+            : v.map((i) => INTERPRETATIONS[i].label).join(', ')
+        }
+        sx={{ fontSize: 13, borderRadius: '10px' }}
+        aria-label="Interpretacje"
+      >
+        {ALL_INTERPRETATIONS.map((i) => (
+          <MenuItem key={i} value={i} dense>
+            <Checkbox size="small" checked={filters.interpretations.includes(i)} />
+            <ListItemText primary={INTERPRETATIONS[i].label} />
+          </MenuItem>
+        ))}
+      </Select>
       <Stack direction="row" sx={{ gap: 0.75, flexWrap: 'wrap' }}>
         {SEARCHABLE.map((p) => {
           const on = filters.priorities.includes(p);

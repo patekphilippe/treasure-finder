@@ -8,6 +8,8 @@ export interface CandidateFilters {
   priorities: Priority[];
   showProtected: boolean;
   showNatural: boolean;
+  /** 'nieokreslona' is most of a real sheet (small irregularities) */
+  showUndetermined: boolean;
   showRejected: boolean;
 }
 
@@ -17,6 +19,7 @@ export const DEFAULT_FILTERS: CandidateFilters = {
   priorities: [],
   showProtected: true,
   showNatural: false,
+  showUndetermined: false,
   showRejected: false,
 };
 

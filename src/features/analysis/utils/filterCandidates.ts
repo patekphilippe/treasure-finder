@@ -15,6 +15,9 @@ export function filterCandidates(
         (f.priorities.length === 0 || f.priorities.includes(c.priority)) &&
         (f.showProtected || c.priority !== 'chroniony') &&
         (f.showNatural || c.priority !== 'naturalne') &&
+        (f.showUndetermined ||
+          c.interpretation !== 'nieokreslona' ||
+          f.interpretations.includes('nieokreslona')) &&
         (f.showRejected || c.decision !== 'odrzucony'),
     )
     .sort(

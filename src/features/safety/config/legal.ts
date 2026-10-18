@@ -32,3 +32,11 @@ export const UXO_STEPS = [
   'Odejdź na bezpieczną odległość i nie pozwól nikomu podchodzić.',
   'Zadzwoń pod 112 i podaj współrzędne.',
 ];
+
+export const UXO_WARNING =
+  'Teren walk lub bombardowań: ryzyko niewybuchów. Nie kop głęboko w miejscu silnego sygnału, ' +
+  'nie dotykaj metalowych przedmiotów o kształcie pocisku. W razie wątpliwości odejdź i zadzwoń pod 112.';
+
+export const WAR_GRAVES_WARNING =
+  'Na terenach walk mogą być groby wojenne. Jeśli natrafisz na szczątki ludzkie, przerwij poszukiwania ' +
+  'i powiadom policję.';

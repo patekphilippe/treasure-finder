@@ -5,11 +5,10 @@ import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef } from 'react';
 import { POINT_STATUS_LABELS } from '@/features/points';
+import { INTERPRETATIONS, PRIORITIES } from '@/shared/lib/detect';
 import type { Candidate, PointStatus } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
-import { INTERPRETATIONS } from '@/shared/lib/detect';
 import { INTERPRETATION_STYLE, PRIORITY_COLOR } from '../config/interpretationStyle';
-import { describeCandidate } from '../utils/describeCandidate';
 
 interface CandidateListItemProps {
   candidate: Candidate;
@@ -19,6 +18,7 @@ interface CandidateListItemProps {
   onClick: () => void;
 }
 
+/** Row: interpretation and confidence, priority, score; red triangle for UXO risk. */
 export function CandidateListItem({
   candidate: c,
   selected,
@@ -26,7 +26,6 @@ export function CandidateListItem({
   onClick,
 }: CandidateListItemProps) {
   const ref = useRef<HTMLButtonElement>(null);
-  const label = INTERPRETATIONS[c.interpretation].label;
   const color = PRIORITY_COLOR[c.priority];
 
   useEffect(() => {
@@ -70,7 +69,18 @@ export function CandidateListItem({
       </Box>
       <Stack sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="subtitle2" noWrap>
-          {label}
+          {INTERPRETATIONS[c.interpretation].label}
+          <Typography component="span" variant="caption" color="text.secondary">
+            {' '}
+            {Math.round(c.confidence * 100)}%
+          </Typography>
+          {c.flags.uxo && (
+            <Icon
+              name="exclamation-triangle"
+              size={15}
+              sx={{ color: 'error.main', ml: 0.5, verticalAlign: '-2px' }}
+            />
+          )}
           {c.decision === 'przyjety' && (
             <Icon
               name="check-circle"
@@ -81,16 +91,20 @@ export function CandidateListItem({
         </Typography>
         <Typography variant="caption" color="text.secondary" noWrap>
           {fieldStatus && fieldStatus !== 'do_sprawdzenia'
-            ? `Teren: ${POINT_STATUS_LABELS[fieldStatus].toLowerCase()} · ${describeCandidate(c)}`
-            : describeCandidate(c)}
+            ? `Teren: ${POINT_STATUS_LABELS[fieldStatus].toLowerCase()}`
+            : c.needsRecompute
+              ? 'Przelicz arkusz ponownie'
+              : (c.reasons[0] ?? '')}
         </Typography>
       </Stack>
-      <Typography
-        variant="subtitle2"
-        sx={{ minWidth: 28, textAlign: 'right', color: 'text.secondary' }}
-      >
-        {c.score}
-      </Typography>
+      <Stack sx={{ alignItems: 'flex-end', flexShrink: 0 }}>
+        <Typography variant="caption" sx={{ color, fontWeight: 700 }}>
+          {PRIORITIES[c.priority].label}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          ocena {c.score}
+        </Typography>
+      </Stack>
     </ButtonBase>
   );
 }

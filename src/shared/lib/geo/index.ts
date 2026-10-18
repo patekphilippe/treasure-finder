@@ -5,3 +5,4 @@ export { coveragePercent, type Coverage } from './coveragePercent';
 export { distanceToZoneEdge } from './distanceToZoneEdge';
 export { pointInPolygon } from './pointInPolygon';
 export { toEpsg2180 } from './toEpsg2180';
+export { geometryCentroid } from './geometryCentroid';
