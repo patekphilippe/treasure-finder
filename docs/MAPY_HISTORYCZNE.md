@@ -21,9 +21,24 @@ GetCapabilities i GetMap lub pobraniem kafelków, z obejrzeniem obrazów.
 - **GUGiK mapy topograficzne układ 1942 i 1965**: brak usługi przeglądania, tylko skorowidze (`.../pub/guest/G2_SKOROWIDZE_TOPO/MapServer/WMSServer`); skany do pobrania z PZGiK jako GeoTIFF, więc przez import własny.
 - **Polona, David Rumsey, Archiwum Map WIG**: skany bez georeferencji, do importu i dopasowania w aplikacji.
 
+## Geoportale wojewódzkie
+
+Tylko 2 z 16 województw mają publiczną warstwę historyczną, której da się użyć w przeglądarce
+(EPSG:3857 i CORS sprawdzone, obrazy obejrzane).
+
+| Województwo | Usługa (WMS 1.3.0) | Zawartość | Warunki |
+|---|---|---|---|
+| **Śląskie (ORSIP)** | `https://geoportal.orsip.pl/image/services/MapyHistoryczne/<NAZWA>/ImageServer/WMSServer`, warstwa = `<NAZWA>` | `BorowaGora_100_WIG_AP` (WIG 1:100k, 1924–39, całe województwo); `BorowaGora_10_AP`, `BorowaGora_5_AP` (1:10k i 1:5k, 1958–61); `SuchaGora_10_1883_AP` (mapa górnicza 1:10k, 1883), `SuchaGora_10_1901_AP`, `SuchaGora_10_1901_1913_AP`, `SuchaGora_10_1914_1918_AP`, `SuchaGora_10_1926_AP`, `SuchaGora_10_1930_1935_AP` (tylko GOP i Zagłębie) | regulamin zabrania programów „automatyzujących korzystanie z usług”, więc tylko online |
+| Śląskie, wektory | `https://geoportal.orsip.pl/site1/rest/services/Hosted/DaneHistoryczne/FeatureServer/0` i `/1` | fortyfikacje (1495 niezweryfikowanych, 207 zweryfikowanych), granice administracyjne 1922–2020 | jak wyżej |
+| **Świętokrzyskie** | `https://orto.e-swietokrzyskie.pl/erdas-iws/ogc/wms/SIPWS` | `ORTOFOTOMAPY_ortoIIWSarchiwumNARA` (zdjęcia lotnicze z II wojny, pojedyncze kadry); ortofotomapy 1957–1973 dla małych obszarów | zakaz automatyzacji; bez licencji tylko cele niekomercyjne |
+
+Bez map historycznych lub nieosiągalne: dolnośląskie i wielkopolskie (tylko przeglądarka iMap, bez WMS),
+małopolskie i mazowieckie (nie odpowiadają), podkarpackie, lubuskie, lubelskie, łódzkie,
+warmińsko-mazurskie, zachodniopomorskie, pomorskie, opolskie, kujawsko-pomorskie, podlaskie
+(tylko mapy powojenne lub współczesne). Wrocław, Kraków, Gdańsk: nic sprzed 1945.
+
 ## Do sprawdzenia
 
-- Geoportale wojewódzkie (śląskie, dolnośląskie, pomorskie, warmińsko-mazurskie, kujawsko-pomorskie, lubuskie, zachodniopomorskie, małopolskie, lubelskie, podkarpackie).
 - Mapy rosyjskie 1:42k i austriacka Spezialkarte 1:75 000 dla Galicji: nie znaleziono otwartej usługi.
 
 ## Skorowidze arkuszy
