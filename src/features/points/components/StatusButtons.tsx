@@ -40,6 +40,7 @@ export function StatusButtons({ status, onChange }: StatusButtonsProps) {
               px: 0.5,
               borderRadius: '12px',
               lineHeight: 1.2,
+              whiteSpace: 'normal',
               fontSize: 13,
             }}
           >

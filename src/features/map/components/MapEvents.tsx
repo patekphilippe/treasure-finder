@@ -1,3 +1,4 @@
+import { useAttributionPrefix } from '../hooks/useAttributionPrefix';
 import { useFlyTo } from '../hooks/useFlyTo';
 import { useFollowPosition } from '../hooks/useFollowPosition';
 import { useLongPress } from '../hooks/useLongPress';
@@ -9,5 +10,6 @@ export function MapEvents() {
   useTrackMapView();
   useLongPress();
   useFlyTo();
+  useAttributionPrefix();
   return null;
 }
