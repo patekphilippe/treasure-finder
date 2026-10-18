@@ -20,6 +20,7 @@ describe('buildExportZip', () => {
       'poszukiwania.gpx',
       'punkty.geojson',
       'strefy.geojson',
+      'strefy_poszukiwan.geojson',
       'trasy.geojson',
       'zdjecia/',
       'zdjecia/ph1.jpg',

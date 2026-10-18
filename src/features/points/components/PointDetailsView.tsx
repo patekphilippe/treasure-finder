@@ -6,7 +6,12 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import { alpha } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
-import { FIND_REMINDER, PROTECTED_REMINDER } from '@/features/safety';
+import {
+  FIND_REMINDER,
+  PROTECTED_REMINDER,
+  UXO_WARNING,
+  WAR_GRAVES_WARNING,
+} from '@/features/safety';
 import { formatDate, formatDistance } from '@/shared/lib/format';
 import type { FieldPoint, PointStatus } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
@@ -67,6 +72,16 @@ export function PointDetailsView({
           sx={{ borderRadius: '8px' }}
         />
       </Stack>
+      {point.flags?.uxo && (
+        <Alert severity="error" icon={<Icon name="exclamation-triangle" size={20} />}>
+          {UXO_WARNING}
+        </Alert>
+      )}
+      {point.flags?.warGraves && (
+        <Alert severity="info" icon={<Icon name="cross" size={20} />}>
+          {WAR_GRAVES_WARNING}
+        </Alert>
+      )}
       {point.type === 'niewybuch' && (
         <Button
           color="error"

@@ -4,6 +4,7 @@ import { toCandidatesGeoJSON } from './toCandidatesGeoJSON';
 import { toFindsCsv } from './toFindsCsv';
 import { toGpx } from './toGpx';
 import { toPointsGeoJSON } from './toPointsGeoJSON';
+import { toSearchZonesGeoJSON } from './toSearchZonesGeoJSON';
 import { toTracksGeoJSON } from './toTracksGeoJSON';
 import { toZonesGeoJSON } from './toZonesGeoJSON';
 
@@ -27,6 +28,7 @@ export async function buildExportZip(
   zip.file(ZIP_FILES.backup, json(backup));
   zip.file(ZIP_FILES.points, json(toPointsGeoJSON(data.points)));
   zip.file(ZIP_FILES.candidates, json(toCandidatesGeoJSON(data.candidates)));
+  zip.file(ZIP_FILES.searchZones, json(toSearchZonesGeoJSON(data.candidates)));
   zip.file(ZIP_FILES.tracks, json(toTracksGeoJSON(data.tracks)));
   zip.file(ZIP_FILES.zones, json(toZonesGeoJSON(data.zones)));
   zip.file(ZIP_FILES.gpx, toGpx(data.points, data.tracks));

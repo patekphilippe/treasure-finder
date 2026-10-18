@@ -24,6 +24,7 @@ export const ZIP_FILES = {
   zones: 'strefy.geojson',
   gpx: 'poszukiwania.gpx',
   finds: 'znaleziska.csv',
+  searchZones: 'strefy_poszukiwan.geojson',
   photosDir: 'zdjecia/',
 } as const;
 

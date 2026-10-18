@@ -5,7 +5,7 @@ export type NewPointInput = Pick<
   FieldPoint,
   'type' | 'name' | 'desc' | 'depthCm' | 'lat' | 'lng' | 'accM' | 'src' | 'photoId'
 > &
-  Partial<Pick<FieldPoint, 'status' | 'candidateId'>>;
+  Partial<Pick<FieldPoint, 'status' | 'candidateId' | 'flags'>>;
 
 export function createPoint(input: NewPointInput, now: number): FieldPoint {
   return {

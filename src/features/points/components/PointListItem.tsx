@@ -49,6 +49,13 @@ export function PointListItem({ point, distM, onClick }: PointListItemProps) {
       <Stack sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="subtitle2" noWrap>
           {point.name}
+          {point.flags?.uxo && (
+            <Icon
+              name="exclamation-triangle"
+              size={15}
+              sx={{ color: 'error.main', ml: 0.5, verticalAlign: '-2px' }}
+            />
+          )}
         </Typography>
         <Typography variant="caption" color="text.secondary" noWrap>
           {POINT_STATUS_LABELS[point.status]} · {formatDate(point.created)}

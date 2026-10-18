@@ -23,6 +23,7 @@ export function candidatePointInput(c: Candidate): NewPointInput {
     accM: null,
     src: 'analiza',
     candidateId: c.id,
+    ...(c.flags.uxo || c.flags.warGraves ? { flags: c.flags } : {}),
     photoId: null,
   };
 }

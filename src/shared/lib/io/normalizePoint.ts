@@ -22,6 +22,9 @@ export function normalizePoint(raw: unknown): FieldPoint | null {
   const created = num(raw.created) ?? num(raw.updated) ?? 0;
   const photoId = str(raw.photoId ?? raw.photo) || null;
   const candidateId = str(raw.candidateId);
+  const flags = isRecord(raw.flags)
+    ? { uxo: raw.flags.uxo === true, warGraves: raw.flags.warGraves === true }
+    : undefined;
 
   return {
     id,
@@ -35,6 +38,7 @@ export function normalizePoint(raw: unknown): FieldPoint | null {
     accM: num(raw.accM ?? raw.acc),
     src,
     ...(candidateId && { candidateId }),
+    ...(flags && (flags.uxo || flags.warGraves) && { flags }),
     photoId,
     created,
     updated: num(raw.updated) ?? created,

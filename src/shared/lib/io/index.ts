@@ -18,5 +18,6 @@ export { toCandidatesGeoJSON } from './toCandidatesGeoJSON';
 export { toFindsCsv } from './toFindsCsv';
 export { toGpx } from './toGpx';
 export { toPointsGeoJSON } from './toPointsGeoJSON';
+export { toSearchZonesGeoJSON } from './toSearchZonesGeoJSON';
 export { toTracksGeoJSON } from './toTracksGeoJSON';
 export { toZonesGeoJSON } from './toZonesGeoJSON';

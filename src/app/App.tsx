@@ -1,6 +1,7 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider } from '@mui/material/styles';
 import { lazy, Suspense } from 'react';
+import { useLoadCandidates } from '@/features/analysis/field';
 import { useCompass, useGeolocation } from '@/features/gps';
 import { useLoadPoints } from '@/features/points';
 import { useLoadAreas } from '@/features/roughness';
@@ -28,6 +29,7 @@ export function App() {
   useLoadZones();
   useZoneAlerts();
   useLoadAreas();
+  useLoadCandidates();
   const mode = useUiStore((s) => s.mode);
 
   return (

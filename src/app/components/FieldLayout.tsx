@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box';
+import { AcceptedZonesLayer } from '@/features/analysis/field';
 import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { GuidancePanel } from '@/features/navigation';
 import { RoughnessLegend } from '@/features/roughness';
@@ -13,7 +14,9 @@ export function FieldLayout() {
 
   return (
     <Box sx={{ position: 'absolute', inset: 0 }}>
-      <MapView />
+      <MapView>
+        <AcceptedZonesLayer />
+      </MapView>
       <MapCrosshair />
       <FollowButton />
       <GuidancePanel />

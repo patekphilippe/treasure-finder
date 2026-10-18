@@ -10,12 +10,15 @@ import { saveCustomLayers } from '../utils/saveCustomLayers';
 interface LayersState {
   baseLayer: BaseLayerId;
   nmtOn: boolean;
+  /** search zones of accepted candidates */
+  searchZonesOn: boolean;
   /** 0–1 */
   nmtOpacity: number;
   /** kept in their own localStorage key as a plain CustomLayer[] */
   customLayers: CustomLayer[];
   setBaseLayer: (id: BaseLayerId) => void;
   setNmtOn: (on: boolean) => void;
+  setSearchZonesOn: (on: boolean) => void;
   setNmtOpacity: (opacity: number) => void;
   addCustomLayer: (layer: CustomLayer) => void;
   updateCustomLayer: (id: string, patch: Partial<CustomLayer>) => void;
@@ -33,10 +36,12 @@ export const useLayersStore = create<LayersState>()(
         baseLayer: 'osm',
         nmtOn: false,
         nmtOpacity: 0.6,
+        searchZonesOn: true,
         customLayers: loadCustomLayers(browserStorage()),
         setBaseLayer: (baseLayer) => set({ baseLayer }),
         setNmtOn: (nmtOn) => set({ nmtOn }),
         setNmtOpacity: (nmtOpacity) => set({ nmtOpacity }),
+        setSearchZonesOn: (searchZonesOn) => set({ searchZonesOn }),
         addCustomLayer: (layer) => commit([...get().customLayers, layer]),
         updateCustomLayer: (id, patch) =>
           commit(get().customLayers.map((l) => (l.id === id ? { ...l, ...patch } : l))),
@@ -46,7 +51,12 @@ export const useLayersStore = create<LayersState>()(
     {
       name: LAYER_SETTINGS_KEY,
       storage: createJSONStorage(() => browserStorage() ?? sessionStorage),
-      partialize: (s) => ({ baseLayer: s.baseLayer, nmtOn: s.nmtOn, nmtOpacity: s.nmtOpacity }),
+      partialize: (s) => ({
+        baseLayer: s.baseLayer,
+        nmtOn: s.nmtOn,
+        nmtOpacity: s.nmtOpacity,
+        searchZonesOn: s.searchZonesOn,
+      }),
     },
   ),
 );

@@ -37,6 +37,8 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
   const [adding, setAdding] = useState(false);
   const zoneCount = useZonesStore((s) => s.zones.length);
   const showSheet = useUiStore((s) => s.showSheet);
+  const searchZonesOn = useLayersStore((s) => s.searchZonesOn);
+  const setSearchZonesOn = useLayersStore((s) => s.setSearchZonesOn);
   const { swathM, showCoverage, setSwathM, setShowCoverage } = useCoverageStore();
 
   return (
@@ -91,6 +93,19 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
               valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
             />
           </Stack>
+        </Stack>
+
+        <Divider />
+
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+          <Icon name="bullseye" size={22} />
+          <Stack sx={{ flex: 1 }}>
+            <Typography variant="subtitle2">Strefy poszukiwań</Typography>
+            <Typography variant="caption" color="text.secondary">
+              Przyjęte w analizie miejsca: gdzie szukać wokół formy
+            </Typography>
+          </Stack>
+          <Switch checked={searchZonesOn} onChange={(e) => setSearchZonesOn(e.target.checked)} />
         </Stack>
 
         <Divider />

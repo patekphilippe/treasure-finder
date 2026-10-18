@@ -66,6 +66,8 @@ export interface FieldPoint {
   src: 'gps' | 'mapa' | 'import' | 'analiza';
   /** set when the point was created from an analysis candidate */
   candidateId?: string;
+  /** safety flags copied from the candidate (UXO, war graves) */
+  flags?: CandidateFlags;
   /** key in the photos store (JPEG Blob) */
   photoId: string | null;
   created: number;
