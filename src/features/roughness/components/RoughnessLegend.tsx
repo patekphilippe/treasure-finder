@@ -76,10 +76,8 @@ export function RoughnessLegend() {
                 }}
               />
               <Typography variant="caption" sx={{ flex: 1 }}>
-                Obszar do sprawdzenia (numer)
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {areas.length}
+                Kółko z numerem: obszar do sprawdzenia. Na mapie jest ich {areas.length}, lista w
+                Warstwach.
               </Typography>
             </Stack>
           )}
