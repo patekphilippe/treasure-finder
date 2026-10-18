@@ -63,12 +63,12 @@ export function ImportCandidatesButton({ variant = 'compact' }: ImportCandidates
       ) : (
         <Button
           data-tour="import-candidates"
-          variant="contained"
+          color="inherit"
           disabled={busy}
           startIcon={busy ? <CircularProgress size={14} /> : <Icon name="file-import" size={18} />}
           onClick={() => inputRef.current?.click()}
         >
-          Wczytaj kandydatów
+          Wczytaj kandydatów z pliku
         </Button>
       )}
     </>
