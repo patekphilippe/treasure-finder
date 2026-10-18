@@ -40,3 +40,6 @@ export const UXO_WARNING =
 export const WAR_GRAVES_WARNING =
   'Na terenach walk mogą być groby wojenne. Jeśli natrafisz na szczątki ludzkie, przerwij poszukiwania ' +
   'i powiadom policję.';
+
+export const HISTORICAL_ONLINE_NOTE =
+  'Tylko z internetem: dostawcy nie pozwalają pobierać tych map do pracy bez sieci.';

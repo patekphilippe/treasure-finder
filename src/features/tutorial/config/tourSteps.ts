@@ -143,6 +143,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'layers',
   },
   {
+    id: 'layers-historical',
+    target: 'layers-historical',
+    title: 'Mapa historyczna',
+    content:
+      'Dawne mapy na mapie: Messtischblatt, WIG, mapy rosyjskie i austriackie oraz zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Suwakiem zmienisz krycie.',
+    mode: 'field',
+    sheet: 'layers',
+  },
+  {
     id: 'layers-search-zones',
     target: 'layers-search-zones',
     title: 'Strefy poszukiwań',

@@ -16,6 +16,7 @@ import { TopoLayer } from '../layers/TopoLayer';
 import { AreaMarkers } from './AreaMarkers';
 import { CoverageLayer } from './CoverageLayer';
 import { CustomLayers } from './CustomLayers';
+import { HistoricalMapLayer } from './HistoricalMapLayer';
 import { DraftMarker } from './DraftMarker';
 import { GuidanceLine } from './GuidanceLine';
 import { MapEvents } from './MapEvents';
@@ -62,6 +63,7 @@ export function MapView({ children }: MapViewProps) {
         />
       )}
       {baseLayer === 'topo' && <TopoLayer key="topo" maxZoom={MAX_ZOOM} />}
+      <HistoricalMapLayer />
       <CustomLayers />
       <RoughnessOverlay />
       {nmtOn && <NmtShadedLayer opacity={nmtOpacity} zIndex={50} maxZoom={MAX_ZOOM} />}

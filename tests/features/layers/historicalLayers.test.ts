@@ -1,0 +1,27 @@
+import { describe, expect, it } from 'vitest';
+import { HISTORICAL_LAYERS, ORTHO_ARCHIVE_ID } from '@/features/layers/config/historicalLayers';
+import { findHistoricalLayer } from '@/features/layers/utils/findHistoricalLayer';
+import { historicalWmsParams } from '@/features/layers/utils/historicalWmsParams';
+
+describe('historical layers', () => {
+  it('has unique ids and EPSG:3857 layers for IH PAN', () => {
+    const ids = HISTORICAL_LAYERS.map((l) => l.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const l of HISTORICAL_LAYERS.filter((x) => x.url.includes('cenagis'))) {
+      expect(l.layers).toMatch(/_3857$/);
+    }
+  });
+
+  it('finds a layer by id and ignores unknown or null ids', () => {
+    expect(findHistoricalLayer('wig100k')?.label).toContain('WIG');
+    expect(findHistoricalLayer('nie-ma')).toBeUndefined();
+    expect(findHistoricalLayer(null)).toBeUndefined();
+  });
+
+  it('adds a whole-year TIME range only for time-enabled layers', () => {
+    const ortho = findHistoricalLayer(ORTHO_ARCHIVE_ID)!;
+    expect(historicalWmsParams(ortho, 2004)).toEqual({ TIME: '2004-01-01/2004-12-31' });
+    expect(historicalWmsParams(ortho, 1900)).toEqual({ TIME: '1995-01-01/1995-12-31' });
+    expect(historicalWmsParams(findHistoricalLayer('m25k')!, 2004)).toEqual({});
+  });
+});

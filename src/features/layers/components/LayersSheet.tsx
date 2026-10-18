@@ -17,6 +17,7 @@ import { BASE_LAYER_OPTIONS } from '../config/baseLayers';
 import { useLayersStore } from '../store/useLayersStore';
 import { CustomLayerForm } from './CustomLayerForm';
 import { CustomLayerItem } from './CustomLayerItem';
+import { HistoricalSection } from './HistoricalSection';
 
 interface LayersSheetProps {
   onClose: () => void;
@@ -97,6 +98,10 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
         </Stack>
 
         <SheetReliefSection />
+
+        <Divider />
+
+        <HistoricalSection />
 
         <Divider />
 
