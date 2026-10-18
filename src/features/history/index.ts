@@ -6,3 +6,4 @@ export { FitCornersBar } from './components/FitCornersBar';
 export { FitCornersLayer } from './components/FitCornersLayer';
 export { OwnMapsLayer } from './components/OwnMapsLayer';
 export { useOwnMapsStore } from './store/useOwnMapsStore';
+export { ProposalsLayer } from './components/ProposalsLayer';

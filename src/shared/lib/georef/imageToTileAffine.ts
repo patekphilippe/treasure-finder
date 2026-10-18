@@ -13,12 +13,14 @@ export function imageToTileAffine(
   sourceToPixel: Homography,
   crs: CrsTransform,
   tilePx: number,
+  /** for a non-square target (a whole view); defaults to a square tile */
+  heightPx = tilePx,
 ): Affine {
   const [q0, q1, q2] = corners2180.map((c) => {
     const [x, y] = crs.from2180(c.x, c.y);
     return applyHomography(sourceToPixel, { x, y });
   }) as [XY, XY, XY];
-  // forward image → tile: tile = M · (img − q0); M maps (q1 − q0) → (tilePx, 0), (q2 − q0) → (0, tilePx)
+  // forward image → tile: tile = M · (img − q0); M maps (q1 − q0) → (tilePx, 0), (q2 − q0) → (0, heightPx)
   const ux = q1.x - q0.x;
   const uy = q1.y - q0.y;
   const vx = q2.x - q0.x;
@@ -26,7 +28,7 @@ export function imageToTileAffine(
   const det = ux * vy - vx * uy;
   const a = (tilePx * vy) / det;
   const c = (-tilePx * vx) / det;
-  const b = (-tilePx * uy) / det;
-  const d = (tilePx * ux) / det;
+  const b = (-heightPx * uy) / det;
+  const d = (heightPx * ux) / det;
   return { a, b, c, d, e: -(a * q0.x + c * q0.y), f: -(b * q0.x + d * q0.y) };
 }

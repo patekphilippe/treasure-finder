@@ -5,6 +5,7 @@ import {
   FitCornersBar,
   FitCornersLayer,
   OwnMapsLayer,
+  ProposalsLayer,
   useOwnMapsStore,
 } from '@/features/history';
 import { FollowButton, MapCrosshair, MapView } from '@/features/map';
@@ -29,6 +30,7 @@ export function FieldLayout() {
         <AcceptedZonesLayer />
         <ContextLayer />
         <FitCornersLayer />
+        <ProposalsLayer />
         {selectingArea && <AreaSelectFrame />}
       </MapView>
       <MapCrosshair />

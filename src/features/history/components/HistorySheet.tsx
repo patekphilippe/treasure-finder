@@ -26,6 +26,7 @@ import { useContextStore } from '../store/useContextStore';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { createContextPoint } from '../utils/createContextPoint';
 import { representativePoint } from '../utils/representativePoint';
+import { AiReadingSection } from './AiReadingSection';
 import { OwnMapsSection } from './OwnMapsSection';
 
 interface HistorySheetProps {
@@ -78,6 +79,10 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
       <Sheet title="Mapy i obiekty historyczne" onClose={onClose} hidden={picking}>
         <Stack spacing={2}>
           <OwnMapsSection />
+
+          <Divider />
+
+          <AiReadingSection />
 
           <Divider />
 
