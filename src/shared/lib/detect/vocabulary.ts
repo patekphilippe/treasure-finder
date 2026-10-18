@@ -1,4 +1,4 @@
-import type { FormKind, Interpretation, Priority } from '@/shared/types/domain';
+import type { CandidateFlags, FormKind, Interpretation, Priority } from '@/shared/types/domain';
 
 /** Polish labels for the interpretation model (shared by UI, reasons and exports). */
 export const INTERPRETATIONS: Record<Interpretation, { label: string; priority: Priority }> = {
@@ -48,3 +48,28 @@ export function bumpPriority(p: Priority): Priority {
   const i = LADDER.indexOf(p);
   return i < 0 ? p : LADDER[Math.min(LADDER.length - 1, i + 1)]!;
 }
+
+const NONE: CandidateFlags = { uxo: false, warGraves: false };
+const UXO: CandidateFlags = { uxo: true, warGraves: false };
+const WAR: CandidateFlags = { uxo: true, warGraves: true };
+
+/** Safety flags per interpretation (specification table). */
+export const FLAGS: Record<Interpretation, CandidateFlags> = {
+  zaginiona_osada: NONE,
+  oboz: UXO,
+  ziemianka: NONE,
+  okop: WAR,
+  stanowiska_strzeleckie: WAR,
+  stanowisko_sprzetu: UXO,
+  leje: WAR,
+  dawna_droga: NONE,
+  pola_dawne: NONE,
+  mielerz: NONE,
+  wyrobisko: NONE,
+  row_melioracyjny_graniczny: NONE,
+  kurhan: NONE,
+  grodzisko_waly: NONE,
+  wykrot: NONE,
+  naturalna_inna: NONE,
+  nieokreslona: NONE,
+};

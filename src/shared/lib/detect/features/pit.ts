@@ -78,7 +78,7 @@ export function spoilAround(
 export interface Profile {
   /** plane fitted to the surroundings (local metres: x = col·cell, y = −row·cell) */
   plane: Plane | null;
-  /** maximum depth (pit) or height (mound) against that plane, metres */
+  /** depth (pit) or height (mound) against that plane, metres: 95th percentile (robust to single cells) */
   maxM: number;
   /** share of the area deeper / higher than 80 % of the maximum */
   deepShare: number;
@@ -118,7 +118,11 @@ export function profileAgainstSurroundings(
     const ground = plane.a * col * s.cell + plane.b * -row * s.cell + plane.c;
     vals.push(sign * (s.dem[i]! - ground));
   }
-  const maxM = Math.max(0, ...vals);
+  const sorted = [...vals].sort((a, b) => a - b);
+  const maxM = Math.max(
+    0,
+    sorted[Math.min(sorted.length - 1, Math.floor(0.95 * sorted.length))] ?? 0,
+  );
   const deepShare =
     maxM > 0 ? vals.filter((v) => v > pr.deepShareLevel * maxM).length / vals.length : 0;
   return { plane, maxM, deepShare };

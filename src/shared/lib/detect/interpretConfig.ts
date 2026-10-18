@@ -24,8 +24,11 @@ export const interpretConfig = {
     sectors: 8,
     /** a sector "has spoil" when its share of the strongest sector is at least this */
     sectorShareMin: 0.35,
-    /** mean positive LRM in the ring below this: no spoil at all */
-    minMeanM: 0.04,
+    /**
+     * strongest sector's mean positive LRM below this: no spoil at all. The LRM halo of nearby
+     * pits reaches ~0.05 m, so real spoil (crater rims, root plates: 0.2–0.4 m) starts above 0.1.
+     */
+    minMeanM: 0.1,
     /** crater: completeness ≥ 0.75 */
     craterCompleteness: 0.75,
     /** uprooted tree: ≥ 60 % of the mass in 1–2 adjacent sectors and the mound touches the pit */

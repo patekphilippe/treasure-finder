@@ -97,9 +97,7 @@ describe('ring and horseshoe', () => {
 
 describe('dugout entrance', () => {
   it('finds the notch on the east side, none on a plain rectangle', () => {
-    const t = new Terrain()
-      .add(rectPit(100, 100, 5, 4, 1))
-      .add(notchX(102.5, 104.5, 100, 1, 0.7, 0.4));
+    const t = new Terrain().add(rectPit(100, 100, 5, 4, 1)).add(notchX(103, 105, 100, 1, 0.7, 0.4));
     const { c, s } = probe(t, 100, 100, 'concave');
     const e = entrance(c, s.w, s.cell);
     expect(e.found).toBe(true);

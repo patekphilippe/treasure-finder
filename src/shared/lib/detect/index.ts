@@ -3,3 +3,7 @@ export { croftonPerimeter, measure, type Shape } from './measure';
 export { close, dilate, erode, holes, open } from './morphology';
 export { interpretConfig, type InterpretConfig } from './interpretConfig';
 export { bumpPriority, FORMS, INTERPRETATIONS, PRIORITIES } from './vocabulary';
+export { buildScene, sceneComponents, type Scene } from './scene';
+export { detectForms, type Detection, type DetectOptions } from './pipeline';
+export type { ExclusionSpec, ZoneSpec } from './zoneSpec';
+export { FLAGS } from './vocabulary';
