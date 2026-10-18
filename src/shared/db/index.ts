@@ -6,3 +6,4 @@ export { pointsRepo } from './repos/pointsRepo';
 export { tracksRepo } from './repos/tracksRepo';
 export { zonesRepo } from './repos/zonesRepo';
 export { rastersRepo } from './repos/rastersRepo';
+export { contextRepo } from './repos/contextRepo';

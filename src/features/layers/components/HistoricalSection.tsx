@@ -1,3 +1,4 @@
+import Button from '@mui/material/Button';
 import Link from '@mui/material/Link';
 import MenuItem from '@mui/material/MenuItem';
 import Slider from '@mui/material/Slider';
@@ -5,6 +6,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { HISTORICAL_ONLINE_NOTE } from '@/features/safety';
+import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon } from '@/shared/ui';
 import { HISTORICAL_LAYERS } from '../config/historicalLayers';
 import { useLayersStore } from '../store/useLayersStore';
@@ -20,6 +22,7 @@ export function HistoricalSection() {
   const setOpacity = useLayersStore((s) => s.setHistoricalOpacity);
   const setYear = useLayersStore((s) => s.setHistoricalYear);
   const layer = findHistoricalLayer(historicalId);
+  const showSheet = useUiStore((s) => s.showSheet);
 
   return (
     <Stack data-tour="layers-historical" spacing={1}>
@@ -93,6 +96,14 @@ export function HistoricalSection() {
           </Typography>
         </>
       )}
+      <Button
+        size="small"
+        startIcon={<Icon name="map-marked-alt" size={16} />}
+        onClick={() => showSheet('history')}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Obiekty z map archiwalnych
+      </Button>
     </Stack>
   );
 }

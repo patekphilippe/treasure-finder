@@ -153,6 +153,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'layers',
   },
   {
+    id: 'history-add',
+    target: 'history-add',
+    title: 'Obiekty z map archiwalnych',
+    content:
+      'Widzisz na dawnej mapie młyn, karczmę albo wieś, której dziś nie ma? Wybierz rodzaj i wskaż miejsce celownikiem. Kandydaci z analizy NMT w pobliżu dostaną wyższy wynik.',
+    mode: 'field',
+    sheet: 'history',
+  },
+  {
     id: 'layers-search-zones',
     target: 'layers-search-zones',
     title: 'Strefy poszukiwań',

@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box';
 import { AcceptedZonesLayer, SheetReliefLayer } from '@/features/analysis/field';
+import { ContextLayer } from '@/features/history';
 import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { GuidancePanel } from '@/features/navigation';
 import { AreaDownloadBar, AreaSelectFrame, useOfflineStore } from '@/features/offline';
@@ -19,6 +20,7 @@ export function FieldLayout() {
       <MapView>
         <SheetReliefLayer />
         <AcceptedZonesLayer />
+        <ContextLayer />
         {selectingArea && <AreaSelectFrame />}
       </MapView>
       <MapCrosshair />

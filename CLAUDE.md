@@ -58,7 +58,7 @@ tests/                      testy Vitest, struktura odpowiada src/
 ```
 
 Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `analysis`, `zones`, `safety`,
-`roughness`, `tutorial`, `offline`.
+`roughness`, `tutorial`, `offline`, `history` (obiekty z map archiwalnych, analiza map historycznych, zgłoszenia).
 
 - `services/` — logika poza Reactem (np. `tracks/services/trackRecorder.ts`, import/eksport w `data/services/`).
 - Stan współdzielony między funkcjami jest w `src/shared/store/`: `useUiStore` (tryb, otwarty arkusz,

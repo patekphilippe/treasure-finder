@@ -4,6 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
+import { useContextStore } from '@/features/history';
 import { ImportError } from '@/shared/lib/io/parseBackup';
 import { Icon } from '@/shared/ui';
 import { applyImport } from '../services/applyImport';
@@ -22,6 +23,7 @@ export function ImportSection() {
     setResult(null);
     try {
       const summary = await applyImport(await readImportFile(file));
+      if (summary.contextAdded) void useContextStore.getState().load();
       setResult({ ok: true, lines: describeImport(summary) });
     } catch (e) {
       setResult({

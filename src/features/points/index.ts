@@ -1,4 +1,5 @@
 export { AddPointSheet } from './components/AddPointSheet';
+export { PickLocationBar } from './components/PickLocationBar';
 export { PointDetailsSheet } from './components/PointDetailsSheet';
 export { PointsListSheet } from './components/PointsListSheet';
 export { POINT_STATUS_LABELS, POINT_TYPES } from './config/pointTypes';
