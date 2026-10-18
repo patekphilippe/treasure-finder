@@ -1,7 +1,6 @@
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import LinearProgress from '@mui/material/LinearProgress';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -30,7 +29,6 @@ export function TutorialTooltip({
         overflow: 'hidden',
       }}
     >
-      <LinearProgress variant="determinate" value={((index + 1) / size) * 100} />
       <Stack spacing={1} sx={{ p: 2, pb: 1.5 }}>
         <Stack direction="row" sx={{ alignItems: 'flex-start', gap: 1 }}>
           <Stack sx={{ flex: 1 }}>
