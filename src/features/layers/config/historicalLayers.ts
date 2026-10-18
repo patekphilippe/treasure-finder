@@ -19,29 +19,6 @@ export interface HistoricalLayer {
   yearRange?: { min: number; max: number };
 }
 
-const IHPAN_WMS = 'https://pastmaps.cenagis.edu.pl/geoserver/ihpan/wms';
-const IHPAN_ATTRIBUTION =
-  '<a href="https://pastmaps.cenagis.edu.pl/" target="_blank" rel="noreferrer">IH PAN, Mapy z przeszłością</a>, skany: Mapster';
-const IHPAN_TERMS = 'https://pastmaps.cenagis.edu.pl/';
-
-const ihpan = (
-  id: string,
-  label: string,
-  years: string,
-  coverage: string,
-  maxNativeZoom: number,
-): HistoricalLayer => ({
-  id,
-  label,
-  years,
-  coverage,
-  url: IHPAN_WMS,
-  layers: `${id}_3857`,
-  maxNativeZoom,
-  attribution: IHPAN_ATTRIBUTION,
-  termsUrl: IHPAN_TERMS,
-});
-
 const UMWD_ATTRIBUTION =
   'Źródło danych: <a href="https://geoportal.dolnyslask.pl/" target="_blank" rel="noreferrer">Urząd Marszałkowski Województwa Dolnośląskiego</a>';
 const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
@@ -61,17 +38,10 @@ const umwd = (id: string, label: string, years: string): HistoricalLayer => ({
 
 export const ORTHO_ARCHIVE_ID = 'orto-archiwalna';
 
+// IH PAN „Mapy z przeszłością” (WIG, Messtischblatt, mapy rosyjskie): czeka na zgodę, docs/MAPY_HISTORYCZNE.md
 export const HISTORICAL_LAYERS: readonly HistoricalLayer[] = [
-  ihpan('m25k', 'Messtischblatt 1:25 000', '1870–1945', 'Dawne ziemie niemieckie', 17),
   umwd('UMWD_Messtischblat_starsze', 'Messtischblatt Dolny Śląsk, starsze wydania', '1883–1942'),
   umwd('UMWD_Messtischblat_nowsze', 'Messtischblatt Dolny Śląsk, nowsze wydania', '1905–1944'),
-  ihpan('wig25k','WIG 1:25 000', '1918–1939', 'Część II RP', 17),
-  ihpan('wig100k', 'WIG 1:100 000', '1918–1939', 'Cała Polska', 15),
-  ihpan('kdr', 'Karte des Deutschen Reiches 1:100 000', 'ok. 1900', 'Cała Polska', 15),
-  ihpan('kdwr', 'Karte des Westlichen Russlands 1:100 000', '1914–1921', 'Dawny zabór rosyjski', 15),
-  ihpan('dwuwiorstowka', 'Dwuwiorstówka 1:84 000', '1908–1936', 'Dawny zabór rosyjski', 15),
-  ihpan('kummersberg', 'Mapa Galicji Kummersberga 1:115 200', '1855', 'Galicja', 14),
-  ihpan('TKKP_126k', 'Topograficzna Karta Królestwa Polskiego', '1839–1843', 'Królestwo Polskie', 14),
   {
     id: ORTHO_ARCHIVE_ID,
     label: 'Ortofotomapa archiwalna',

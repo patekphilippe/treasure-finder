@@ -66,7 +66,8 @@ mapy szczegółowej Polski 1:25 000 WIG* (PPK 2014), OSM wiki (siatka MTB).
 
 1. Warstwy historyczne wyłącznie online. Żadne z otwartych źródeł nie pozwala na zbiorcze pobieranie
    kafelków, więc nie trafiają do `planAreaTiles`. Offline: import własnych GeoTIFF (np. z PZGiK).
-2. Domyślny zestaw: IH PAN (WIG 25k i 100k, Messtischblatt, KdDR, dwuwiorstówka, Kummersberg) oraz
-   ortofotomapy archiwalne GUGiK z wyborem roku. Przed publikacją aplikacji: zgoda IH PAN.
+2. W aplikacji teraz: Messtischblatt z geoportalu Dolnego Śląska i ortofotomapy archiwalne GUGiK
+   z wyborem roku. IH PAN (WIG 25k i 100k, Messtischblatt, KdDR, dwuwiorstówka, Kummersberg)
+   wyłączone do czasu zgody; wpisy były w commicie b9a2caf.
 3. SLUB jako opcja dla ostrzejszych arkuszy Messtischblatt na dawnych ziemiach niemieckich.
 4. W aplikacji przy każdej warstwie: atrybucja, rok, link do warunków.

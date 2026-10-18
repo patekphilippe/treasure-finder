@@ -147,7 +147,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-historical',
     title: 'Mapa historyczna',
     content:
-      'Dawne mapy na mapie: Messtischblatt, WIG, mapy rosyjskie i austriackie oraz zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Suwakiem zmienisz krycie.',
+      'Dawne mapy na mapie: przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Suwakiem zmienisz krycie.',
     mode: 'field',
     sheet: 'layers',
   },
