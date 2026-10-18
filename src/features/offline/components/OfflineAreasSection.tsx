@@ -2,7 +2,6 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
-import { useLayersStore } from '@/features/layers';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { ConfirmDialog, Icon } from '@/shared/ui';
@@ -14,8 +13,7 @@ const SHOW_ZOOM = 16;
 
 /** Section in Dane: download a map area for work without signal, and the saved areas. */
 export function OfflineAreasSection() {
-  const { areas, load, startSelecting, preselectBase, remove } = useOfflineStore();
-  const baseLayer = useLayersStore((s) => s.baseLayer);
+  const { areas, load, startSelecting, remove } = useOfflineStore();
   const closeSheet = useUiStore((s) => s.closeSheet);
   const flyTo = useMapViewStore((s) => s.flyTo);
   const [toDelete, setToDelete] = useState<OfflineArea | null>(null);
@@ -30,8 +28,8 @@ export function OfflineAreasSection() {
         Mapy offline
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        Ortofotomapa, mapa topograficzna i cieniowanie NMT wybranego obszaru (przybliżenia 12–19) do
-        pracy w terenie bez zasięgu.
+        Ortofotomapa i cieniowanie NMT wybranego obszaru (przybliżenia 12–19) do pracy w terenie bez
+        zasięgu. Mapa topograficzna działa tylko z internetem.
       </Typography>
       {areas.length > 0 && (
         <Stack>
@@ -58,7 +56,6 @@ export function OfflineAreasSection() {
         startIcon={<Icon name="download" size={20} />}
         onClick={() => {
           closeSheet();
-          preselectBase(baseLayer);
           startSelecting();
         }}
       >

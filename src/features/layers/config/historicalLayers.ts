@@ -56,7 +56,8 @@ export const HISTORICAL_LAYERS: readonly HistoricalLayer[] = [
     maxNativeZoom: 19,
     // MaxScaleDenominator 1:47 247; with 512 px tiles that is zoom 14
     minZoom: 14,
-    attribution: '<a href="https://www.geoportal.gov.pl/" target="_blank" rel="noreferrer">GUGiK</a>',
+    attribution:
+      '<a href="https://www.geoportal.gov.pl/" target="_blank" rel="noreferrer">GUGiK</a>',
     termsUrl: 'https://www.geoportal.gov.pl/',
     yearRange: { min: 1995, max: 2025 },
   },

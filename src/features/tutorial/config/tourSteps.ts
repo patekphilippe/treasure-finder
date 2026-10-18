@@ -130,7 +130,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-base',
     title: 'Podkład',
     content:
-      'Mapa (OpenStreetMap), Ortofoto, czyli zdjęcia lotnicze z Geoportalu, albo Topo, czyli mapa topograficzna 1:10 000 z poziomicami, ścieżkami i rowami.',
+      'Mapa (OpenStreetMap), Ortofoto, czyli zdjęcia lotnicze z Geoportalu, albo Topo, czyli mapa topograficzna 1:10 000 z poziomicami, ścieżkami i rowami (tylko z internetem).',
     mode: 'field',
     sheet: 'layers',
   },

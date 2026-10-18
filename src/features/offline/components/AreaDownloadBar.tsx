@@ -17,7 +17,7 @@ export function AreaDownloadBar() {
   const { layers, progress, setLayers, stopSelecting, download, cancelDownload } =
     useOfflineStore();
   const customLayers = downloadableLayers(useLayersStore((s) => s.customLayers));
-  const baseIsOsm = useLayersStore((s) => s.baseLayer === 'osm');
+  const baseLayer = useLayersStore((s) => s.baseLayer);
   const showToast = useToastStore((s) => s.show);
   const { plan, layerNames } = useAreaPlan();
 
@@ -78,7 +78,6 @@ export function AreaDownloadBar() {
         <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
           {toggle(layers.ortho, 'Ortofotomapa', () => setLayers({ ortho: !layers.ortho }))}
           {toggle(layers.nmt, 'Cieniowanie NMT', () => setLayers({ nmt: !layers.nmt }))}
-          {toggle(layers.topo, 'Mapa topograficzna', () => setLayers({ topo: !layers.topo }))}
           {customLayers.map((l) => {
             const on = layers.custom.includes(l.id);
             return toggle(on, l.name, () =>
@@ -100,9 +99,11 @@ export function AreaDownloadBar() {
             {info}
           </Typography>
         )}
-        {baseIsOsm && !progress && (
+        {(baseLayer === 'osm' || baseLayer === 'topo') && !progress && (
           <Typography variant="caption" color="text.secondary">
-            Podkład OpenStreetMap nie jest pobierany: jego serwery zabraniają masowego pobierania.
+            {baseLayer === 'osm'
+              ? 'Podkład OpenStreetMap nie jest pobierany: jego serwery zabraniają masowego pobierania.'
+              : 'Mapa topograficzna działa tylko z internetem: warunki usługi Geoportalu zabraniają jej pobierania. Bez zasięgu przełącz podkład na Ortofoto.'}
           </Typography>
         )}
         <Stack direction="row" sx={{ justifyContent: 'flex-end', gap: 1 }}>

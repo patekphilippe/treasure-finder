@@ -15,17 +15,21 @@ Stan po krokach 1–3 (18.10.2026).
 3. Włącz tryb samolotowy, otwórz aplikację z ikony, przewiń do obszaru i przybliżaj od 12 do 19.
 4. Nagraj krótką trasę i dodaj punkt bez zasięgu.
 
-## Warunki Geoportalu (sprawdzone 18.10.2026)
+## Warunki usług (sprawdzone 18.10.2026 w GetCapabilities)
 
-- Ortofotomapa i dane Geoportalu są „dostępne bezpłatnie i możliwe do dowolnego wykorzystania”.
-- Regulamin serwisu wymaga tylko podania źródła; nie określa limitów ani zakazu zapisywania kafelków.
-  Mapa pokazuje „© GUGiK”.
-- Aplikacja i tak pobiera grzecznie: 4 zapytania naraz, najwyżej 3000 kafelków na obszar.
-  Przy zmianie zasad: sigservicedesk@geoportal.gov.pl.
+| Usługa                                 | Warunki                                                                                     | W aplikacji                  |
+| -------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------- |
+| Ortofotomapa (WMTS StandardResolution) | „brak ograniczeń”, akceptacja regulaminu Geoportalu                                         | pobieranie offline           |
+| Cieniowanie NMT (WMTS ShadedRelief)    | „brak ograniczeń”                                                                           | pobieranie offline           |
+| Mapa topograficzna (WMTS TOPO)         | bez opłat, „z wyłączeniem automatycznego pobierania i kolekcjonowania obrazów (harvesting)” | tylko online, bez pobierania |
+| OpenStreetMap                          | zakaz masowego pobierania                                                                   | tylko online                 |
+
+Regulamin Geoportalu wymaga podania źródła (mapa pokazuje „© GUGiK”). Aplikacja pobiera grzecznie:
+4 zapytania naraz, najwyżej 3000 kafelków na obszar. Kontakt: sigservicedesk@geoportal.gov.pl.
 
 ## Ograniczenia
 
 - Limit 3000 kafelków na obszar: około 4 km² z ortofotomapą i cieniowaniem (ok. 90 MB). Większy teren pobierz w kilku obszarach.
-- OpenStreetMap nie jest pobierany (zasady jego serwerów). Bez internetu przełącz podkład na Ortofotomapę.
+- OpenStreetMap i mapa topograficzna nie są pobierane (warunki usług). Bez internetu przełącz podkład na Ortofoto.
 - Własne warstwy XYZ z `{s}` w adresie nie są pobierane (losowy serwer, kafelek z pamięci by nie pasował).
 - Teren nierówny i BDOT10k potrzebują sieci, poza kafelkami pobranego obszaru.

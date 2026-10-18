@@ -54,10 +54,11 @@ export class PoliteWmsLayer extends L.TileLayer.WMS {
       });
 
     // start after Leaflet has put the tile in the DOM, so pruned tiles can be skipped
-    queueMicrotask(() =>
-      void attempt(0).then((ok) =>
-        done(ok ? undefined : new Error(`WMS tile failed: ${url}`), img),
-      ),
+    queueMicrotask(
+      () =>
+        void attempt(0).then((ok) =>
+          done(ok ? undefined : new Error(`WMS tile failed: ${url}`), img),
+        ),
     );
     return img;
   }

@@ -23,6 +23,8 @@ describe('historical layers', () => {
     const ortho = findHistoricalLayer(ORTHO_ARCHIVE_ID)!;
     expect(historicalWmsParams(ortho, 2004)).toEqual({ TIME: '2004-01-01/2004-12-31' });
     expect(historicalWmsParams(ortho, 1900)).toEqual({ TIME: '1995-01-01/1995-12-31' });
-    expect(historicalWmsParams(findHistoricalLayer('UMWD_Messtischblat_nowsze')!, 2004)).toEqual({});
+    expect(historicalWmsParams(findHistoricalLayer('UMWD_Messtischblat_nowsze')!, 2004)).toEqual(
+      {},
+    );
   });
 });

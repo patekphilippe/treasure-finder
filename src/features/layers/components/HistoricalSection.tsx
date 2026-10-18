@@ -88,8 +88,7 @@ export function HistoricalSection() {
             />
           </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ pl: 4.5 }}>
-            {layer.coverage}.{' '}
-            {layer.minZoom && 'Widać po przybliżeniu mapy. '}
+            {layer.coverage}. {layer.minZoom && 'Widać po przybliżeniu mapy. '}
             <Link href={layer.termsUrl} target="_blank" rel="noreferrer">
               Źródło i warunki
             </Link>

@@ -1,4 +1,3 @@
-import { TOPO_WMTS_2180 } from '@/shared/config/geoportalTopo';
 import { NMT_SOURCE } from '@/shared/config/geoportalWmts2180';
 import { ORTHO_MAX_NATIVE_ZOOM, ORTHO_WMTS_URL } from '@/shared/config/geoportalOrtho';
 import { toEpsg2180 } from '@/shared/lib/geo';
@@ -24,13 +23,12 @@ export interface XyzSource {
 export interface AreaLayers {
   ortho: boolean;
   nmt: boolean;
-  topo: boolean;
   custom: readonly XyzSource[];
 }
 
 export interface AreaPlan {
   urls: string[];
-  counts: { ortho: number; nmt: number; topo: number; custom: number };
+  counts: { ortho: number; nmt: number; custom: number };
   /** estimate before downloading */
   bytes: number;
   total: number;
@@ -84,7 +82,8 @@ function sourceTiles(b: Bounds, source: Wmts2180Source, dpr: number): string[] {
 
 /**
  * Every tile URL the map will request for the area at zooms 12–19: orthophoto and custom
- * XYZ tiles directly, NMT and the topographic map as the EPSG:2180 tiles their layers draw from.
+ * XYZ tiles directly, NMT as the EPSG:2180 tiles its layer draws from. The topographic map is
+ * left out on purpose: its service forbids automated downloading (harvesting).
  * Too large an area is only counted, never listed.
  */
 export function planAreaTiles(b: Bounds, layers: AreaLayers, dpr: number): AreaPlan {
@@ -106,8 +105,8 @@ export function planAreaTiles(b: Bounds, layers: AreaLayers, dpr: number): AreaP
   const orthoCount = layers.ortho ? countFor(ORTHO_MAX_NATIVE_ZOOM) : 0;
   const customCount = layers.custom.reduce((s, l) => s + countFor(l.maxNativeZoom), 0);
   // EPSG:2180 layers need far fewer tiles than map tiles; huge areas are not enumerated
-  const grid2180 = layers.nmt || layers.topo;
-  const empty = { ortho: orthoCount, nmt: 0, topo: 0, custom: customCount };
+  const grid2180 = layers.nmt;
+  const empty = { ortho: orthoCount, nmt: 0, custom: customCount };
   if (orthoCount + customCount > MAX_AREA_TILES || (grid2180 && mapTiles > MAX_AREA_TILES * 4)) {
     const total = orthoCount + customCount + (grid2180 ? mapTiles : 0);
     return { urls: [], counts: empty, bytes: 0, total, tooLarge: true };
@@ -126,20 +125,17 @@ export function planAreaTiles(b: Bounds, layers: AreaLayers, dpr: number): AreaP
   for (const l of layers.custom) add(l.url, l.maxNativeZoom);
 
   const nmtUrls = layers.nmt ? sourceTiles(b, NMT_SOURCE, dpr) : [];
-  const topoUrls = layers.topo ? sourceTiles(b, TOPO_WMTS_2180, dpr) : [];
-  for (const u of [...nmtUrls, ...topoUrls]) urls.add(u);
+  for (const u of nmtUrls) urls.add(u);
 
   const counts = {
     ortho: orthoCount,
     nmt: nmtUrls.length,
-    topo: topoUrls.length,
     custom: customCount,
   };
   const total = urls.size;
   const bytes =
     counts.ortho * AVG_TILE_BYTES.ortho +
     counts.nmt * AVG_TILE_BYTES.nmt +
-    counts.topo * AVG_TILE_BYTES.topo +
     counts.custom * AVG_TILE_BYTES.custom;
   return { urls: [...urls], counts, bytes, total, tooLarge: total > MAX_AREA_TILES };
 }
