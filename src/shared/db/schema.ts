@@ -11,7 +11,7 @@ import type {
 } from '@/shared/types/domain';
 
 export const DB_NAME = 'mapa-poszukiwan';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 export interface AppDB extends DBSchema {
   points: { key: string; value: FieldPoint; indexes: { byCandidate: string } };

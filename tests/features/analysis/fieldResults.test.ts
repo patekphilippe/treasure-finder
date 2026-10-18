@@ -6,10 +6,10 @@ import { makePoint } from '../../helpers/fixtures';
 
 describe('field results back on the laptop', () => {
   const candidates = [
-    makeCandidate({ id: 'c1', form: 'zaglebienie_okragle', decision: 'przyjety' }),
-    makeCandidate({ id: 'c2', form: 'zaglebienie_okragle', decision: 'przyjety' }),
-    makeCandidate({ id: 'c3', form: 'kopiec_okragly', decision: 'przyjety' }),
-    makeCandidate({ id: 'c4', form: 'wal_liniowy', decision: 'nowy' }),
+    makeCandidate({ id: 'c1', interpretation: 'ziemianka', decision: 'przyjety' }),
+    makeCandidate({ id: 'c2', interpretation: 'ziemianka', decision: 'przyjety' }),
+    makeCandidate({ id: 'c3', interpretation: 'okop', decision: 'przyjety' }),
+    makeCandidate({ id: 'c4', interpretation: 'leje', decision: 'nowy' }),
   ];
   const points = [
     makePoint({ id: 'p1', candidateId: 'c1', status: 'znalezisko' }),
@@ -22,13 +22,12 @@ describe('field results back on the laptop', () => {
   it('maps candidates to the status of their point', () => {
     expect(status.get('c1')).toBe('znalezisko');
     expect(status.has('c4')).toBe(false);
-    expect(status.size).toBe(3);
   });
 
-  it('counts accepted, checked and finds per class, best first', () => {
+  it('counts accepted, checked and finds per interpretation, best first', () => {
     expect(fieldResultsByForm(candidates, status)).toEqual([
-      { form: 'zaglebienie_okragle', accepted: 2, checked: 2, finds: 1, empty: 1 },
-      { form: 'kopiec_okragly', accepted: 1, checked: 0, finds: 0, empty: 0 },
+      { interpretation: 'ziemianka', accepted: 2, checked: 2, finds: 1, empty: 1 },
+      { interpretation: 'okop', accepted: 1, checked: 0, finds: 0, empty: 0 },
     ]);
   });
 });

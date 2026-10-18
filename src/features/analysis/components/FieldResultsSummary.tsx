@@ -4,7 +4,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useMemo, useState } from 'react';
 import { Icon } from '@/shared/ui';
-import { FORM_META } from '../config/forms';
+import { INTERPRETATIONS } from '@/shared/lib/detect';
 import { useFieldStatus } from '../hooks/useFieldStatus';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { fieldResultsByForm } from '../utils/fieldResultsByForm';
@@ -50,7 +50,7 @@ export function FieldResultsSummary() {
                 '& th:first-of-type': { textAlign: 'left' },
               }}
             >
-              <th>Klasa</th>
+              <th>Interpretacja</th>
               <th>Przyjęte</th>
               <th>Sprawdzone</th>
               <th>Znaleziska</th>
@@ -60,10 +60,10 @@ export function FieldResultsSummary() {
             {rows.map((r) => (
               <Box
                 component="tr"
-                key={r.form}
+                key={r.interpretation}
                 sx={{ textAlign: 'right', '& td:first-of-type': { textAlign: 'left' } }}
               >
-                <td>{FORM_META[r.form].label}</td>
+                <td>{INTERPRETATIONS[r.interpretation].label}</td>
                 <td>{r.accepted}</td>
                 <td>{r.checked}</td>
                 <td>

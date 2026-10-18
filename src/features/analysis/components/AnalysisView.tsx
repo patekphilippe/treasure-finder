@@ -35,7 +35,11 @@ export function AnalysisView() {
   const showFilters = filtersOpen ?? !isPhone;
   const activeFilters = useAnalysisStore(
     (s) =>
-      s.filters.forms.length + (s.filters.showRejected ? 1 : 0) + (s.filters.showProtected ? 0 : 1),
+      s.filters.priorities.length +
+      s.filters.interpretations.length +
+      (s.filters.showRejected ? 1 : 0) +
+      (s.filters.showNatural ? 1 : 0) +
+      (s.filters.showProtected ? 0 : 1),
   );
   useCandidateShortcuts(visible, setNoteFor);
 
@@ -113,7 +117,7 @@ export function AnalysisView() {
           <EmptyState
             icon="file-import"
             title="Wczytaj kandydatów z QGIS"
-            description="Plik kandydaci.geojson tworzy skrypt qgis/detect.py z arkuszy NMT. Przyjęci kandydaci trafiają do terenu jako punkty do sprawdzenia."
+            description="Wczytaj arkusz NMT, aby rozpoznać formy terenu. Przyjęci kandydaci trafiają do terenu jako strefy i punkty do sprawdzenia."
             action={<ImportCandidatesButton variant="full" />}
           />
         ) : (

@@ -7,10 +7,10 @@ export class ProtectedCandidateError extends Error {}
 
 /**
  * Accepting creates a point to check (anomalia, do_sprawdzenia, src analiza) — once.
- * Probably protected candidates can never become search targets.
+ * Protected candidates (priority 'chroniony') can never become search targets.
  */
 export async function acceptCandidate(c: Candidate, now = Date.now()): Promise<FieldPoint> {
-  if (c.protectedLikely) throw new ProtectedCandidateError(c.id);
+  if (c.priority === 'chroniony') throw new ProtectedCandidateError(c.id);
   const points = usePointsStore.getState();
   let point = points.points.find((p) => p.candidateId === c.id);
   if (!point) {

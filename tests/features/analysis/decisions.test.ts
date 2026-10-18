@@ -38,7 +38,7 @@ describe('candidate decisions', () => {
   });
 
   it('a probably protected candidate can never be accepted', async () => {
-    const c = makeCandidate({ protectedLikely: true });
+    const c = makeCandidate({ priority: 'chroniony', interpretation: 'kurhan' });
     await seed(c);
     await expect(acceptCandidate(c)).rejects.toBeInstanceOf(ProtectedCandidateError);
     expect(await pointsRepo.getAll()).toHaveLength(0);

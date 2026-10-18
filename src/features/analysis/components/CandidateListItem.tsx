@@ -7,7 +7,8 @@ import { useEffect, useRef } from 'react';
 import { POINT_STATUS_LABELS } from '@/features/points';
 import type { Candidate, PointStatus } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
-import { FORM_META, PROTECTED_COLOR } from '../config/forms';
+import { INTERPRETATIONS } from '@/shared/lib/detect';
+import { INTERPRETATION_STYLE, PRIORITY_COLOR } from '../config/interpretationStyle';
 import { describeCandidate } from '../utils/describeCandidate';
 
 interface CandidateListItemProps {
@@ -25,8 +26,8 @@ export function CandidateListItem({
   onClick,
 }: CandidateListItemProps) {
   const ref = useRef<HTMLButtonElement>(null);
-  const meta = FORM_META[c.form];
-  const color = c.protectedLikely ? PROTECTED_COLOR : meta.color;
+  const label = INTERPRETATIONS[c.interpretation].label;
+  const color = PRIORITY_COLOR[c.priority];
 
   useEffect(() => {
     if (selected) ref.current?.scrollIntoView({ block: 'nearest' });
@@ -60,11 +61,16 @@ export function CandidateListItem({
           bgcolor: alpha(color, 0.14),
         }}
       >
-        <Icon name={c.protectedLikely ? 'shield-alt' : meta.icon} size={18} />
+        <Icon
+          name={
+            c.priority === 'chroniony' ? 'shield-alt' : INTERPRETATION_STYLE[c.interpretation].icon
+          }
+          size={18}
+        />
       </Box>
       <Stack sx={{ flex: 1, minWidth: 0 }}>
         <Typography variant="subtitle2" noWrap>
-          {meta.label}
+          {label}
           {c.decision === 'przyjety' && (
             <Icon
               name="check-circle"

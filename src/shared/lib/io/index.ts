@@ -1,9 +1,10 @@
 export { BACKUP_VERSION, photoPath, ZIP_FILES, type BackupV2, type ExportData } from './backup';
 export { buildExportZip } from './buildExportZip';
 export {
-  FORM_VALUES,
   importCandidatesGeoJSON,
+  INTERPRETATION_VALUES,
   isCandidatesGeoJSON,
+  RECOMPUTE_REASON,
 } from './importCandidatesGeoJSON';
 export { CRS_HINT, importGeoJSON, type GeoJSONImport } from './importGeoJSON';
 export { importZip, type ImportBundle } from './importZip';

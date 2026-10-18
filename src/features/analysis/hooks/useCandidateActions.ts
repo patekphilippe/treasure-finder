@@ -2,7 +2,7 @@ import { bottomSheetOffset } from '@/shared/lib/bottomSheetOffset';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useToastStore } from '@/shared/ui';
 import type { Candidate } from '@/shared/types/domain';
-import { PROTECTED_MESSAGE } from '../config/forms';
+import { PROTECTED_MESSAGE } from '../config/interpretationStyle';
 import {
   acceptCandidate,
   ProtectedCandidateError,

@@ -1,17 +1,22 @@
-import type { FormClass } from '@/shared/types/domain';
+import type { Interpretation, Priority } from '@/shared/types/domain';
 
 export interface CandidateFilters {
   minScore: number;
-  /** empty = all classes */
-  forms: FormClass[];
+  /** empty = all */
+  interpretations: Interpretation[];
+  /** empty = all */
+  priorities: Priority[];
   showProtected: boolean;
+  showNatural: boolean;
   showRejected: boolean;
 }
 
 export const DEFAULT_FILTERS: CandidateFilters = {
-  minScore: 50,
-  forms: [],
+  minScore: 0,
+  interpretations: [],
+  priorities: [],
   showProtected: true,
+  showNatural: false,
   showRejected: false,
 };
 

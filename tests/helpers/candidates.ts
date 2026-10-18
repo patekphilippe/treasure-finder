@@ -4,25 +4,30 @@ export function makeCandidate(overrides: Partial<Candidate> = {}): Candidate {
   return {
     id: 'M-33-33-B-d-3-1-0012',
     sheetId: 'M-33-33-B-d-3-1',
-    form: 'zaglebienie_okragle',
+    form: 'pojedynczy_dol',
+    interpretation: 'leje',
+    confidence: 0.8,
+    alternatives: [{ interpretation: 'wyrobisko', confidence: 0.3 }],
+    priority: 'niski',
+    flags: { uxo: true, warGraves: true },
+    reasons: ['wał dookoła całego dołu'],
     lat: 51.2,
     lng: 16.38,
     areaM2: 20.4,
     lengthM: 6,
     widthM: 4.2,
     reliefM: -1.12,
-    circularity: 0.82,
-    elongation: 1.43,
-    rectangularity: 0.8,
     score: 73,
-    protectedLikely: false,
+    outline: null,
+    searchZone: null,
+    exclusionZone: null,
     decision: 'nowy',
     note: '',
     ...overrides,
   };
 }
 
-/** Same shape as qgis/detect.py output. */
+/** Same shape as the export of this app. */
 export function candidatesGeoJSON(list: Candidate[]) {
   return {
     type: 'FeatureCollection',

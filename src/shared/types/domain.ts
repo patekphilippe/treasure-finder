@@ -6,14 +6,51 @@ export type PointType = 'anomalia' | 'sprawdzic' | 'znalezisko' | 'niewybuch' | 
 
 export type PointStatus = 'do_sprawdzenia' | 'pusto' | 'znalezisko' | 'chroniony' | 'odrzucony';
 
-export type FormClass =
-  | 'kopiec_okragly'
-  | 'zaglebienie_okragle'
-  | 'zaglebienie_prostokatne'
-  | 'row_liniowy'
-  | 'wal_liniowy'
+/** Geometry of a detected form (independent of what it means). */
+export type FormKind =
+  | 'pojedynczy_dol'
+  | 'pojedynczy_kopiec'
+  | 'skupisko'
+  | 'linia'
   | 'pierscien'
-  | 'nieokreslony';
+  | 'podkowa'
+  | 'platforma'
+  | 'uklad_rownolegly';
+
+/** What the form probably is. */
+export type Interpretation =
+  | 'zaginiona_osada'
+  | 'oboz'
+  | 'ziemianka'
+  | 'okop'
+  | 'stanowiska_strzeleckie'
+  | 'stanowisko_sprzetu'
+  | 'leje'
+  | 'dawna_droga'
+  | 'pola_dawne'
+  | 'mielerz'
+  | 'wyrobisko'
+  | 'row_melioracyjny_graniczny'
+  | 'kurhan'
+  | 'grodzisko_waly'
+  | 'wykrot'
+  | 'naturalna_inna'
+  | 'nieokreslona';
+
+export type Priority = 'najwyzszy' | 'wysoki' | 'sredni' | 'niski' | 'chroniony' | 'naturalne';
+
+export interface CandidateFlags {
+  /** risk of unexploded ordnance */
+  uxo: boolean;
+  /** battlefield: war graves possible */
+  warGraves: boolean;
+}
+
+export interface AlternativeInterpretation {
+  interpretation: Interpretation;
+  /** 0–1 */
+  confidence: number;
+}
 
 /** store: points */
 export interface FieldPoint {
@@ -86,23 +123,35 @@ export type CandidateDecision = 'nowy' | 'przyjety' | 'odrzucony';
 export interface Candidate {
   id: string;
   sheetId: string;
-  form: FormClass;
+  form: FormKind;
+  interpretation: Interpretation;
+  /** 0–1 */
+  confidence: number;
+  /** the next two interpretations */
+  alternatives: AlternativeInterpretation[];
+  priority: Priority;
+  flags: CandidateFlags;
+  /** why, in plain Polish */
+  reasons: string[];
   lat: number;
   lng: number;
   areaM2: number;
   lengthM: number;
   widthM: number;
-  /** signed: + convex, - concave */
+  /** signed: + convex, − concave */
   reliefM: number;
-  circularity: number;
-  elongation: number;
-  rectangularity: number;
   /** 0–100 */
   score: number;
-  /** looks like an archaeological monument — never a search target */
-  protectedLikely: boolean;
+  /** outline of the form, WGS84 */
+  outline: Polygon | MultiPolygon | null;
+  /** where to search, WGS84; null for protected and natural forms */
+  searchZone: Polygon | MultiPolygon | null;
+  /** protected forms: outline + buffer, becomes a forbidden zone */
+  exclusionZone: Polygon | MultiPolygon | null;
   decision: CandidateDecision;
   note: string;
+  /** result of an older analysis: recompute the sheet */
+  needsRecompute?: boolean;
 }
 
 /** store: context — features digitised from archival maps */

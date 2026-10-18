@@ -2,22 +2,32 @@ import Chip from '@mui/material/Chip';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import type { FormClass } from '@/shared/types/domain';
-import { FORM_META } from '../config/forms';
+import { PRIORITIES } from '@/shared/lib/detect';
+import type { Priority } from '@/shared/types/domain';
+import { PRIORITY_COLOR } from '../config/interpretationStyle';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 
-const FORMS = Object.keys(FORM_META) as FormClass[];
+const SEARCHABLE: Priority[] = ['najwyzszy', 'wysoki', 'sredni', 'niski'];
 
 export function CandidateFiltersBar() {
   const filters = useAnalysisStore((s) => s.filters);
   const setFilters = useAnalysisStore((s) => s.setFilters);
 
-  const toggleForm = (form: FormClass) =>
+  const togglePriority = (p: Priority) =>
     setFilters({
-      forms: filters.forms.includes(form)
-        ? filters.forms.filter((f) => f !== form)
-        : [...filters.forms, form],
+      priorities: filters.priorities.includes(p)
+        ? filters.priorities.filter((x) => x !== p)
+        : [...filters.priorities, p],
     });
+  const toggle = (label: string, on: boolean, onClick: () => void) => (
+    <Chip
+      size="small"
+      label={label}
+      variant={on ? 'filled' : 'outlined'}
+      onClick={onClick}
+      sx={{ borderRadius: '8px' }}
+    />
+  );
 
   return (
     <Stack spacing={1} sx={{ px: 2.5, pb: 1.5 }}>
@@ -36,36 +46,28 @@ export function CandidateFiltersBar() {
         />
       </Stack>
       <Stack direction="row" sx={{ gap: 0.75, flexWrap: 'wrap' }}>
-        {FORMS.map((form) => {
-          const on = filters.forms.includes(form);
+        {SEARCHABLE.map((p) => {
+          const on = filters.priorities.includes(p);
           return (
             <Chip
-              key={form}
+              key={p}
               size="small"
-              label={FORM_META[form].label}
-              onClick={() => toggleForm(form)}
+              label={PRIORITIES[p].label}
+              onClick={() => togglePriority(p)}
               variant={on ? 'filled' : 'outlined'}
-              sx={{
-                borderRadius: '8px',
-                ...(on && { bgcolor: FORM_META[form].color, color: '#fff' }),
-              }}
+              sx={{ borderRadius: '8px', ...(on && { bgcolor: PRIORITY_COLOR[p], color: '#fff' }) }}
             />
           );
         })}
-        <Chip
-          size="small"
-          label="Chronione"
-          variant={filters.showProtected ? 'filled' : 'outlined'}
-          onClick={() => setFilters({ showProtected: !filters.showProtected })}
-          sx={{ borderRadius: '8px' }}
-        />
-        <Chip
-          size="small"
-          label="Odrzucone"
-          variant={filters.showRejected ? 'filled' : 'outlined'}
-          onClick={() => setFilters({ showRejected: !filters.showRejected })}
-          sx={{ borderRadius: '8px' }}
-        />
+        {toggle('Chronione', filters.showProtected, () =>
+          setFilters({ showProtected: !filters.showProtected }),
+        )}
+        {toggle('Naturalne', filters.showNatural, () =>
+          setFilters({ showNatural: !filters.showNatural }),
+        )}
+        {toggle('Odrzucone', filters.showRejected, () =>
+          setFilters({ showRejected: !filters.showRejected }),
+        )}
       </Stack>
     </Stack>
   );

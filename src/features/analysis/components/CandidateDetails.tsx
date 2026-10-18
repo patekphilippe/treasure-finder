@@ -6,7 +6,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { Candidate } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
-import { FORM_META, PROTECTED_MESSAGE } from '../config/forms';
+import { INTERPRETATIONS, PRIORITIES } from '@/shared/lib/detect';
+import { INTERPRETATION_STYLE, PROTECTED_MESSAGE } from '../config/interpretationStyle';
 import { useCandidateActions } from '../hooks/useCandidateActions';
 import { describeCandidate } from '../utils/describeCandidate';
 
@@ -18,24 +19,25 @@ interface CandidateDetailsProps {
 
 export function CandidateDetails({ candidate: c, onNote, onClose }: CandidateDetailsProps) {
   const { accept, reject, restore } = useCandidateActions();
-  const meta = FORM_META[c.form];
+  const label = INTERPRETATIONS[c.interpretation].label;
+  const hint = INTERPRETATION_STYLE[c.interpretation].hint;
 
   return (
     <Box sx={{ px: 2.5, py: 1.5, borderTop: 1, borderBottom: 1, borderColor: 'divider' }}>
       <Stack direction="row" sx={{ alignItems: 'flex-start', gap: 1 }}>
         <Stack sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 650 }}>
-            {meta.label} · ocena {c.score}
+            {label} · {PRIORITIES[c.priority].label.toLowerCase()} · ocena {c.score}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {describeCandidate(c)} · {meta.hint}
+            {describeCandidate(c)} · {hint}
           </Typography>
         </Stack>
         <IconButton size="small" aria-label="Zamknij szczegóły" onClick={onClose}>
           <Icon name="times" size={18} />
         </IconButton>
       </Stack>
-      {c.protectedLikely && (
+      {c.priority === 'chroniony' && (
         <Alert severity="warning" icon={<Icon name="shield-alt" size={18} />} sx={{ mt: 1, py: 0 }}>
           {PROTECTED_MESSAGE}
         </Alert>
@@ -60,7 +62,7 @@ export function CandidateDetails({ candidate: c, onNote, onClose }: CandidateDet
           <Button
             sx={{ flex: 1 }}
             variant="contained"
-            disabled={c.protectedLikely}
+            disabled={c.priority === 'chroniony'}
             startIcon={<Icon name="map-marker-alt" size={18} />}
             onClick={() => accept(c)}
           >

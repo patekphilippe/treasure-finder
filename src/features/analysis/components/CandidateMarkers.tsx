@@ -2,14 +2,14 @@ import L from 'leaflet';
 import { useMemo } from 'react';
 import { CircleMarker } from 'react-leaflet';
 import type { Candidate } from '@/shared/types/domain';
-import { FORM_META, PROTECTED_COLOR } from '../config/forms';
+import { PRIORITY_COLOR } from '../config/interpretationStyle';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 
 interface CandidateMarkersProps {
   candidates: readonly Candidate[];
 }
 
-/** Circles coloured by class, sized by score; protected ones grey. Canvas-rendered (thousands). */
+/** Circles coloured by priority, sized by score; protected ones grey. Canvas-rendered (thousands). */
 export function CandidateMarkers({ candidates }: CandidateMarkersProps) {
   const selectedId = useAnalysisStore((s) => s.selectedId);
   const select = useAnalysisStore((s) => s.select);
@@ -17,7 +17,7 @@ export function CandidateMarkers({ candidates }: CandidateMarkersProps) {
 
   return candidates.map((c) => {
     const selected = c.id === selectedId;
-    const color = c.protectedLikely ? PROTECTED_COLOR : FORM_META[c.form].color;
+    const color = PRIORITY_COLOR[c.priority];
     return (
       <CircleMarker
         key={c.id}
