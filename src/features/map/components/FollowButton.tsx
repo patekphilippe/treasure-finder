@@ -1,5 +1,6 @@
 import IconButton from '@mui/material/IconButton';
 import { requestCompassPermission } from '@/features/gps';
+import { BESIDE_DOCK_MIN_WIDTH, besideDockBottom } from '@/shared/config/layout';
 import { useFieldStore } from '@/shared/store/useFieldStore';
 import { glass, Icon, useToastStore } from '@/shared/ui';
 
@@ -34,6 +35,7 @@ export function FollowButton() {
         zIndex: 1000,
         right: 12,
         bottom: 'calc(env(safe-area-inset-bottom, 0px) + 92px)',
+        [theme.breakpoints.up(BESIDE_DOCK_MIN_WIDTH)]: { bottom: besideDockBottom(48) },
         width: 48,
         height: 48,
         borderRadius: '12px',

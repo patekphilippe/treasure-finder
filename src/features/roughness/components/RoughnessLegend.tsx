@@ -4,6 +4,7 @@ import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
+import { BESIDE_DOCK_MIN_WIDTH, besideDockBottom } from '@/shared/config/layout';
 import { glass, Icon } from '@/shared/ui';
 import { PLACE_COLOR } from '../config/places';
 import { useAreasStore } from '../store/useAreasStore';
@@ -26,6 +27,8 @@ export function RoughnessLegend() {
         zIndex: 1000,
         left: 12,
         bottom: 'calc(env(safe-area-inset-bottom, 0px) + 92px)',
+        // centred on the dock by its header row (40 px); opening grows it upwards
+        [theme.breakpoints.up(BESIDE_DOCK_MIN_WIDTH)]: { bottom: besideDockBottom(40) },
         borderRadius: '12px',
         maxWidth: 260,
         overflow: 'hidden',
