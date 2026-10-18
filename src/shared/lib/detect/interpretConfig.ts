@@ -204,6 +204,11 @@ export const interpretConfig = {
     waterBonusDistanceM: 200,
     priorityBumpContext: 0.6,
     fieldsNearSettlementM: 300,
+    /**
+     * how far an archival object still lends context (closeness 1 at the object → 0 here).
+     * A village spreads its traces wider than a ford; unknown kinds use contextMaxDistanceM.
+     */
+    contextKindRadiusM: { osada: 400, mlyn: 300, karczma: 300, brod: 200, droga: 150, inne: 200 },
   },
 } as const;
 

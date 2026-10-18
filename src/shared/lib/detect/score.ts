@@ -54,16 +54,18 @@ export interface ContextInput {
   roadM: number;
   /** distance to water, metres */
   waterM: number;
+  /** range of the nearest archival object's kind (default: contextMaxDistanceM) */
+  archivalRadiusM?: number;
 }
 
-/** Context 0–1: archival features (1 at 0 m → 0 at 300 m) plus bonuses, at most 1. */
+/** Context 0–1: archival features (1 at 0 m → 0 at the kind's range) plus bonuses, at most 1. */
 export function contextScore(
   interp: Interpretation,
   c: ContextInput,
   cfg = interpretConfig,
 ): number {
   const S = cfg.score;
-  let v = Math.max(0, 1 - c.archivalM / S.contextMaxDistanceM);
+  let v = Math.max(0, 1 - c.archivalM / (c.archivalRadiusM ?? S.contextMaxDistanceM));
   if (c.roadM <= S.roadBonusDistanceM) v += S.roadBonus;
   if ((interp === 'oboz' || interp === 'ziemianka') && c.waterM <= S.waterBonusDistanceM)
     v += S.waterBonus;

@@ -19,3 +19,11 @@ export {
   type ScoreParts,
 } from './score';
 export { DEFAULT_SETTINGS, withParams, type AnalysisSettings } from './withParams';
+export {
+  ARCHIVAL_REASON,
+  archivalNearest,
+  archivalReason,
+  type ArchivalFeature,
+  type ArchivalNearest,
+} from './archivalContext';
+export { CONTEXT_BUMP_REASON, rescoreContext } from './rescoreContext';

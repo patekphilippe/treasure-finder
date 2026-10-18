@@ -6,15 +6,10 @@ import type { XY } from './features/lines';
 import { distanceToWater } from './features/water';
 import { interpretConfig } from './interpretConfig';
 import { detectForms, type Detection } from './pipeline';
+import { archivalNearest, archivalReason, type ArchivalFeature } from './archivalContext';
+import { CONTEXT_BUMP_REASON } from './rescoreContext';
 import { buildScene, type Scene } from './scene';
-import {
-  contextPriority,
-  contextScore,
-  distanceToGeometry,
-  score,
-  scoreParts,
-  type ScoreParts,
-} from './score';
+import { contextPriority, contextScore, score, scoreParts, type ScoreParts } from './score';
 
 const roundParts = (p: ScoreParts): ScoreParts => ({
   relief: Math.round(p.relief * 1000) / 1000,
@@ -26,8 +21,8 @@ import { buildExclusionLocal, buildZoneLocal, hullBuffer, toWgs84 } from './sear
 
 export interface AnalyseOptions {
   sheetId: string;
-  /** archival context features in WGS84 (settlements, roads, mills, inns, fords) */
-  context?: Geometry[];
+  /** archival context features in WGS84 (settlements, roads, mills, inns, fords), with their kind */
+  context?: (Geometry | ArchivalFeature)[];
   /** extra water lines / areas in WGS84 (e.g. BDOT10k rivers) */
   water?: Geometry[];
   /** forbidden zones in WGS84 (user's 'zakaz' zones, protected forms of other sheets) */
@@ -138,7 +133,11 @@ export function toCandidates(
   waterLocal: XY[],
   cfg = interpretConfig,
 ): Candidate[] {
-  const context = (opts.context ?? []).map((g) => toLocalGeometry(g, grid));
+  const context: ArchivalFeature[] = (opts.context ?? []).map((c) =>
+    'geometry' in c
+      ? { geometry: toLocalGeometry(c.geometry, grid), kind: c.kind }
+      : { geometry: toLocalGeometry(c, grid) },
+  );
   // roads as sampled points (every ~5th cell) for fast distance checks
   const roads = detections
     .filter((d) => d.interpretation === 'dawna_droga')
@@ -157,9 +156,7 @@ export function toCandidates(
   );
   const ranked = [...detections].sort((a, b) => b.confidence - a.confidence);
   return ranked.map((d, k) => {
-    const archivalM = context.length
-      ? Math.min(...context.map((g) => distanceToGeometry(d.centre, g)))
-      : Infinity;
+    const nearest = archivalNearest(d.centre, context, cfg);
     let roadM = Infinity;
     for (const r of roads) {
       if (r.d === d) continue;
@@ -169,14 +166,18 @@ export function toCandidates(
       }
     }
     const waterM = distanceToWater(d.centre, waterLocal).d;
-    const ctx = contextScore(d.interpretation, { archivalM, roadM, waterM }, cfg);
+    const ctx = contextScore(
+      d.interpretation,
+      { archivalM: nearest.distM, archivalRadiusM: nearest.radiusM, roadM, waterM },
+      cfg,
+    );
     const reasons = [...d.reasons];
-    if (archivalM <= cfg.score.contextMaxDistanceM)
-      reasons.push(`obiekt z mapy archiwalnej ${Math.round(archivalM)} m dalej`);
+    const archival = archivalReason(nearest);
+    if (archival) reasons.push(archival);
     if (roadM <= cfg.score.roadBonusDistanceM)
       reasons.push(`dawna droga ${Math.round(roadM)} m dalej`);
     let priority = contextPriority(d.priority, ctx, cfg);
-    if (priority !== d.priority) reasons.push('silny kontekst historyczny podnosi priorytet');
+    if (priority !== d.priority) reasons.push(CONTEXT_BUMP_REASON);
     const cellPts: XY[] = d.cells.map((i) => [
       ((i % grid.w) + 0.5) * grid.cell,
       -(((i / grid.w) | 0) + 0.5) * grid.cell,
@@ -214,6 +215,11 @@ export function toCandidates(
       reliefM: Math.round(d.reliefM * 100) / 100,
       score: score(d.reliefM, d.confidence, ctx, cfg),
       scoreParts: roundParts(scoreParts(d.reliefM, d.confidence, ctx, cfg)),
+      contextInputs: {
+        roadM: Number.isFinite(roadM) ? Math.round(roadM) : null,
+        waterM: Number.isFinite(waterM) ? Math.round(waterM) : null,
+        basePriority: d.priority,
+      },
       outline,
       searchZone:
         priority === 'chroniony' || priority === 'naturalne'

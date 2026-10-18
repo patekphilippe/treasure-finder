@@ -42,7 +42,7 @@ export async function runSheetAnalysis(
   const setRun = useAnalysisStore.getState().setRun;
   setRun({ name: file.name, share: 0, step: 'Wczytywanie pliku' });
   const db = await getDb();
-  const context = (await db.getAll('context')).map((c) => c.geometry);
+  const context = (await db.getAll('context')).map((c) => ({ geometry: c.geometry, kind: c.kind }));
   const own = exclusionPrefix(sheetIdFromName(file.name));
   const forbidden = (await db.getAll('zones'))
     .filter((z) => z.kind === 'zakaz' && !z.id.startsWith(own))

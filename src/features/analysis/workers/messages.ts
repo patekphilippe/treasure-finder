@@ -1,5 +1,5 @@
 import type { Geometry } from 'geojson';
-import type { AnalysisSettings } from '@/shared/lib/detect';
+import type { AnalysisSettings, ArchivalFeature } from '@/shared/lib/detect';
 import type { ExclusionGroupResult } from '@/shared/lib/tiles';
 import type { Candidate, ReliefKind } from '@/shared/types/domain';
 
@@ -7,7 +7,7 @@ export interface AnalysisRequest {
   name: string;
   buffer: ArrayBuffer;
   /** archival context features, WGS84 */
-  context: Geometry[];
+  context: ArchivalFeature[];
   /** extra water (e.g. BDOT10k rivers), WGS84 */
   water: Geometry[];
   /** forbidden zones ('zakaz'), WGS84 */

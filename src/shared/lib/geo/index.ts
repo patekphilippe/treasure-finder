@@ -6,3 +6,4 @@ export { distanceToZoneEdge } from './distanceToZoneEdge';
 export { pointInPolygon } from './pointInPolygon';
 export { toEpsg2180 } from './toEpsg2180';
 export { geometryCentroid } from './geometryCentroid';
+export { geometryTo2180 } from './geometryTo2180';

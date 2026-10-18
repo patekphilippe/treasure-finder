@@ -146,6 +146,11 @@ export interface Candidate {
   score: number;
   /** relief clarity, confidence and context (0–1) the score weighs; absent in old analyses */
   scoreParts?: { relief: number; confidence: number; context: number };
+  /**
+   * what the context score is built from besides archival objects, so adding or removing an
+   * object re-scores the candidate at once; null distance = nothing in range; absent in old analyses
+   */
+  contextInputs?: { roadM: number | null; waterM: number | null; basePriority: Priority };
   /** outline of the form, WGS84 */
   outline: Polygon | MultiPolygon | null;
   /** where to search, WGS84; null for protected and natural forms */
@@ -158,10 +163,12 @@ export interface Candidate {
   needsRecompute?: boolean;
 }
 
+export type ContextKind = 'osada' | 'droga' | 'mlyn' | 'karczma' | 'brod' | 'inne';
+
 /** store: context — features digitised from archival maps */
 export interface ContextFeature {
   id: string;
-  kind: 'osada' | 'droga' | 'mlyn' | 'karczma' | 'brod' | 'inne';
+  kind: ContextKind;
   geometry: Geometry;
   source: string;
 }

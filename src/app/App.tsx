@@ -15,6 +15,7 @@ import { AppGlobalStyles } from './components/AppGlobalStyles';
 import { FieldLayout } from './components/FieldLayout';
 import { TopBar } from './components/TopBar';
 import { useAppTheme } from './hooks/useAppTheme';
+import { useContextRecompute } from './hooks/useContextRecompute';
 import { useUiStore } from '@/shared/store/useUiStore';
 
 // analysis (laptop) is loaded only when opened — keeps the field app light on phones
@@ -33,6 +34,7 @@ export function App() {
   useLoadAreas();
   useLoadCandidates();
   useLoadReliefs();
+  useContextRecompute();
   const mode = useUiStore((s) => s.mode);
   const startTourIfNew = useTutorialStore((s) => s.startIfNew);
 
