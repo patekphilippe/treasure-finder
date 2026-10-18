@@ -1,11 +1,13 @@
 import type { Step } from 'react-joyride';
-import type { TourStep } from '../config/tourSteps';
+import type { Platform, TourStep } from '../config/tourSteps';
 import { showTourView } from './showTourView';
 
 export interface TourConditions {
   candidates: boolean;
   legend: boolean;
   exclusion: boolean;
+  installed: boolean;
+  platform: Platform;
 }
 
 const applies = (step: TourStep, c: TourConditions) => {
@@ -13,6 +15,7 @@ const applies = (step: TourStep, c: TourConditions) => {
   if (step.when === 'noCandidates') return !c.candidates;
   if (step.when === 'legend') return c.legend;
   if (step.when === 'exclusion') return c.exclusion;
+  if (step.when === 'notInstalled') return !c.installed;
   return true;
 };
 
@@ -36,7 +39,7 @@ export function toJoyrideSteps(steps: readonly TourStep[], c: TourConditions): S
         // shift the card back into the viewport even if it then covers part of the target
         floatingOptions: { shiftOptions: { crossAxis: true, padding: 12 } },
         title: s.title,
-        content: s.content,
+        content: s.contentByPlatform?.[c.platform] ?? s.content,
         before: () => showTourView(s.mode, s.sheet ?? null, target),
       };
     });

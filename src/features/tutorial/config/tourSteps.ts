@@ -1,18 +1,22 @@
 import type { Step } from 'react-joyride';
 import type { AppMode, SheetId } from '@/shared/store/useUiStore';
 
+export type Platform = 'ios' | 'android' | 'desktop';
+
 export interface TourStep {
   id: string;
   /** value of the `data-tour` attribute, or null for a centred step */
   target: string | null;
   title: string;
   content: string;
+  /** replaces `content` when the steps differ per device */
+  contentByPlatform?: Record<Platform, string>;
   /** the app state the step needs: mode and the open sheet */
   mode: AppMode;
   sheet?: SheetId;
   placement?: Step['placement'];
   /** step only makes sense when its element exists */
-  when?: 'candidates' | 'noCandidates' | 'legend' | 'exclusion';
+  when?: 'candidates' | 'noCandidates' | 'legend' | 'exclusion' | 'notInstalled';
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
@@ -276,6 +280,21 @@ export const TOUR_STEPS: readonly TourStep[] = [
       'Po wczytaniu arkusza pojawi się tu lista. Wybierz kandydata, aby zobaczyć, dlaczego został wskazany i jaką ma strefę poszukiwań. Przyjęte strefy trafiają do trybu Teren. Miejsc chronionych, np. kurhanów, nie da się przyjąć.',
     mode: 'analysis',
     when: 'noCandidates',
+  },
+  {
+    id: 'install',
+    target: null,
+    title: 'Zainstaluj aplikację',
+    content: '',
+    contentByPlatform: {
+      ios: 'W Safari dotknij Udostępnij (kwadrat ze strzałką), potem Do ekranu początkowego i Dodaj. Aplikacja otworzy się z ikony na pełnym ekranie i zadziała bez internetu. Najpierw zrób kopię w Dane, bo zainstalowana aplikacja na iPhonie ma osobne dane.',
+      android:
+        'W Chrome dotknij menu ⋮ i wybierz Zainstaluj aplikację. Aplikacja otworzy się z ikony na pełnym ekranie i zadziała bez internetu.',
+      desktop:
+        'W Chrome kliknij ikonę Zainstaluj na końcu paska adresu albo w menu ⋮ wybierz Przesyłaj, zapisz i udostępnij, a potem Zainstaluj stronę jako aplikację. Na telefonie zainstalujesz ją z menu przeglądarki.',
+    },
+    mode: 'field',
+    when: 'notInstalled',
   },
   {
     id: 'help',

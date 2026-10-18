@@ -3,8 +3,16 @@ import { describe, expect, it } from 'vitest';
 import { TOUR_STEPS } from '@/features/tutorial/config/tourSteps';
 import { toJoyrideSteps } from '@/features/tutorial/utils/toJoyrideSteps';
 
-const ids = (c: { candidates: boolean; legend: boolean; exclusion?: boolean }) =>
-  toJoyrideSteps(TOUR_STEPS, { exclusion: false, ...c }).map((s) => s.id);
+type Conditions = Parameters<typeof toJoyrideSteps>[1];
+const base: Conditions = {
+  candidates: false,
+  legend: false,
+  exclusion: false,
+  installed: false,
+  platform: 'android',
+};
+const ids = (c: Partial<Conditions>) =>
+  toJoyrideSteps(TOUR_STEPS, { ...base, ...c }).map((s) => s.id);
 
 describe('guided tour', () => {
   it('shows the candidate steps only when there are candidates', () => {
@@ -26,6 +34,15 @@ describe('guided tour', () => {
     expect(ids({ candidates: true, legend: false })).not.toContain('exclusion');
   });
 
+  it('offers installing only in the browser, with the steps for the device', () => {
+    expect(ids({ installed: true })).not.toContain('install');
+    const content = (platform: Conditions['platform']) =>
+      toJoyrideSteps(TOUR_STEPS, { ...base, platform }).find((s) => s.id === 'install')?.content;
+    expect(content('ios')).toMatch(/Do ekranu początkowego/);
+    expect(content('android')).toMatch(/Zainstaluj aplikację/);
+    expect(content('desktop')).toMatch(/paska adresu/);
+  });
+
   it('starts with the welcome and ends on the help button', () => {
     const all = ids({ candidates: true, legend: true });
     expect(all[0]).toBe('welcome');
@@ -42,6 +59,9 @@ describe('guided tour', () => {
   });
 
   it('texts have no long dashes', () => {
-    for (const s of TOUR_STEPS) expect(`${s.title} ${s.content}`).not.toMatch(/[—–]/);
+    for (const s of TOUR_STEPS)
+      expect(
+        `${s.title} ${s.content} ${Object.values(s.contentByPlatform ?? {}).join(' ')}`,
+      ).not.toMatch(/[—–]/);
   });
 });
