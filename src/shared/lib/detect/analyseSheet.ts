@@ -7,7 +7,20 @@ import { distanceToWater } from './features/water';
 import { interpretConfig } from './interpretConfig';
 import { detectForms, type Detection } from './pipeline';
 import { buildScene, type Scene } from './scene';
-import { contextPriority, contextScore, distanceToGeometry, score } from './score';
+import {
+  contextPriority,
+  contextScore,
+  distanceToGeometry,
+  score,
+  scoreParts,
+  type ScoreParts,
+} from './score';
+
+const roundParts = (p: ScoreParts): ScoreParts => ({
+  relief: Math.round(p.relief * 1000) / 1000,
+  confidence: Math.round(p.confidence * 1000) / 1000,
+  context: Math.round(p.context * 1000) / 1000,
+});
 import { forbiddenAreas, touchesAreas, withoutAreas } from './protection';
 import { buildExclusionLocal, buildZoneLocal, hullBuffer, toWgs84 } from './searchZone';
 
@@ -200,6 +213,7 @@ export function toCandidates(
       widthM: Math.round(d.widthM * 10) / 10,
       reliefM: Math.round(d.reliefM * 100) / 100,
       score: score(d.reliefM, d.confidence, ctx, cfg),
+      scoreParts: roundParts(scoreParts(d.reliefM, d.confidence, ctx, cfg)),
       outline,
       searchZone:
         priority === 'chroniony' || priority === 'naturalne'

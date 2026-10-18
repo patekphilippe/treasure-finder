@@ -89,7 +89,7 @@ export interface Track {
 
 export interface AnalysisWeights {
   relief: number;
-  shape: number;
+  confidence: number;
   context: number;
 }
 
@@ -144,6 +144,8 @@ export interface Candidate {
   reliefM: number;
   /** 0–100 */
   score: number;
+  /** relief clarity, confidence and context (0–1) the score weighs; absent in old analyses */
+  scoreParts?: { relief: number; confidence: number; context: number };
   /** outline of the form, WGS84 */
   outline: Polygon | MultiPolygon | null;
   /** where to search, WGS84; null for protected and natural forms */

@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 // NMT interpretation runs here, never on the UI thread. Cancelling = worker.terminate().
-import { analyseSheet, type Scene } from '@/shared/lib/detect';
+import { analyseSheet, withParams, type Scene } from '@/shared/lib/detect';
 import { readAsc, readGeoTiff, type DemGrid } from '@/shared/lib/raster';
 import { fetchExclusionMask } from '@/shared/lib/tiles';
 import { sheetIdFromName } from '../utils/sheetIdFromName';
@@ -13,7 +13,7 @@ const reply = (msg: AnalysisResponse, transfer: Transferable[] = []) =>
   self.postMessage(msg, transfer);
 
 self.onmessage = async (event: MessageEvent<AnalysisRequest>) => {
-  const { name, buffer, context, water, forbidden, excludeBuildings } = event.data;
+  const { name, buffer, context, water, forbidden, excludeBuildings, settings } = event.data;
   try {
     reply({ type: 'progress', share: 0.01, step: 'Wczytywanie arkusza' });
     const grid: DemGrid = /\.tiff?$/i.test(name) ? await readGeoTiff(buffer) : readAsc(buffer);
@@ -24,17 +24,21 @@ self.onmessage = async (event: MessageEvent<AnalysisRequest>) => {
     }
     const sheetId = sheetIdFromName(name);
     let scene: Scene | null = null;
-    const candidates = analyseSheet(grid, {
-      sheetId,
-      context,
-      water,
-      forbidden,
-      exclude: exclusion?.mask,
-      onProgress: (share, step) => reply({ type: 'progress', share: 0.05 + share * 0.85, step }),
-      onScene: (s) => {
-        scene = s;
+    const candidates = analyseSheet(
+      grid,
+      {
+        sheetId,
+        context,
+        water,
+        forbidden,
+        exclude: exclusion?.mask,
+        onProgress: (share, step) => reply({ type: 'progress', share: 0.05 + share * 0.85, step }),
+        onScene: (s) => {
+          scene = s;
+        },
       },
-    });
+      withParams(settings),
+    );
     const steps = {
       lrm: 'Warstwa LRM',
       hillshade: 'Cieniowanie z 16 kierunków',

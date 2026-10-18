@@ -239,6 +239,14 @@ export const TOUR_STEPS: readonly TourStep[] = [
     mode: 'analysis',
   },
   {
+    id: 'analysis-settings',
+    target: 'analysis-settings',
+    title: 'Ustawienia analizy',
+    content:
+      'Promień reliefu lokalnego i próg wysokości działają przy następnym wczytaniu arkusza. Wagi oceny (wyrazistość, pewność, kontekst) przeliczają oceny od razu; zestawienie znalezisk z terenu podpowie, którą podnieść.',
+    mode: 'analysis',
+  },
+  {
     id: 'import-candidates',
     target: 'import-candidates',
     title: 'Wczytaj kandydatów',

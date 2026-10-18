@@ -1,5 +1,6 @@
 import { getDb } from '@/shared/db';
 import type { Candidate } from '@/shared/types/domain';
+import { useAnalysisSettings } from '../store/useAnalysisSettings';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 import { sheetIdFromName } from '../utils/sheetIdFromName';
 import type {
@@ -53,6 +54,9 @@ export async function runSheetAnalysis(
     water: (await db.getAll('water')).map((w) => w.geometry),
     forbidden,
     excludeBuildings,
+    settings: (({ lrmRadiusM, thresholdM, weights }) => ({ lrmRadiusM, thresholdM, weights }))(
+      useAnalysisSettings.getState(),
+    ),
   };
   const worker = new Worker(new URL('../workers/analysis.worker.ts', import.meta.url), {
     type: 'module',

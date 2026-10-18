@@ -70,16 +70,47 @@ export function contextScore(
   return Math.min(1, v);
 }
 
-/** score = 40 × relief clarity + 20 × confidence + 40 × context (0–100). */
+export interface ScoreParts {
+  /** relief clarity 0–1 */
+  relief: number;
+  confidence: number;
+  context: number;
+}
+
+/** The three 0–1 parts the score weighs; kept with the candidate so new weights re-score it. */
+export function scoreParts(
+  reliefM: number,
+  confidence: number,
+  context: number,
+  cfg = interpretConfig,
+): ScoreParts {
+  return {
+    relief: Math.min(1, Math.abs(reliefM) / cfg.score.reliefFullM),
+    confidence,
+    context,
+  };
+}
+
+/** Weighted parts on 0–100; the weights are normalised, so any scale works. */
+export function weighScore(
+  p: ScoreParts,
+  W: { relief: number; confidence: number; context: number },
+): number {
+  const sum = W.relief + W.confidence + W.context;
+  if (sum <= 0) return 0;
+  return Math.round(
+    ((W.relief * p.relief + W.confidence * p.confidence + W.context * p.context) * 100) / sum,
+  );
+}
+
+/** score = 40 × relief clarity + 20 × confidence + 40 × context (0–100) with the default weights. */
 export function score(
   reliefM: number,
   confidence: number,
   context: number,
   cfg = interpretConfig,
 ): number {
-  const W = cfg.score.weights;
-  const relief = Math.min(1, Math.abs(reliefM) / cfg.score.reliefFullM);
-  return Math.round(W.relief * relief + W.confidence * confidence + W.context * context);
+  return weighScore(scoreParts(reliefM, confidence, context, cfg), cfg.score.weights);
 }
 
 /** Strong context raises the priority by one step (never for protected or natural forms). */

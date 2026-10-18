@@ -19,6 +19,7 @@ import { CandidateDetails } from './CandidateDetails';
 import { CandidateFiltersBar } from './CandidateFiltersBar';
 import { CandidateList } from './CandidateList';
 import { AnalysisProgress } from './AnalysisProgress';
+import { AnalysisSettingsDialog } from './AnalysisSettingsDialog';
 import { CandidateMarkers } from './CandidateMarkers';
 import { CandidateZones } from './CandidateZones';
 import { ExclusionMaskLayer } from './ExclusionMaskLayer';
@@ -37,6 +38,7 @@ export function AnalysisView() {
   const select = useAnalysisStore((s) => s.select);
   const visible = useVisibleCandidates();
   const [noteFor, setNoteFor] = useState<Candidate | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const isPhone = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const [filtersOpen, setFiltersOpen] = useState<boolean | null>(null);
   const showFilters = filtersOpen ?? !isPhone;
@@ -108,6 +110,15 @@ export function AnalysisView() {
                 </Badge>
               </IconButton>
             )}
+            <IconButton
+              size="small"
+              aria-label="Ustawienia analizy"
+              data-tour="analysis-settings"
+              onClick={() => setSettingsOpen(true)}
+              sx={{ color: 'text.secondary' }}
+            >
+              <Icon name="sliders-h" size={20} />
+            </IconButton>
             <LoadSheetButton />
             {all.length > 0 && <ImportCandidatesButton />}
           </Stack>
@@ -178,6 +189,7 @@ export function AnalysisView() {
           </>
         )}
       </Paper>
+      {settingsOpen && <AnalysisSettingsDialog onClose={() => setSettingsOpen(false)} />}
       {noteFor && (
         <NoteDialog
           initial={noteFor.note}

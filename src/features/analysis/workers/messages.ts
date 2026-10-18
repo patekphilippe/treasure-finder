@@ -1,4 +1,5 @@
 import type { Geometry } from 'geojson';
+import type { AnalysisSettings } from '@/shared/lib/detect';
 import type { ExclusionGroupResult } from '@/shared/lib/tiles';
 import type { Candidate, ReliefKind } from '@/shared/types/domain';
 
@@ -13,6 +14,8 @@ export interface AnalysisRequest {
   forbidden: Geometry[];
   /** skip buildings and yards (BDOT10k WMS) */
   excludeBuildings: boolean;
+  /** LRM radius, threshold and weights from the analysis settings */
+  settings: AnalysisSettings;
 }
 
 export interface SheetInfo {

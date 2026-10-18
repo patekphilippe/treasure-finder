@@ -9,4 +9,13 @@ export type { ExclusionSpec, ZoneSpec } from './zoneSpec';
 export { FLAGS } from './vocabulary';
 export { areaCentroid, buildExclusionLocal, buildZoneLocal, toWgs84 } from './searchZone';
 export { analyseSheet, toCandidates, type AnalyseOptions } from './analyseSheet';
-export { contextPriority, contextScore, distanceToGeometry, score } from './score';
+export {
+  contextPriority,
+  contextScore,
+  distanceToGeometry,
+  score,
+  scoreParts,
+  weighScore,
+  type ScoreParts,
+} from './score';
+export { DEFAULT_SETTINGS, withParams, type AnalysisSettings } from './withParams';
