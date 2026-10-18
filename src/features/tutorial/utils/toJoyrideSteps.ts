@@ -25,6 +25,12 @@ export function toJoyrideSteps(steps: readonly TourStep[], c: TourConditions): S
       return {
         id: s.id,
         target,
+        // in a sheet the whole sheet stays lit and the section gets an outline (markTourTarget)
+        ...(s.sheet && {
+          spotlightTarget: '[data-tour="sheet"]',
+          spotlightPadding: 0,
+          spotlightRadius: 16,
+        }),
         placement: s.target ? (s.placement ?? 'auto') : 'center',
         title: s.title,
         content: s.content,

@@ -1,3 +1,5 @@
+import { markTourTarget } from './markTourTarget';
+import { scrollIntoSheet } from './scrollIntoSheet';
 import { useUiStore, type AppMode, type SheetId } from '@/shared/store/useUiStore';
 
 const SHEET_SLIDE_MS = 350;
@@ -5,13 +7,14 @@ const TARGET_WAIT_MS = 4000;
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Polls until the element is on screen; the analysis view loads lazily on first open. */
-async function waitForTarget(selector: string): Promise<void> {
+async function waitForTarget(selector: string): Promise<Element | null> {
   const until = Date.now() + TARGET_WAIT_MS;
   while (Date.now() < until) {
     const el = document.querySelector(selector);
-    if (el && el.getClientRects().length > 0) return;
+    if (el && el.getClientRects().length > 0) return el;
     await wait(100);
   }
+  return null;
 }
 
 /**
@@ -23,6 +26,7 @@ export async function showTourView(
   sheet: SheetId | null,
   selector: string,
 ): Promise<void> {
+  markTourTarget(null);
   const ui = useUiStore.getState();
   if (ui.mode !== mode) ui.setMode(mode);
   if (useUiStore.getState().activeSheet !== sheet) {
@@ -30,5 +34,9 @@ export async function showTourView(
     else ui.closeSheet();
     await wait(SHEET_SLIDE_MS);
   }
-  await waitForTarget(selector);
+  const el = await waitForTarget(selector);
+  if (el && sheet) {
+    scrollIntoSheet(el);
+    markTourTarget(selector);
+  }
 }

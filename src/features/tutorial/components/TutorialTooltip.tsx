@@ -27,6 +27,9 @@ export function TutorialTooltip({
         width: 'min(calc(100vw - 32px), 360px)',
         borderRadius: '16px',
         overflow: 'hidden',
+        border: 1,
+        borderColor: 'divider',
+        backgroundImage: 'none',
       }}
     >
       <Stack spacing={1} sx={{ p: 2, pb: 1.5 }}>
