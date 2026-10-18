@@ -56,7 +56,7 @@ export function createAppTheme(mode: PaletteMode): Theme {
       MuiButton: {
         defaultProps: { disableElevation: true },
         styleOverrides: {
-          root: { borderRadius: 999, paddingInline: 18 },
+          root: { borderRadius: 999, paddingInline: 18, whiteSpace: 'nowrap' },
           sizeLarge: { paddingBlock: 10 },
         },
       },

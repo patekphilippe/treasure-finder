@@ -53,7 +53,7 @@ export function CandidateDetails({ candidate: c, onNote, onClose }: CandidateDet
             disabled
             startIcon={<Icon name="check" size={18} />}
           >
-            Przyjęty: strefa i punkt w terenie
+            Przyjęty
           </Button>
         ) : (
           <Button

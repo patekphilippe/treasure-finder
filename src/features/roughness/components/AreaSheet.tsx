@@ -1,5 +1,6 @@
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -70,31 +71,26 @@ export function AreaSheet({ onClose }: AreaSheetProps) {
             note !== area.note && void update({ ...area, note: note.trim(), updated: Date.now() })
           }
         />
-        <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap' }}>
+        <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
           <Button
             variant="contained"
             sx={{ flex: 1 }}
             startIcon={<Icon name="map-marker-alt" size={18} />}
             onClick={addPoint}
           >
-            Punkt do sprawdzenia
+            Dodaj punkt
           </Button>
-          <Button
-            color="inherit"
-            startIcon={<Icon name="search" size={18} />}
+          <IconButton
+            aria-label="Pokaż na mapie"
             onClick={() =>
               flyTo({ lat: area.lat, lng: area.lng, zoom: 17, offsetY: bottomSheetOffset() })
             }
           >
-            Pokaż
-          </Button>
-          <Button
-            color="error"
-            startIcon={<Icon name="trash-alt" size={18} />}
-            onClick={() => setConfirm(true)}
-          >
-            Usuń
-          </Button>
+            <Icon name="search" size={22} />
+          </IconButton>
+          <IconButton aria-label="Usuń obszar" color="error" onClick={() => setConfirm(true)}>
+            <Icon name="trash-alt" size={22} />
+          </IconButton>
         </Stack>
       </Stack>
       <ConfirmDialog
