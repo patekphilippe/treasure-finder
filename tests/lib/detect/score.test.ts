@@ -102,6 +102,22 @@ describe('analyseSheet', () => {
     expect(Math.min(...xs(clipped.searchZone))).toBeGreaterThan(91.9);
   });
 
+  it('imported water near a dugout raises its score; water far outside the sheet is ignored', () => {
+    const line = (x: number) => ({
+      type: 'LineString' as const,
+      coordinates: [0, 200].map((y) => {
+        const [lat, lng] = fromEpsg2180(ORIGIN_E + x, ORIGIN_N - y);
+        return [lng, lat];
+      }),
+    });
+    const grid = scenarios.ziemianka().grid();
+    const dugout = (water: ReturnType<typeof line>[]) =>
+      analyseSheet(grid, { sheetId: 'T', water }).find((x) => x.interpretation === 'ziemianka')!;
+    const dry = dugout([]);
+    expect(dugout([line(160)]).score).toBe(dry.score + 8);
+    expect(dugout([line(5000)]).score).toBe(dry.score);
+  });
+
   it('reports progress', () => {
     const steps: string[] = [];
     analyseSheet(scenarios.lej().grid(), { sheetId: 'T', onProgress: (_, s) => steps.push(s) });

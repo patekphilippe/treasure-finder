@@ -19,8 +19,8 @@ export function cancelSheetAnalysis(): void {
 }
 
 /**
- * Analyses an NMT sheet file in a worker. Archival context features and forbidden zones come
- * from the database; the sheet's own exclusion zones are left out, the analysis rebuilds them.
+ * Analyses an NMT sheet file in a worker. Archival context, BDOT10k water and forbidden zones
+ * come from the database; the sheet's own exclusion zones are left out, the analysis rebuilds them.
  */
 export async function runSheetAnalysis(
   file: File,
@@ -39,7 +39,7 @@ export async function runSheetAnalysis(
     name: file.name,
     buffer: await file.arrayBuffer(),
     context,
-    water: [],
+    water: (await db.getAll('water')).map((w) => w.geometry),
     forbidden,
     excludeBuildings,
   };

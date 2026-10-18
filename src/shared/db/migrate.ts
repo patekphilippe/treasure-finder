@@ -66,4 +66,8 @@ export async function migrate(
       cursor = await cursor.continue();
     }
   }
+  if (oldVersion < 4 && !db.objectStoreNames.contains('water')) {
+    // water from BDOT10k for the analysis
+    db.createObjectStore('water', { keyPath: 'id' });
+  }
 }

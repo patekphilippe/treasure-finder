@@ -25,6 +25,18 @@ export function describeImport(s: ImportSummary): string[] {
       `Kandydaci: ${countCandidates(s.candidatesAdded)} nowych, ${s.candidatesUpdated} zaktualizowanych (zobacz w trybie Analiza)`,
     );
   }
+  if (s.contextAdded)
+    lines.push(
+      `Kontekst archiwalny: ${pluralPl(s.contextAdded, 'obiekt', 'obiekty', 'obiektów')} (użyty przy następnej analizie arkusza)`,
+    );
+  if (s.waterAdded)
+    lines.push(
+      `Wody z BDOT10k: ${pluralPl(s.waterAdded, 'obiekt', 'obiekty', 'obiektów')} (użyte przy następnej analizie arkusza)`,
+    );
+  if (s.ditches)
+    lines.push(
+      `Pominięto ${pluralPl(s.ditches, 'rów melioracyjny', 'rowy melioracyjne', 'rowów melioracyjnych')}`,
+    );
   if (s.photos) lines.push(`Wczytano ${countPhotos(s.photos)}`);
   if (s.unchanged) lines.push(`Bez zmian (już są na urządzeniu): ${s.unchanged}`);
   if (s.skipped)

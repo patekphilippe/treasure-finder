@@ -14,6 +14,10 @@ export interface ImportSummary {
   tracksUpdated: number;
   candidatesAdded: number;
   candidatesUpdated: number;
+  contextAdded: number;
+  waterAdded: number;
+  /** drainage ditches left out of a water file */
+  ditches: number;
   photos: number;
   unchanged: number;
   skipped: number;
@@ -25,16 +29,17 @@ const trackTime = (t: Track) => t.end ?? t.start;
  * Merges imported data into IndexedDB by id:
  * points — newer `updated` wins; tracks — later `end` wins, a track being
  * recorded here is never overwritten; candidates — new data, but decisions and notes made
- * here are kept; zones/context — only new ids.
+ * here are kept; zones/context/water — only new ids.
  */
 export async function applyImport(payload: ImportPayload): Promise<ImportSummary> {
   const db = await getDb();
-  const [points, tracks, candidates, zones, context, photoKeys] = await Promise.all([
+  const [points, tracks, candidates, zones, context, water, photoKeys] = await Promise.all([
     db.getAll('points'),
     db.getAll('tracks'),
     db.getAll('candidates'),
     db.getAll('zones'),
     db.getAll('context'),
+    db.getAll('water'),
     db.getAllKeys('photos'),
   ]);
 
@@ -48,6 +53,7 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
   const c = mergeCandidates(candidates, payload.candidates);
   const z = mergeRecords(zones, payload.zones, onlyNew);
   const x = mergeRecords(context, payload.context, onlyNew);
+  const w = mergeRecords(water, payload.water, onlyNew);
 
   const havePhoto = new Set(photoKeys);
   const photos = p.toWrite.flatMap((pt) =>
@@ -57,7 +63,7 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
   );
 
   const tx = db.transaction(
-    ['points', 'tracks', 'candidates', 'zones', 'context', 'photos'],
+    ['points', 'tracks', 'candidates', 'zones', 'context', 'water', 'photos'],
     'readwrite',
   );
   await Promise.all([
@@ -66,6 +72,7 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
     ...c.toWrite.map((r) => tx.objectStore('candidates').put(r)),
     ...z.toWrite.map((r) => tx.objectStore('zones').put(r)),
     ...x.toWrite.map((r) => tx.objectStore('context').put(r)),
+    ...w.toWrite.map((r) => tx.objectStore('water').put(r)),
     ...photos.map(([id, blob]) => tx.objectStore('photos').put(blob, id)),
     tx.done,
   ]);
@@ -83,8 +90,11 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
     tracksUpdated: t.updated,
     candidatesAdded: c.added,
     candidatesUpdated: c.updated,
+    contextAdded: x.added,
+    waterAdded: w.added,
+    ditches: payload.ditches ?? 0,
     photos: photos.length,
-    unchanged: p.unchanged + t.unchanged,
+    unchanged: p.unchanged + t.unchanged + x.unchanged + w.unchanged,
     skipped: payload.skipped,
   };
 }

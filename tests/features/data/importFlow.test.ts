@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { applyImport } from '@/features/data/services/applyImport';
 import { readImportFile } from '@/features/data/services/readImportFile';
 import { usePointsStore } from '@/features/points';
-import { candidatesRepo, photosRepo, pointsRepo, tracksRepo } from '@/shared/db';
+import { candidatesRepo, getDb, photosRepo, pointsRepo, tracksRepo } from '@/shared/db';
 import { candidatesGeoJSON, makeCandidate } from '../../helpers/candidates';
 import v1 from '../../fixtures/kopia-v1.json';
 import { clearDb } from '../../helpers/clearDb';
@@ -99,5 +99,53 @@ describe('import flow', () => {
     const again = await applyImport(await readImportFile(file(55)));
     expect(again).toMatchObject({ candidatesAdded: 0, candidatesUpdated: 1 });
     expect((await candidatesRepo.getAll())[0]).toMatchObject({ score: 55, decision: 'odrzucony' });
+  });
+
+  it('imports archival context and BDOT10k water GeoJSON; the same file twice adds nothing', async () => {
+    const geo = (name: string, features: unknown[]) =>
+      new File([JSON.stringify({ type: 'FeatureCollection', features })], name);
+    const ctx = geo('mapa.geojson', [
+      {
+        type: 'Feature',
+        properties: { kind: 'mlyn' },
+        geometry: { type: 'Point', coordinates: [17.1, 51.2] },
+      },
+    ]);
+    const water = geo('woda.geojson', [
+      {
+        type: 'Feature',
+        properties: { x_kod: 'SWRS01' },
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [17.1, 51.2],
+            [17.11, 51.21],
+          ],
+        },
+      },
+      {
+        type: 'Feature',
+        properties: { x_kod: 'SWRM01' },
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [17.2, 51.2],
+            [17.21, 51.21],
+          ],
+        },
+      },
+    ]);
+    const c = await readImportFile(ctx);
+    expect(c.kind).toBe('context');
+    expect(await applyImport(c)).toMatchObject({ contextAdded: 1, pointsAdded: 0 });
+    const w = await readImportFile(water);
+    expect(w.kind).toBe('water');
+    expect(await applyImport(w)).toMatchObject({ waterAdded: 1, ditches: 1 });
+
+    expect(await applyImport(await readImportFile(water))).toMatchObject({ waterAdded: 0 });
+    expect(await applyImport(await readImportFile(ctx))).toMatchObject({ contextAdded: 0 });
+    const db = await getDb();
+    expect(await db.count('context')).toBe(1);
+    expect(await db.count('water')).toBe(1);
   });
 });
