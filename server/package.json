@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "deploy": "wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply treasure-finder --local",
-    "db:migrate": "wrangler d1 migrations apply treasure-finder --remote"
+    "db:migrate": "wrangler d1 migrations apply treasure-finder --remote",
+    "try-reading": "tsx --tsconfig tsconfig.json scripts/tryReading.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.131.0"
@@ -17,6 +18,8 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.22.0",
     "@cloudflare/workers-types": "5.20261004.1",
+    "@types/node": "24.10.1",
+    "tsx": "4.20.6",
     "typescript": "6.0.3",
     "vitest": "4.1.11",
     "wrangler": "4.147.0"
