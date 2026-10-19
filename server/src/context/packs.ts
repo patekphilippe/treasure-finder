@@ -43,7 +43,7 @@ function cellBbox(key: string): PackIndexEntry['bbox'] {
 
 /** Adds approved objects to their cells' packs and refreshes the index (read, merge, write). */
 export async function publishObjects(
-  bucket: R2Bucket,
+  store: KVNamespace,
   objects: readonly SourceObject[],
   source: string,
   now: number,
@@ -52,13 +52,12 @@ export async function publishObjects(
   for (const o of objects)
     byCell.set(cellKey(o.lat, o.lng), [...(byCell.get(cellKey(o.lat, o.lng)) ?? []), o]);
 
-  const indexObj = await bucket.get(INDEX_KEY);
-  const index = indexObj ? ((await indexObj.json()) as PackIndexEntry[]) : [];
+  const index = (await store.get<PackIndexEntry[]>(INDEX_KEY, 'json')) ?? [];
   for (const [key, list] of byCell) {
-    const current = await bucket.get(key);
-    const pack: Pack = current
-      ? ((await current.json()) as Pack)
-      : { type: 'FeatureCollection', features: [] };
+    const pack: Pack = (await store.get<Pack>(key, 'json')) ?? {
+      type: 'FeatureCollection',
+      features: [],
+    };
     for (const o of list)
       pack.features.push({
         type: 'Feature',
@@ -68,16 +67,12 @@ export async function publishObjects(
         },
         properties: { kind: o.kind, label: o.label, radiusM: o.radiusM, source, approved: now },
       });
-    await bucket.put(key, JSON.stringify(pack), {
-      httpMetadata: { contentType: 'application/geo+json' },
-    });
+    await store.put(key, JSON.stringify(pack));
     const entry = { key, bbox: cellBbox(key), count: pack.features.length, updated: now };
     const at = index.findIndex((e) => e.key === key);
     if (at >= 0) index[at] = entry;
     else index.push(entry);
   }
-  await bucket.put(INDEX_KEY, JSON.stringify(index), {
-    httpMetadata: { contentType: 'application/json' },
-  });
+  await store.put(INDEX_KEY, JSON.stringify(index));
   return [...byCell.keys()];
 }

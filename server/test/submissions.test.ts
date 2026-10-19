@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SubmissionCreated, SubmissionView } from '@/shared/types/sources';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
-const testEnv = env as unknown as { DB: D1Database; SOURCES: R2Bucket };
+const testEnv = env as unknown as { DB: D1Database; SOURCES: KVNamespace };
 const ORIGIN = 'https://patekphilippe.github.io';
 let device = 0;
 
@@ -49,7 +49,7 @@ describe('submissions', () => {
     expect(created.status).toBe('nowe');
 
     const stored = await testEnv.SOURCES.list({ prefix: `zgloszenia/${created.id}/` });
-    expect(stored.objects).toHaveLength(1);
+    expect(stored.keys).toHaveLength(1);
 
     const view = await worker.fetch(
       new Request(`https://api.test/api/submissions/${created.id}?key=${created.accessKey}`),
@@ -73,9 +73,9 @@ describe('submissions', () => {
       }),
     );
     expect(del.status).toBe(204);
-    expect(
-      (await testEnv.SOURCES.list({ prefix: `zgloszenia/${created.id}/` })).objects,
-    ).toHaveLength(0);
+    expect((await testEnv.SOURCES.list({ prefix: `zgloszenia/${created.id}/` })).keys).toHaveLength(
+      0,
+    );
     const row = await testEnv.DB.prepare('SELECT id FROM submissions WHERE id = ?')
       .bind(created.id)
       .first();

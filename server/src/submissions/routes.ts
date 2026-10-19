@@ -57,7 +57,7 @@ export async function createSubmission(request: Request, env: Env, cors: Cors, n
     parsed.files.map(async (file) => {
       const fileId = randomToken(9);
       const r2Key = `zgloszenia/${id}/${fileId}`;
-      await env.SOURCES.put(r2Key, file.stream(), { httpMetadata: { contentType: file.type } });
+      await env.SOURCES.put(r2Key, await file.arrayBuffer());
       return { fileId, r2Key, mime: file.type, bytes: file.size };
     }),
   );
@@ -126,7 +126,7 @@ export async function deleteSubmission(env: Env, id: string, key: string | null,
   const files = await env.DB.prepare('SELECT r2_key FROM files WHERE submission_id = ?')
     .bind(id)
     .all<{ r2_key: string }>();
-  if (files.results.length) await env.SOURCES.delete(files.results.map((f) => f.r2_key));
+  await Promise.all(files.results.map((f) => env.SOURCES.delete(f.r2_key)));
   await env.DB.batch([
     env.DB.prepare('DELETE FROM results WHERE submission_id = ?').bind(id),
     env.DB.prepare('DELETE FROM files WHERE submission_id = ?').bind(id),

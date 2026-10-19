@@ -12,10 +12,10 @@ export async function serveContext(env: Env, path: string, cors: Record<string, 
     return key === INDEX_KEY
       ? new Response('[]', { headers: { ...cors, 'content-type': 'application/json' } })
       : fail(404, 'Nie ma takiej paczki', cors);
-  return new Response(obj.body, {
+  return new Response(obj, {
     headers: {
       ...cors,
-      'content-type': obj.httpMetadata?.contentType ?? 'application/json',
+      'content-type': key === INDEX_KEY ? 'application/json' : 'application/geo+json',
       'cache-control': 'public, max-age=3600',
     },
   });

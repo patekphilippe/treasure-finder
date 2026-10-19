@@ -1,8 +1,10 @@
 /** Bindings from wrangler.toml and secrets set with `wrangler secret put`. */
 export interface Env {
   DB: D1Database;
-  SOURCES: R2Bucket;
-  CONTEXT: R2Bucket;
+  /** uploaded photos and texts (Workers KV: free plan, no card; values up to 25 MB) */
+  SOURCES: KVNamespace;
+  /** approved context packs and their index */
+  CONTEXT: KVNamespace;
   ALLOWED_ORIGINS: string;
   MONTHLY_BUDGET_USD: string;
   PRIVATE_DAILY_LIMIT: string;

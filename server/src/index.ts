@@ -4,6 +4,7 @@ import { adminRoutes } from './admin/routes';
 import { serveContext } from './context/routes';
 import { corsHeaders, fail, json } from './http';
 import { anthropicClient } from './pipeline/aiClient';
+import { deleteExpired } from './pipeline/cleanup';
 import { runPipeline } from './pipeline/runPipeline';
 import { createSubmission, deleteSubmission, getSubmission } from './submissions/routes';
 
@@ -35,6 +36,11 @@ export default {
 
   // AI pipeline (docs/BACKEND.md): collect finished batches, then send new submissions as one batch
   async scheduled(_controller, env, ctx): Promise<void> {
+    // until the owner sets the key (docs/BACKEND.md) submissions simply wait; old ones still go
+    if (!env.ANTHROPIC_API_KEY) {
+      ctx.waitUntil(deleteExpired(env, Date.now()).then(() => undefined));
+      return;
+    }
     ctx.waitUntil(
       runPipeline(env, anthropicClient(env.ANTHROPIC_API_KEY), Date.now()).then(() => undefined),
     );

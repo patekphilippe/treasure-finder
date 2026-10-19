@@ -126,7 +126,7 @@ describe('review panel', () => {
       label: 'Młyn wodny (poprawiony)',
       source: 'Kronika Kowar',
     });
-    expect((await testEnv.SOURCES.list({ prefix: `zgloszenia/${c.id}/` })).objects).toHaveLength(0);
+    expect((await testEnv.SOURCES.list({ prefix: `zgloszenia/${c.id}/` })).keys).toHaveLength(0);
     const again = await admin(`submissions/${c.id}/approve`, {
       method: 'POST',
       body: JSON.stringify({ objects }),

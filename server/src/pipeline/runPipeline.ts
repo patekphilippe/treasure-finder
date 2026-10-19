@@ -11,6 +11,7 @@ import type { AiClient, BatchOutcome, BatchRequest } from './aiClient';
 import { objectFromText, objectsFromMap } from './assemble';
 import { findPlaces, growBbox, type Place } from './gazetteer';
 import { placeByNames, placeBySheet, type Placement } from './georef';
+import { deleteExpired } from './cleanup';
 import { costUsd, estimateUsd, FIRST_MODEL, SECOND_MODEL, type PipelineModel } from './pricing';
 import { parseMapReading, parseTextReading, type MapReading } from './readings';
 import { mapRequest, parseCustomId, textRequest } from './requests';
@@ -107,9 +108,9 @@ export async function submitNew(env: Env, ai: AiClient, now: number): Promise<nu
     committed += estimate;
     const uploaded: Record<string, string> = {};
     for (const f of files) {
-      const object = await env.SOURCES.get(f.r2_key);
-      if (!object) continue;
-      uploaded[f.id] = await ai.uploadFile(`${row.id}-${f.id}`, f.mime, object.body);
+      const body = await env.SOURCES.get(f.r2_key, 'stream');
+      if (!body) continue;
+      uploaded[f.id] = await ai.uploadFile(`${row.id}-${f.id}`, f.mime, body);
       requests.push(mapRequest(row.id, f.id, uploaded[f.id]!, f.mime, viewOf(row), row.model));
     }
     if (row.text) requests.push(textRequest(row.id, row.text, row.link, row.model));
@@ -273,5 +274,6 @@ async function processOne(env: Env, ai: AiClient, row: Row, outcomes: BatchOutco
 export async function runPipeline(env: Env, ai: AiClient, now: number) {
   const collected = await collectFinished(env, ai, now);
   const submitted = await submitNew(env, ai, now);
-  return { collected, submitted };
+  const deleted = await deleteExpired(env, now);
+  return { collected, submitted, deleted };
 }

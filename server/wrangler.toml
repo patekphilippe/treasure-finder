@@ -16,18 +16,19 @@ PRIVATE_DAILY_LIMIT = "5"
 [[d1_databases]]
 binding = "DB"
 database_name = "treasure-finder"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "f761f7ed-f593-4941-830f-c0ffb460c719"
 migrations_dir = "migrations"
 
-# Uploaded photos and texts: private, deleted after 30 days (lifecycle rule, docs/BACKEND.md).
-[[r2_buckets]]
+# Uploaded photos and texts (Workers KV: free plan without a card; R2 needs one). Private,
+# deleted with the submission; the app sends images of at most 1568 px.
+[[kv_namespaces]]
 binding = "SOURCES"
-bucket_name = "tf-zrodla"
+id = "3166279fe80d435ebba9c23bc45b3b2a"
 
-# Approved context packs: public, read by the app.
-[[r2_buckets]]
+# Approved context packs and their index, served by the worker under /api/kontekst/.
+[[kv_namespaces]]
 binding = "CONTEXT"
-bucket_name = "tf-kontekst"
+id = "001e63b2a1454daea7674193dc9e463d"
 
 [triggers]
 crons = ["*/15 * * * *"]

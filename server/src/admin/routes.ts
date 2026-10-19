@@ -22,7 +22,7 @@ async function dropFiles(env: Env, id: string) {
   const files = await env.DB.prepare('SELECT r2_key FROM files WHERE submission_id = ?')
     .bind(id)
     .all<{ r2_key: string }>();
-  if (files.results.length) await env.SOURCES.delete(files.results.map((f) => f.r2_key));
+  await Promise.all(files.results.map((f) => env.SOURCES.delete(f.r2_key)));
   await env.DB.prepare('DELETE FROM files WHERE submission_id = ?').bind(id).run();
 }
 
@@ -85,9 +85,9 @@ export async function adminRoutes(
     const row = await env.DB.prepare('SELECT r2_key, mime FROM files WHERE id = ?')
       .bind(file[1])
       .first<{ r2_key: string; mime: string }>();
-    const obj = row ? await env.SOURCES.get(row.r2_key) : null;
+    const obj = row ? await env.SOURCES.get(row.r2_key, 'stream') : null;
     if (!obj || !row) return fail(404, 'Nie ma takiego pliku', cors);
-    return new Response(obj.body, {
+    return new Response(obj, {
       headers: { ...cors, 'content-type': row.mime, 'cache-control': 'private, no-store' },
     });
   }

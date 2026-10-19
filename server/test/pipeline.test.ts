@@ -165,6 +165,18 @@ describe('AI pipeline', () => {
     expect(v.result!.objects[0]!.lat).toBeGreaterThan(50.792);
   });
 
+  it('deletes private submissions after 30 days, files included', async () => {
+    const c = await submit({ text: 'stary młyn' }, true);
+    const ai = fakeAi(() => ({ summary: '', objects: [] }));
+    const r = await runPipeline(testEnv, ai.client, Date.now() + 31 * 86_400_000);
+    expect(r.deleted).toBeGreaterThanOrEqual(1);
+    expect((await testEnv.SOURCES.list({ prefix: `zgloszenia/${c.id}/` })).keys).toHaveLength(0);
+    const row = await testEnv.DB.prepare('SELECT id FROM submissions WHERE id = ?')
+      .bind(c.id)
+      .first();
+    expect(row).toBeNull();
+  });
+
   it('holds new work once the monthly budget is spent', async () => {
     const c = await submit({ text: 'karczma przy brodzie' }, false);
     await addSpending(testEnv.DB, Date.now(), 5);

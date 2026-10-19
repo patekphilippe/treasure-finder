@@ -8,14 +8,14 @@
 | --------------------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
 | API i przetwarzanie   | Worker `treasure-finder-api` | `server/src/`                                                                            |
 | Baza                  | D1 `treasure-finder`         | zgłoszenia, wyniki, licznik wydatków, limity dzienne, pamięć wyszukiwania nazw           |
-| Pliki zgłoszeń        | R2 `tf-zrodla` (prywatny)    | zmniejszone zdjęcia i teksty                                                             |
-| Zatwierdzony kontekst | R2 `tf-kontekst`             | paczki GeoJSON w siatce 0,25° i `index.json`, wydawane przez worker pod `/api/kontekst/` |
+| Pliki zgłoszeń        | Workers KV `SOURCES`         | zmniejszone zdjęcia i teksty (prywatne, kasowane z zgłoszeniem)                          |
+| Zatwierdzony kontekst | Workers KV `CONTEXT`         | paczki GeoJSON w siatce 0,25° i `index.json`, wydawane przez worker pod `/api/kontekst/` |
 | Ochrona przed botami  | Turnstile                    | token przy każdym wysłaniu                                                               |
 | Panel przeglądu       | aplikacja pod `…/#admin`     | token `ADMIN_TOKEN` (sekret workera), tylko dla właściciela                              |
 
 ## Koszty
 
-- **Cloudflare:** plan darmowy wystarcza (Workers 100 tys. zapytań dziennie, D1 5 GB, R2 10 GB bez opłat za pobieranie, Cron, Turnstile).
+- **Cloudflare:** plan darmowy wystarcza (Workers 100 tys. zapytań dziennie, D1 5 GB, Workers KV 1 GB i 1000 zapisów dziennie, Cron, Turnstile). Bez karty płatniczej: R2 wymagałby jej podania, dlatego pliki są w KV.
 - **Anthropic:** domyślnie `claude-haiku-5-5` w Batch API (-50%), a `claude-sonnet-5-5` tylko w drugim przebiegu przy trudnych mapach.
 
   | Wejście       | Koszt        |
@@ -30,9 +30,7 @@
 
 1. Konto Cloudflare, potem w `server/`: `npx wrangler login`.
 2. `npx wrangler d1 create treasure-finder`: wpisz zwrócone `database_id` do `server/wrangler.toml`.
-3. `npx wrangler r2 bucket create tf-zrodla` oraz `npx wrangler r2 bucket create tf-kontekst`.
-   - W panelu R2 dla `tf-zrodla` dodaj regułę cyklu życia „usuń obiekty po 30 dniach”.
-   - `tf-kontekst` zostaje prywatny: paczki wydaje worker.
+3. `npx wrangler kv namespace create SOURCES` oraz `npx wrangler kv namespace create CONTEXT`: wpisz zwrócone `id` do `server/wrangler.toml`. Prywatne zgłoszenia starsze niż 30 dni usuwa cron.
 4. Turnstile: w panelu dodaj widżet dla `patekphilippe.github.io`. Klucz witryny trafia do zmiennej `TURNSTILE_SITE_KEY` (punkt 9), a sekret ustawiasz tak: `npx wrangler secret put TURNSTILE_SECRET`.
 5. Klucz Anthropic: `npx wrangler secret put ANTHROPIC_API_KEY`.
 6. `npm run db:migrate`, potem `npm run deploy`.
