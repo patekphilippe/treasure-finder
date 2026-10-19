@@ -1,4 +1,3 @@
-import { acceptFix } from '@/features/gps';
 import { tracksRepo } from '@/shared/db';
 import { useFieldStore, type GpsFix } from '@/shared/store/useFieldStore';
 import type { Track } from '@/shared/types/domain';
@@ -7,6 +6,7 @@ import { useTracksStore } from '../store/useTracksStore';
 import { appendFix } from '../utils/appendFix';
 import { createTrack } from '../utils/createTrack';
 import { finishTrack } from '../utils/finishTrack';
+import { fixAction } from '../utils/fixAction';
 import { resumeTrack } from '../utils/resumeTrack';
 
 /**
@@ -16,6 +16,7 @@ import { resumeTrack } from '../utils/resumeTrack';
  */
 let current: Track | null = null;
 let lastFix: GpsFix | null = null;
+let jumpsInRow = 0;
 let dirty = false;
 let timer: ReturnType<typeof setInterval> | null = null;
 let unsubscribe: (() => void) | null = null;
@@ -31,7 +32,15 @@ const publish = (track: Track | null) => {
 };
 
 const onPosition = (fix: GpsFix | null) => {
-  if (!current || !fix || !acceptFix(lastFix, fix)) return;
+  if (!current || !fix) return;
+  const action = fixAction(lastFix, fix, jumpsInRow, Date.now());
+  if (action === 'skip') return;
+  if (action === 'jump') {
+    jumpsInRow++;
+    return;
+  }
+  jumpsInRow = 0;
+  if (action === 'newSegment') current = resumeTrack(current);
   lastFix = fix;
   current = appendFix(current, fix);
   dirty = true;
@@ -58,6 +67,7 @@ export const trackRecorder = {
     if (current) return current;
     current = createTrack(now);
     lastFix = null;
+    jumpsInRow = 0;
     await tracksRepo.put(current);
     publish(current);
     attach();
@@ -72,6 +82,7 @@ export const trackRecorder = {
     if (!active) return null;
     current = resumeTrack(active);
     lastFix = null;
+    jumpsInRow = 0;
     await tracksRepo.put(current);
     publish(current);
     attach();
@@ -105,6 +116,7 @@ export const trackRecorder = {
     }
     current = null;
     lastFix = null;
+    jumpsInRow = 0;
     dirty = false;
     publish(null);
   },

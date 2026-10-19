@@ -6,12 +6,17 @@ import { useFieldStore } from '@/shared/store/useFieldStore';
 import { clearDb } from '../../helpers/clearDb';
 
 const M = 1 / 111_195; // ~1 m of latitude
-const move = (metres: number, accM = 5) =>
-  useFieldStore.getState().setPosition({ lat: 52 + metres * M, lng: 19, accM, t: Date.now() });
+// fixes 3 s apart, like walking with a phone
+let clock = Date.now();
+const move = (metres: number, accM = 5) => {
+  clock += 3000;
+  useFieldStore.getState().setPosition({ lat: 52 + metres * M, lng: 19, accM, t: clock });
+};
 
 describe('track recording flow', () => {
   beforeEach(async () => {
     await clearDb();
+    clock = Date.now();
     useFieldStore.getState().setPosition(null);
   });
   afterEach(() => trackRecorder.detach());
@@ -30,6 +35,24 @@ describe('track recording flow', () => {
     expect(saved?.segments[0]).toHaveLength(3);
     expect(saved?.distM).toBeCloseTo(25, 0);
     expect(useFieldStore.getState().recordingTrackId).toBe(track.id);
+  });
+
+  it('a GPS jump is not drawn; a gap after a locked screen starts a new segment', async () => {
+    const track = await trackRecorder.start();
+    move(0);
+    move(5);
+    move(300); // jump
+    move(10);
+    clock += 120_000; // screen locked for 2 minutes
+    move(400);
+    move(405);
+    await trackRecorder.flush();
+
+    const saved = await tracksRepo.get(track.id);
+    expect(saved?.segments).toHaveLength(2);
+    expect(saved?.segments[0]).toHaveLength(3);
+    expect(saved?.segments[1]).toHaveLength(2);
+    expect(saved?.distM).toBeCloseTo(15, 0);
   });
 
   it('resumes after a reload as a new segment', async () => {
