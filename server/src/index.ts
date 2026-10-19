@@ -1,6 +1,8 @@
 import { spentThisMonth } from './budget';
 import type { Env } from './env';
 import { corsHeaders, fail, json } from './http';
+import { anthropicClient } from './pipeline/aiClient';
+import { runPipeline } from './pipeline/runPipeline';
 import { createSubmission, deleteSubmission, getSubmission } from './submissions/routes';
 
 export default {
@@ -25,7 +27,10 @@ export default {
     return fail(404, 'Nie ma takiego adresu', cors);
   },
 
-  async scheduled(): Promise<void> {
-    // AI pipeline (docs/BACKEND.md): submit new submissions as a batch, collect finished ones.
+  // AI pipeline (docs/BACKEND.md): collect finished batches, then send new submissions as one batch
+  async scheduled(_controller, env, ctx): Promise<void> {
+    ctx.waitUntil(
+      runPipeline(env, anthropicClient(env.ANTHROPIC_API_KEY), Date.now()).then(() => undefined),
+    );
   },
 } satisfies ExportedHandler<Env>;

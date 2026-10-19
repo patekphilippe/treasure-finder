@@ -1,4 +1,4 @@
-import type { XY } from '../tiles';
+import type { XY } from '../tiles/tileAffine';
 
 /** 3×3 projective map, row-major: x' = (h0·x + h1·y + h2) / (h6·x + h7·y + h8), y' likewise. */
 export type Homography = readonly number[];
