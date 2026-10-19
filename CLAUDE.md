@@ -91,8 +91,9 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   najwyższego poziomu: komponent. Pomocnicze funkcje idą do `utils/` lub `hooks/`
   (też po jednej na plik). Handlery wewnątrz komponentu są dozwolone. Pilnuje tego
   reguła `architecture/one-function-per-file` (eslint-rules/).
-- Funkcja nie importuje wnętrza innej funkcji, tylko jej `index.ts` (wyjątek: lekkie wejście
-  `features/analysis/field.ts` dla trybu Teren, żeby ekran analizy zostawał ładowany leniwie).
+- Funkcja nie importuje wnętrza innej funkcji, tylko jej `index.ts` (wyjątki: lekkie wejście
+  `features/analysis/field.ts` dla trybu Teren, żeby ekran analizy zostawał ładowany leniwie, oraz
+  `features/sources/admin.ts`, panel przeglądu zgłoszeń ładowany leniwie pod `#admin`).
   `shared/` nie importuje z `features/` ani `app/`.
 - Alias `@/` wskazuje na `src/`.
 

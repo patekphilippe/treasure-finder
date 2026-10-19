@@ -1,4 +1,5 @@
 import Alert from '@mui/material/Alert';
+import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -8,6 +9,7 @@ import { SOURCES_ENABLED } from '../config/sourcesApi';
 import { useSourcesStore } from '../store/useSourcesStore';
 import { MyAnalysesList } from './MyAnalysesList';
 import { SendSourceForm } from './SendSourceForm';
+import { SharedContextSection } from './SharedContextSection';
 
 interface SourcesSheetProps {
   onClose: () => void;
@@ -34,6 +36,12 @@ export function SourcesSheet({ onClose }: SourcesSheetProps) {
           SOURCES_ENABLED && <SendSourceForm onSent={() => setTab('mine')} />
         ) : (
           <MyAnalysesList />
+        )}
+        {SOURCES_ENABLED && (
+          <>
+            <Divider />
+            <SharedContextSection />
+          </>
         )}
       </Stack>
     </Sheet>

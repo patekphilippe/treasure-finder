@@ -14,6 +14,7 @@ export default defineConfig(async () => {
             ANTHROPIC_API_KEY: 'test-key',
             // Cloudflare's documented always-passing Turnstile test secret
             TURNSTILE_SECRET: '1x0000000000000000000000000000000AA',
+            ADMIN_TOKEN: 'test-admin-token-0123456789abcdef',
           },
         },
       }),

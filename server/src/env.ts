@@ -8,4 +8,6 @@ export interface Env {
   PRIVATE_DAILY_LIMIT: string;
   ANTHROPIC_API_KEY: string;
   TURNSTILE_SECRET: string;
+  /** long random secret for the review panel (wrangler secret put ADMIN_TOKEN) */
+  ADMIN_TOKEN: string;
 }

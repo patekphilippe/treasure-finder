@@ -16,11 +16,16 @@ import { FieldLayout } from './components/FieldLayout';
 import { TopBar } from './components/TopBar';
 import { useAppTheme } from './hooks/useAppTheme';
 import { useContextRecompute } from './hooks/useContextRecompute';
+import { useIsAdminRoute } from './hooks/useIsAdminRoute';
 import { useUiStore } from '@/shared/store/useUiStore';
 
 // analysis (laptop) is loaded only when opened — keeps the field app light on phones
 const AnalysisView = lazy(() =>
   import('@/features/analysis').then((m) => ({ default: m.AnalysisView })),
+);
+// review panel for the owner (…/#admin), never loaded for normal use
+const AdminPanel = lazy(() =>
+  import('@/features/sources/admin').then((m) => ({ default: m.AdminPanel })),
 );
 
 export function App() {
@@ -37,6 +42,17 @@ export function App() {
   useContextRecompute();
   const mode = useUiStore((s) => s.mode);
   const startTourIfNew = useTutorialStore((s) => s.startIfNew);
+  const admin = useIsAdminRoute();
+
+  if (admin)
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline enableColorScheme />
+        <Suspense fallback={null}>
+          <AdminPanel />
+        </Suspense>
+      </ThemeProvider>
+    );
 
   return (
     <ThemeProvider theme={theme}>

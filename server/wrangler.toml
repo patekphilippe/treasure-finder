@@ -32,4 +32,4 @@ bucket_name = "tf-kontekst"
 [triggers]
 crons = ["*/15 * * * *"]
 
-# Secrets (wrangler secret put): ANTHROPIC_API_KEY, TURNSTILE_SECRET
+# Secrets (wrangler secret put): ANTHROPIC_API_KEY, TURNSTILE_SECRET, ADMIN_TOKEN
