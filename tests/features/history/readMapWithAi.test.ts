@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readMapWithAi } from '@/features/history/services/readMapWithAi';
+import { BACKEND_URL } from '@/shared/config/backend';
 
 const image = new Blob([new Uint8Array([1, 2, 3])], { type: 'image/jpeg' });
 const answer = (status: number, body: unknown) =>
@@ -7,68 +8,43 @@ const answer = (status: number, body: unknown) =>
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe('reading a map with Claude', () => {
-  it('sends the image with the JSON format and the key, and reads the objects back', async () => {
+describe('reading a map through the backend', () => {
+  it('posts the view to /api/readings without any API key and returns the objects', async () => {
+    vi.stubGlobal('localStorage', { getItem: () => 'device-0123456789abcdef', setItem: () => {} });
     const fetch = answer(200, {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            objects: [{ kind: 'mlyn', label: 'Mühle', x: 40, y: 60, confidence: 0.9 }],
-          }),
-        },
-      ],
-      stop_reason: 'end_turn',
-      usage: { input_tokens: 2100, output_tokens: 180 },
+      objects: [{ kind: 'mlyn', label: 'Mühle', x: 40, y: 60, confidence: 0.9 }],
+      usage: { inputTokens: 2100, outputTokens: 180 },
     });
     vi.stubGlobal('fetch', fetch);
-    const r = await readMapWithAi(image, 800, 600, 1.5, 'sk-test', 'claude-haiku-5-5');
+    const r = await readMapWithAi(image, 800, 600, 1.5, 'claude-haiku-5-5', 'turnstile-token');
     expect(r.objects).toEqual([{ kind: 'mlyn', label: 'Mühle', x: 40, y: 60, confidence: 0.9 }]);
     expect(r.usage).toEqual({ inputTokens: 2100, outputTokens: 180 });
     const [url, init] = fetch.mock.calls[0]!;
-    expect(url).toBe('https://api.anthropic.com/v1/messages');
-    expect(init.headers['x-api-key']).toBe('sk-test');
-    expect(init.headers['anthropic-dangerous-direct-browser-access']).toBe('true');
-    const body = JSON.parse(init.body);
-    expect(body.model).toBe('claude-haiku-5-5');
-    // no forced tool: Sonnet 5.5 rejects tool_choice "tool" with a 400
-    expect(body.tool_choice).toBeUndefined();
-    expect(body.output_config.format.type).toBe('json_schema');
-    expect(body.messages[0].content[0].source).toEqual({
-      type: 'base64',
-      media_type: 'image/jpeg',
-      data: 'AQID',
+    expect(url).toBe(`${BACKEND_URL}/api/readings`);
+    expect(init.headers).toBeUndefined();
+    const form = init.body as FormData;
+    expect(Object.fromEntries([...form.entries()].filter(([k]) => k !== 'image'))).toEqual({
+      w: '800',
+      h: '600',
+      res: '1.5',
+      model: 'claude-haiku-5-5',
+      deviceId: 'device-0123456789abcdef',
+      turnstile: 'turnstile-token',
     });
-    expect(body.messages[0].content[1].text).toMatch(/800 × 600 pixels.*1 pixel = 1\.5 m/s);
+    expect(form.get('image')).toBeInstanceOf(Blob);
   });
 
-  it('works the same for Sonnet', async () => {
-    const fetch = answer(200, { content: [{ type: 'text', text: '{"objects":[]}' }], usage: {} });
-    vi.stubGlobal('fetch', fetch);
-    const r = await readMapWithAi(image, 10, 10, 1, 'k', 'claude-sonnet-5-5');
-    expect(r.objects).toEqual([]);
-    expect(JSON.parse(fetch.mock.calls[0]![1].body).model).toBe('claude-sonnet-5-5');
-  });
-
-  it('a refusal and broken JSON become clear messages', async () => {
-    vi.stubGlobal('fetch', answer(200, { content: [], stop_reason: 'refusal' }));
-    await expect(readMapWithAi(image, 10, 10, 1, 'k', 'claude-haiku-5-5')).rejects.toThrow(
-      'odmówił',
+  it('shows the server’s Polish message, or a plain one when it is unreachable', async () => {
+    vi.stubGlobal(
+      'fetch',
+      answer(429, { error: 'Dzienny limit odczytów map został wykorzystany, spróbuj jutro' }),
     );
-    vi.stubGlobal('fetch', answer(200, { content: [{ type: 'text', text: '{oops' }] }));
-    await expect(readMapWithAi(image, 10, 10, 1, 'k', 'claude-haiku-5-5')).rejects.toThrow(
-      'Nieczytelna',
+    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 't')).rejects.toThrow(
+      /limit odczytów/,
     );
-  });
-
-  it('a wrong key and other errors become clear messages', async () => {
-    vi.stubGlobal('fetch', answer(401, { error: { message: 'invalid x-api-key' } }));
-    await expect(readMapWithAi(image, 10, 10, 1, 'bad', 'claude-haiku-5-5')).rejects.toThrow(
-      'Klucz API jest nieprawidłowy',
-    );
-    vi.stubGlobal('fetch', answer(400, { error: { message: 'image too large' } }));
-    await expect(readMapWithAi(image, 10, 10, 1, 'k', 'claude-haiku-5-5')).rejects.toThrow(
-      'image too large',
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('offline')));
+    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 't')).rejects.toThrow(
+      'Brak połączenia z serwerem analizy',
     );
   });
 });

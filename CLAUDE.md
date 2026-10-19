@@ -79,9 +79,10 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   `shared/lib/tiles/pickSourceTiles.ts`, wspólne dla warstwy i pobierania: zmiana w jednym miejscu.
 - Własne mapy historyczne: magazyn `maps` (obraz do 16 Mpx + georeferencja w układzie pliku, `shared/lib/georef`),
   nie wchodzą do kopii ZIP. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka.
-- Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): tylko na kluczu użytkownika (localStorage
-  `mapa.ai`, nigdy w eksporcie), wysyłany jest wyłącznie obraz mapy z widoku. Propozycje (`shared/lib/history`)
-  trafiają do kontekstu dopiero po „Przyjmij”.
+- Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
+  Turnstile, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Prompt i schemat
+  w `shared/lib/history/readPrompt.ts`, wspólne dla aplikacji i workera. Propozycje trafiają do kontekstu
+  dopiero po „Przyjmij”. Adres backendu i klucz witryny Turnstile: `shared/config/backend.ts`.
 - Komunikaty prawne są w `features/safety/config/legal.ts` — krótkie, rzeczowe, z linkiem do źródła.
 - Ciężkie biblioteki (JSZip, proj4) ładujemy dynamicznie (`import()`), żeby start na telefonie był lekki.
   `src/shared/lib/geo/crs.ts` rejestruje EPSG:2180 leniwie — bez efektów ubocznych przy imporcie.

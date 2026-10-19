@@ -2,6 +2,7 @@ import { spentThisMonth } from './budget';
 import type { Env } from './env';
 import { adminRoutes } from './admin/routes';
 import { aiKeyStatus } from './aiKeyStatus';
+import { readView } from './readings/routes';
 import { serveContext } from './context/routes';
 import { corsHeaders, fail, json } from './http';
 import { anthropicClient } from './pipeline/aiClient';
@@ -35,6 +36,8 @@ export default {
       return adminRoutes(request, env, pathname.slice('/api/admin/'.length), cors, Date.now());
     if (request.method === 'GET' && pathname.startsWith('/api/kontekst/'))
       return serveContext(env, pathname.slice('/api/kontekst/'.length), cors);
+    if (request.method === 'POST' && pathname === '/api/readings')
+      return readView(request, env, cors, Date.now());
     if (request.method === 'POST' && pathname === '/api/submissions')
       return createSubmission(request, env, cors, Date.now());
     const one = /^\/api\/submissions\/([A-Za-z0-9_-]+)$/.exec(pathname);

@@ -166,7 +166,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'ai-reading',
     title: 'Zaginiona zabudowa (AI)',
     content:
-      'Claude na Twoim kluczu API czyta widoczny fragment mapy historycznej: domy, młyny, karczmy, folwarki. Aplikacja porównuje je z dzisiejszymi budynkami i proponuje miejsca, których już nie ma. Przyjęte trafiają do kontekstu i podnoszą wynik kandydatów w pobliżu.',
+      'Claude czyta przez serwer analizy widoczny fragment mapy historycznej: domy, młyny, karczmy, folwarki. Aplikacja porównuje je z dzisiejszymi budynkami i proponuje miejsca, których już nie ma. Przyjęte trafiają do kontekstu i podnoszą wynik kandydatów w pobliżu.',
     mode: 'field',
     sheet: 'history',
   },

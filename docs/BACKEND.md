@@ -41,6 +41,23 @@
 8. Panel przeglądu: `npx wrangler secret put ADMIN_TOKEN` (losowy ciąg, co najmniej 24 znaki, np. `openssl rand -base64 32`). Otwórz `https://patekphilippe.github.io/treasure-finder/#admin` i wpisz token: zostaje tylko w tej przeglądarce.
 9. Aplikacja: adres workera i klucz witryny Turnstile są wpisane jako domyślne w `src/features/sources/config/sourcesApi.ts` (to wartości publiczne). Zmienne repozytorium `SOURCES_API_URL` i `TURNSTILE_SITE_KEY` mogą je nadpisać, np. dla testowego workera.
 
+## Odczyt widoku mapy (`POST /api/readings`)
+
+„Szukaj zaginionej zabudowy” w aplikacji (Warstwy → Mapa historyczna → Własne mapy i obiekty)
+wysyła obraz widoku mapy historycznej, a worker od razu pyta Claude (zwykłe Messages API, bez Batch,
+bo użytkownik czeka na wynik) z tym samym promptem i schematem JSON co aplikacja
+(`src/shared/lib/history/readPrompt.ts`). Zwraca listę obiektów w pikselach obrazu; porównanie
+z BDOT10k i grupowanie w zaginione wsie robi aplikacja.
+
+- **Ochrona:** Turnstile przy każdym odczycie, limit 30 odczytów dziennie na urządzenie i na adres IP
+  (własny licznik `read:…`, nie zużywa limitu zgłoszeń), obraz do 3 MB i 1600 px na bok.
+- **Budżet:** wspólny z potokiem zgłoszeń (`MONTHLY_BUDGET_USD`). Przed wywołaniem worker sprawdza,
+  czy najgorszy przypadek (3000 tokenów wejścia, 4096 wyjścia) zmieści się w budżecie; liczy koszt bez
+  rabatu Batch.
+- **Koszt:** Haiku ok. 0,0005–0,002 $ za widok, Sonnet ok. 20 razy więcej.
+- **Prywatność:** obraz służy tylko do tego jednego wywołania, worker go nie zapisuje. Wraz z nim
+  idzie losowy identyfikator urządzenia (do limitu) i nic więcej.
+
 ## Dane osobowe (RODO)
 
 - **Co zbieramy:** to, co ktoś sam wyśle (zdjęcie, tekst, link), widok mapy w chwili wysłania, losowy identyfikator urządzenia oraz skrót (hash) adresu IP do limitów. Pełnego adresu IP nie zapisujemy.

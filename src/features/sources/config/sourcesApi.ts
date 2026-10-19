@@ -1,20 +1,11 @@
 import type { SubmissionStatus } from '@/shared/types/sources';
 
-/**
- * Backend for AI analysis of historical sources (server/, docs/BACKEND.md). Both values are
- * public (the browser sees them anyway); a build may override them, e.g. for a test worker.
- */
-const DEFAULT_API_URL = 'https://treasure-finder-api.treasure-finder-server.workers.dev';
-// Cloudflare Turnstile site key of the widget for patekphilippe.github.io (public by design)
-const DEFAULT_TURNSTILE_SITE_KEY = '0x4AAAAAAFbOm_C1nNH_sg35';
-
-export const SOURCES_API_URL = String(
-  import.meta.env.VITE_SOURCES_API_URL || DEFAULT_API_URL,
-).replace(/\/$/, '');
-export const TURNSTILE_SITE_KEY = String(
-  import.meta.env.VITE_TURNSTILE_SITE_KEY || DEFAULT_TURNSTILE_SITE_KEY,
-);
-export const SOURCES_ENABLED = Boolean(SOURCES_API_URL && TURNSTILE_SITE_KEY);
+// the backend's address and Turnstile key are shared with the map reading (history)
+export {
+  BACKEND_ENABLED as SOURCES_ENABLED,
+  BACKEND_URL as SOURCES_API_URL,
+  TURNSTILE_SITE_KEY,
+} from '@/shared/config/backend';
 
 /** Longest side sent: the model scales larger images down anyway. */
 export const IMAGE_MAX_SIDE = 1568;

@@ -28,14 +28,21 @@ export interface Proposal {
 export async function findLostBuildings(
   bounds: Bounds,
   source: ViewSource,
-  apiKey: string,
   model: AiModelId,
+  turnstileToken: string,
   onStep: (step: string) => void,
 ): Promise<{ proposals: Proposal[]; usage: AiUsage; read: number }> {
   onStep('Przygotowuję obraz mapy');
   const { image, grid } = await captureView(bounds, source);
   onStep('Claude czyta mapę');
-  const { objects, usage } = await readMapWithAi(image, grid.w, grid.h, grid.res, apiKey, model);
+  const { objects, usage } = await readMapWithAi(
+    image,
+    grid.w,
+    grid.h,
+    grid.res,
+    model,
+    turnstileToken,
+  );
   onStep('Porównuję z dzisiejszymi budynkami (BDOT10k)');
   const buildings = await fetchBuildingMask(grid.originE, grid.originN, grid.res, grid.w, grid.h, [
     { ...BDOT_EXCLUSION[0]!, bufferM: 0 },

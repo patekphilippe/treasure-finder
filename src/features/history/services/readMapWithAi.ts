@@ -1,87 +1,40 @@
-import { parseMapObjects, type MapObject } from '@/shared/lib/history';
-import { API_URL, READ_SCHEMA, readPrompt, type AiModelId } from '../config/aiReading';
+import { BACKEND_URL } from '@/shared/config/backend';
+import { deviceId } from '@/shared/lib/deviceId';
+import type { MapObject } from '@/shared/lib/history';
+import type { MapReading } from '@/shared/types/readings';
+import type { AiModelId } from '../config/aiReading';
 
-export interface AiUsage {
-  inputTokens: number;
-  outputTokens: number;
-}
-
-/** Blob → base64 without a data: prefix. */
-async function toBase64(blob: Blob): Promise<string> {
-  const bytes = new Uint8Array(await blob.arrayBuffer());
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000)
-    s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return btoa(s);
-}
+export type AiUsage = MapReading['usage'];
 
 /**
- * Sends one map image to Claude with the user's key (directly from the browser, nothing else is
- * sent) and returns the buildings and places it reports, in image pixels.
+ * Sends one map view to the backend, which asks Claude with the owner's key (server/, POST
+ * /api/readings) and returns the buildings and places it read, in image pixels. Only the image
+ * of the map leaves the device; the backend does not keep it.
  */
 export async function readMapWithAi(
   image: Blob,
   w: number,
   h: number,
   res: number,
-  apiKey: string,
   model: AiModelId,
+  turnstileToken: string,
 ): Promise<{ objects: MapObject[]; usage: AiUsage }> {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 4096,
-      output_config: { format: { type: 'json_schema', schema: READ_SCHEMA } },
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: image.type || 'image/jpeg',
-                data: await toBase64(image),
-              },
-            },
-            { type: 'text', text: readPrompt(w, h, res) },
-          ],
-        },
-      ],
-    }),
-  });
-  const body = (await response.json().catch(() => null)) as {
-    content?: { type: string; text?: string }[];
-    stop_reason?: string;
-    usage?: { input_tokens?: number; output_tokens?: number };
-    error?: { message?: string };
-  } | null;
-  if (!response.ok) {
-    if (response.status === 401) throw new Error('Klucz API jest nieprawidłowy');
-    if (response.status === 429) throw new Error('Za dużo zapytań, spróbuj za chwilę');
-    throw new Error(body?.error?.message ?? `Błąd API (${response.status})`);
-  }
-  if (body?.stop_reason === 'refusal') throw new Error('Model odmówił odczytania tej mapy');
-  if (body?.stop_reason === 'max_tokens') throw new Error('Odpowiedź za długa, przybliż mapę');
-  const text = body?.content?.find((c) => c.type === 'text')?.text;
-  let reading: unknown = null;
+  const form = new FormData();
+  form.append('image', image, 'widok.jpg');
+  form.append('w', String(w));
+  form.append('h', String(h));
+  form.append('res', String(res));
+  form.append('model', model);
+  form.append('deviceId', deviceId());
+  form.append('turnstile', turnstileToken);
+  let response: Response;
   try {
-    reading = text ? JSON.parse(text) : null;
+    response = await fetch(`${BACKEND_URL}/api/readings`, { method: 'POST', body: form });
   } catch {
-    throw new Error('Nieczytelna odpowiedź modelu, spróbuj jeszcze raz');
+    throw new Error('Brak połączenia z serwerem analizy');
   }
-  return {
-    objects: parseMapObjects(reading, w, h),
-    usage: {
-      inputTokens: body?.usage?.input_tokens ?? 0,
-      outputTokens: body?.usage?.output_tokens ?? 0,
-    },
-  };
+  const body = (await response.json().catch(() => null)) as
+    (MapReading & { error?: string }) | null;
+  if (!response.ok || !body) throw new Error(body?.error ?? `Błąd serwera (${response.status})`);
+  return { objects: body.objects, usage: body.usage };
 }

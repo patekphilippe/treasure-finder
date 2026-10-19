@@ -5,6 +5,7 @@ import type {
   SubmissionView,
 } from '@/shared/types/sources';
 import { randomToken, sha256Hex } from '../crypto';
+import { ipSubject } from '../ipSubject';
 import type { Env } from '../env';
 import { fail, json } from '../http';
 import { consumeDaily } from './dailyLimit';
@@ -21,13 +22,6 @@ interface SubmissionRow {
   access_key_hash: string;
   created_at: number;
   error: string | null;
-}
-
-/** IP hashed together with the day: enough to count requests, useless for tracking a person. */
-async function ipSubject(request: Request, now: number): Promise<{ ip: string; subject: string }> {
-  const ip = request.headers.get('cf-connecting-ip') ?? '';
-  const day = new Date(now).toISOString().slice(0, 10);
-  return { ip, subject: `ip:${(await sha256Hex(`${day}|${ip}`)).slice(0, 32)}` };
 }
 
 export async function createSubmission(request: Request, env: Env, cors: Cors, now: number) {

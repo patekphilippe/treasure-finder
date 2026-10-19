@@ -1,8 +1,8 @@
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { useEffect, useRef, useState } from 'react';
-import { TURNSTILE_SITE_KEY } from '../config/sourcesApi';
-import { loadTurnstile } from '../utils/loadTurnstile';
+import { TURNSTILE_SITE_KEY } from '../../config/backend';
+import { loadTurnstile } from './loadTurnstile';
 
 interface TurnstileWidgetProps {
   /** token for the next send, null when it expired or failed */

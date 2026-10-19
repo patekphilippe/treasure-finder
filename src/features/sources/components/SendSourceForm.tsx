@@ -15,9 +15,9 @@ import { Icon, useToastStore } from '@/shared/ui';
 import { MAX_FILES } from '../config/sourcesApi';
 import { sourcesApi } from '../services/sourcesApi';
 import { useSourcesStore } from '../store/useSourcesStore';
-import { deviceId } from '../utils/deviceId';
+import { deviceId } from '@/shared/lib/deviceId';
 import { shrinkImage } from '../utils/shrinkImage';
-import { TurnstileWidget } from './TurnstileWidget';
+import { TurnstileWidget } from '@/shared/ui';
 
 interface SendSourceFormProps {
   onSent: () => void;

@@ -3,21 +3,26 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import type { AiModelId } from '../config/aiReading';
 
 interface AiSettingsState {
-  /** the user's own Anthropic API key: kept only in this browser, never exported */
-  apiKey: string;
   model: AiModelId;
-  setApiKey: (apiKey: string) => void;
   setModel: (model: AiModelId) => void;
 }
 
 export const useAiSettings = create<AiSettingsState>()(
   persist(
     (set) => ({
-      apiKey: '',
       model: 'claude-haiku-5-5',
-      setApiKey: (apiKey) => set({ apiKey: apiKey.trim() }),
       setModel: (model) => set({ model }),
     }),
-    { name: 'mapa.ai', storage: createJSONStorage(() => localStorage) },
+    {
+      name: 'mapa.ai',
+      storage: createJSONStorage(() => localStorage),
+      // version 0 kept the user's own Anthropic key here: the reading now goes through the
+      // backend, so the key is dropped from this browser
+      version: 1,
+      migrate: (old) => ({
+        model: (old as { model?: AiModelId } | null)?.model ?? 'claude-haiku-5-5',
+      }),
+      partialize: (s) => ({ model: s.model }),
+    },
   ),
 );

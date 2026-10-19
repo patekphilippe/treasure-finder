@@ -5,10 +5,11 @@ import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
-import { Icon, useToastStore } from '@/shared/ui';
-import { AI_MODELS, type AiModelId } from '../config/aiReading';
+import { BACKEND_ENABLED } from '@/shared/config/backend';
+import { Icon, TurnstileWidget, useToastStore } from '@/shared/ui';
+import { AI_MODELS, AI_READING_NOTE, type AiModelId } from '../config/aiReading';
 import { useViewSource } from '../hooks/useViewSource';
 import { findLostBuildings } from '../services/findLostBuildings';
 import { useAiSettings } from '../store/useAiSettings';
@@ -21,20 +22,23 @@ const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
 
 /** Claude reads the visible historical map; lost buildings and named places become proposals. */
 export function AiReadingSection() {
-  const { apiKey, model, setApiKey, setModel } = useAiSettings();
+  const { model, setModel } = useAiSettings();
   const { proposals, step, usage, read, set, drop } = useProposalsStore();
   const add = useContextStore((s) => s.add);
   const flyTo = useMapViewStore((s) => s.flyTo);
   const showToast = useToastStore((s) => s.show);
   const source = useViewSource();
-  const [draftKey, setDraftKey] = useState('');
+  // a Turnstile token works once: a new widget after every reading
+  const [token, setToken] = useState<string | null>(null);
+  const [round, setRound] = useState(0);
+  const onToken = useCallback((t: string | null) => setToken(t), []);
 
   const run = async () => {
     const bounds = useMapViewStore.getState().bounds;
-    if (!source || !bounds) return;
+    if (!source || !bounds || !token) return;
     set({ step: 'Start', proposals: [], usage: null, read: null });
     try {
-      const r = await findLostBuildings(bounds, source, apiKey, model, (s) => set({ step: s }));
+      const r = await findLostBuildings(bounds, source, model, token, (s) => set({ step: s }));
       set({ proposals: r.proposals, usage: r.usage, read: r.read });
       showToast(
         r.proposals.length ? `Propozycje: ${r.proposals.length}` : 'Nic nowego w tym widoku',
@@ -43,6 +47,7 @@ export function AiReadingSection() {
       showToast(e instanceof Error ? e.message : 'Odczyt mapy nie powiódł się');
     } finally {
       set({ step: null });
+      setRound((n) => n + 1);
     }
   };
 
@@ -65,37 +70,10 @@ export function AiReadingSection() {
         porównuje je z dzisiejszymi budynkami (BDOT10k) i proponuje miejsca, których już nie ma.
       </Typography>
 
-      {!apiKey ? (
-        <Stack spacing={1}>
-          <TextField
-            size="small"
-            type="password"
-            label="Klucz API Anthropic"
-            placeholder="sk-ant-…"
-            value={draftKey}
-            onChange={(e) => setDraftKey(e.target.value)}
-            autoComplete="off"
-          />
-          <Button
-            variant="contained"
-            disabled={!draftKey.trim()}
-            onClick={() => setApiKey(draftKey)}
-          >
-            Zapisz klucz
-          </Button>
-          <Typography variant="caption" color="text.secondary">
-            Klucz założysz na{' '}
-            <Link
-              href="https://console.anthropic.com/settings/keys"
-              target="_blank"
-              rel="noreferrer"
-            >
-              console.anthropic.com
-            </Link>
-            . Zostaje tylko w tej przeglądarce i nie trafia do kopii danych. Do Anthropic wysyłany
-            jest wyłącznie obraz mapy z widoku; koszt nalicza się na Twoim koncie.
-          </Typography>
-        </Stack>
+      {!BACKEND_ENABLED ? (
+        <Typography variant="caption" color="warning.main">
+          Odczyt map wymaga serwera analizy, a ta wersja aplikacji go nie ma.
+        </Typography>
       ) : (
         <Stack spacing={1}>
           <TextField
@@ -126,6 +104,10 @@ export function AiReadingSection() {
               . Bez wątpliwości działa na własnych mapach.
             </Typography>
           )}
+          {source && !step && <TurnstileWidget key={round} onToken={onToken} resetKey={round} />}
+          <Typography variant="caption" color="text.secondary">
+            {AI_READING_NOTE}
+          </Typography>
           {step ? (
             <Stack spacing={0.5}>
               <LinearProgress />
@@ -138,14 +120,11 @@ export function AiReadingSection() {
               <Button
                 variant="contained"
                 sx={{ flex: 1 }}
-                disabled={!source}
+                disabled={!source || !token}
                 startIcon={<Icon name="search" size={18} />}
                 onClick={() => void run()}
               >
                 Szukaj w widoku
-              </Button>
-              <Button color="inherit" onClick={() => setApiKey('')}>
-                Usuń klucz
               </Button>
             </Stack>
           )}
