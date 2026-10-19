@@ -25,6 +25,8 @@ export interface HistoricalLayer {
    * (Lower Silesian Messtischblatt ~150 m off against OSM and the NMT; checked 18.10.2026)
    */
   ask2180?: boolean;
+  /** WMS image format when not plain PNG (image/png8 for big scans: smaller and faster) */
+  format?: string;
 }
 
 const UMWD_ATTRIBUTION =
@@ -43,6 +45,8 @@ const umwd = (id: string, label: string, years: string): HistoricalLayer => ({
   // 12 tiles at once: 4 answered 400; 3 at once plus retries loads them all
   maxParallel: 3,
   ask2180: true,
+  // measured: 1727 × 1138 px in 6.6 s and 1.7 MB instead of 12 s and 5.3 MB as PNG
+  format: 'image/png8',
   attribution: UMWD_ATTRIBUTION,
   termsUrl: UMWD_TERMS,
 });

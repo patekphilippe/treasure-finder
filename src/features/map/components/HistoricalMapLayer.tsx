@@ -32,6 +32,7 @@ export function HistoricalMapLayer() {
         attribution={layer.attribution}
         tileSize={512}
         maxParallel={layer.maxParallel}
+        format={layer.format}
         opacity={opacity}
         minZoom={layer.minZoom}
         maxZoom={MAX_ZOOM}
