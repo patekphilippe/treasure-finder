@@ -8,7 +8,7 @@
 | --------------------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
 | API i przetwarzanie   | Worker `treasure-finder-api` | `server/src/`                                                                            |
 | Baza                  | D1 `treasure-finder`         | zgłoszenia, wyniki, licznik wydatków, limity dzienne, pamięć wyszukiwania nazw           |
-| Pliki zgłoszeń        | Workers KV `SOURCES`         | zmniejszone zdjęcia i teksty (prywatne, kasowane z zgłoszeniem)                          |
+| Pliki zgłoszeń        | Workers KV `SOURCES`         | zmniejszone zdjęcia i teksty (prywatne, kasowane razem ze zgłoszeniem)                   |
 | Zatwierdzony kontekst | Workers KV `CONTEXT`         | paczki GeoJSON w siatce 0,25° i `index.json`, wydawane przez worker pod `/api/kontekst/` |
 | Ochrona przed botami  | Turnstile                    | token przy każdym wysłaniu                                                               |
 | Panel przeglądu       | aplikacja pod `…/#admin`     | token `ADMIN_TOKEN` (sekret workera), tylko dla właściciela                              |
