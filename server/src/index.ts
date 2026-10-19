@@ -1,6 +1,7 @@
 import { spentThisMonth } from './budget';
 import type { Env } from './env';
 import { adminRoutes } from './admin/routes';
+import { communityRoutes } from './community/routes';
 import { aiKeyStatus } from './aiKeyStatus';
 import { readView } from './readings/routes';
 import { serveContext } from './context/routes';
@@ -32,6 +33,14 @@ export default {
         cors,
       );
     }
+    if (pathname.startsWith('/api/community/'))
+      return communityRoutes(
+        request,
+        env,
+        pathname.slice('/api/community/'.length),
+        cors,
+        Date.now(),
+      );
     if (pathname.startsWith('/api/admin/'))
       return adminRoutes(request, env, pathname.slice('/api/admin/'.length), cors, Date.now());
     if (request.method === 'GET' && pathname.startsWith('/api/kontekst/'))

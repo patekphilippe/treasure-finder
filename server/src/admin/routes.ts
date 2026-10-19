@@ -1,8 +1,8 @@
 import type { SourceObject, SubmissionResult, SubmissionStatus } from '@/shared/types/sources';
 import { monthKey, spentThisMonth } from '../budget';
-import { publishObjects } from '../context/packs';
 import type { Env } from '../env';
 import { fail, json } from '../http';
+import { adminCommunity, insertApproved } from './community';
 
 type Cors = Record<string, string>;
 const KINDS: readonly string[] = ['osada', 'droga', 'mlyn', 'karczma', 'brod', 'inne'];
@@ -115,7 +115,7 @@ export async function adminRoutes(
     if (!row) return fail(404, 'Nie znaleziono zgłoszenia', cors);
     if (row.mode !== 'public' || row.status !== 'do_przegladu')
       return fail(409, 'Tego zgłoszenia nie można już zatwierdzić', cors);
-    let published: string[] = [];
+    let published = 0;
     if (verb === 'approve') {
       if (!row.consent_publish) return fail(409, 'Brak zgody na publikację', cors);
       const body = (await request.json().catch(() => null)) as {
@@ -125,7 +125,8 @@ export async function adminRoutes(
       const objects = cleanObjects(body?.objects);
       if (!objects.length) return fail(400, 'Brak obiektów do zatwierdzenia', cors);
       const source = String(body?.source ?? 'Wspólna baza źródeł').slice(0, 120);
-      published = await publishObjects(env.CONTEXT, objects, source, now);
+      // the members-only base (D1); the old public packs are no longer written
+      published = await insertApproved(env, objects, source, now);
     }
     await dropFiles(env, id!);
     await env.DB.prepare('UPDATE submissions SET status = ?, updated_at = ? WHERE id = ?')
@@ -133,5 +134,7 @@ export async function adminRoutes(
       .run();
     return json({ ok: true, published }, 200, cors);
   }
+  const community = await adminCommunity(request, env, path, cors, now);
+  if (community) return community;
   return fail(404, 'Nie ma takiego adresu', cors);
 }

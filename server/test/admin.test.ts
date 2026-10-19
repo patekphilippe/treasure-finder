@@ -2,7 +2,6 @@ import { env, exports } from 'cloudflare:workers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SubmissionCreated } from '@/shared/types/sources';
 import type { Env } from '../src/env';
-import { cellKey } from '../src/context/packs';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 const testEnv = env as unknown as Env;
@@ -92,7 +91,7 @@ describe('review panel', () => {
     expect(img.headers.get('content-type')).toBe('image/jpeg');
   });
 
-  it('approving publishes the edited objects to the public pack and deletes the photos', async () => {
+  it('approving puts the edited objects into the members-only base and deletes the photos', async () => {
     const c = await publicSubmission();
     const objects = [
       {
@@ -110,22 +109,19 @@ describe('review panel', () => {
       headers: { 'content-type': 'application/json' },
     });
     expect(res.status).toBe(200);
-    const index = (await (
-      await worker.fetch(new Request('https://api.test/api/kontekst/index.json'))
-    ).json()) as {
-      key: string;
-      count: number;
-    }[];
-    const key = cellKey(50.795, 15.836);
-    expect(index.find((e) => e.key === key)?.count).toBeGreaterThanOrEqual(1);
-    const pack = (await (
-      await worker.fetch(new Request(`https://api.test/api/${key}`))
-    ).json()) as { features: { properties: { kind: string; label: string; source: string } }[] };
-    expect(pack.features.at(-1)!.properties).toMatchObject({
+    // into the members-only base, without an author; the old public packs are gone
+    const row = await testEnv.DB.prepare(
+      "SELECT kind, label, source, author_id, radius_m FROM community_objects WHERE label = 'Młyn wodny (poprawiony)'",
+    ).first<Record<string, unknown>>();
+    expect(row).toMatchObject({
       kind: 'mlyn',
-      label: 'Młyn wodny (poprawiony)',
       source: 'Kronika Kowar',
+      author_id: null,
+      radius_m: 120,
     });
+    expect(
+      (await worker.fetch(new Request('https://api.test/api/kontekst/index.json'))).status,
+    ).toBe(410);
     expect((await testEnv.SOURCES.list({ prefix: `zgloszenia/${c.id}/` })).keys).toHaveLength(0);
     const again = await admin(`submissions/${c.id}/approve`, {
       method: 'POST',

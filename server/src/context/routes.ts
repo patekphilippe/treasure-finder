@@ -1,22 +1,10 @@
 import type { Env } from '../env';
 import { fail } from '../http';
-import { INDEX_KEY } from './packs';
 
-/** Public, read-only: the index and the packs of approved context, cached for an hour. */
-export async function serveContext(env: Env, path: string, cors: Record<string, string>) {
-  const key = path === 'index.json' ? INDEX_KEY : `kontekst/${path}`;
-  if (!/^kontekst\/(index\.json|-?\d+\.\d{2}_-?\d+\.\d{2}\.geojson)$/.test(key))
-    return fail(404, 'Nie ma takiej paczki', cors);
-  const obj = await env.CONTEXT.get(key);
-  if (!obj)
-    return key === INDEX_KEY
-      ? new Response('[]', { headers: { ...cors, 'content-type': 'application/json' } })
-      : fail(404, 'Nie ma takiej paczki', cors);
-  return new Response(obj, {
-    headers: {
-      ...cors,
-      'content-type': key === INDEX_KEY ? 'application/json' : 'application/geo+json',
-      'cache-control': 'public, max-age=3600',
-    },
-  });
+/**
+ * The old public packs are gone: the shared base is for invited members only
+ * (/api/community/objects). The packs were moved with POST /api/admin/migrate-packs.
+ */
+export function serveContext(_env: Env, _path: string, cors: Record<string, string>) {
+  return fail(410, 'Wspólna baza jest teraz tylko dla członków społeczności', cors);
 }
