@@ -12,6 +12,7 @@ import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { GuidancePanel } from '@/features/navigation';
 import { AreaDownloadBar, AreaSelectFrame, useOfflineStore } from '@/features/offline';
 import { RoughnessLegend } from '@/features/roughness';
+import { SourceProposalsLayer } from '@/features/sources';
 import { Dock } from '@/shared/ui';
 import { DOCK_ITEMS } from '../config/dockItems';
 import { useUiStore } from '@/shared/store/useUiStore';
@@ -31,6 +32,7 @@ export function FieldLayout() {
         <ContextLayer />
         <FitCornersLayer />
         <ProposalsLayer />
+        <SourceProposalsLayer />
         {selectingArea && <AreaSelectFrame />}
       </MapView>
       <MapCrosshair />

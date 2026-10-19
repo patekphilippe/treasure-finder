@@ -180,6 +180,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'history',
   },
   {
+    id: 'layers-sources',
+    target: 'layers-sources',
+    title: 'Źródła historyczne',
+    content:
+      'Wyślij zdjęcie dawnej mapy, fragment kroniki albo wspomnienie. AI odczyta młyny, karczmy i dawną zabudowę, umieści je na mapie, a Ty przyjmiesz te, które pasują.',
+    mode: 'field',
+    sheet: 'layers',
+  },
+  {
     id: 'layers-search-zones',
     target: 'layers-search-zones',
     title: 'Strefy poszukiwań',

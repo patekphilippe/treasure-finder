@@ -1,6 +1,7 @@
 import { DataSheet } from '@/features/data';
 import { ContextDetailsSheet, HistorySheet } from '@/features/history';
 import { LayersSheet } from '@/features/layers';
+import { SourcesSheet } from '@/features/sources';
 import { AddPointSheet, PointDetailsSheet, PointsListSheet } from '@/features/points';
 import { AreaSheet } from '@/features/roughness';
 import { TracksSheet, useTracksStore } from '@/features/tracks';
@@ -35,6 +36,8 @@ export function SheetHost() {
       return <HistorySheet onClose={closeSheet} />;
     case 'contextDetails':
       return <ContextDetailsSheet key={selectedContextId} onClose={closeSheet} />;
+    case 'sources':
+      return <SourcesSheet onClose={closeSheet} />;
     case 'layers':
       return <LayersSheet onClose={closeSheet} />;
     case 'data':

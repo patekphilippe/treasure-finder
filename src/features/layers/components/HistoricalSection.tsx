@@ -103,6 +103,15 @@ export function HistoricalSection() {
       >
         Własne mapy i obiekty
       </Button>
+      <Button
+        size="small"
+        data-tour="layers-sources"
+        startIcon={<Icon name="robot" size={16} />}
+        onClick={() => showSheet('sources')}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Źródła historyczne: analiza AI
+      </Button>
     </Stack>
   );
 }

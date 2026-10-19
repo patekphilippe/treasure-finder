@@ -13,7 +13,8 @@ export type SheetId =
   | 'zoneDetails'
   | 'area'
   | 'history'
-  | 'contextDetails';
+  | 'contextDetails'
+  | 'sources';
 
 interface UiState {
   mode: AppMode;

@@ -43,3 +43,8 @@ export const WAR_GRAVES_WARNING =
 
 export const HISTORICAL_ONLINE_NOTE =
   'Tylko z internetem: dostawcy nie pozwalają pobierać tych map do pracy bez sieci.';
+
+export const SOURCES_PRIVACY_NOTE =
+  'Zdjęcia i teksty trafiają na serwer aplikacji i do Anthropic (Claude) tylko po to, by je przeanalizować. ' +
+  'Prywatne zgłoszenia usuwamy po 30 dniach, możesz je usunąć wcześniej. Do wspólnej bazy trafiają tylko ' +
+  'zatwierdzone obiekty z położeniem, nigdy zdjęcia.';
