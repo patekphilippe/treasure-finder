@@ -73,6 +73,7 @@ export function AdminPanel() {
           />
           <Button
             variant="contained"
+            disabled={!SOURCES_ENABLED}
             onClick={() => {
               adminToken.set(token.trim());
               void load();

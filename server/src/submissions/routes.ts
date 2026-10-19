@@ -31,6 +31,8 @@ async function ipSubject(request: Request, now: number): Promise<{ ip: string; s
 }
 
 export async function createSubmission(request: Request, env: Env, cors: Cors, now: number) {
+  // the owner has not finished the setup (docs/BACKEND.md): say so instead of a failed check
+  if (!env.TURNSTILE_SECRET) return fail(503, 'Wysyłanie źródeł jest chwilowo niedostępne', cors);
   const form = await request.formData().catch(() => null);
   if (!form) return fail(400, 'Nieprawidłowe zgłoszenie', cors);
   const parsed = parseSubmission(form);

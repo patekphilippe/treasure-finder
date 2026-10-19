@@ -28,7 +28,7 @@ jobs:
       - run: npm run test
       - run: npm run build
         env:
-          # AI analysis backend (docs/BACKEND.md): repository variables, empty until it is set up
+          # optional override of the AI backend address and Turnstile key (defaults in features/sources/config)
           VITE_SOURCES_API_URL: ${{ vars.SOURCES_API_URL }}
           VITE_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
       - uses: actions/configure-pages@v5

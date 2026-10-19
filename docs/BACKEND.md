@@ -39,7 +39,7 @@
    Workflow `.github/workflows/server.yml` testuje zawsze. Wdraża tylko wtedy, gdy token jest ustawiony.
 
 8. Panel przeglądu: `npx wrangler secret put ADMIN_TOKEN` (losowy ciąg, co najmniej 24 znaki, np. `openssl rand -base64 32`). Otwórz `https://patekphilippe.github.io/treasure-finder/#admin` i wpisz token: zostaje tylko w tej przeglądarce.
-9. Aplikacja: w ustawieniach repozytorium, w zakładce Variables, dodaj `SOURCES_API_URL` (adres workera, np. `https://treasure-finder-api.<konto>.workers.dev`) i `TURNSTILE_SITE_KEY`. Następne wdrożenie strony włączy sekcję „Źródła historyczne”. Bez tych zmiennych sekcja informuje, że analiza jest wyłączona.
+9. Aplikacja: adres workera i klucz witryny Turnstile są wpisane jako domyślne w `src/features/sources/config/sourcesApi.ts` (to wartości publiczne). Zmienne repozytorium `SOURCES_API_URL` i `TURNSTILE_SITE_KEY` mogą je nadpisać, np. dla testowego workera.
 
 ## Dane osobowe (RODO)
 
