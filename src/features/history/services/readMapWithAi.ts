@@ -1,5 +1,5 @@
 import { parseMapObjects, type MapObject } from '@/shared/lib/history';
-import { API_URL, READ_TOOL, readPrompt, type AiModelId } from '../config/aiReading';
+import { API_URL, READ_SCHEMA, readPrompt, type AiModelId } from '../config/aiReading';
 
 export interface AiUsage {
   inputTokens: number;
@@ -38,8 +38,7 @@ export async function readMapWithAi(
     body: JSON.stringify({
       model,
       max_tokens: 4096,
-      tools: [READ_TOOL],
-      tool_choice: { type: 'tool', name: READ_TOOL.name },
+      output_config: { format: { type: 'json_schema', schema: READ_SCHEMA } },
       messages: [
         {
           role: 'user',
@@ -59,7 +58,8 @@ export async function readMapWithAi(
     }),
   });
   const body = (await response.json().catch(() => null)) as {
-    content?: { type: string; input?: unknown }[];
+    content?: { type: string; text?: string }[];
+    stop_reason?: string;
     usage?: { input_tokens?: number; output_tokens?: number };
     error?: { message?: string };
   } | null;
@@ -68,9 +68,17 @@ export async function readMapWithAi(
     if (response.status === 429) throw new Error('Za dużo zapytań, spróbuj za chwilę');
     throw new Error(body?.error?.message ?? `Błąd API (${response.status})`);
   }
-  const tool = body?.content?.find((c) => c.type === 'tool_use');
+  if (body?.stop_reason === 'refusal') throw new Error('Model odmówił odczytania tej mapy');
+  if (body?.stop_reason === 'max_tokens') throw new Error('Odpowiedź za długa, przybliż mapę');
+  const text = body?.content?.find((c) => c.type === 'text')?.text;
+  let reading: unknown = null;
+  try {
+    reading = text ? JSON.parse(text) : null;
+  } catch {
+    throw new Error('Nieczytelna odpowiedź modelu, spróbuj jeszcze raz');
+  }
   return {
-    objects: parseMapObjects(tool?.input, w, h),
+    objects: parseMapObjects(reading, w, h),
     usage: {
       inputTokens: body?.usage?.input_tokens ?? 0,
       outputTokens: body?.usage?.output_tokens ?? 0,
