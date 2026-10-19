@@ -1,6 +1,7 @@
 import { spentThisMonth } from './budget';
 import type { Env } from './env';
 import { adminRoutes } from './admin/routes';
+import { aiKeyStatus } from './aiKeyStatus';
 import { serveContext } from './context/routes';
 import { corsHeaders, fail, json } from './http';
 import { anthropicClient } from './pipeline/aiClient';
@@ -17,7 +18,18 @@ export default {
     if (request.method === 'GET' && pathname === '/api/health') {
       const budget = Number(env.MONTHLY_BUDGET_USD);
       const spent = await spentThisMonth(env.DB, Date.now());
-      return json({ ok: true, aiAvailable: spent < budget }, 200, cors);
+      const aiKey = await aiKeyStatus(env.ANTHROPIC_API_KEY, Date.now());
+      return json(
+        {
+          ok: true,
+          // analysis runs only with a working key and money left this month
+          aiAvailable: aiKey === 'ok' && spent < budget,
+          aiKey,
+          sourcesAvailable: Boolean(env.TURNSTILE_SECRET),
+        },
+        200,
+        cors,
+      );
     }
     if (pathname.startsWith('/api/admin/'))
       return adminRoutes(request, env, pathname.slice('/api/admin/'.length), cors, Date.now());
