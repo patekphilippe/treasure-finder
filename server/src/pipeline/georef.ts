@@ -96,6 +96,7 @@ export function placeByNames(
   maxRmsM = 150,
 ): Placement | null {
   let set = [...pairs];
+  if (set.length === 2) return placeByTwoNames(set[0]!, set[1]!);
   if (set.length < 3) return null;
   const plane = localPlane({
     lat: set.reduce((s, p) => s + p.at.lat, 0) / set.length,
@@ -150,5 +151,37 @@ export function placeBySheet(
     rmsM: null,
     // old datum (tens of metres up to 100+ m) plus reading the corners on a photo
     uncertaintyM: 150,
+  };
+}
+
+/**
+ * Two named places: shift, rotation and scale only (the map is not skewed), exact through both.
+ * Nothing checks the fit, so the error margin is wide; anchors must be far enough apart.
+ */
+function placeByTwoNames(a: { uv: UV; at: LatLng }, b: { uv: UV; at: LatLng }): Placement | null {
+  const plane = localPlane(a.at);
+  const pa = plane.toXY(a.at);
+  const pb = plane.toXY(b.at);
+  const metres = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+  // image y grows downwards, northing upwards: flip v so the similarity has no mirror
+  const du = { x: b.uv.x - a.uv.x, y: -(b.uv.y - a.uv.y) };
+  const span = Math.hypot(du.x, du.y);
+  // closer than 500 m, or a whole image unit (the map width) under 300 m or over 60 km: wrong match
+  if (metres < 500 || span < 1e-6 || metres / span < 300 || metres / span > 60_000) return null;
+  // complex ratio (pb − pa) / du = scale · e^{iθ}
+  const d2 = du.x * du.x + du.y * du.y;
+  const k = {
+    re: ((pb.x - pa.x) * du.x + (pb.y - pa.y) * du.y) / d2,
+    im: ((pb.y - pa.y) * du.x - (pb.x - pa.x) * du.y) / d2,
+  };
+  return {
+    method: 'nazwy',
+    toLatLng: (p) => {
+      const u = p.x - a.uv.x;
+      const v = -(p.y - a.uv.y);
+      return plane.toLatLng(pa.x + k.re * u - k.im * v, pa.y + k.im * u + k.re * v);
+    },
+    rmsM: null,
+    uncertaintyM: 300,
   };
 }

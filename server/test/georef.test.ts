@@ -70,3 +70,48 @@ describe('gazetteer answers', () => {
     expect(uniquePlace([])).toBeNull();
   });
 });
+
+describe('placing a map from few names', () => {
+  it('places a north-up map exactly from two named places far apart', () => {
+    const plane = localPlane({ lat: 50.77, lng: 15.78 });
+    // 1 image unit = 3000 m, north up
+    const at = (u: number, v: number) => plane.toLatLng(u * 3000, -v * 3000);
+    const p = placeByNames([
+      { uv: { x: 0.2, y: 0.3 }, at: at(0.2, 0.3) },
+      { uv: { x: 0.8, y: 0.7 }, at: at(0.8, 0.7) },
+    ])!;
+    expect(p.uncertaintyM).toBe(300);
+    const mid = p.toLatLng({ x: 0.5, y: 0.1 });
+    const want = at(0.5, 0.1);
+    expect(Math.abs(mid.lat - want.lat) * 110_574).toBeLessThan(1);
+    expect(Math.abs(mid.lng - want.lng) * 70_000).toBeLessThan(1);
+  });
+
+  it('refuses two names closer than 500 m (likely one place read twice)', () => {
+    expect(
+      placeByNames([
+        { uv: { x: 0.1, y: 0.1 }, at: { lat: 50.77, lng: 15.78 } },
+        { uv: { x: 0.9, y: 0.9 }, at: { lat: 50.771, lng: 15.781 } },
+      ]),
+    ).toBeNull();
+  });
+});
+
+describe('names read on maps', () => {
+  it('writes out "B." as -berg and skips cut-off labels', async () => {
+    const { nameVariants } = await import('../src/pipeline/gazetteer');
+    expect(nameVariants('Zimmer B')).toEqual(['Zimmer B', 'Zimmerberg']);
+    expect(nameVariants('Raben Bg.')).toEqual(['Raben Bg.', 'Rabenberg']);
+    expect(nameVariants('Ober-')).toEqual([]);
+    expect(nameVariants('Krummhübel')).toEqual(['Krummhübel']);
+  });
+
+  it('prefers the village point over the commune boundary', async () => {
+    const { uniquePlace } = await import('../src/pipeline/gazetteer');
+    const p = uniquePlace([
+      { lat: 50.79, lng: 15.73, name: 'Karpacz', boundary: true },
+      { lat: 50.7752, lng: 15.7569, name: 'Karpacz' },
+    ]);
+    expect(p).toMatchObject({ lat: 50.7752, lng: 15.7569 });
+  });
+});

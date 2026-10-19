@@ -4,6 +4,8 @@ import type { LatLng } from './georef';
 
 export interface Place extends LatLng {
   name: string;
+  /** an administrative area: its centre can be far from where the name is printed */
+  boundary?: boolean;
 }
 
 const NOMINATIM = 'https://nominatim.openstreetmap.org/search';
@@ -37,7 +39,8 @@ export async function findPlaces(
   const q = normalizeName(name);
   if (q.length < 3) return [];
   const viewbox = [bbox.west, bbox.north, bbox.east, bbox.south].map((v) => v.toFixed(3)).join(',');
-  const key = await sha256Hex(`${q}|${viewbox}`);
+  // v2: results carry the boundary flag
+  const key = await sha256Hex(`v2|${q}|${viewbox}`);
   const cached = await db
     .prepare('SELECT json, fetched_at FROM gazetteer_cache WHERE query = ?')
     .bind(key)
@@ -60,11 +63,17 @@ export async function findPlaces(
   try {
     const res = await fetch(url, { headers: { 'user-agent': USER_AGENT } });
     if (!res.ok) return [];
-    const rows = (await res.json()) as { lat: string; lon: string; display_name: string }[];
+    const rows = (await res.json()) as {
+      lat: string;
+      lon: string;
+      display_name: string;
+      category?: string;
+    }[];
     places = rows.map((r) => ({
       lat: Number(r.lat),
       lng: Number(r.lon),
       name: r.display_name.split(',')[0] ?? '',
+      ...(r.category === 'boundary' ? { boundary: true } : {}),
     }));
   } catch {
     return [];
@@ -91,10 +100,26 @@ const SAME_PLACE_KM = 3;
  * village twice (its point and its boundary), which must not count as two candidates.
  */
 export function uniquePlace(found: readonly Place[]): Place | null {
+  // the village point or the peak, not the centre of the commune around it
+  const points = found.filter((p) => !p.boundary);
+  if (points.length) found = points;
   const first = found[0];
   if (!first) return null;
   const kmPerDegLng = 111.32 * Math.cos((first.lat * Math.PI) / 180);
   const near = (p: Place) =>
     Math.hypot((p.lat - first.lat) * 110.57, (p.lng - first.lng) * kmPerDegLng) <= SAME_PLACE_KM;
   return found.every(near) ? first : null;
+}
+
+/**
+ * Spellings to try for a name read on a map: as printed, then with the usual abbreviations
+ * written out ("Zimmer B." → "Zimmerberg"). Cut-off labels ("Ober-") give none.
+ */
+export function nameVariants(text: string): string[] {
+  const t = text.replace(/\s+/g, ' ').trim();
+  if (t.length < 3 || /-$/.test(t)) return [];
+  const out = [t];
+  const berg = t.replace(/\s+(B|Bg)\.?$/i, 'berg');
+  if (berg !== t) out.push(berg);
+  return out;
 }

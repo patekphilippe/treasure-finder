@@ -70,7 +70,8 @@ export const MAP_SCHEMA = {
     },
     placeNames: {
       type: 'array',
-      description: 'names of towns, villages and estates printed on the map, at the label centre',
+      description:
+        'every name printed on the map at its label centre: villages, hamlets, estates, mills, mountains, rocks, streams, forests; settlements first',
       items: {
         type: 'object',
         properties: { text: { type: 'string' }, x: { type: 'number' }, y: { type: 'number' } },
@@ -143,7 +144,7 @@ export function mapInstruction(view: ViewBbox | null): string {
     : 'The location is unknown.';
   return `This image is a historical map (or a photo of one). ${hint}
 Identify the series, year and sheet number if printed. Give the four corners of the printed map frame if all are visible.
-List the place names printed on the map with their label centres; they are used to place the map on today's map, so read them exactly as printed.
+List every name printed on the map with its label centre: villages, hamlets, estates, mountains, rocks, streams and forests, settlements first. They are used to place the map on today's map, so read them exactly as printed and do not leave any out.
 List every building and every named or symbolised place of historical interest (kinds: ${MAP_OBJECT_KINDS.join(', ')}).
 Positions are fractions of the image: x from 0 (left) to 1 (right), y from 0 (top) to 1 (bottom).`;
 }

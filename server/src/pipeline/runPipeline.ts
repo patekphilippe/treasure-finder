@@ -9,7 +9,7 @@ import { addSpending, spentThisMonth } from '../budget';
 import type { Env } from '../env';
 import type { AiClient, BatchOutcome, BatchRequest } from './aiClient';
 import { objectFromText, objectsFromMap } from './assemble';
-import { findPlaces, growBbox, uniquePlace, type Place } from './gazetteer';
+import { findPlaces, growBbox, nameVariants, uniquePlace, type Place } from './gazetteer';
 import { placeByNames, placeBySheet, type Placement } from './georef';
 import { deleteExpired } from './cleanup';
 import { costUsd, estimateUsd, FIRST_MODEL, SECOND_MODEL, type PipelineModel } from './pricing';
@@ -42,7 +42,7 @@ const SHEET_SERIES: Record<string, SheetSeries> = {
 /** submissions sent in one cron run (keeps the run short and the batch small) */
 const PER_RUN = 40;
 /** most names looked up per map: each lookup waits a second (Nominatim policy) */
-const NAMES_PER_MAP = 10;
+const NAMES_PER_MAP = 20;
 
 const viewOf = (row: Row): ViewBbox | null =>
   row.view_bbox ? (JSON.parse(row.view_bbox) as ViewBbox) : null;
@@ -146,10 +146,14 @@ async function placeMap(
   if (!area) return null;
   const pairs: { uv: { x: number; y: number }; at: Place }[] = [];
   for (const name of reading.placeNames.slice(0, NAMES_PER_MAP)) {
-    const found = await findPlaces(env.DB, name.text, area, now);
-    // a name that fits several villages is no anchor
-    const place = uniquePlace(found);
-    if (place) pairs.push({ uv: name, at: place });
+    for (const spelling of nameVariants(name.text)) {
+      const found = await findPlaces(env.DB, spelling, area, now);
+      if (!found.length) continue;
+      // a name that fits several places is no anchor
+      const place = uniquePlace(found);
+      if (place) pairs.push({ uv: name, at: place });
+      break;
+    }
   }
   return placeByNames(pairs);
 }
