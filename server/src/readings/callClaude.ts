@@ -1,4 +1,4 @@
-import { READ_SCHEMA, readPrompt } from '@/shared/lib/history';
+import { READ_SCHEMA, readPrompt } from '@/shared/lib/history/readPrompt';
 import type { PipelineModel, TokenUsage } from '../pipeline/pricing';
 import { READ_MAX_TOKENS } from './limits';
 

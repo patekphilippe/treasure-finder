@@ -1,4 +1,4 @@
-import { parseMapObjects } from '@/shared/lib/history';
+import { parseMapObjects } from '@/shared/lib/history/parseMapObjects';
 import type { MapReading } from '@/shared/types/readings';
 import { addSpending, spentThisMonth } from '../budget';
 import type { Env } from '../env';
