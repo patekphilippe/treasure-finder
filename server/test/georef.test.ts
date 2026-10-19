@@ -53,3 +53,20 @@ describe('georeferencing', () => {
     expect(p.toLatLng(frame.se).lat).toBeCloseTo(51.0, 6);
   });
 });
+
+describe('gazetteer answers', () => {
+  it('treats a village returned twice (point and boundary) as one place, not as ambiguous', async () => {
+    const { uniquePlace } = await import('../src/pipeline/gazetteer');
+    const karpacz = [
+      { lat: 50.7752, lng: 15.7569, name: 'Karpacz' },
+      { lat: 50.7731, lng: 15.7414, name: 'Karpacz' },
+    ];
+    expect(uniquePlace(karpacz)?.name).toBe('Karpacz');
+    const arnsberg = [
+      { lat: 50.79, lng: 15.82, name: 'Krowiniec' },
+      { lat: 50.86, lng: 15.95, name: 'Podgórze' },
+    ];
+    expect(uniquePlace(arnsberg)).toBeNull();
+    expect(uniquePlace([])).toBeNull();
+  });
+});

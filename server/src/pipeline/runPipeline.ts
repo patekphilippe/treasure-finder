@@ -9,7 +9,7 @@ import { addSpending, spentThisMonth } from '../budget';
 import type { Env } from '../env';
 import type { AiClient, BatchOutcome, BatchRequest } from './aiClient';
 import { objectFromText, objectsFromMap } from './assemble';
-import { findPlaces, growBbox, type Place } from './gazetteer';
+import { findPlaces, growBbox, uniquePlace, type Place } from './gazetteer';
 import { placeByNames, placeBySheet, type Placement } from './georef';
 import { deleteExpired } from './cleanup';
 import { costUsd, estimateUsd, FIRST_MODEL, SECOND_MODEL, type PipelineModel } from './pricing';
@@ -148,7 +148,8 @@ async function placeMap(
   for (const name of reading.placeNames.slice(0, NAMES_PER_MAP)) {
     const found = await findPlaces(env.DB, name.text, area, now);
     // a name that fits several villages is no anchor
-    if (found.length === 1) pairs.push({ uv: name, at: found[0]! });
+    const place = uniquePlace(found);
+    if (place) pairs.push({ uv: name, at: place });
   }
   return placeByNames(pairs);
 }
@@ -234,8 +235,12 @@ async function processOne(env: Env, ai: AiClient, row: Row, outcomes: BatchOutco
         georef = { method: placement.method, rmsM: placement.rmsM };
         objects.push(...objectsFromMap(reading, placement));
       } else if (reading.objects.length) {
+        const names = reading.placeNames.slice(0, 8).map((p) => p.text);
         summaries.push(
-          `Mapa ma ${reading.objects.length} obiektów, ale nie udało się jej umieścić na dzisiejszej mapie: potrzebne ręczne dopasowanie.`,
+          `Mapa ma ${reading.objects.length} obiektów, ale nie udało się jej umieścić na dzisiejszej mapie: potrzebne ręczne dopasowanie.` +
+            (names.length
+              ? ` Odczytane nazwy: ${names.join(', ')}.`
+              : ' Nie odczytano nazw miejscowości.'),
         );
       }
     } else {

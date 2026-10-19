@@ -82,3 +82,19 @@ export function growBbox(b: ViewBbox, km: number): ViewBbox {
   const dLng = km / (111 * Math.cos((((b.south + b.north) / 2) * Math.PI) / 180));
   return { south: b.south - dLat, north: b.north + dLat, west: b.west - dLng, east: b.east + dLng };
 }
+
+/** Results further apart than this are different places with the same name. */
+const SAME_PLACE_KM = 3;
+
+/**
+ * The one place a name means, or null when it is ambiguous. Nominatim often returns the same
+ * village twice (its point and its boundary), which must not count as two candidates.
+ */
+export function uniquePlace(found: readonly Place[]): Place | null {
+  const first = found[0];
+  if (!first) return null;
+  const kmPerDegLng = 111.32 * Math.cos((first.lat * Math.PI) / 180);
+  const near = (p: Place) =>
+    Math.hypot((p.lat - first.lat) * 110.57, (p.lng - first.lng) * kmPerDegLng) <= SAME_PLACE_KM;
+  return found.every(near) ? first : null;
+}
