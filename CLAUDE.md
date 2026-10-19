@@ -10,6 +10,7 @@ Wersja 1 do przeniesienia: legacy/index.html.
 - npm run test testy Vitest
 - npm run lint ESLint (w tym reguła architektury)
 - npm run build build produkcyjny, musi przejść przed każdym commitem
+- w `server/`: npm run test (testy w runtime Workers), npm run typecheck, npm run dev (wrangler dev)
 
 ## Analiza NMT
 
@@ -24,7 +25,11 @@ Testy syntetyczne (12 modeli ze specyfikacji): `tests/lib/detect/interpret.test.
 
 - Interfejs po polsku. Nazwy w kodzie po angielsku, wartości typów
   i pola eksportu dokładnie jak w docs/PLAN.md.
-- Bez backendu, kont i telemetrii. Dane tylko w IndexedDB.
+- Bez kont i telemetrii. Dane użytkownika tylko w IndexedDB. Jedyny backend to `server/`
+  (Cloudflare Worker, docs/BACKEND.md): przyjmuje zgłoszenia źródeł i analizuje je przez AI.
+  Jest opcjonalny: aplikacja działa w pełni bez niego i offline. Klucz API Anthropic tylko
+  w sekretach workera, nigdy w aplikacji. Aplikacja nie importuje z `server/`; serwer może
+  używać czystych funkcji z `src/shared/lib/` przez alias `@/`.
 - Algorytmy w src/shared/lib/ jako czyste funkcje z testami Vitest.
   Ciężkie obliczenia na rastrach tylko w Web Workerze.
 - Import kopia.json z wersji 1 musi zawsze działać. Zmiana formatu

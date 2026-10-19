@@ -23,3 +23,7 @@ coverage/
 /tiles/
 __pycache__/
 *.pyc
+
+# Cloudflare Worker local state (server/)
+.wrangler/
+.dev.vars

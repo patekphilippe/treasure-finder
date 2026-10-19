@@ -1,0 +1,35 @@
+# Backend for AI analysis of historical sources (docs/BACKEND.md).
+# The app works without it; this only takes submissions and runs the AI pipeline.
+name = "treasure-finder-api"
+main = "src/index.ts"
+compatibility_date = "2026-08-15"
+
+[vars]
+# where the PWA is served from (CORS)
+ALLOWED_ORIGINS = "https://patekphilippe.github.io,http://localhost:5173,http://127.0.0.1:5199"
+# hard monthly stop for Anthropic spending
+MONTHLY_BUDGET_USD = "5"
+# private analyses per device and per IP a day
+PRIVATE_DAILY_LIMIT = "5"
+
+# Created once with `wrangler d1 create treasure-finder`; paste the id it prints.
+[[d1_databases]]
+binding = "DB"
+database_name = "treasure-finder"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
+
+# Uploaded photos and texts: private, deleted after 30 days (lifecycle rule, docs/BACKEND.md).
+[[r2_buckets]]
+binding = "SOURCES"
+bucket_name = "tf-zrodla"
+
+# Approved context packs: public, read by the app.
+[[r2_buckets]]
+binding = "CONTEXT"
+bucket_name = "tf-kontekst"
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Secrets (wrangler secret put): ANTHROPIC_API_KEY, TURNSTILE_SECRET

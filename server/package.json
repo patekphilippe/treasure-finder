@@ -1,0 +1,24 @@
+{
+  "name": "treasure-finder-server",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "deploy": "wrangler deploy",
+    "db:migrate:local": "wrangler d1 migrations apply treasure-finder --local",
+    "db:migrate": "wrangler d1 migrations apply treasure-finder --remote"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.131.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "0.22.0",
+    "@cloudflare/workers-types": "5.20261004.1",
+    "typescript": "6.0.3",
+    "vitest": "4.1.11",
+    "wrangler": "4.147.0"
+  }
+}
