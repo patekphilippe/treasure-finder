@@ -21,9 +21,11 @@ import { TurnstileWidget } from './TurnstileWidget';
 
 interface SendSourceFormProps {
   onSent: () => void;
+  /** sending is off in this build: the form is shown greyed so people see what will be there */
+  disabled?: boolean;
 }
 
-export function SendSourceForm({ onSent }: SendSourceFormProps) {
+export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [files, setFiles] = useState<File[]>([]);
   const [text, setText] = useState('');
@@ -39,7 +41,7 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
   const onToken = useCallback((t: string | null) => setToken(t), []);
 
   const empty = !files.length && !text.trim() && !link.trim();
-  const canSend = !busy && !empty && !!token && (mode === 'private' || consent);
+  const canSend = !disabled && !busy && !empty && !!token && (mode === 'private' || consent);
 
   const send = async () => {
     setBusy(true);
@@ -69,7 +71,7 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
       setText('');
       setLink('');
       setConsent(false);
-      showToast('Wysłano. Wynik pojawi się w „Moje analizy”, zwykle w ciągu godziny');
+      showToast('Wysłano. Wynik pojawi się w „Moje źródła”, zwykle w ciągu godziny');
       onSent();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Nie udało się wysłać');
@@ -84,8 +86,8 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
     <Stack spacing={1.5} data-tour="sources-send">
       <Typography variant="body2" color="text.secondary">
         Zdjęcie dawnej mapy, fragment kroniki albo wspomnienie („za kościołem stał młyn”). AI
-        odczyta obiekty i umieści je na mapie. Ustaw mapę na okolicy, której dotyczy źródło: to
-        pomaga.
+        odczyta z niego młyny, karczmy i dawne zabudowania i pokaże je na mapie. Najpierw ustaw mapę
+        na okolicy, której dotyczy źródło.
       </Typography>
       <input
         ref={inputRef}
@@ -102,6 +104,7 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
       <Button
         variant="outlined"
         color="inherit"
+        disabled={disabled}
         startIcon={<Icon name="camera" size={18} />}
         onClick={() => inputRef.current?.click()}
       >
@@ -110,6 +113,7 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
       <TextField
         size="small"
         label="Opis albo fragment tekstu"
+        disabled={disabled}
         multiline
         minRows={2}
         maxRows={8}
@@ -120,6 +124,7 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
       <TextField
         size="small"
         label="Link do źródła (opcjonalnie)"
+        disabled={disabled}
         value={link}
         onChange={(e) => setLink(e.target.value)}
       />
@@ -127,12 +132,13 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
         exclusive
         fullWidth
         size="small"
+        disabled={disabled}
         value={mode}
         onChange={(_, v) => v && setMode(v)}
         sx={{ bgcolor: 'action.hover', p: 0.5, borderRadius: 999 }}
       >
         <ToggleButton value="private">Tylko dla mnie</ToggleButton>
-        <ToggleButton value="public">Do wspólnej bazy</ToggleButton>
+        <ToggleButton value="public">Podziel się z innymi</ToggleButton>
       </ToggleButtonGroup>
       {mode === 'public' && (
         <FormControlLabel
@@ -145,7 +151,7 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
           }
         />
       )}
-      <TurnstileWidget onToken={onToken} resetKey={resetKey} />
+      {!disabled && <TurnstileWidget onToken={onToken} resetKey={resetKey} />}
       {error && <Alert severity="error">{error}</Alert>}
       <Button
         variant="contained"
@@ -153,7 +159,7 @@ export function SendSourceForm({ onSent }: SendSourceFormProps) {
         startIcon={<Icon name="paper-plane" size={18} />}
         onClick={() => void send()}
       >
-        {busy ? 'Wysyłanie…' : 'Wyślij do analizy'}
+        {busy ? 'Wysyłanie…' : 'Wyślij'}
       </Button>
       <Typography variant="caption" color="text.secondary">
         {SOURCES_PRIVACY_NOTE}

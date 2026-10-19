@@ -1,7 +1,7 @@
 import { Circle, CircleMarker, Tooltip } from 'react-leaflet';
 import { useSourcesStore } from '../store/useSourcesStore';
 
-/** Objects of the analysis chosen in "Moje analizy": point and the circle it may be off by. */
+/** Objects of the analysis chosen in "Moje źródła": point and the circle it may be off by. */
 export function SourceProposalsLayer() {
   const shown = useSourcesStore((s) => s.sent.find((x) => x.id === s.shownId));
   const objects = shown?.view?.result?.objects ?? [];

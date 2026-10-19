@@ -61,7 +61,7 @@ export function AnalysisItem({ item }: AnalysisItemProps) {
       </Stack>
       <Typography variant="caption" color="text.secondary">
         {new Date(item.sentAt).toLocaleString('pl-PL')} ·{' '}
-        {item.mode === 'public' ? 'do wspólnej bazy' : 'tylko dla mnie'}
+        {item.mode === 'public' ? 'udostępnione innym po sprawdzeniu' : 'tylko dla mnie'}
       </Typography>
       {item.view?.error && (
         <Typography variant="body2" color="error">

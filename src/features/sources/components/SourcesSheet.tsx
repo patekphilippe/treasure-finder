@@ -25,15 +25,16 @@ export function SourcesSheet({ onClose }: SourcesSheetProps) {
       <Stack spacing={2}>
         {!SOURCES_ENABLED && (
           <Alert severity="info" icon={<Icon name="info-circle" size={18} />}>
-            Analiza źródeł przez AI nie jest jeszcze włączona w tej wersji aplikacji.
+            Wysyłanie źródeł ruszy wkrótce. Do tego czasu możesz oglądać mapy historyczne i
+            zaznaczać obiekty ręcznie w „Własne mapy i obiekty”.
           </Alert>
         )}
         <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="fullWidth">
-          <Tab value="send" label="Wyślij" />
-          <Tab value="mine" label="Moje analizy" />
+          <Tab value="send" label="Dodaj" />
+          <Tab value="mine" label="Moje źródła" />
         </Tabs>
         {tab === 'send' ? (
-          SOURCES_ENABLED && <SendSourceForm onSent={() => setTab('mine')} />
+          <SendSourceForm disabled={!SOURCES_ENABLED} onSent={() => setTab('mine')} />
         ) : (
           <MyAnalysesList />
         )}

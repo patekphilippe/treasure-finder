@@ -97,20 +97,21 @@ export function HistoricalSection() {
       )}
       <Button
         size="small"
+        variant="outlined"
+        data-tour="layers-sources"
+        startIcon={<Icon name="camera" size={16} />}
+        onClick={() => showSheet('sources')}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        Dodaj źródło: zdjęcie mapy lub opis
+      </Button>
+      <Button
+        size="small"
         startIcon={<Icon name="map-marked-alt" size={16} />}
         onClick={() => showSheet('history')}
         sx={{ alignSelf: 'flex-start' }}
       >
         Własne mapy i obiekty
-      </Button>
-      <Button
-        size="small"
-        data-tour="layers-sources"
-        startIcon={<Icon name="robot" size={16} />}
-        onClick={() => showSheet('sources')}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        Źródła historyczne: analiza AI
       </Button>
     </Stack>
   );

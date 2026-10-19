@@ -184,7 +184,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-sources',
     title: 'Źródła historyczne',
     content:
-      'Wyślij zdjęcie dawnej mapy, fragment kroniki albo wspomnienie. AI odczyta młyny, karczmy i dawną zabudowę, umieści je na mapie, a Ty przyjmiesz te, które pasują.',
+      'Masz zdjęcie starej mapy, fragment kroniki albo wspomnienie dziadka? Dodaj je tutaj: AI odczyta młyny, karczmy i dawną zabudowę, pokaże je na mapie, a Ty wybierzesz, co zachować.',
     mode: 'field',
     sheet: 'layers',
   },

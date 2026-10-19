@@ -78,6 +78,15 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
       {picking && <PickLocationBar />}
       <Sheet title="Mapy i obiekty historyczne" onClose={onClose} hidden={picking}>
         <Stack spacing={2}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<Icon name="camera" size={18} />}
+            onClick={() => useUiStore.getState().showSheet('sources')}
+          >
+            Masz zdjęcie starej mapy albo opis z kroniki? Dodaj źródło
+          </Button>
+
           <OwnMapsSection />
 
           <Divider />

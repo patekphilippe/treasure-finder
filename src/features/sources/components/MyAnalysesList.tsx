@@ -11,7 +11,7 @@ export function MyAnalysesList() {
   if (!sent.length)
     return (
       <Typography variant="body2" color="text.secondary">
-        Nic jeszcze nie wysłano. Wyniki pojawią się tutaj, zwykle w ciągu godziny.
+        Nic jeszcze nie dodano. Wysłane źródła i to, co z nich odczytano, pojawią się tutaj.
       </Typography>
     );
   return (
