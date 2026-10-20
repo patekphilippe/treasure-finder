@@ -12,11 +12,19 @@ export const CONTEXT_KIND_VALUES: readonly ContextFeature['kind'][] = [
   'karczma',
   'brod',
   'inne',
+  'wojsko',
+  'grob_wojenny',
 ];
 
 /** "Młyn", "BRÓD" → mlyn, brod; null when not a context kind. */
 export function contextKind(v: unknown): ContextFeature['kind'] | null {
-  const k = str(v).trim().toLowerCase().replace(/ł/g, 'l').normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const k = str(v)
+    .trim()
+    .toLowerCase()
+    .replace(/ł/g, 'l')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, '_');
   return (CONTEXT_KIND_VALUES as readonly string[]).includes(k)
     ? (k as ContextFeature['kind'])
     : null;

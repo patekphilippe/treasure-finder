@@ -7,7 +7,8 @@ import { distanceToWater } from './features/water';
 import { interpretConfig } from './interpretConfig';
 import { detectForms, type Detection } from './pipeline';
 import { archivalNearest, archivalReason, type ArchivalFeature } from './archivalContext';
-import { CONTEXT_BUMP_REASON } from './rescoreContext';
+import { militaryNearby, withMilitaryFlags } from './militaryNearby';
+import { CONTEXT_BUMP_REASON, FORBIDDEN_ZONE_REASON } from './rescoreContext';
 import { buildScene, type Scene } from './scene';
 import { contextPriority, contextScore, score, scoreParts, type ScoreParts } from './score';
 
@@ -189,8 +190,11 @@ export function toCandidates(
       touchesAreas([d.centre, ...cellPts], forbidden)
     ) {
       priority = 'chroniony';
-      reasons.push('leży w strefie zakazu (prawdopodobne stanowisko), nie może być celem');
+      reasons.push(FORBIDDEN_ZONE_REASON);
     }
+    const military = militaryNearby(d.centre, context, cfg);
+    reasons.push(...military.reasons);
+    if (military.protect && priority !== 'naturalne') priority = 'chroniony';
     const [lat, lng] = fromEpsg2180(grid.originE + d.centre[0], grid.originN + d.centre[1]);
     const ring = cellPts.length >= 3 ? hullBuffer(cellPts, grid.cell / 2) : null;
     const outline = ring ? toWgs84([[[...ring, ring[0]!]]], grid.originE, grid.originN) : null;
@@ -205,7 +209,7 @@ export function toCandidates(
         confidence: Math.round(a.confidence * 100) / 100,
       })),
       priority,
-      flags: d.flags,
+      flags: withMilitaryFlags(d.flags, military),
       reasons,
       lat: Math.round(lat * 1e7) / 1e7,
       lng: Math.round(lng * 1e7) / 1e7,

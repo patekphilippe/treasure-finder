@@ -103,6 +103,45 @@ describe('view readings', () => {
     expect((await spentThisMonth(db, Date.now())) - before).toBeCloseTo(0.0004, 8);
   });
 
+  it('reads a military map with its own prompt, schema and length; lines come back', async () => {
+    claude = () =>
+      Response.json({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              objects: [
+                {
+                  kind: 'linia_frontu',
+                  label: '52 A',
+                  x: 400,
+                  y: 300,
+                  line: [
+                    { x: 10, y: 10 },
+                    { x: 790, y: 590 },
+                  ],
+                  confidence: 0.8,
+                },
+                { kind: 'mlyn', label: '', x: 5, y: 5, line: [], confidence: 0.9 },
+              ],
+            }),
+          },
+        ],
+        stop_reason: 'end_turn',
+        usage: { input_tokens: 2000, output_tokens: 900 },
+      });
+    const res = await read({ profile: 'wojskowa', res: '6' });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as MapReading;
+    // a mill is no military kind: it stays, as "inne"
+    expect(body.objects.map((o) => o.kind)).toEqual(['linia_frontu', 'inne']);
+    expect(body.objects[0]!.line).toHaveLength(2);
+    expect(sent!.messages[0]!.content[1]!.text).toMatch(/Second World War military map/);
+    expect(JSON.stringify(sent!.output_config)).toContain('linia_frontu');
+    expect((sent as unknown as { max_tokens: number }).max_tokens).toBe(8192);
+    expect((await read({ profile: 'kataster' })).status).toBe(400);
+  });
+
   it('refuses without a passed Turnstile check and with bad input', async () => {
     turnstileOk = false;
     expect((await read()).status).toBe(403);

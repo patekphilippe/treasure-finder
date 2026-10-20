@@ -208,7 +208,20 @@ export const interpretConfig = {
      * how far an archival object still lends context (closeness 1 at the object → 0 here).
      * A village spreads its traces wider than a ford; unknown kinds use contextMaxDistanceM.
      */
-    contextKindRadiusM: { osada: 400, mlyn: 300, karczma: 300, brod: 200, droga: 150, inne: 200 },
+    contextKindRadiusM: {
+      osada: 400,
+      mlyn: 300,
+      karczma: 300,
+      brod: 200,
+      droga: 150,
+      inne: 200,
+      // positions and trenches: also the reach of the UXO warning
+      wojsko: 300,
+      // war graves lend no context; this is only the reach of the war-graves warning
+      grob_wojenny: 150,
+    },
+    /** a candidate this close to a war grave from a map is protected (never a search target) */
+    warGraveProtectM: 50,
   },
 } as const;
 

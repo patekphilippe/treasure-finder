@@ -78,16 +78,34 @@ brody, drogi). Bazę widzą i zmieniają tylko zaproszeni członkowie.
 ## Odczyt widoku mapy (`POST /api/readings`)
 
 „Szukaj zaginionej zabudowy” w aplikacji (Warstwy → Mapa historyczna → Własne mapy i obiekty)
-wysyła obraz widoku mapy historycznej, a worker od razu pyta Claude (zwykłe Messages API, bez Batch,
-bo użytkownik czeka na wynik) z tym samym promptem i schematem JSON co aplikacja
-(`src/shared/lib/history/readPrompt.ts`). Zwraca listę obiektów w pikselach obrazu; porównanie
-z BDOT10k i grupowanie w zaginione wsie robi aplikacja.
+wysyła obraz widoku mapy historycznej i rodzaj mapy (`profile`), a worker od razu pyta Claude
+(zwykłe Messages API, bez Batch, bo użytkownik czeka na wynik) z promptem i schematem JSON tego
+profilu. Zwraca listę obiektów w pikselach obrazu; porównanie z BDOT10k i grupowanie w zaginione wsie
+robi aplikacja.
+
+### Profile odczytu
+
+Profil to „umiejętność” odczytu jednego rodzaju mapy: instrukcja z legendą (prompt), lista rodzajów
+obiektów (schemat JSON), najgrubsza skala, przy której znaki są jeszcze czytelne, i limit długości
+odpowiedzi. Leżą w `src/shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera.
+
+- `topo` (domyślny, `readPrompt.ts`): Messtischblatt, WIG i podobne mapy topograficzne; budynki,
+  młyny, karczmy, folwarki i inne obiekty; widok do ok. 3 km.
+- `wojskowa` (`militaryPrompt.ts`): mapy sztabowe z II wojny; linia frontu, okopy, stanowiska, punkty
+  dowodzenia, przeprawy, pola minowe, mogiły; linie jako ciąg punktów; widok do ok. 12 km. W
+  aplikacji pozycje dają kontekst `wojsko` (ostrzeżenie o niewybuchach u kandydatów do 300 m), mogiły
+  `grob_wojenny` (ostrzeżenie do 150 m, kandydaci do 50 m chronieni).
+
+Nowy rodzaj mapy (np. katastralna, Urmesstischblatt): nowy plik z promptem i schematem, wpis w
+`READ_PROFILES`, rodzaje w `types.ts`, przełożenie na obiekty kontekstu w aplikacji, test i krok
+przewodnika. Potok zgłoszeń (Batch) ma własne prompty w `server/src/pipeline/prompts.ts`.
+Skille Claude API (Agent Skills) się tu nie nadają: działają tylko w kontenerze code execution, a
+odczyt to jedno wywołanie ze schematem JSON.
 
 - **Ochrona:** Turnstile przy każdym odczycie, limit 30 odczytów dziennie na urządzenie i na adres IP
   (własny licznik `read:…`, nie zużywa limitu zgłoszeń), obraz do 3 MB i 1600 px na bok.
 - **Budżet:** wspólny z potokiem zgłoszeń (`MONTHLY_BUDGET_USD`). Przed wywołaniem worker sprawdza,
-  czy najgorszy przypadek (3000 tokenów wejścia, 4096 wyjścia) zmieści się w budżecie; liczy koszt bez
-  rabatu Batch.
+  czy najgorszy przypadek (3000 tokenów wejścia i limit wyjścia profilu: 4096, a dla mapy wojskowej 8192) zmieści się w budżecie; liczy koszt bez rabatu Batch.
 - **Koszt:** Haiku ok. 0,0005–0,002 $ za widok, Sonnet ok. 20 razy więcej.
 - **Prywatność:** obraz służy tylko do tego jednego wywołania, worker go nie zapisuje. Wraz z nim
   idzie losowy identyfikator urządzenia (do limitu) i nic więcej.

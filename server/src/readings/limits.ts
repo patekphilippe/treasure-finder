@@ -4,6 +4,5 @@ export const READ_DAILY_LIMIT = 30;
 export const MAX_READ_IMAGE_BYTES = 3 * 1024 * 1024;
 export const READ_IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp'] as const;
 export const READ_MAX_SIDE = 1600;
-export const READ_MAX_TOKENS = 4096;
-/** upper bound of one reading's tokens, checked against the monthly budget before calling */
-export const READ_ESTIMATE_TOKENS = { input_tokens: 3000, output_tokens: READ_MAX_TOKENS } as const;
+/** input tokens of one reading (image and prompt), for the budget check before calling */
+export const READ_ESTIMATE_INPUT_TOKENS = 3000;

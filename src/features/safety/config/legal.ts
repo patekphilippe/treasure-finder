@@ -53,3 +53,8 @@ export const COMMUNITY_NOTE =
   'Do wspólnej bazy trafia rodzaj obiektu z mapy, jego położenie, źródło i Twoje imię; widzą je tylko ' +
   'zaproszeni członkowie. Nie udostępniaj znalezisk ani stanowisk archeologicznych: to chroni miejsca ' +
   'przed rabusiami, a Ciebie przed odpowiedzialnością.';
+
+export const MILITARY_MAP_NOTE =
+  'Mapa wojskowa pokazuje, gdzie walczono. Przy pozycjach zostają niewybuchy: nie kop głęboko przy ' +
+  'silnym sygnale, niewybuchu nie dotykaj i dzwoń pod 112. Mogiły wojenne chroni ustawa o grobach i ' +
+  'cmentarzach wojennych: kandydaci tuż przy mogile z mapy nie mogą być celem poszukiwań.';

@@ -81,8 +81,10 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Własne mapy historyczne: magazyn `maps` (obraz do 16 Mpx + georeferencja w układzie pliku, `shared/lib/georef`),
   nie wchodzą do kopii ZIP. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka.
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
-  Turnstile, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Prompt i schemat
-  w `shared/lib/history/readPrompt.ts`, wspólne dla aplikacji i workera. Propozycje trafiają do kontekstu
+  Turnstile, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
+  (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera
+  (docs/BACKEND.md, „Profile odczytu”); mapa wojskowa daje kontekst `wojsko` i `grob_wojenny`
+  (ostrzeżenia, ochrona przy mogiłach w `shared/lib/detect/militaryNearby.ts`). Propozycje trafiają do kontekstu
   dopiero po „Przyjmij”. Adres backendu i klucz witryny Turnstile: `shared/config/backend.ts`.
 - Społeczność: członkostwo (kod zaproszenia, imię) w `shared/store/useMembership.ts` (localStorage, nigdy w eksporcie);
   wspólna baza przez `/api/community/` (docs/BACKEND.md), scalanie z lokalnym kontekstem w

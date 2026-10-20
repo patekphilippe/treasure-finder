@@ -4,26 +4,36 @@ import Link from '@mui/material/Link';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { useCallback, useState } from 'react';
+import { MILITARY_MAP_NOTE } from '@/features/safety';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { BACKEND_ENABLED } from '@/shared/config/backend';
+import { READ_PROFILES, type ReadProfileId } from '@/shared/lib/history';
 import { useMembership } from '@/shared/store/useMembership';
 import { Icon, TurnstileWidget, useToastStore } from '@/shared/ui';
-import { AI_MODELS, AI_READING_NOTE, type AiModelId } from '../config/aiReading';
+import { AI_MAX_SIDE, AI_MODELS, AI_READING_NOTE, type AiModelId } from '../config/aiReading';
 import { useViewSource } from '../hooks/useViewSource';
 import { findLostBuildings } from '../services/findLostBuildings';
 import { useAiSettings } from '../store/useAiSettings';
 import { useContextStore } from '../store/useContextStore';
 import { useProposalsStore } from '../store/useProposalsStore';
-import { createContextPoint } from '../utils/createContextPoint';
+import { proposalToContext } from '../utils/proposalToContext';
 import { ProposalItem } from './ProposalItem';
 
 const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
 
-/** Claude reads the visible historical map; lost buildings and named places become proposals. */
+/**
+ * Claude reads the visible historical map with the chosen profile: on a topographic map lost
+ * buildings and named places, on a military map positions, front lines and war graves.
+ */
 export function AiReadingSection() {
-  const { model, setModel } = useAiSettings();
+  const { model, setModel, profile, setProfile } = useAiSettings();
+  const military = profile === 'wojskowa';
+  // the widest view the profile still reads, in km
+  const maxViewKm = Math.round((READ_PROFILES[profile].maxResM * AI_MAX_SIDE) / 1000);
   const member = useMembership((st) => st.code !== null);
   const { proposals, step, usage, read, set, drop } = useProposalsStore();
   const add = useContextStore((s) => s.add);
@@ -40,7 +50,9 @@ export function AiReadingSection() {
     if (!source || !bounds || (!token && !member)) return;
     set({ step: 'Start', proposals: [], usage: null, read: null });
     try {
-      const r = await findLostBuildings(bounds, source, model, token, (s) => set({ step: s }));
+      const r = await findLostBuildings(bounds, source, model, profile, token, (s) =>
+        set({ step: s }),
+      );
       set({ proposals: r.proposals, usage: r.usage, read: r.read });
       showToast(
         r.proposals.length ? `Propozycje: ${r.proposals.length}` : 'Nic nowego w tym widoku',
@@ -55,7 +67,7 @@ export function AiReadingSection() {
 
   const accept = async (ids: string[]) => {
     const chosen = proposals.filter((p) => ids.includes(p.id));
-    await add(chosen.map((p) => createContextPoint(p.kind, p.lat, p.lng, p.source)));
+    await add(chosen.map(proposalToContext));
     chosen.forEach((p) => drop(p.id));
     showToast(`Dodano do kontekstu: ${chosen.length}`);
   };
@@ -65,12 +77,32 @@ export function AiReadingSection() {
   return (
     <Stack data-tour="ai-reading" spacing={1}>
       <Typography variant="overline" color="text.secondary">
-        Szukaj zaginionej zabudowy (AI)
+        {military ? 'Pozycje z mapy wojskowej (AI)' : 'Szukaj zaginionej zabudowy (AI)'}
       </Typography>
+      <ToggleButtonGroup
+        data-tour="ai-profile"
+        exclusive
+        size="small"
+        value={profile}
+        onChange={(_, v: ReadProfileId | null) => v && setProfile(v)}
+      >
+        <ToggleButton value="topo" sx={{ flex: 1 }}>
+          Mapa topograficzna
+        </ToggleButton>
+        <ToggleButton value="wojskowa" sx={{ flex: 1 }}>
+          Mapa wojskowa
+        </ToggleButton>
+      </ToggleButtonGroup>
       <Typography variant="body2" color="text.secondary">
-        Claude czyta widoczny fragment mapy historycznej: domy, młyny, karczmy, folwarki. Aplikacja
-        porównuje je z dzisiejszymi budynkami (BDOT10k) i proponuje miejsca, których już nie ma.
+        {military
+          ? 'Claude czyta naniesioną sytuację bojową: linię frontu, okopy, stanowiska, punkty dowodzenia, przeprawy, pola minowe i mogiły. Kandydaci NMT przy pozycjach dostają ostrzeżenie o niewybuchach.'
+          : 'Claude czyta widoczny fragment mapy historycznej: domy, młyny, karczmy, folwarki. Aplikacja porównuje je z dzisiejszymi budynkami (BDOT10k) i proponuje miejsca, których już nie ma.'}
       </Typography>
+      {military && (
+        <Typography variant="caption" color="warning.main">
+          {MILITARY_MAP_NOTE}
+        </Typography>
+      )}
 
       {!BACKEND_ENABLED ? (
         <Typography variant="caption" color="warning.main">
@@ -93,7 +125,7 @@ export function AiReadingSection() {
           </TextField>
           <Typography variant="caption" color={source ? 'text.secondary' : 'warning.main'}>
             {source
-              ? `Czyta: ${source.label}. Przybliż mapę tak, by widok miał najwyżej ok. 3 km.`
+              ? `Czyta: ${source.label}. Przybliż mapę tak, by widok miał najwyżej ok. ${maxViewKm} km.`
               : 'Włącz własną mapę albo mapę historyczną w Warstwach.'}
           </Typography>
           {isUmwd && (

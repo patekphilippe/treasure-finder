@@ -1,9 +1,12 @@
 import type { SourceObject } from './sources';
 
+/** Kinds the shared base holds: the sources' kinds and the military ones from military maps. */
+export type CommunityKind = SourceObject['kind'] | 'wojsko' | 'grob_wojenny';
+
 /** One object of the members-only shared base (server/, docs/BACKEND.md, "Społeczność"). */
 export interface CommunityObject {
   id: string;
-  kind: SourceObject['kind'];
+  kind: CommunityKind;
   label: string;
   lat: number;
   lng: number;
@@ -22,7 +25,7 @@ export interface CommunityObject {
 }
 
 export interface NewCommunityObject {
-  kind: SourceObject['kind'];
+  kind: CommunityKind;
   label: string;
   lat: number;
   lng: number;

@@ -2,7 +2,7 @@ import type { ContextKind } from '@/shared/types/domain';
 import { pluralPl } from '../format';
 import { clusterPoints } from './clusterPoints';
 import { existsToday } from './existsToday';
-import type { ImageGrid, MapObject, MapObjectKind } from './types';
+import type { ImageGrid, MapObject, ReadKind } from './types';
 
 export interface SiteProposal {
   kind: ContextKind;
@@ -14,6 +14,8 @@ export interface SiteProposal {
   buildings: number;
   /** nothing in today's BDOT10k there */
   lost: boolean;
+  /** a line object (front line, trench): its points, EPSG:2180 metres */
+  line?: [number, number][];
 }
 
 export interface ProposalOptions {
@@ -25,7 +27,7 @@ export interface ProposalOptions {
   minConfidence: number;
 }
 
-const POI: Partial<Record<MapObjectKind, { kind: ContextKind; label: string }>> = {
+const POI: Partial<Record<ReadKind, { kind: ContextKind; label: string }>> = {
   mlyn: { kind: 'mlyn', label: 'Młyn' },
   karczma: { kind: 'karczma', label: 'Karczma' },
   folwark: { kind: 'osada', label: 'Folwark' },
@@ -45,7 +47,7 @@ const POI: Partial<Record<MapObjectKind, { kind: ContextKind; label: string }>> 
  * Named places (mill, inn, manor farm, ford…) are proposed each on their own, gone or not.
  */
 export function buildProposals(
-  objects: readonly MapObject[],
+  objects: readonly MapObject<ReadKind>[],
   mask: Uint8Array,
   g: ImageGrid,
   o: ProposalOptions,
@@ -70,7 +72,7 @@ export function buildProposals(
     };
   });
   const places: SiteProposal[] = ok
-    .filter((x) => x.kind !== 'budynek')
+    .filter((x) => x.kind !== 'budynek' && POI[x.kind])
     .map((x) => {
       const p = POI[x.kind]!;
       const lost = !existsToday(mask, g, x.x, x.y, o.bufferM);

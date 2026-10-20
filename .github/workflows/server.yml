@@ -10,6 +10,8 @@ on:
       - 'src/shared/lib/raster/**'
       - 'src/shared/lib/geo/**'
       - 'src/shared/types/sources.ts'
+      - 'src/shared/types/community.ts'
+      - 'src/shared/types/readings.ts'
       - '.github/workflows/server.yml'
   workflow_dispatch:
 

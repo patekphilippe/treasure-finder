@@ -1,13 +1,15 @@
-import type { CommunityObject, NewCommunityObject } from '@/shared/types/community';
-import type { SourceObject } from '@/shared/types/sources';
+import type { CommunityKind, CommunityObject, NewCommunityObject } from '@/shared/types/community';
 
-export const KINDS: readonly SourceObject['kind'][] = [
+/** as the CHECK in migrations/0004_community_military_kinds.sql */
+export const KINDS: readonly CommunityKind[] = [
   'osada',
   'droga',
   'mlyn',
   'karczma',
   'brod',
   'inne',
+  'wojsko',
+  'grob_wojenny',
 ];
 /** largest bbox one request may ask for (about 110 × 70 km) */
 export const MAX_BBOX_DEG = 1;
@@ -20,10 +22,10 @@ export function cleanObject(raw: unknown): NewCommunityObject | null {
   const o = raw as Record<string, unknown> | null;
   const lat = Number(o?.lat);
   const lng = Number(o?.lng);
-  if (!KINDS.includes(String(o?.kind) as SourceObject['kind'])) return null;
+  if (!KINDS.includes(String(o?.kind) as CommunityKind)) return null;
   if (!(lat > 48 && lat < 56 && lng > 13 && lng < 25)) return null;
   return {
-    kind: o!.kind as SourceObject['kind'],
+    kind: o!.kind as CommunityKind,
     label: String(o!.label ?? '').slice(0, 160),
     lat: Number(lat.toFixed(6)),
     lng: Number(lng.toFixed(6)),
@@ -44,7 +46,7 @@ export function parseBbox(text: string | null) {
 
 export interface ObjectRow {
   id: string;
-  kind: SourceObject['kind'];
+  kind: CommunityKind;
   label: string;
   lat: number;
   lng: number;

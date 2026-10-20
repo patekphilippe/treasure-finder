@@ -109,6 +109,11 @@ describe('community', () => {
   it('bad objects and huge areas are refused', async () => {
     const d = await invite('Darek');
     expect((await add(d.auth, { ...mill, kind: 'znalezisko' })).status).toBe(400);
+    // positions and war graves from military maps are shared like any map object
+    expect((await add(d.auth, { ...mill, kind: 'wojsko', label: 'Okopy' })).status).toBe(201);
+    expect((await add(d.auth, { ...mill, kind: 'grob_wojenny', label: 'Mogiła' })).status).toBe(
+      201,
+    );
     expect((await add(d.auth, { ...mill, lat: 40 })).status).toBe(400);
     expect((await call('community/objects?bbox=49,14,52,18', d.auth)).status).toBe(400);
   });

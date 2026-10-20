@@ -1,4 +1,5 @@
 import { parseMapObjects } from '@/shared/lib/history/parseMapObjects';
+import { READ_PROFILES } from '@/shared/lib/history/readProfiles';
 import type { MapReading } from '@/shared/types/readings';
 import { addSpending, spentThisMonth } from '../budget';
 import type { Env } from '../env';
@@ -8,7 +9,7 @@ import { costUsd } from '../pipeline/pricing';
 import { consumeDaily } from '../submissions/dailyLimit';
 import { humanCheck } from '../community/humanCheck';
 import { callClaude } from './callClaude';
-import { READ_DAILY_LIMIT, READ_ESTIMATE_TOKENS } from './limits';
+import { READ_DAILY_LIMIT, READ_ESTIMATE_INPUT_TOKENS } from './limits';
 import { parseReading } from './parseReading';
 
 type Cors = Record<string, string>;
@@ -33,8 +34,11 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
       ? fail(403, 'Weryfikacja nie powiodła się, spróbuj jeszcze raz', cors)
       : fail(400, 'Potwierdź, że nie jesteś robotem', cors);
 
+  const profile = READ_PROFILES[req.profile];
+  // upper bound of this reading's cost, checked against the monthly budget before calling
+  const estimate = { input_tokens: READ_ESTIMATE_INPUT_TOKENS, output_tokens: profile.maxTokens };
   const spent = await spentThisMonth(env.DB, now);
-  if (spent + costUsd(req.model, READ_ESTIMATE_TOKENS, false) > Number(env.MONTHLY_BUDGET_USD))
+  if (spent + costUsd(req.model, estimate, false) > Number(env.MONTHLY_BUDGET_USD))
     return fail(503, 'Miesięczny budżet odczytów się skończył, spróbuj w przyszłym miesiącu', cors);
   // own prefix: readings do not use up the private submissions of the day
   const allowed = await consumeDaily(
@@ -51,6 +55,7 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
   const answer = await callClaude(
     env.ANTHROPIC_API_KEY,
     req.model,
+    profile,
     req.image,
     req.w,
     req.h,
@@ -60,7 +65,7 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
   if (!answer.ok) return fail(answer.status, answer.message, cors);
 
   const body: MapReading = {
-    objects: parseMapObjects(answer.json, req.w, req.h),
+    objects: parseMapObjects(answer.json, req.w, req.h, profile.kinds),
     usage: { inputTokens: answer.usage.input_tokens, outputTokens: answer.usage.output_tokens },
   };
   return json(body, 200, cors);

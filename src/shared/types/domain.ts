@@ -163,7 +163,13 @@ export interface Candidate {
   needsRecompute?: boolean;
 }
 
-export type ContextKind = 'osada' | 'droga' | 'mlyn' | 'karczma' | 'brod' | 'inne';
+/**
+ * Archival object kinds. `wojsko`: positions, trenches, front lines, crossings and minefields from
+ * military maps (UXO warning nearby); `grob_wojenny`: war graves (never raise a candidate,
+ * candidates right next to one are protected).
+ */
+export type ContextKind =
+  'osada' | 'droga' | 'mlyn' | 'karczma' | 'brod' | 'inne' | 'wojsko' | 'grob_wojenny';
 
 /** store: context — features digitised from archival maps */
 export interface ContextFeature {

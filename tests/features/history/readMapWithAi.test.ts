@@ -16,7 +16,15 @@ describe('reading a map through the backend', () => {
       usage: { inputTokens: 2100, outputTokens: 180 },
     });
     vi.stubGlobal('fetch', fetch);
-    const r = await readMapWithAi(image, 800, 600, 1.5, 'claude-haiku-5-5', 'turnstile-token');
+    const r = await readMapWithAi(
+      image,
+      800,
+      600,
+      1.5,
+      'claude-haiku-5-5',
+      'wojskowa',
+      'turnstile-token',
+    );
     expect(r.objects).toEqual([{ kind: 'mlyn', label: 'Mühle', x: 40, y: 60, confidence: 0.9 }]);
     expect(r.usage).toEqual({ inputTokens: 2100, outputTokens: 180 });
     const [url, init] = fetch.mock.calls[0]!;
@@ -28,6 +36,7 @@ describe('reading a map through the backend', () => {
       h: '600',
       res: '1.5',
       model: 'claude-haiku-5-5',
+      profile: 'wojskowa',
       deviceId: 'device-0123456789abcdef',
       turnstile: 'turnstile-token',
     });
@@ -39,11 +48,11 @@ describe('reading a map through the backend', () => {
       'fetch',
       answer(429, { error: 'Dzienny limit odczytów map został wykorzystany, spróbuj jutro' }),
     );
-    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 't')).rejects.toThrow(
+    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 'topo', 't')).rejects.toThrow(
       /limit odczytów/,
     );
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('offline')));
-    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 't')).rejects.toThrow(
+    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 'topo', 't')).rejects.toThrow(
       'Brak połączenia z serwerem analizy',
     );
   });

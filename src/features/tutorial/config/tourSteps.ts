@@ -180,6 +180,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'history',
   },
   {
+    id: 'ai-profile',
+    target: 'ai-profile',
+    title: 'Rodzaj mapy',
+    content:
+      'Mapa topograficzna: Claude szuka zabudowy, młynów i karczm. Mapa wojskowa (np. sztabowa z 1945 r.): linii frontu, okopów, stanowisk, przepraw i mogił. Pozycje ostrzegają przed niewybuchami u pobliskich kandydatów, a kandydaci tuż przy mogile stają się chronieni.',
+    mode: 'field',
+    sheet: 'history',
+  },
+  {
     id: 'history-add',
     target: 'history-add',
     title: 'Obiekty z map archiwalnych',

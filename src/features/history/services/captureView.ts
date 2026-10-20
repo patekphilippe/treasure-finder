@@ -32,6 +32,7 @@ export type ViewSource =
 export async function captureView(
   bounds: Bounds,
   source: ViewSource,
+  maxResM = AI_MAX_RES_M,
 ): Promise<{ image: Blob; grid: ImageGrid }> {
   const pts = [
     toEpsg2180(bounds.north, bounds.west),
@@ -44,9 +45,9 @@ export async function captureView(
   const minN = Math.min(...pts.map((p) => p[1]));
   const maxN = Math.max(...pts.map((p) => p[1]));
   const res = Math.max(maxE - minE, maxN - minN) / AI_MAX_SIDE;
-  if (res > AI_MAX_RES_M)
+  if (res > maxResM)
     throw new Error(
-      `Przybliż mapę: widok ma ${((maxE - minE) / 1000).toFixed(1)} km, domy byłyby za małe do odczytania`,
+      `Przybliż mapę: widok ma ${((maxE - minE) / 1000).toFixed(1)} km, znaki byłyby za małe do odczytania`,
     );
   const w = Math.ceil((maxE - minE) / res);
   const h = Math.ceil((maxN - minN) / res);

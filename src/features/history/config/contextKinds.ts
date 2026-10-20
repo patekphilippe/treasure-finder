@@ -9,6 +9,8 @@ export const CONTEXT_KINDS: Record<ContextKind, { label: string; icon: string; c
   karczma: { label: 'Karczma', icon: 'beer', color: '#a21caf' },
   brod: { label: 'Bród', icon: 'water', color: '#2563eb' },
   inne: { label: 'Inny obiekt', icon: 'map-pin', color: '#4d7c0f' },
+  wojsko: { label: 'Pozycje wojskowe', icon: 'bomb', color: '#b91c1c' },
+  grob_wojenny: { label: 'Mogiła wojenna', icon: 'cross', color: '#374151' },
 };
 
 export const CONTEXT_KIND_ORDER: readonly ContextKind[] = [
@@ -17,6 +19,8 @@ export const CONTEXT_KIND_ORDER: readonly ContextKind[] = [
   'karczma',
   'brod',
   'droga',
+  'wojsko',
+  'grob_wojenny',
   'inne',
 ];
 

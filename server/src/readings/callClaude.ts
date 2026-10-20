@@ -1,6 +1,5 @@
-import { READ_SCHEMA, readPrompt } from '@/shared/lib/history/readPrompt';
+import type { ReadProfile } from '@/shared/lib/history/readProfiles';
 import type { PipelineModel, TokenUsage } from '../pipeline/pricing';
-import { READ_MAX_TOKENS } from './limits';
 
 const API = 'https://api.anthropic.com/v1/messages';
 
@@ -16,10 +15,11 @@ export type ClaudeAnswer =
   | { ok: true; json: unknown; usage: TokenUsage }
   | { ok: false; status: number; message: string; usage: TokenUsage | null };
 
-/** One synchronous Messages call: the view image, the shared prompt and the JSON schema. */
+/** One synchronous Messages call: the view image, the profile's prompt and its JSON schema. */
 export async function callClaude(
   apiKey: string,
   model: PipelineModel,
+  profile: ReadProfile,
   image: File,
   w: number,
   h: number,
@@ -36,8 +36,8 @@ export async function callClaude(
       },
       body: JSON.stringify({
         model,
-        max_tokens: READ_MAX_TOKENS,
-        output_config: { format: { type: 'json_schema', schema: READ_SCHEMA } },
+        max_tokens: profile.maxTokens,
+        output_config: { format: { type: 'json_schema', schema: profile.schema } },
         messages: [
           {
             role: 'user',
@@ -46,7 +46,7 @@ export async function callClaude(
                 type: 'image',
                 source: { type: 'base64', media_type: image.type, data: await toBase64(image) },
               },
-              { type: 'text', text: readPrompt(w, h, res) },
+              { type: 'text', text: profile.prompt(w, h, res) },
             ],
           },
         ],

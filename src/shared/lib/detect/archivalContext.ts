@@ -24,6 +24,8 @@ const KIND_LABEL: Record<ContextKind, string> = {
   karczma: 'karczma',
   brod: 'bród',
   inne: 'obiekt',
+  wojsko: 'pozycje wojskowe',
+  grob_wojenny: 'mogiła wojenna',
 };
 
 /** Reason texts this module writes, so a re-score can replace them. */
@@ -41,6 +43,8 @@ export function archivalNearest(
   let best: ArchivalNearest = { distM: Infinity, radiusM: cfg.score.contextMaxDistanceM };
   let bestCloseness = -Infinity;
   for (const f of features) {
+    // a grave is no reason to search nearby: it only warns (militaryNearby)
+    if (f.kind === 'grob_wojenny') continue;
     const radiusM = f.kind ? cfg.score.contextKindRadiusM[f.kind] : cfg.score.contextMaxDistanceM;
     const distM = distanceToGeometry(p, f.geometry);
     const closeness = 1 - distM / radiusM;

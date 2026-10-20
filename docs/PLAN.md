@@ -151,7 +151,10 @@ interface Candidate {
 interface ContextFeature {
   // magazyn: context, obiekty z map archiwalnych
   id: string;
-  kind: 'osada' | 'droga' | 'mlyn' | 'karczma' | 'brod' | 'inne';
+  kind: 'osada' | 'droga' | 'mlyn' | 'karczma' | 'brod' | 'inne' | 'wojsko' | 'grob_wojenny';
+  // wojsko: pozycje, okopy, linia frontu, przeprawy, pola minowe z map wojskowych (ostrzeżenie
+  // o niewybuchach w pobliżu); grob_wojenny: mogiły wojenne (nie podnoszą oceny, kandydaci
+  // tuż obok są chronieni)
   geometry: GeoJSON.Geometry;
   source: string;
 }

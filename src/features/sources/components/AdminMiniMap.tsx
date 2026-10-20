@@ -2,7 +2,8 @@ import { Circle, MapContainer, Rectangle, TileLayer, Tooltip } from 'react-leafl
 import type { SourceObject, ViewBbox } from '@/shared/types/sources';
 
 interface AdminMiniMapProps {
-  objects: readonly SourceObject[];
+  /** submitted or shared objects: only position, reach and label are drawn */
+  objects: readonly Pick<SourceObject, 'lat' | 'lng' | 'radiusM' | 'label'>[];
   view: ViewBbox | null;
 }
 
