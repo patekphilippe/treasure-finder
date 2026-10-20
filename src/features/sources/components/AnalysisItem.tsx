@@ -51,7 +51,14 @@ export function AnalysisItem({ item }: AnalysisItemProps) {
         <Typography variant="subtitle2" noWrap sx={{ flex: 1, minWidth: 0 }}>
           {item.label}
         </Typography>
-        <Chip size="small" label={STATUS_LABELS[status]} sx={{ height: 22, fontSize: 11 }} />
+        <Chip
+          size="small"
+          label={
+            item.fresh ? `Nowe: ${STATUS_LABELS[status].toLowerCase()}` : STATUS_LABELS[status]
+          }
+          color={item.fresh ? 'primary' : 'default'}
+          sx={{ height: 22, fontSize: 11 }}
+        />
         <IconButton size="small" aria-label="Usuń analizę" onClick={() => void del()}>
           <Icon name="trash-alt" size={18} />
         </IconButton>

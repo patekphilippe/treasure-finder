@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import type { Theme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useState } from 'react';
+import { useSourcesActivity } from '@/features/sources';
 import { useActivityStore } from '@/shared/store/useActivityStore';
 import { glass, Icon } from '@/shared/ui';
 import { activitySummary } from '../utils/activitySummary';
@@ -15,14 +16,16 @@ import { ActivityList } from './ActivityList';
 const SHOW_AFTER_MS = 400;
 
 /**
- * Top-bar chip, in both modes, while something runs ("Arkusz NMT 45%", "W toku: 2"). Tapping
- * it lists the tasks with their progress, "Pokaż" and "Przerwij".
+ * Top-bar chip, in both modes, while something runs ("Arkusz NMT 45%", "W toku: 2"), a result
+ * of a sent source is new ("Gotowe: 1") or sources wait on the server ("Na serwerze: 1").
+ * Tapping it lists the tasks with their progress, "Pokaż" and "Przerwij".
  */
 export function ActivityChip() {
   const tasks = useActivityStore((s) => s.tasks);
   const compact = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'));
   const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-  const summary = activitySummary(tasks, { waiting: 0, ready: 0 }, compact);
+  const remote = useSourcesActivity();
+  const summary = activitySummary(tasks, remote, compact);
   if (!summary) return null;
 
   return (
@@ -74,7 +77,7 @@ export function ActivityChip() {
         }}
       >
         <Typography variant="overline" color="text.secondary">
-          W toku
+          {tasks.length ? 'W toku' : 'Analizy na serwerze'}
         </Typography>
         <ActivityList onNavigate={() => setAnchor(null)} />
       </Popover>

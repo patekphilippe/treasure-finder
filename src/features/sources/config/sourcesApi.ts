@@ -10,7 +10,7 @@ export {
 /** Longest side sent: the model scales larger images down anyway. */
 export const IMAGE_MAX_SIDE = 1568;
 export const MAX_FILES = 5;
-/** how often waiting analyses are checked while the sheet is open */
+/** how often analyses that may still change are checked (in the background, app-wide) */
 export const POLL_MS = 60_000;
 
 export const STATUS_LABELS: Record<SubmissionStatus, string> = {
@@ -31,3 +31,9 @@ export const PENDING: readonly SubmissionStatus[] = [
   'czeka_na_budzet',
   'do_przegladu',
 ];
+
+/** still being worked on by the server: counted on the activity chip ("Na serwerze") */
+export const WAITING: readonly SubmissionStatus[] = ['nowe', 'w_kolejce'];
+
+/** a result came (or the analysis failed): the user is told once */
+export const READY: readonly SubmissionStatus[] = ['gotowe', 'do_przegladu', 'blad'];

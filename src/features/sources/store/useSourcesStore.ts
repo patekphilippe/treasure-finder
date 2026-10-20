@@ -12,6 +12,8 @@ export interface SentSource {
   view: SubmissionView | null;
   /** indices of result objects already added to the archival context */
   accepted: number[];
+  /** a result came that the user has not looked at yet */
+  fresh?: boolean;
 }
 
 interface SourcesState {
@@ -22,6 +24,8 @@ interface SourcesState {
   update: (id: string, patch: Partial<SentSource>) => void;
   remove: (id: string) => void;
   show: (id: string | null) => void;
+  /** the results were seen in "Moje źródła" */
+  markSeen: () => void;
 }
 
 export const useSourcesStore = create<SourcesState>()(
@@ -38,6 +42,12 @@ export const useSourcesStore = create<SourcesState>()(
           shownId: st.shownId === id ? null : st.shownId,
         })),
       show: (shownId) => set({ shownId }),
+      markSeen: () =>
+        set((st) =>
+          st.sent.some((s) => s.fresh)
+            ? { sent: st.sent.map((s) => (s.fresh ? { ...s, fresh: false } : s)) }
+            : st,
+        ),
     }),
     {
       name: 'mapa.sources',

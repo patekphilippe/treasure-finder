@@ -7,6 +7,7 @@ import { MovedNotice, UpdatePrompt } from '@/features/offline';
 import { useLoadPoints } from '@/features/points';
 import { useLoadAreas } from '@/features/roughness';
 import { LegalIntroDialog } from '@/features/safety';
+import { useSourcesPolling } from '@/features/sources';
 import { useCommunitySignIn } from '@/features/history';
 import { useTrackRecorder } from '@/features/tracks';
 import { TutorialTour, useTutorialStore } from '@/features/tutorial';
@@ -42,6 +43,7 @@ export function App() {
   useLoadReliefs();
   useContextRecompute();
   useCommunitySignIn();
+  useSourcesPolling();
   const mode = useUiStore((s) => s.mode);
   const startTourIfNew = useTutorialStore((s) => s.startIfNew);
   const admin = useIsAdminRoute();
