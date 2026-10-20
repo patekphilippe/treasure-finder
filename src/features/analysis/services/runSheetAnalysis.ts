@@ -1,4 +1,5 @@
 import { getDb } from '@/shared/db';
+import { contextYears } from '@/shared/lib/history';
 import { isDisputed } from '@/shared/types/community';
 import type { Candidate } from '@/shared/types/domain';
 import { useAnalysisSettings } from '../store/useAnalysisSettings';
@@ -45,7 +46,7 @@ export async function runSheetAnalysis(
   const db = await getDb();
   const context = (await db.getAll('context'))
     .filter((c) => !(c.community && isDisputed(c.community)))
-    .map((c) => ({ geometry: c.geometry, kind: c.kind }));
+    .map((c) => ({ geometry: c.geometry, kind: c.kind, years: contextYears(c) ?? undefined }));
   const own = exclusionPrefix(sheetIdFromName(file.name));
   const forbidden = (await db.getAll('zones'))
     .filter((z) => z.kind === 'zakaz' && !z.id.startsWith(own))

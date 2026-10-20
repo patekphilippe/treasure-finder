@@ -136,7 +136,7 @@ export function toCandidates(
 ): Candidate[] {
   const context: ArchivalFeature[] = (opts.context ?? []).map((c) =>
     'geometry' in c
-      ? { geometry: toLocalGeometry(c.geometry, grid), kind: c.kind }
+      ? { geometry: toLocalGeometry(c.geometry, grid), kind: c.kind, years: c.years }
       : { geometry: toLocalGeometry(c, grid) },
   );
   // roads as sampled points (every ~5th cell) for fast distance checks

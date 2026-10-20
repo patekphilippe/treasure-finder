@@ -1,6 +1,7 @@
 import { candidatesRepo } from '@/shared/db';
 import { rescoreContext } from '@/shared/lib/detect';
 import { geometryTo2180, toEpsg2180 } from '@/shared/lib/geo';
+import { contextYears } from '@/shared/lib/history';
 import { isDisputed } from '@/shared/types/community';
 import type { Candidate, ContextFeature } from '@/shared/types/domain';
 import { useAnalysisSettings } from '../store/useAnalysisSettings';
@@ -14,7 +15,11 @@ export async function recomputeContext(features: readonly ContextFeature[]): Pro
   // objects the community disputes do not raise anything
   const local = features
     .filter((f) => !(f.community && isDisputed(f.community)))
-    .map((f) => ({ geometry: geometryTo2180(f.geometry), kind: f.kind }));
+    .map((f) => ({
+      geometry: geometryTo2180(f.geometry),
+      kind: f.kind,
+      years: contextYears(f) ?? undefined,
+    }));
   const weights = useAnalysisSettings.getState().weights;
   const changed: Candidate[] = [];
   for (const c of useAnalysisStore.getState().candidates) {
