@@ -4,16 +4,15 @@ import type {
   SubmissionStatus,
   ViewBbox,
 } from '@/shared/types/sources';
-import { sheetCorners, type SheetSeries } from '@/shared/lib/georef/sheetCorners';
 import { addSpending, spentThisMonth } from '../budget';
 import type { Env } from '../env';
 import type { AiClient, BatchOutcome, BatchRequest } from './aiClient';
 import { objectFromText, objectsFromMap } from './assemble';
-import { findPlaces, growBbox, nameVariants, uniquePlace, type Place } from './gazetteer';
-import { placeByNames, placeBySheet, type Placement } from './georef';
+import { findPlaces, growBbox } from './gazetteer';
+import { placeMap } from './placeMap';
 import { deleteExpired } from './cleanup';
 import { costUsd, estimateUsd, FIRST_MODEL, SECOND_MODEL, type PipelineModel } from './pricing';
-import { parseMapReading, parseTextReading, squareReading, type MapReading } from './readings';
+import { parseMapReading, parseTextReading, squareReading } from './readings';
 import { imageSize } from './imageSize';
 import { mapRequest, parseCustomId, textRequest } from './requests';
 
@@ -35,15 +34,8 @@ interface FileRow {
 }
 
 const POLAND: ViewBbox = { south: 49.0, west: 14.1, north: 54.9, east: 24.2 };
-const SHEET_SERIES: Record<string, SheetSeries> = {
-  messtischblatt: 'messtischblatt',
-  wig25: 'wig25',
-  wig100: 'wig100',
-};
 /** submissions sent in one cron run (keeps the run short and the batch small) */
 const PER_RUN = 40;
-/** most names looked up per map: each lookup waits a second (Nominatim policy) */
-const NAMES_PER_MAP = 20;
 
 /** Files sent to Anthropic for the current batch: their id and height ÷ width. */
 interface UploadedFile {
@@ -144,35 +136,6 @@ export async function submitNew(env: Env, ai: AiClient, now: number): Promise<nu
     ),
   );
   return sent.length;
-}
-
-/** Where the map is: sheet number and frame first, then place names near the sender's view. */
-async function placeMap(
-  env: Env,
-  reading: MapReading,
-  view: ViewBbox | null,
-  now: number,
-): Promise<Placement | null> {
-  const series = SHEET_SERIES[reading.series];
-  if (series && reading.sheetNumber && reading.frameCorners) {
-    const bySheet = placeBySheet(series, reading.sheetNumber, reading.frameCorners);
-    if (bySheet) return bySheet;
-  }
-  const sheet = series && reading.sheetNumber ? sheetCorners(series, reading.sheetNumber) : null;
-  const area = sheet ? growBbox(sheet, 5) : view ? growBbox(view, 15) : null;
-  if (!area) return null;
-  const pairs: { uv: { x: number; y: number }; at: Place }[] = [];
-  for (const name of reading.placeNames.slice(0, NAMES_PER_MAP)) {
-    for (const spelling of nameVariants(name.text)) {
-      const found = await findPlaces(env.DB, spelling, area, now);
-      if (!found.length) continue;
-      // a name that fits several places is no anchor
-      const place = uniquePlace(found);
-      if (place) pairs.push({ uv: name, at: place });
-      break;
-    }
-  }
-  return placeByNames(pairs);
 }
 
 async function finish(env: Env, row: Row, result: SubmissionResult, now: number) {
