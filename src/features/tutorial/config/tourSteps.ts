@@ -174,7 +174,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'own-maps',
     title: 'Własne mapy',
     content:
-      'Wczytaj własną dawną mapę: GeoTIFF albo skan z PZGiK, SLUB czy mapywig.org. Skan dopasujesz, przeciągając 4 narożniki na ortofotomapę; dla Messtischblatt i WIG wystarczy numer arkusza na start. Mapa zostaje w telefonie i działa bez internetu.',
+      'Wczytaj własną dawną mapę: GeoTIFF albo skan z PZGiK, SLUB czy mapywig.org. Skan dopasujesz, przeciągając 4 narożniki na ortofotomapę; dla Messtischblatt i WIG wystarczy numer arkusza na start. Wpisz rok mapy: obiekty z niej będą go pamiętać. Mapa zostaje w telefonie i działa bez internetu.',
     mode: 'field',
     sheet: 'history',
   },

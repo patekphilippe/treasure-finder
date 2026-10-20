@@ -277,6 +277,8 @@ export interface OwnMap {
   method: 'geotiff' | 'worldfile' | 'corners';
   visible: boolean;
   opacity: number;
+  /** the year the map shows, when known: objects seen on it get it */
+  year?: number;
 }
 
 /** store: rasters — derived analysis rasters cached between reloads */

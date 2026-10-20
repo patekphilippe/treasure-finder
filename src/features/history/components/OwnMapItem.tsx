@@ -2,10 +2,12 @@ import IconButton from '@mui/material/IconButton';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import type { OwnMap } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
 import { METHOD_LABEL } from '../config/ownMaps';
+import { parseMapYear } from '../utils/parseMapYear';
 
 interface OwnMapItemProps {
   map: OwnMap;
@@ -41,6 +43,25 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
         <IconButton size="small" aria-label="Usuń mapę" color="error" onClick={onDelete}>
           <Icon name="trash" size={18} />
         </IconButton>
+      </Stack>
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 6, pr: 1 }}>
+        <TextField
+          key={map.year ?? ''}
+          size="small"
+          label="Rok mapy"
+          placeholder="np. 1936"
+          defaultValue={map.year ?? ''}
+          slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 4 } }}
+          sx={{ width: 120 }}
+          onBlur={(e) => {
+            const year = parseMapYear(e.target.value);
+            if (year === null) e.target.value = map.year ? String(map.year) : '';
+            else if (year !== map.year) onChange({ year });
+          }}
+        />
+        <Typography variant="caption" color="text.secondary">
+          Obiekty oznaczone na tej mapie dostaną ten rok.
+        </Typography>
       </Stack>
       {map.visible && (
         <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 6, pr: 1 }}>

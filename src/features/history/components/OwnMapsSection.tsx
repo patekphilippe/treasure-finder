@@ -71,10 +71,10 @@ export function OwnMapsSection() {
     const image = files.find((f) => /\.(jpe?g|png|webp)$/i.test(f.name));
     if (!image) return run(files);
     setBusy(true);
-    let corners: ImportOptions['corners'];
+    let placed: Partial<ImportOptions> = {};
     try {
       const p = await placeOwnMap(image, useMapViewStore.getState().bounds, turnstileToken);
-      corners = p.corners;
+      placed = { corners: p.corners, ...(p.year && { year: p.year }) };
       showToast(
         p.method === 'arkusz'
           ? `Umieszczono po numerze arkusza ${p.sheetNumber ?? ''}. Sprawdź narożniki.`
@@ -87,7 +87,7 @@ export function OwnMapsSection() {
     } finally {
       setBusy(false);
     }
-    await run(files, corners ? { corners } : {});
+    await run(files, placed);
   };
 
   const pick = (files: File[]) => {

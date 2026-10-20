@@ -9,6 +9,7 @@ import {
   type Homography,
   type SheetSeries,
 } from '@/shared/lib/georef';
+import { yearsFromText } from '@/shared/lib/history';
 import type { Bounds } from '@/shared/store/useMapViewStore';
 import type { OwnMap } from '@/shared/types/domain';
 import {
@@ -32,6 +33,8 @@ export interface ImportOptions {
   corners?: { lat: number; lng: number }[];
   /** …or in the middle of the current view */
   view?: Bounds | null;
+  /** the year the map shows (read by the backend); else a single year in the file name */
+  year?: number;
 }
 
 const corners = (w: number, h: number) => [
@@ -153,12 +156,16 @@ export async function importOwnMap(
   const image = files.find((f) => IMAGE_EXT.test(f.name));
   if (!image) throw new Error('Wybierz plik mapy: GeoTIFF, JPG, PNG albo WebP');
   const world = files.find((f) => WORLD_EXT.test(f.name));
+  const name = image.name.replace(/\.[^.]+$/, '');
+  const named = yearsFromText(name);
+  const year = opts.year ?? (named && named.from === named.to ? named.from : undefined);
   const base = {
     id: createId(),
-    name: image.name.replace(/\.[^.]+$/, ''),
+    name,
     created: Date.now(),
     visible: true,
     opacity: 0.8,
+    ...(year && { year }),
   };
 
   if (/\.tiff?$/i.test(image.name) && !world) {

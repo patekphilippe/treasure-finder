@@ -44,7 +44,8 @@ export function legacySightings(source: string, known: readonly KnownMap[]): Sig
   }
   // "Mapa (własna mapa" is inside "Stara Mapa (własna mapa": only the longer name counts
   const named = found.filter(
-    (f) => !found.some((g) => g !== f && g.at <= f.at && g.end >= f.end && g.end - g.at > f.end - f.at),
+    (f) =>
+      !found.some((g) => g !== f && g.at <= f.at && g.end >= f.end && g.end - g.at > f.end - f.at),
   );
   if (named.length > 0) return named.sort((a, b) => a.at - b.at).map((f) => f.sighting);
   const years = yearsFromText(source);

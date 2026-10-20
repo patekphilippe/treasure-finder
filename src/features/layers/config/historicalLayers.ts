@@ -1,3 +1,5 @@
+import type { YearSpan } from '@/shared/types/domain';
+
 /**
  * Historical map layers (docs/MAPY_HISTORYCZNE.md). WMS (in EPSG:3857, or EPSG:2180 where the
  * service places that one correctly), online only:
@@ -8,6 +10,8 @@ export interface HistoricalLayer {
   label: string;
   /** years shown under the name */
   years: string;
+  /** the years the layer's maps come from (an object seen on it gets them) */
+  yearSpan?: YearSpan;
   coverage: string;
   url: string;
   layers: string;
@@ -34,10 +38,11 @@ const UMWD_ATTRIBUTION =
 const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
 
 /** Lower Silesian geoportal, ArcGIS WMS: layer "1" is the image (2 and 3 are footprints). */
-const umwd = (id: string, label: string, years: string): HistoricalLayer => ({
+const umwd = (id: string, label: string, from: number, to: number): HistoricalLayer => ({
   id,
   label,
-  years,
+  years: `${from}–${to}`,
+  yearSpan: { from, to },
   coverage: 'Dolny Śląsk',
   url: `https://geoportal.dolnyslask.pl/gpservices/${id}/MapServer/WMSServer`,
   layers: '1',
@@ -55,8 +60,8 @@ export const ORTHO_ARCHIVE_ID = 'orto-archiwalna';
 
 // IH PAN „Mapy z przeszłością” (WIG, Messtischblatt, mapy rosyjskie): czeka na zgodę, docs/MAPY_HISTORYCZNE.md
 export const HISTORICAL_LAYERS: readonly HistoricalLayer[] = [
-  umwd('UMWD_Messtischblat_starsze', 'Messtischblatt Dolny Śląsk, starsze wydania', '1883–1942'),
-  umwd('UMWD_Messtischblat_nowsze', 'Messtischblatt Dolny Śląsk, nowsze wydania', '1905–1944'),
+  umwd('UMWD_Messtischblat_starsze', 'Messtischblatt Dolny Śląsk, starsze wydania', 1883, 1942),
+  umwd('UMWD_Messtischblat_nowsze', 'Messtischblatt Dolny Śląsk, nowsze wydania', 1905, 1944),
   {
     id: ORTHO_ARCHIVE_ID,
     label: 'Ortofotomapa archiwalna',

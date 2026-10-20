@@ -1,12 +1,10 @@
-import { historicalWmsParams } from '@/features/layers';
+import { historicalWmsParams, type HistoricalLayer } from '@/features/layers';
 import { crsTransform, toEpsg2180 } from '@/shared/lib/geo';
 import { imageToTileAffine, invertHomography } from '@/shared/lib/georef';
 import type { ImageGrid } from '@/shared/lib/history';
 import type { Bounds } from '@/shared/store/useMapViewStore';
-import type { OwnMap } from '@/shared/types/domain';
+import type { MapRef, OwnMap, YearSpan } from '@/shared/types/domain';
 import { AI_MAX_RES_M, AI_MAX_SIDE } from '../config/aiReading';
-
-type WmsLayer = Parameters<typeof historicalWmsParams>[0];
 
 /** a busy ArcGIS server answers 400 and then serves the same image */
 const RETRY_DELAYS_MS = [1000, 2500, 5000];
@@ -21,9 +19,10 @@ async function fetchWithRetry(url: string): Promise<Blob> {
   }
 }
 
-export type ViewSource =
-  | { kind: 'own'; map: OwnMap; label: string }
-  | { kind: 'wms'; layer: WmsLayer; year: number; label: string };
+/** a historical map to read: what it is called, which map it is and the years it shows */
+export type ViewSource = { label: string; ref: MapRef; years?: YearSpan } & (
+  { kind: 'own'; map: OwnMap } | { kind: 'wms'; layer: HistoricalLayer; year: number }
+);
 
 /**
  * The visible part of a historical map as one image on the EPSG:2180 grid: an own map is warped

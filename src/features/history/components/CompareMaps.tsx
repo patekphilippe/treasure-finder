@@ -5,6 +5,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { HISTORICAL_LAYERS, ORTHO_ARCHIVE_ID } from '@/features/layers';
+import { sameMap } from '@/shared/lib/history';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { Icon, useToastStore } from '@/shared/ui';
 import type { AiModelId } from '../config/aiReading';
@@ -12,6 +13,7 @@ import type { ViewSource } from '../services/captureView';
 import { compareMaps } from '../services/compareMaps';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { useProposalsStore } from '../store/useProposalsStore';
+import { toViewSource } from '../utils/toViewSource';
 
 interface CompareMapsProps {
   source: ViewSource;
@@ -40,14 +42,11 @@ export function CompareMaps({ source, model, member, topographic }: CompareMapsP
 
   // an orthophoto has no map symbols to compare
   const options: ViewSource[] = [
-    ...maps.map((m): ViewSource => ({ kind: 'own', map: m, label: `${m.name} (własna mapa)` })),
-    ...HISTORICAL_LAYERS.filter((l) => l.id !== ORTHO_ARCHIVE_ID).map((l): ViewSource => ({
-      kind: 'wms',
-      layer: l,
-      year: 0,
-      label: `${l.label} (${l.years})`,
-    })),
-  ].filter((o) => o.label !== source.label);
+    ...maps.map((own) => toViewSource({ own })),
+    ...HISTORICAL_LAYERS.filter((l) => l.id !== ORTHO_ARCHIVE_ID).map((layer) =>
+      toViewSource({ layer, year: 0 }),
+    ),
+  ].filter((o) => !sameMap(o.ref, source.ref));
   const chosen = options.find((o) => o.label === other) ?? null;
 
   const run = async () => {

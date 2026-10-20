@@ -20,7 +20,12 @@ const mill: ContextFeature = {
       how: 'ai',
     },
     {
-      map: { kind: 'wms', id: 'orto-archiwalna', label: 'Ortofotomapa archiwalna 2004', time: 2004 },
+      map: {
+        kind: 'wms',
+        id: 'orto-archiwalna',
+        label: 'Ortofotomapa archiwalna 2004',
+        time: 2004,
+      },
       years: { from: 2004, to: 2004 },
       how: 'reczne',
       confidence: 0.8,
@@ -30,7 +35,12 @@ const mill: ContextFeature = {
 
 describe('archival objects in a backup', () => {
   it('version 2 objects stay as they are', () => {
-    const old = { id: 'c2', kind: 'karczma', geometry: mill.geometry, source: 'zaznaczone ręcznie' };
+    const old = {
+      id: 'c2',
+      kind: 'karczma',
+      geometry: mill.geometry,
+      source: 'zaznaczone ręcznie',
+    };
     const r = parseBackup({ wersja: 2, points: [], context: [old, { kind: 'osada' }] });
     expect(r.context).toEqual([old]);
   });

@@ -24,8 +24,16 @@ const MAPA: MapRef = { kind: 'own', id: 'm1', label: 'Mapa (własna mapa)' };
 const STARA: MapRef = { kind: 'own', id: 'm2', label: 'Stara Mapa (własna mapa, 1936)' };
 
 const known: KnownMap[] = [
-  { ref: OLDER, text: 'Messtischblatt Dolny Śląsk, starsze wydania', years: { from: 1883, to: 1942 } },
-  { ref: NEWER, text: 'Messtischblatt Dolny Śląsk, nowsze wydania', years: { from: 1905, to: 1944 } },
+  {
+    ref: OLDER,
+    text: 'Messtischblatt Dolny Śląsk, starsze wydania',
+    years: { from: 1883, to: 1942 },
+  },
+  {
+    ref: NEWER,
+    text: 'Messtischblatt Dolny Śląsk, nowsze wydania',
+    years: { from: 1905, to: 1944 },
+  },
   { ref: ORTHO, text: 'Ortofotomapa archiwalna', timed: true },
   { ref: MAPA, text: 'Mapa (własna mapa' },
   { ref: STARA, text: 'Stara Mapa (własna mapa', years: { from: 1936, to: 1936 } },
@@ -145,7 +153,9 @@ describe('maps of an older object, read from its description', () => {
     expect(legacySightings('AI ze źródła: Mühle (±150 m)', known)).toEqual([
       { map: { kind: 'none', label: 'AI ze źródła: Mühle (±150 m)' }, how: 'zrodlo' },
     ]);
-    expect(legacySightings('auto (AI): Messtischblatt Ostpreußen (1890–1910), młyn', known)).toEqual([
+    expect(
+      legacySightings('auto (AI): Messtischblatt Ostpreußen (1890–1910), młyn', known),
+    ).toEqual([
       {
         map: { kind: 'none', label: 'auto (AI): Messtischblatt Ostpreußen (1890–1910), młyn' },
         how: 'ai',

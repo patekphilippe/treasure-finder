@@ -9,7 +9,6 @@ import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
-import { findHistoricalLayer, useLayersStore } from '@/features/layers';
 import { PickLocationBar } from '@/features/points';
 import { bottomSheetOffset } from '@/shared/lib/bottomSheetOffset';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
@@ -22,8 +21,8 @@ import {
   MANUAL_SOURCE,
   type ContextKind,
 } from '../config/contextKinds';
+import { useViewSource } from '../hooks/useViewSource';
 import { useContextStore } from '../store/useContextStore';
-import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { createContextPoint } from '../utils/createContextPoint';
 import { representativePoint } from '../utils/representativePoint';
 import { AiReadingSection } from './AiReadingSection';
@@ -37,19 +36,13 @@ interface HistorySheetProps {
 /** Own historical maps and objects from archival maps: add, show, mark at the crosshair. */
 export function HistorySheet({ onClose }: HistorySheetProps) {
   const { features, visible, setVisible, add } = useContextStore();
-  const historical = findHistoricalLayer(useLayersStore((s) => s.historicalId));
   const picking = usePointDraftStore((s) => s.picking);
   const startPicking = usePointDraftStore((s) => s.startPicking);
   const showContext = useUiStore((s) => s.showContext);
   const flyTo = useMapViewStore((s) => s.flyTo);
   const showToast = useToastStore((s) => s.show);
   const [kind, setKind] = useState<ContextKind | null>(null);
-  const ownMap = useOwnMapsStore((s) => s.maps.find((m) => m.visible));
-  const source = ownMap
-    ? `${ownMap.name} (własna mapa)`
-    : historical
-      ? `${historical.label} (${historical.years})`
-      : MANUAL_SOURCE;
+  const source = useViewSource()?.label ?? MANUAL_SOURCE;
 
   // "Gotowe" on the crosshair bar sets a location: save it with the chosen kind
   useEffect(
