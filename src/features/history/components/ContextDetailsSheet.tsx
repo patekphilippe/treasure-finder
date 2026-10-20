@@ -38,29 +38,30 @@ export function ContextDetailsSheet({ onClose }: ContextDetailsSheetProps) {
   return (
     <Sheet title={kind.label} onClose={onClose}>
       <Stack spacing={2}>
-        <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
-          <Typography variant="body2" sx={{ flex: 1 }}>
-            {feature.label || feature.source || 'brak opisu'}
-          </Typography>
-          {at && (
-            <IconButton
-              aria-label="Pokaż na mapie"
-              onClick={() => flyTo({ ...at, zoom: 17, offsetY: bottomSheetOffset() })}
-            >
-              <Icon name="search" size={22} />
-            </IconButton>
-          )}
-          {/* objects of others belong to the community: dispute them instead of deleting */}
-          {(!feature.community || feature.community.mineAuthor) && (
-            <IconButton aria-label="Usuń obiekt" color="error" onClick={() => setConfirm(true)}>
-              <Icon name="trash-alt" size={22} />
-            </IconButton>
-          )}
-        </Stack>
+        {/* the maps it was seen on are listed below; an older object shows its description */}
+        {(feature.label || !feature.seen) && (
+          <Typography variant="body2">{feature.label || feature.source || 'brak opisu'}</Typography>
+        )}
         <Stack spacing={1}>
-          <Typography variant="overline" color="text.secondary">
-            Widziany na mapach ({sightings.length})
-          </Typography>
+          <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
+            <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>
+              Widziany na mapach ({sightings.length})
+            </Typography>
+            {at && (
+              <IconButton
+                aria-label="Pokaż na mapie"
+                onClick={() => flyTo({ ...at, zoom: 17, offsetY: bottomSheetOffset() })}
+              >
+                <Icon name="search" size={22} />
+              </IconButton>
+            )}
+            {/* objects of others belong to the community: dispute them instead of deleting */}
+            {(!feature.community || feature.community.mineAuthor) && (
+              <IconButton aria-label="Usuń obiekt" color="error" onClick={() => setConfirm(true)}>
+                <Icon name="trash-alt" size={22} />
+              </IconButton>
+            )}
+          </Stack>
           {sightings.map((s, i) => (
             <SightingRow key={i} sighting={s} at={at} />
           ))}

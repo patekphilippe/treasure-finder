@@ -59,5 +59,13 @@ describe('an object in the list', () => {
       'Młyn',
     );
     expect(contextLine(point('c', {}))).toBe('zaznaczone ręcznie');
+    const byHand = point('d', {
+      seen: [
+        { map: OLDER, years: { from: 1883, to: 1942 }, how: 'reczne' },
+        { map: ORTHO_2004, years: { from: 2004, to: 2004 }, how: 'reczne' },
+      ],
+    });
+    expect(contextLine({ ...byHand, seen: byHand.seen!.slice(0, 1) })).toBe(OLDER.label);
+    expect(contextLine(byHand)).toBe('2 mapy · 1883–2004');
   });
 });
