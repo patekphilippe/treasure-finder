@@ -42,7 +42,11 @@ describe('archival context GeoJSON', () => {
     expect(isContextGeoJSON(json)).toBe(true);
     const { context, skipped } = importContextGeoJSON(json, 'mapa.geojson');
     expect(context.map((c) => c.kind)).toEqual(['osada', 'droga']);
-    expect(context[0]).toMatchObject({ source: 'mapa.geojson', geometry: pt });
+    expect(context[0]).toMatchObject({
+      source: 'mapa.geojson',
+      geometry: pt,
+      seen: [{ map: { kind: 'none', label: 'mapa.geojson' }, how: 'import' }],
+    });
     expect(skipped).toBe(1);
   });
 

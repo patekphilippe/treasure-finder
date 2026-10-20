@@ -2,6 +2,7 @@ import { compareSites } from '@/shared/lib/history';
 import type { Bounds } from '@/shared/store/useMapViewStore';
 import { PROPOSAL_OPTIONS, type AiModelId } from '../config/aiReading';
 import { siteToProposal } from '../utils/siteToProposal';
+import { viewSighting } from '../utils/viewSighting';
 import type { ViewSource } from './captureView';
 import type { Proposal } from './findLostBuildings';
 import type { AiUsage } from './readMapWithAi';
@@ -28,15 +29,19 @@ export async function compareMaps(
     onStep(`${b.label}: ${s}`),
   );
   const origin = `auto (AI, porównanie): ${a.label} i ${b.label}`;
-  const proposals = compareSites(first.sites, second.sites, SAME_PLACE_M).map(({ site, seen }) =>
-    siteToProposal(
+  const onA = viewSighting(a, 'ai');
+  const onB = viewSighting(b, 'ai');
+  const proposals = compareSites(first.sites, second.sites, SAME_PLACE_M).map(({ site, seen }) => ({
+    ...siteToProposal(
       {
         ...site,
         title: `${site.title} (${seen === 'both' ? 'na obu mapach' : `tylko: ${(seen === 'a' ? a : b).label}`})`,
       },
       origin,
+      seen === 'both' ? [onA, onB] : seen === 'a' ? [onA] : [onB],
     ),
-  );
+    label: site.title,
+  }));
   return {
     proposals,
     usage: {

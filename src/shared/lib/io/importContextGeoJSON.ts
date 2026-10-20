@@ -55,6 +55,7 @@ export function importContextGeoJSON(
       kind,
       geometry,
       source,
+      seen: [{ map: { kind: 'none', label: source }, how: 'import' }],
     });
   }
   if (context.length === 0 && metric > 0) throw new ImportError(CRS_HINT);

@@ -25,6 +25,7 @@ import { useViewSource } from '../hooks/useViewSource';
 import { useContextStore } from '../store/useContextStore';
 import { createContextPoint } from '../utils/createContextPoint';
 import { representativePoint } from '../utils/representativePoint';
+import { viewSighting } from '../utils/viewSighting';
 import { AiReadingSection } from './AiReadingSection';
 import { CommunitySection } from './CommunitySection';
 import { OwnMapsSection } from './OwnMapsSection';
@@ -42,7 +43,7 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
   const flyTo = useMapViewStore((s) => s.flyTo);
   const showToast = useToastStore((s) => s.show);
   const [kind, setKind] = useState<ContextKind | null>(null);
-  const source = useViewSource()?.label ?? MANUAL_SOURCE;
+  const view = useViewSource();
 
   // "Gotowe" on the crosshair bar sets a location: save it with the chosen kind
   useEffect(
@@ -50,14 +51,19 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
       usePointDraftStore.subscribe((s, prev) => {
         if (!kind || !prev.picking || s.picking || s.source !== 'crosshair' || !s.location) return;
         const { lat, lng } = s.location;
-        void add([createContextPoint(kind, lat, lng, source)]).then(() => {
+        const seen = viewSighting(
+          view ?? { ref: { kind: 'none', label: MANUAL_SOURCE } },
+          'reczne',
+        );
+        const point = createContextPoint(kind, lat, lng, view?.label ?? MANUAL_SOURCE, [seen]);
+        void add([point]).then(() => {
           showToast(`Dodano: ${CONTEXT_KINDS[kind].label.toLowerCase()}`);
           setVisible(true);
         });
         setKind(null);
         usePointDraftStore.getState().reset();
       }),
-    [kind, source, add, setVisible, showToast],
+    [kind, view, add, setVisible, showToast],
   );
 
   // closing the sheet mid-way must not leave the crosshair on the map
@@ -132,7 +138,7 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
               Wskaż miejsce celownikiem
             </Button>
             <Typography variant="caption" color="text.secondary">
-              Źródło: {source}
+              Źródło: {view?.label ?? MANUAL_SOURCE}
             </Typography>
           </Stack>
 

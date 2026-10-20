@@ -33,6 +33,7 @@ export function mergeChunkProposals(list: Proposal[], linkM: number, dupM: numbe
       ...first,
       kind: n >= 3 ? 'osada' : 'inne',
       title,
+      label: title,
       lat,
       lng,
       buildings: n,

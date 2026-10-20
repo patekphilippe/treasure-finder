@@ -11,5 +11,7 @@ export function proposalToContext(p: Proposal): ContextFeature {
       ? { type: 'LineString', coordinates: p.line.map(([lat, lng]) => [lng, lat]) }
       : { type: 'Point', coordinates: [p.lng, p.lat] },
     source: p.source,
+    label: p.label,
+    seen: p.seen,
   };
 }

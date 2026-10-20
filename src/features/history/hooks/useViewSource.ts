@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { findHistoricalLayer, useLayersStore } from '@/features/layers';
 import type { ViewSource } from '../services/captureView';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
@@ -8,7 +9,8 @@ export function useViewSource(): ViewSource | null {
   const own = useOwnMapsStore((s) => s.maps.find((m) => m.visible));
   const layer = findHistoricalLayer(useLayersStore((s) => s.historicalId));
   const year = useLayersStore((s) => s.historicalYear);
-  if (own) return toViewSource({ own });
-  if (layer) return toViewSource({ layer, year });
-  return null;
+  return useMemo(
+    () => (own ? toViewSource({ own }) : layer ? toViewSource({ layer, year }) : null),
+    [own, layer, year],
+  );
 }

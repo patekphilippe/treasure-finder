@@ -11,11 +11,13 @@ const at = (e: number, n: number, p: Partial<Proposal>): Proposal => {
     id: `p${next++}`,
     kind: 'inne',
     title: 'Młyn',
+    label: p.title ?? 'Młyn',
     lat,
     lng,
     buildings: 0,
     lost: true,
     source: `auto (AI): Mapa, ${(p.title ?? 'Młyn').toLowerCase()}`,
+    seen: [{ map: { kind: 'own', id: 'm1', label: 'Mapa (własna mapa)' }, how: 'ai' }],
     ...p,
   };
 };
@@ -73,5 +75,6 @@ describe('reading a whole map window by window', () => {
     const village = merged[2]!;
     expect(village.kind).toBe('osada');
     expect(village.source).toBe('auto (AI): Mapa, zaginiona wieś (6 budynków)');
+    expect(village.label).toBe('Zaginiona wieś (6 budynków)');
   });
 });

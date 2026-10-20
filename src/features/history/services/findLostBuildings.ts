@@ -1,8 +1,9 @@
 import type { ReadProfileId } from '@/shared/lib/history';
 import type { Bounds } from '@/shared/store/useMapViewStore';
-import type { ContextKind } from '@/shared/types/domain';
+import type { ContextKind, Sighting } from '@/shared/types/domain';
 import type { AiModelId } from '../config/aiReading';
 import { siteToProposal } from '../utils/siteToProposal';
+import { viewSighting } from '../utils/viewSighting';
 import type { ViewSource } from './captureView';
 import type { AiUsage } from './readMapWithAi';
 import { readViewSites } from './readViewSites';
@@ -19,6 +20,10 @@ export interface Proposal {
   line?: [number, number][];
   /** what the context object's `source` will say */
   source: string;
+  /** what the map says, without notes on the reading, e.g. "Młyn: Wassermühle" */
+  label: string;
+  /** the maps it was read on */
+  seen: Sighting[];
 }
 
 /**
@@ -44,7 +49,9 @@ export async function findLostBuildings(
   );
   const what = profile === 'wojskowa' ? 'auto (AI, mapa wojskowa)' : 'auto (AI)';
   return {
-    proposals: sites.map((p) => siteToProposal(p, `${what}: ${source.label}`)),
+    proposals: sites.map((p) =>
+      siteToProposal(p, `${what}: ${source.label}`, [viewSighting(source, 'ai')]),
+    ),
     usage,
     read,
   };

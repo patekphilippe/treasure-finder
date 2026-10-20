@@ -8,18 +8,31 @@ describe('AI source results', () => {
   afterEach(() => vi.restoreAllMocks());
 
   it('turns a proposed object into an archival context point (lng, lat)', () => {
-    const f = toContextFeature({
-      kind: 'mlyn',
-      label: 'Młyn: „Mühle”',
-      lat: 50.77,
-      lng: 15.8,
-      radiusM: 150,
-      confidence: 0.8,
-      reasons: [],
-    });
+    const f = toContextFeature(
+      {
+        kind: 'mlyn',
+        label: 'Młyn: „Mühle”',
+        lat: 50.77,
+        lng: 15.8,
+        radiusM: 150,
+        confidence: 0.8,
+        reasons: [],
+      },
+      'Kronika parafii',
+      7,
+    );
     expect(f.kind).toBe('mlyn');
     expect(f.geometry).toEqual({ type: 'Point', coordinates: [15.8, 50.77] });
     expect(f.source).toBe('AI ze źródła: Młyn: „Mühle” (±150 m)');
+    expect(f.label).toBe('Młyn: „Mühle”');
+    expect(f.seen).toEqual([
+      {
+        map: { kind: 'none', label: 'Źródło: Kronika parafii' },
+        at: 7,
+        how: 'zrodlo',
+        confidence: 0.8,
+      },
+    ]);
   });
 
   it('shows the server message on errors and a Polish one when offline', async () => {

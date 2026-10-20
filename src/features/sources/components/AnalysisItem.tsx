@@ -28,7 +28,7 @@ export function AnalysisItem({ item }: AnalysisItemProps) {
   const open = objects.map((_, i) => i).filter((i) => !item.accepted.includes(i));
 
   const accept = async (indices: number[]) => {
-    await addContext(indices.map((i) => toContextFeature(objects[i]!)));
+    await addContext(indices.map((i) => toContextFeature(objects[i]!, item.label)));
     update(item.id, { accepted: [...item.accepted, ...indices] });
     showToast(
       indices.length === 1
