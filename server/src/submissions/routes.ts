@@ -11,7 +11,7 @@ import { fail, json } from '../http';
 import { consumeDaily } from './dailyLimit';
 import { PUBLIC_DAILY_LIMIT } from './limits';
 import { parseSubmission } from './parseSubmission';
-import { humanCheck } from '../community/humanCheck';
+import { memberFrom, SIGN_IN_FIRST } from '../community/auth';
 
 type Cors = Record<string, string>;
 
@@ -25,31 +25,24 @@ interface SubmissionRow {
 }
 
 export async function createSubmission(request: Request, env: Env, cors: Cors, now: number) {
-  // the owner has not finished the setup (docs/BACKEND.md): say so instead of a failed check
-  if (!env.TURNSTILE_SECRET) return fail(503, 'Wysyłanie źródeł jest chwilowo niedostępne', cors);
+  const member = await memberFrom(request, env, now);
+  if (!member) return fail(401, SIGN_IN_FIRST, cors);
   const form = await request.formData().catch(() => null);
   if (!form) return fail(400, 'Nieprawidłowe zgłoszenie', cors);
   const parsed = parseSubmission(form);
   if ('error' in parsed) return fail(400, parsed.error, cors);
 
-  const { ip, subject } = await ipSubject(request, now);
-  const check = await humanCheck(request, env, parsed.turnstileToken, ip, now);
-  if (!check)
-    return parsed.turnstileToken
-      ? fail(403, 'Weryfikacja nie powiodła się, spróbuj jeszcze raz', cors)
-      : fail(400, 'Potwierdź, że nie jesteś robotem', cors);
-
-  // a member is counted by their code, others by device and IP
-  const who = check.member ? `member:${check.member.id}` : null;
+  // the IP only as a hash, kept with the submission (docs/BACKEND.md, "Dane osobowe")
+  const { subject } = await ipSubject(request, now);
   const allowed =
     parsed.mode === 'private'
       ? await consumeDaily(
           env.DB,
-          who ? [`sub:${who}`] : [`device:${parsed.deviceId}`, subject],
+          [`sub:member:${member.id}`],
           Number(env.PRIVATE_DAILY_LIMIT),
           now,
         )
-      : await consumeDaily(env.DB, [`public:${who ?? subject}`], PUBLIC_DAILY_LIMIT, now);
+      : await consumeDaily(env.DB, [`public:member:${member.id}`], PUBLIC_DAILY_LIMIT, now);
   if (!allowed) return fail(429, 'Dzienny limit analiz został wykorzystany, spróbuj jutro', cors);
 
   const id = randomToken(12);

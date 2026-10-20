@@ -16,7 +16,7 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const sourcesApi = {
-  // a signed-in community member needs no Turnstile check
+  // only signed-in members may send (the owner's key pays for the analysis)
   send: async (form: FormData) =>
     call<SubmissionCreated>('/api/submissions', {
       method: 'POST',

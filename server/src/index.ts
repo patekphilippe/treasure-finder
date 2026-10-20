@@ -30,7 +30,8 @@ export default {
           // analysis runs only with a working key and money left this month
           aiAvailable: aiKey === 'ok' && spent < budget,
           aiKey,
-          sourcesAvailable: Boolean(env.TURNSTILE_SECRET),
+          // the analyses need a signed-in member (docs/BACKEND.md, "Logowanie")
+          signInAvailable: Boolean(env.AUTH0_DOMAIN && env.AUTH0_AUDIENCE),
           reliefStored: Boolean(env.TILES),
         },
         200,

@@ -16,7 +16,6 @@ export interface Env {
   MONTHLY_BUDGET_USD: string;
   PRIVATE_DAILY_LIMIT: string;
   ANTHROPIC_API_KEY: string;
-  TURNSTILE_SECRET: string;
   /** long random secret for the review panel from scripts (wrangler secret put ADMIN_TOKEN) */
   ADMIN_TOKEN: string;
   /** Auth0 tenant, e.g. `treasure-finder.eu.auth0.com`; empty: nobody can sign in (docs/BACKEND.md) */

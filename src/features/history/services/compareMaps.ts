@@ -22,12 +22,8 @@ export async function compareMaps(
   model: AiModelId,
   onStep: (step: string) => void,
 ): Promise<{ proposals: Proposal[]; usage: AiUsage; read: number }> {
-  const first = await readViewSites(bounds, a, model, 'topo', null, (s) =>
-    onStep(`${a.label}: ${s}`),
-  );
-  const second = await readViewSites(bounds, b, model, 'topo', null, (s) =>
-    onStep(`${b.label}: ${s}`),
-  );
+  const first = await readViewSites(bounds, a, model, 'topo', (s) => onStep(`${a.label}: ${s}`));
+  const second = await readViewSites(bounds, b, model, 'topo', (s) => onStep(`${b.label}: ${s}`));
   const origin = `auto (AI, porównanie): ${a.label} i ${b.label}`;
   const onA = viewSighting(a, 'ai');
   const onB = viewSighting(b, 'ai');

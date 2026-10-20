@@ -7,18 +7,15 @@ import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { BACKEND_ENABLED } from '@/shared/config/backend';
 import { MAP_CRS } from '@/shared/lib/geo';
 import type { SheetSeries } from '@/shared/lib/georef';
 import { useMembership } from '@/shared/store/useMembership';
-import { TurnstileWidget } from '@/shared/ui';
 import type { ImportOptions } from '../services/importOwnMap';
 
-/** "auto": ask the backend to place the scan by its names (one AI reading) */
-export type DialogChoice = Pick<ImportOptions, 'epsg' | 'sheet'> & {
-  auto?: { turnstileToken: string | null };
-};
+/** "auto": ask the backend to place the scan by its names (one AI reading, signed-in members) */
+export type DialogChoice = Pick<ImportOptions, 'epsg' | 'sheet'> & { auto?: boolean };
 
 interface OwnMapImportDialogProps {
   /** crs: the file is georeferenced but its system is unknown; scan: place a plain image */
@@ -46,12 +43,11 @@ export function OwnMapImportDialog({
   onSubmit,
   onClose,
 }: OwnMapImportDialogProps) {
-  const auto = canAuto && BACKEND_ENABLED;
   const member = useMembership((s) => s.email !== null);
+  // the AI placement is an analysis on the server: for signed-in members
+  const auto = canAuto && BACKEND_ENABLED && member;
   const [epsg, setEpsg] = useState(2180);
   const [series, setSeries] = useState<SheetSeries | 'none' | 'auto'>(auto ? 'auto' : 'none');
-  const [token, setToken] = useState<string | null>(null);
-  const onToken = useCallback((t: string | null) => setToken(t), []);
   const [number, setNumber] = useState('');
   const example = SERIES.find((s) => s.id === series)?.example;
 
@@ -105,15 +101,18 @@ export function OwnMapImportDialog({
                 ))}
               </TextField>
               {series === 'auto' && (
-                <>
-                  <Typography variant="caption" color="text.secondary">
-                    Claude odczyta numer arkusza, ramkę i nazwy miejscowości, a serwer znajdzie je
-                    na dzisiejszej mapie. Idzie tylko pomniejszony obraz i obecny widok jako
-                    podpowiedź; to jeden odczyt z dziennego limitu. Najlepiej działa, gdy mapa w tle
-                    pokazuje okolicę skanu.
-                  </Typography>
-                  {!member && <TurnstileWidget onToken={onToken} resetKey={0} />}
-                </>
+                <Typography variant="caption" color="text.secondary">
+                  Claude odczyta numer arkusza, ramkę i nazwy miejscowości, a serwer znajdzie je na
+                  dzisiejszej mapie. Idzie tylko pomniejszony obraz i obecny widok jako podpowiedź;
+                  to jeden odczyt z dziennego limitu. Najlepiej działa, gdy mapa w tle pokazuje
+                  okolicę skanu.
+                </Typography>
+              )}
+              {canAuto && BACKEND_ENABLED && !member && (
+                <Typography variant="caption" color="text.secondary">
+                  Automatyczne umieszczanie po nazwach (AI) jest dla zalogowanych osób z
+                  zaproszeniem.
+                </Typography>
               )}
               {series !== 'none' && series !== 'auto' && (
                 <TextField
@@ -138,16 +137,13 @@ export function OwnMapImportDialog({
         </Button>
         <Button
           variant="contained"
-          disabled={
-            mode === 'scan' &&
-            (series === 'auto' ? !member && !token : series !== 'none' && !number.trim())
-          }
+          disabled={mode === 'scan' && series !== 'auto' && series !== 'none' && !number.trim()}
           onClick={() =>
             onSubmit(
               mode === 'crs'
                 ? { epsg }
                 : series === 'auto'
-                  ? { auto: { turnstileToken: member ? null : token } }
+                  ? { auto: true }
                   : { sheet: series === 'none' ? undefined : { series, number } },
             )
           }

@@ -11,7 +11,7 @@ const SESSION_GONE = new Set([
 
 /**
  * `Authorization` of the signed-in member (Auth0 access token, renewed with the refresh token), or
- * nothing for everyone else, who pass Turnstile instead. A session Auth0 no longer knows signs out.
+ * nothing for everyone else. A session Auth0 no longer knows signs out.
  */
 export async function memberAuth(): Promise<Record<string, string>> {
   if (!useMembership.getState().email) return {};

@@ -9,7 +9,7 @@ compatibility_date = "2026-08-15"
 ALLOWED_ORIGINS = "https://patekphilippe.github.io,http://localhost:5173,http://127.0.0.1:5199"
 # hard monthly stop for Anthropic spending
 MONTHLY_BUDGET_USD = "5"
-# private analyses per device and per IP a day
+# private analyses per member a day
 PRIVATE_DAILY_LIMIT = "5"
 # Community sign-in (docs/BACKEND.md, "Logowanie"): the Auth0 tenant and this API's identifier.
 # Empty domain: nobody can sign in, the community and the panel are closed.
@@ -44,5 +44,5 @@ bucket_name = "treasure-finder-tiles"
 [triggers]
 crons = ["* * * * *"]
 
-# Secrets (wrangler secret put): ANTHROPIC_API_KEY, TURNSTILE_SECRET, ADMIN_TOKEN, ADMIN_EMAILS,
+# Secrets (wrangler secret put): ANTHROPIC_API_KEY, ADMIN_TOKEN, ADMIN_EMAILS,
 # AUTH0_ACTION_SECRET

@@ -4,7 +4,6 @@ import { ALLOWED_MIME, MAX_FILE_BYTES, MAX_FILES, MAX_LINK_CHARS, MAX_TEXT_CHARS
 export interface ParsedSubmission {
   mode: SubmissionMode;
   deviceId: string;
-  turnstileToken: string;
   text: string | null;
   link: string | null;
   viewBbox: ViewBbox | null;
@@ -20,7 +19,6 @@ export function parseSubmission(form: FormData): ParsedSubmission | { error: str
 
   const deviceId = String(form.get('deviceId') ?? '');
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(deviceId)) return { error: 'Brak identyfikatora urządzenia' };
-  const turnstileToken = String(form.get('turnstile') ?? '');
 
   const text = String(form.get('text') ?? '').trim() || null;
   if (text && text.length > MAX_TEXT_CHARS)
@@ -69,5 +67,5 @@ export function parseSubmission(form: FormData): ParsedSubmission | { error: str
   if (mode === 'public' && !consentPublish)
     return { error: 'Do wspólnej bazy potrzebna jest zgoda na publikację obiektów' };
 
-  return { mode, deviceId, turnstileToken, text, link, viewBbox, consentPublish, files };
+  return { mode, deviceId, text, link, viewBbox, consentPublish, files };
 }

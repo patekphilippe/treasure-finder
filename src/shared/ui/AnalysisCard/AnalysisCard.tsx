@@ -20,7 +20,7 @@ interface AnalysisCardProps extends Omit<BoxProps, 'title'> {
 
 /**
  * One analysis in the Analizy sheet: what it is and needs, its state, and (opened) its controls.
- * One card is open at a time; a closed card unmounts its content (e.g. a Turnstile widget).
+ * One card is open at a time; a closed card unmounts its content.
  */
 export function AnalysisCard({
   card,

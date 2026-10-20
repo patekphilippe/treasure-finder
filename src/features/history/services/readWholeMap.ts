@@ -43,7 +43,7 @@ export async function readWholeMap(
   const worker = async () => {
     for (let chunk; !stopped && !isCancelled() && (chunk = queue.shift());) {
       try {
-        const r = await findLostBuildings(chunk, source, model, profile, null, () => {});
+        const r = await findLostBuildings(chunk, source, model, profile, () => {});
         found.push(...r.proposals);
         usage.inputTokens += r.usage.inputTokens;
         usage.outputTokens += r.usage.outputTokens;

@@ -26,7 +26,7 @@ describe('health', () => {
       ok: true,
       aiAvailable: true,
       aiKey: 'ok',
-      sourcesAvailable: true,
+      signInAvailable: true,
       reliefStored: true,
     });
 

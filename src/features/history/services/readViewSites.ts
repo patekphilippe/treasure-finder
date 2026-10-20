@@ -21,21 +21,12 @@ export async function readViewSites(
   source: ViewSource,
   model: AiModelId,
   profile: ReadProfileId,
-  turnstileToken: string | null,
   onStep: (step: string) => void,
 ): Promise<{ sites: SiteProposal[]; usage: AiUsage; read: number }> {
   onStep('Przygotowuję obraz mapy');
   const { image, grid } = await captureView(bounds, source, READ_PROFILES[profile].maxResM);
   onStep('Claude czyta mapę');
-  const { objects, usage } = await readMapWithAi(
-    image,
-    grid.w,
-    grid.h,
-    grid.res,
-    model,
-    profile,
-    turnstileToken,
-  );
+  const { objects, usage } = await readMapWithAi(image, grid.w, grid.h, grid.res, model, profile);
   if (profile === 'wojskowa')
     return {
       sites: buildMilitaryProposals(objects, grid, PROPOSAL_OPTIONS.minConfidence),

@@ -13,6 +13,10 @@ export interface MemberRow {
 
 const SELECT = 'SELECT id, name, email, blocked, last_seen_day FROM members';
 
+/** the answer of the analyses on the server (they cost the owner money) to anyone not signed in */
+export const SIGN_IN_FIRST =
+  'Zaloguj się kontem z zaproszeniem, żeby korzystać z analiz na serwerze';
+
 /** `token_hash` is left from the invitation codes (NOT NULL UNIQUE): a random hash nobody knows. */
 export const unusedCodeHash = () => sha256Hex(randomToken(24));
 

@@ -16,27 +16,19 @@ interface WholeMapReadingProps {
   map: OwnMap;
   model: AiModelId;
   profile: ReadProfileId;
-  member: boolean;
 }
 
 /**
  * "Przeczytaj całą mapę": an own map read window by window instead of view by view, with the
- * number of windows, cost and time shown first. Members only: every window is one reading,
- * and a Turnstile check per window would not work.
+ * number of windows, cost and time shown first. Every window is one reading of the day.
  */
-export function WholeMapReading({ source, map, model, profile, member }: WholeMapReadingProps) {
+export function WholeMapReading({ source, map, model, profile }: WholeMapReadingProps) {
   const { step, set, wholeRunning, stopRequested, requestStop } = useProposalsStore();
   const showToast = useToastStore((s) => s.show);
   const [asking, setAsking] = useState(false);
   const chunks = useMemo(() => wholeMapChunks(map, profile), [map, profile]);
 
   if (!chunks?.length) return null;
-  if (!member)
-    return (
-      <Typography variant="caption" color="text.secondary">
-        Całą mapę naraz czytają członkowie społeczności. Ty możesz czytać ją widok po widoku.
-      </Typography>
-    );
 
   const n = chunks.length;
   const cost = (n * VIEW_COST_USD[model]).toFixed(2).replace('.', ',');

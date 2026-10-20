@@ -9,7 +9,7 @@ function form(fields: Record<string, string>, files: File[] = []) {
   for (const file of files) f.append('files', file);
   return f;
 }
-const base = { mode: 'private', deviceId: DEVICE, turnstile: 'tok' };
+const base = { mode: 'private', deviceId: DEVICE };
 
 describe('parseSubmission', () => {
   it('accepts a photo with a map view hint', () => {

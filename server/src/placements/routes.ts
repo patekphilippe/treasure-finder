@@ -1,17 +1,15 @@
 import type { MapPlacement } from '@/shared/types/placement';
 import type { ViewBbox } from '@/shared/types/sources';
 import { addSpending, spentThisMonth } from '../budget';
-import { humanCheck } from '../community/humanCheck';
+import { memberFrom, SIGN_IN_FIRST } from '../community/auth';
 import type { Env } from '../env';
 import { fail, json } from '../http';
-import { ipSubject } from '../ipSubject';
 import { placeMap } from '../pipeline/placeMap';
 import { costUsd, FIRST_MODEL } from '../pipeline/pricing';
 import { parseMapReading, squareReading } from '../pipeline/readings';
 import { callClaude } from '../readings/callClaude';
 import {
   MAX_READ_IMAGE_BYTES,
-  READ_DAILY_LIMIT,
   READ_ESTIMATE_INPUT_TOKENS,
   READ_IMAGE_MIME,
   READ_MAX_SIDE,
@@ -35,12 +33,13 @@ function parseView(v: File | string | null): ViewBbox | null {
 /**
  * POST /api/placements: where a scanned map lies. Claude reads its sheet number, frame and
  * names (one synchronous call), the submissions pipeline's placeMap finds them on today's map
- * and fits the scan; the answer is the image's corners. Same guards as view readings: Turnstile
- * or a member's code, the daily reading limit, the monthly budget. The image is not stored.
+ * and fits the scan; the answer is the image's corners. Same guards as view readings: a signed-in
+ * member, the daily reading limit, the monthly budget. The image is not stored.
  */
 export async function placeImage(request: Request, env: Env, cors: Cors, now: number) {
-  if (!env.TURNSTILE_SECRET || !env.ANTHROPIC_API_KEY)
-    return fail(503, 'Umieszczanie map jest chwilowo niedostępne', cors);
+  if (!env.ANTHROPIC_API_KEY) return fail(503, 'Umieszczanie map jest chwilowo niedostępne', cors);
+  const member = await memberFrom(request, env, now);
+  if (!member) return fail(401, SIGN_IN_FIRST, cors);
   const form = await request.formData().catch(() => null);
   if (!form) return fail(400, 'Nieprawidłowe zapytanie', cors);
   const image = form.get('image');
@@ -51,18 +50,7 @@ export async function placeImage(request: Request, env: Env, cors: Cors, now: nu
   const h = Number(form.get('h'));
   if (![w, h].every((v) => Number.isInteger(v) && v >= 16 && v <= READ_MAX_SIDE))
     return fail(400, 'Nieprawidłowy rozmiar obrazu', cors);
-  const deviceId = String(form.get('deviceId') ?? '');
-  if (!/^[A-Za-z0-9_-]{16,64}$/.test(deviceId))
-    return fail(400, 'Brak identyfikatora urządzenia', cors);
   const view = parseView(form.get('view'));
-  const turnstileToken = String(form.get('turnstile') ?? '');
-
-  const { ip, subject } = await ipSubject(request, now);
-  const check = await humanCheck(request, env, turnstileToken, ip, now);
-  if (!check)
-    return turnstileToken
-      ? fail(403, 'Weryfikacja nie powiodła się, spróbuj jeszcze raz', cors)
-      : fail(400, 'Potwierdź, że nie jesteś robotem', cors);
 
   const question = placementQuestion(view);
   const estimate = { input_tokens: READ_ESTIMATE_INPUT_TOKENS, output_tokens: question.maxTokens };
@@ -72,10 +60,8 @@ export async function placeImage(request: Request, env: Env, cors: Cors, now: nu
   // counts as one reading of the day
   const allowed = await consumeDaily(
     env.DB,
-    check.member
-      ? [`read:member:${check.member.id}`]
-      : [`read:device:${deviceId}`, `read:${subject}`],
-    check.member ? READ_MEMBER_DAILY_LIMIT : READ_DAILY_LIMIT,
+    [`read:member:${member.id}`],
+    READ_MEMBER_DAILY_LIMIT,
     now,
   );
   if (!allowed)

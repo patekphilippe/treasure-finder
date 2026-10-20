@@ -1,13 +1,28 @@
 import { env, exports } from 'cloudflare:workers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SubmissionCreated, SubmissionView } from '@/shared/types/sources';
+import { signedInAs } from './signIn';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 const testEnv = env as unknown as { DB: D1Database; SOURCES: KVNamespace };
 const ORIGIN = 'https://patekphilippe.github.io';
 let device = 0;
+// a signed-in member for each test (beforeEach)
+let sender: string;
 
-function send(fields: Record<string, string>, files: File[] = [], ip = '203.0.113.7') {
+async function member(name: string): Promise<string> {
+  const email = `${name.toLowerCase()}@example.com`;
+  await worker.fetch(
+    new Request('https://api.test/api/admin/members', {
+      method: 'POST',
+      body: JSON.stringify({ name, email }),
+      headers: { authorization: 'Bearer test-admin-token-0123456789abcdef' },
+    }),
+  );
+  return signedInAs(email);
+}
+
+function send(fields: Record<string, string>, files: File[] = [], auth: string | null = sender) {
   const body = new FormData();
   for (const [k, v] of Object.entries(fields)) body.append(k, v);
   for (const f of files) body.append('files', f);
@@ -15,7 +30,7 @@ function send(fields: Record<string, string>, files: File[] = [], ip = '203.0.11
     new Request('https://api.test/api/submissions', {
       method: 'POST',
       body,
-      headers: { origin: ORIGIN, 'cf-connecting-ip': ip },
+      headers: { origin: ORIGIN, ...(auth ? { authorization: auth } : {}) },
     }),
   );
 }
@@ -23,13 +38,11 @@ const photo = () =>
   new File([new Uint8Array([255, 216, 255, 0])], 'mapa.jpg', { type: 'image/jpeg' });
 
 describe('submissions', () => {
-  let turnstileOk = true;
-  beforeEach(() => {
+  beforeEach(async () => {
     device++;
-    turnstileOk = true;
+    sender = await member(`Sender${device}`);
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = input instanceof Request ? input.url : String(input);
-      if (url.includes('turnstile')) return Response.json({ success: turnstileOk });
       throw new Error(`unexpected fetch ${url}`);
     });
   });
@@ -38,7 +51,6 @@ describe('submissions', () => {
   const fields = () => ({
     mode: 'private',
     deviceId: `device-${device}-abcdefghijkl`,
-    turnstile: 'tok',
   });
 
   it('stores a private photo, lets the key holder read it and delete it', async () => {
@@ -82,38 +94,25 @@ describe('submissions', () => {
     expect(row).toBeNull();
   });
 
-  it('refuses a failed bot check', async () => {
-    turnstileOk = false;
-    const res = await send({ ...fields(), text: 'karczma' });
-    expect(res.status).toBe(403);
+  it('refuses anyone not signed in with an invitation', async () => {
+    const res = await send({ ...fields(), text: 'karczma' }, [], null);
+    expect(res.status).toBe(401);
+    expect(((await res.json()) as { error: string }).error).toMatch(/Zaloguj się/);
+    const stranger = await signedInAs('stranger@example.com');
+    expect((await send({ ...fields(), text: 'karczma' }, [], stranger)).status).toBe(401);
   });
 
-  it('allows five private analyses a day per device, then answers 429', async () => {
+  it('allows five private analyses a day per member, then answers 429', async () => {
     const f = fields();
-    for (let i = 0; i < 5; i++)
-      expect((await send({ ...f, text: `opis ${i}` }, [], `198.51.100.${i}`)).status).toBe(201);
-    const sixth = await send({ ...f, text: 'opis 6' }, [], '198.51.100.99');
+    for (let i = 0; i < 5; i++) expect((await send({ ...f, text: `opis ${i}` })).status).toBe(201);
+    const sixth = await send({ ...f, text: 'opis 6' });
     expect(sixth.status).toBe(429);
     expect(await sixth.json()).toEqual({
       error: 'Dzienny limit analiz został wykorzystany, spróbuj jutro',
     });
-  });
-
-  it('counts the IP limit across devices too', async () => {
-    const ip = '192.0.2.50';
-    for (let i = 0; i < 5; i++) {
-      const res = await send(
-        { mode: 'private', deviceId: `dev-ip-test-${i}-abcdefgh`, turnstile: 't', text: 'x' },
-        [],
-        ip,
-      );
-      expect(res.status).toBe(201);
-    }
-    const res = await send(
-      { mode: 'private', deviceId: 'dev-ip-test-9-abcdefgh', turnstile: 't', text: 'x' },
-      [],
-      ip,
+    // another member still sends
+    expect((await send({ ...f, text: 'opis' }, [], await member(`Next${device}`))).status).toBe(
+      201,
     );
-    expect(res.status).toBe(429);
   });
 });

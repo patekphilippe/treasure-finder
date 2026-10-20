@@ -1,10 +1,9 @@
 import type { SubmissionStatus } from '@/shared/types/sources';
 
-// the backend's address and Turnstile key are shared with the map reading (history)
+// the backend's address is shared with the map reading (history)
 export {
   BACKEND_ENABLED as SOURCES_ENABLED,
   BACKEND_URL as SOURCES_API_URL,
-  TURNSTILE_SITE_KEY,
 } from '@/shared/config/backend';
 
 /** Longest side sent: the model scales larger images down anyway. */

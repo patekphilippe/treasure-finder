@@ -18,8 +18,6 @@ export default defineConfig(async () => {
           bindings: {
             TEST_MIGRATIONS: migrations,
             ANTHROPIC_API_KEY: 'test-key',
-            // Cloudflare's documented always-passing Turnstile test secret
-            TURNSTILE_SECRET: '1x0000000000000000000000000000000AA',
             ADMIN_TOKEN: 'test-admin-token-0123456789abcdef',
             AUTH0_DOMAIN: 'login.test',
             AUTH0_JWKS: JSON.stringify({

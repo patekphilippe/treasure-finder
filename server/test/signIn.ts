@@ -51,3 +51,18 @@ export async function signedInAs(
   );
   return `Bearer ${head}.${body}.${b64url(new Uint8Array(sig))}`;
 }
+
+let invitedCount = 0;
+
+/** `Authorization` of a freshly invited and signed-in member (each call a new one, own limits). */
+export async function invitedMember(worker: Fetcher, name = 'Członek'): Promise<string> {
+  const email = `invited${++invitedCount}-${Date.now()}@example.com`;
+  await worker.fetch(
+    new Request('https://api.test/api/admin/members', {
+      method: 'POST',
+      body: JSON.stringify({ name, email }),
+      headers: { authorization: 'Bearer test-admin-token-0123456789abcdef' },
+    }),
+  );
+  return signedInAs(email);
+}

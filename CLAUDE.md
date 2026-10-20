@@ -109,11 +109,12 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   pomijany (`shared/lib/history/mergeSighting.ts`). Etykiety i odniesienia map tworzy tylko
   `features/history/utils/toViewSource.ts`.
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
-  Turnstile, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
+  tylko zalogowani członkowie, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
   (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera
   (docs/BACKEND.md, „Profile odczytu”); mapa wojskowa daje kontekst `wojsko` i `grob_wojenny`
   (ostrzeżenia, ochrona przy mogiłach w `shared/lib/detect/militaryNearby.ts`). Propozycje trafiają do kontekstu
-  dopiero po „Przyjmij”. Adres backendu i klucz witryny Turnstile: `shared/config/backend.ts`.
+  dopiero po „Przyjmij”. Adres backendu: `shared/config/backend.ts`. Analizy na serwerze (odczyt, zgłoszenia,
+  umieszczanie skanu) wymagają logowania: bez niego zamiast nich jest `SignInPrompt` z `@/shared/ui`.
 - Społeczność: logowanie w `shared/auth/` (Auth0 ładowany leniwie, nagłówek członka z `memberAuth()`), kto jest
   zalogowany w `shared/store/useMembership.ts` (localStorage, nigdy w eksporcie); zaproszenia (adres e-mail) wysyła
   właściciel ze swojej poczty z panelu `#admin`, Akcja Auth0 `server/auth0/postLogin.js` wpuszcza tylko zaproszonych;

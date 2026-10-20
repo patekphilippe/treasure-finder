@@ -7,13 +7,12 @@ import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
-import { useCallback, useState } from 'react';
 import { MILITARY_MAP_NOTE } from '@/features/safety';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { BACKEND_ENABLED } from '@/shared/config/backend';
 import { READ_PROFILES, type ReadProfileId } from '@/shared/lib/history';
 import { useMembership } from '@/shared/store/useMembership';
-import { Icon, TurnstileWidget, useToastStore } from '@/shared/ui';
+import { Icon, SignInPrompt, useToastStore } from '@/shared/ui';
 import { AI_MAX_SIDE, AI_MODELS, AI_READING_NOTE, type AiModelId } from '../config/aiReading';
 import { useViewSource } from '../hooks/useViewSource';
 import { addSightedObjects } from '../services/addSightedObjects';
@@ -42,19 +41,13 @@ export function AiReadingSection() {
   const flyTo = useMapViewStore((s) => s.flyTo);
   const showToast = useToastStore((s) => s.show);
   const source = useViewSource();
-  // a Turnstile token works once: a new widget after every reading
-  const [token, setToken] = useState<string | null>(null);
-  const [round, setRound] = useState(0);
-  const onToken = useCallback((t: string | null) => setToken(t), []);
 
   const run = async () => {
     const bounds = useMapViewStore.getState().bounds;
-    if (!source || !bounds || (!token && !member)) return;
+    if (!source || !bounds) return;
     set({ step: 'Start', proposals: [], usage: null, read: null });
     try {
-      const r = await findLostBuildings(bounds, source, model, profile, token, (s) =>
-        set({ step: s }),
-      );
+      const r = await findLostBuildings(bounds, source, model, profile, (s) => set({ step: s }));
       set({ proposals: r.proposals, usage: r.usage, read: r.read });
       showToast(
         r.proposals.length ? `Propozycje: ${r.proposals.length}` : 'Nic nowego w tym widoku',
@@ -63,7 +56,6 @@ export function AiReadingSection() {
       showToast(e instanceof Error ? e.message : 'Odczyt mapy nie powiódł się');
     } finally {
       set({ step: null });
-      setRound((n) => n + 1);
     }
   };
 
@@ -110,6 +102,8 @@ export function AiReadingSection() {
         <Typography variant="caption" color="warning.main">
           Odczyt map wymaga serwera analizy, a ta wersja aplikacji go nie ma.
         </Typography>
+      ) : !member ? (
+        <SignInPrompt what="Odczyt map przez AI" />
       ) : (
         <Stack spacing={1}>
           <TextField
@@ -140,9 +134,6 @@ export function AiReadingSection() {
               . Bez wątpliwości działa na własnych mapach.
             </Typography>
           )}
-          {source && !step && !member && (
-            <TurnstileWidget key={round} onToken={onToken} resetKey={round} />
-          )}
           <Typography variant="caption" color="text.secondary">
             {AI_READING_NOTE}
           </Typography>
@@ -158,7 +149,7 @@ export function AiReadingSection() {
               <Button
                 variant="contained"
                 sx={{ flex: 1 }}
-                disabled={!source || (!token && !member)}
+                disabled={!source}
                 startIcon={<Icon name="search" size={18} />}
                 onClick={() => void run()}
               >
@@ -166,17 +157,9 @@ export function AiReadingSection() {
               </Button>
             </Stack>
           )}
-          {source && (
-            <CompareMaps source={source} model={model} member={member} topographic={!military} />
-          )}
+          {source && <CompareMaps source={source} model={model} topographic={!military} />}
           {source?.kind === 'own' && (
-            <WholeMapReading
-              source={source}
-              map={source.map}
-              model={model}
-              profile={profile}
-              member={member}
-            />
+            <WholeMapReading source={source} map={source.map} model={model} profile={profile} />
           )}
           {usage && (
             <Typography variant="caption" color="text.secondary">

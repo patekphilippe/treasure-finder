@@ -2,6 +2,7 @@ import { env, exports } from 'cloudflare:workers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SubmissionCreated } from '@/shared/types/sources';
 import type { Env } from '../src/env';
+import { invitedMember } from './signIn';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 const testEnv = env as unknown as Env;
@@ -12,7 +13,6 @@ async function publicSubmission(consent = true): Promise<SubmissionCreated> {
   const body = new FormData();
   body.append('mode', consent ? 'public' : 'private');
   body.append('deviceId', `admin-device-${n}-abcdefgh`);
-  body.append('turnstile', 'tok');
   body.append('text', 'młyn pod Kowarami');
   if (consent) body.append('consentPublish', 'true');
   body.append('files', new File([new Uint8Array([9, 9])], 'm.jpg', { type: 'image/jpeg' }));
@@ -20,7 +20,7 @@ async function publicSubmission(consent = true): Promise<SubmissionCreated> {
     new Request('https://api.test/api/submissions', {
       method: 'POST',
       body,
-      headers: { 'cf-connecting-ip': `10.1.0.${n}` },
+      headers: { authorization: await invitedMember(worker) },
     }),
   );
   const c = (await res.json()) as SubmissionCreated;

@@ -7,6 +7,7 @@ import type { AiClient, BatchOutcome, BatchRequest } from '../src/pipeline/aiCli
 import { parseCustomId } from '../src/pipeline/requests';
 import { LOCK_MS, releaseLock, takeLock } from '../src/pipeline/runLock';
 import { runPipeline } from '../src/pipeline/runPipeline';
+import { invitedMember } from './signIn';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 const testEnv = env as unknown as Env;
@@ -49,7 +50,6 @@ async function submit(
   const body = new FormData();
   body.append('mode', 'private');
   body.append('deviceId', `pipeline-device-${n}-abcdef`);
-  body.append('turnstile', 'tok');
   for (const [k, v] of Object.entries(fields)) body.append(k, v);
   if (withPhoto)
     body.append('files', new File([new Uint8Array([1, 2, 3])], 'm.jpg', { type: 'image/jpeg' }));
@@ -57,7 +57,7 @@ async function submit(
     new Request('https://api.test/api/submissions', {
       method: 'POST',
       body,
-      headers: { 'cf-connecting-ip': `10.0.0.${n}` },
+      headers: { authorization: await invitedMember(worker) },
     }),
   );
   return (await res.json()) as SubmissionCreated;
@@ -84,7 +84,6 @@ describe('AI pipeline', () => {
     n++;
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = input instanceof Request ? input.url : String(input);
-      if (url.includes('turnstile')) return Response.json({ success: true });
       if (url.includes('nominatim')) {
         const q = new URL(url).searchParams.get('q');
         if (q === 'Kowary')

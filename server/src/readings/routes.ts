@@ -4,35 +4,28 @@ import type { MapReading } from '@/shared/types/readings';
 import { addSpending, spentThisMonth } from '../budget';
 import type { Env } from '../env';
 import { fail, json } from '../http';
-import { ipSubject } from '../ipSubject';
 import { costUsd } from '../pipeline/pricing';
 import { consumeDaily } from '../submissions/dailyLimit';
-import { humanCheck } from '../community/humanCheck';
+import { memberFrom, SIGN_IN_FIRST } from '../community/auth';
 import { callClaude } from './callClaude';
-import { READ_DAILY_LIMIT, READ_ESTIMATE_INPUT_TOKENS, READ_MEMBER_DAILY_LIMIT } from './limits';
+import { READ_ESTIMATE_INPUT_TOKENS, READ_MEMBER_DAILY_LIMIT } from './limits';
 import { parseReading } from './parseReading';
 
 type Cors = Record<string, string>;
 
 /**
  * POST /api/readings: Claude reads one view of a historical map for the app (buildings, mills,
- * inns…). The image is used for this one call and not stored. Turnstile, a daily limit per device
- * and IP, and the monthly budget shared with the batch pipeline guard the owner's key.
+ * inns…). The image is used for this one call and not stored. Only signed-in members use the
+ * owner's key, each with a daily limit, under the monthly budget shared with the batch pipeline.
  */
 export async function readView(request: Request, env: Env, cors: Cors, now: number) {
-  if (!env.TURNSTILE_SECRET || !env.ANTHROPIC_API_KEY)
-    return fail(503, 'Odczyt map jest chwilowo niedostępny', cors);
+  if (!env.ANTHROPIC_API_KEY) return fail(503, 'Odczyt map jest chwilowo niedostępny', cors);
+  const member = await memberFrom(request, env, now);
+  if (!member) return fail(401, SIGN_IN_FIRST, cors);
   const form = await request.formData().catch(() => null);
   if (!form) return fail(400, 'Nieprawidłowe zapytanie', cors);
   const req = parseReading(form);
   if ('error' in req) return fail(400, req.error, cors);
-
-  const { ip, subject } = await ipSubject(request, now);
-  const check = await humanCheck(request, env, req.turnstileToken, ip, now);
-  if (!check)
-    return req.turnstileToken
-      ? fail(403, 'Weryfikacja nie powiodła się, spróbuj jeszcze raz', cors)
-      : fail(400, 'Potwierdź, że nie jesteś robotem', cors);
 
   const profile = READ_PROFILES[req.profile];
   // upper bound of this reading's cost, checked against the monthly budget before calling
@@ -43,10 +36,8 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
   // own prefix: readings do not use up the private submissions of the day
   const allowed = await consumeDaily(
     env.DB,
-    check.member
-      ? [`read:member:${check.member.id}`]
-      : [`read:device:${req.deviceId}`, `read:${subject}`],
-    check.member ? READ_MEMBER_DAILY_LIMIT : READ_DAILY_LIMIT,
+    [`read:member:${member.id}`],
+    READ_MEMBER_DAILY_LIMIT,
     now,
   );
   if (!allowed)

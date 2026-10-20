@@ -1,9 +1,4 @@
-/**
- * view readings a day per device and per IP. Raised from 30 (members 100) while the readings are
- * being worked on; the monthly budget still caps the spending.
- */
-export const READ_DAILY_LIMIT = 300;
-/** a community member's readings a day: many whole maps window by window */
+/** a signed-in member's readings a day: many whole maps window by window */
 export const READ_MEMBER_DAILY_LIMIT = 1000;
 /** a view image is at most 1568 px on a side: a few hundred kB as JPEG */
 export const MAX_READ_IMAGE_BYTES = 3 * 1024 * 1024;

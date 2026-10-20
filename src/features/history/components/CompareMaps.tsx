@@ -2,7 +2,6 @@ import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { HISTORICAL_LAYERS, ORTHO_ARCHIVE_ID } from '@/features/layers';
 import { sameMap } from '@/shared/lib/history';
@@ -18,27 +17,19 @@ import { toViewSource } from '../utils/toViewSource';
 interface CompareMapsProps {
   source: ViewSource;
   model: AiModelId;
-  member: boolean;
   /** comparison reads topographic maps only */
   topographic: boolean;
 }
 
 /**
  * "Porównaj widok": the visible view read on the current map and on a second one, so what
- * both show is surer and what only one shows appeared or vanished between them. Members only.
+ * both show is surer and what only one shows appeared or vanished between them.
  */
-export function CompareMaps({ source, model, member, topographic }: CompareMapsProps) {
+export function CompareMaps({ source, model, topographic }: CompareMapsProps) {
   const maps = useOwnMapsStore((s) => s.maps);
   const { step, set } = useProposalsStore();
   const showToast = useToastStore((s) => s.show);
   const [other, setOther] = useState('');
-
-  if (!member)
-    return (
-      <Typography variant="caption" color="text.secondary">
-        Porównanie widoku na dwóch mapach jest dla członków społeczności.
-      </Typography>
-    );
 
   // an orthophoto has no map symbols to compare
   const options: ViewSource[] = [

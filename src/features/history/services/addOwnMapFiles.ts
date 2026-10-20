@@ -8,8 +8,8 @@ import { placeOwnMap } from './placeOwnMap';
 import { showOwnMap } from './showOwnMap';
 
 export interface AddOwnMapOptions extends Partial<Omit<ImportOptions, 'view'>> {
-  /** place the scan by the names on it (backend AI) before reading it */
-  auto?: { turnstileToken: string | null };
+  /** place the scan by the names on it (backend AI, signed-in members) before reading it */
+  auto?: boolean;
 }
 
 /**
@@ -40,11 +40,7 @@ export async function addOwnMapFiles(
         if (auto && scan) {
           update({ step: 'Umieszczam mapę po nazwach (AI)' });
           try {
-            const p = await placeOwnMap(
-              scan,
-              useMapViewStore.getState().bounds,
-              auto.turnstileToken,
-            );
+            const p = await placeOwnMap(scan, useMapViewStore.getState().bounds);
             placed = { corners: p.corners, ...(p.year && { year: p.year }) };
             showToast(
               p.method === 'arkusz'

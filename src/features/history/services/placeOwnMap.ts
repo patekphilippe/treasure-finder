@@ -1,6 +1,5 @@
 import { memberAuth } from '@/shared/auth/memberAuth';
 import { BACKEND_URL } from '@/shared/config/backend';
-import { deviceId } from '@/shared/lib/deviceId';
 import type { Bounds } from '@/shared/store/useMapViewStore';
 import type { MapPlacement } from '@/shared/types/placement';
 import { AI_MAX_SIDE } from '../config/aiReading';
@@ -10,11 +9,7 @@ import { AI_MAX_SIDE } from '../config/aiReading';
  * frame and place names, the backend finds the names on today's map and fits the scan. Sends a
  * reduced copy of the image and the current view as a hint; nothing else leaves the device.
  */
-export async function placeOwnMap(
-  file: Blob,
-  view: Bounds | null,
-  turnstileToken: string | null,
-): Promise<MapPlacement> {
+export async function placeOwnMap(file: Blob, view: Bounds | null): Promise<MapPlacement> {
   const bitmap = await createImageBitmap(file);
   const k = Math.min(1, AI_MAX_SIDE / Math.max(bitmap.width, bitmap.height));
   const w = Math.max(16, Math.round(bitmap.width * k));
@@ -29,8 +24,6 @@ export async function placeOwnMap(
   form.append('w', String(w));
   form.append('h', String(h));
   if (view) form.append('view', [view.south, view.west, view.north, view.east].join(','));
-  form.append('deviceId', deviceId());
-  if (turnstileToken) form.append('turnstile', turnstileToken);
   const headers = await memberAuth();
   let response: Response;
   try {

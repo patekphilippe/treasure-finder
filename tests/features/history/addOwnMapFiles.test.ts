@@ -70,7 +70,7 @@ describe('adding an own map as a background task', () => {
   });
 
   it('placed by the backend, then read: the chip shows both steps, then fitting starts', async () => {
-    expect(await addOwnMapFiles([scan], { auto: { turnstileToken: 't' } })).toBe('done');
+    expect(await addOwnMapFiles([scan], { auto: true })).toBe('done');
     expect(seen).toEqual([
       { step: 'Umieszczam mapę po nazwach (AI)', importing: 'wig.jpg' },
       { step: 'Wczytuję obraz', importing: 'wig.jpg' },

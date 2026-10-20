@@ -1,11 +1,14 @@
 import { exports } from 'cloudflare:workers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapPlacement } from '@/shared/types/placement';
+import { signedInAs } from './signIn';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 let device = 0;
+// a signed-in member for each test (beforeEach)
+let placer: string;
 
-function place(fields: Record<string, string> = {}) {
+function place(fields: Record<string, string> = {}, auth: string | null = placer) {
   const body = new FormData();
   body.append(
     'image',
@@ -15,8 +18,6 @@ function place(fields: Record<string, string> = {}) {
     w: '800',
     h: '600',
     view: '51.0,16.9,51.3,17.3',
-    deviceId: `placer-${device}-abcdefghijkl`,
-    turnstile: 'tok',
     ...fields,
   };
   for (const [k, v] of Object.entries(all)) body.append(k, v);
@@ -24,7 +25,7 @@ function place(fields: Record<string, string> = {}) {
     new Request('https://api.test/api/placements', {
       method: 'POST',
       body,
-      headers: { 'cf-connecting-ip': '198.51.100.20' },
+      headers: auth ? { authorization: auth } : {},
     }),
   );
 }
@@ -51,13 +52,21 @@ describe('placing a scanned map', () => {
   let answer: unknown;
   let sent: { system?: string; output_config: unknown; max_tokens: number } | null;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     device++;
+    const email = `placer${device}@example.com`;
+    await worker.fetch(
+      new Request('https://api.test/api/admin/members', {
+        method: 'POST',
+        body: JSON.stringify({ name: `Placer${device}`, email }),
+        headers: { authorization: 'Bearer test-admin-token-0123456789abcdef' },
+      }),
+    );
+    placer = await signedInAs(email);
     sent = null;
     answer = reading();
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
       const url = input instanceof Request ? input.url : String(input);
-      if (url.includes('turnstile')) return Response.json({ success: true });
       if (url.startsWith('https://api.anthropic.com/v1/messages')) {
         sent = JSON.parse(String(init?.body));
         return Response.json({
@@ -89,12 +98,13 @@ describe('placing a scanned map', () => {
     expect(sent!.system).toBeTruthy();
   });
 
-  it('says so when nothing places the map, and asks for the bot check', async () => {
+  it('says so when nothing places the map; only for signed-in members', async () => {
     answer = reading({ sheetNumber: null, frameCorners: null, placeNames: [] });
     const none = await place();
     expect(none.status).toBe(422);
     expect(((await none.json()) as { error: string }).error).toMatch(/nazw/);
-    expect((await place({ turnstile: '' })).status).toBe(400);
+    expect((await place({}, null)).status).toBe(401);
+    expect((await place({}, await signedInAs('stranger@example.com'))).status).toBe(401);
     expect((await place({ w: '9000' })).status).toBe(400);
   });
 });

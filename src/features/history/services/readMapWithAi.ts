@@ -1,6 +1,5 @@
 import { memberAuth } from '@/shared/auth/memberAuth';
 import { BACKEND_URL } from '@/shared/config/backend';
-import { deviceId } from '@/shared/lib/deviceId';
 import type { MapObject, ReadKind, ReadProfileId } from '@/shared/lib/history';
 import type { MapReading } from '@/shared/types/readings';
 import type { AiModelId } from '../config/aiReading';
@@ -19,7 +18,6 @@ export async function readMapWithAi(
   res: number,
   model: AiModelId,
   profile: ReadProfileId,
-  turnstileToken: string | null,
 ): Promise<{ objects: MapObject<ReadKind>[]; usage: AiUsage }> {
   const form = new FormData();
   form.append('image', image, 'widok.jpg');
@@ -28,9 +26,7 @@ export async function readMapWithAi(
   form.append('res', String(res));
   form.append('model', model);
   form.append('profile', profile);
-  form.append('deviceId', deviceId());
-  if (turnstileToken) form.append('turnstile', turnstileToken);
-  // a signed-in community member needs no Turnstile check
+  // only signed-in members may read (the owner's key pays)
   const headers = await memberAuth();
   let response: Response;
   try {

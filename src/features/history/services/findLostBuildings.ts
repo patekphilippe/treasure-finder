@@ -36,17 +36,9 @@ export async function findLostBuildings(
   source: ViewSource,
   model: AiModelId,
   profile: ReadProfileId,
-  turnstileToken: string | null,
   onStep: (step: string) => void,
 ): Promise<{ proposals: Proposal[]; usage: AiUsage; read: number }> {
-  const { sites, usage, read } = await readViewSites(
-    bounds,
-    source,
-    model,
-    profile,
-    turnstileToken,
-    onStep,
-  );
+  const { sites, usage, read } = await readViewSites(bounds, source, model, profile, onStep);
   const what = profile === 'wojskowa' ? 'auto (AI, mapa wojskowa)' : 'auto (AI)';
   return {
     proposals: sites.map((p) =>

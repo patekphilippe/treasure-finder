@@ -16,20 +16,12 @@ describe('reading a map through the backend', () => {
       usage: { inputTokens: 2100, outputTokens: 180 },
     });
     vi.stubGlobal('fetch', fetch);
-    const r = await readMapWithAi(
-      image,
-      800,
-      600,
-      1.5,
-      'claude-haiku-5-5',
-      'wojskowa',
-      'turnstile-token',
-    );
+    const r = await readMapWithAi(image, 800, 600, 1.5, 'claude-haiku-5-5', 'wojskowa');
     expect(r.objects).toEqual([{ kind: 'mlyn', label: 'Mühle', x: 40, y: 60, confidence: 0.9 }]);
     expect(r.usage).toEqual({ inputTokens: 2100, outputTokens: 180 });
     const [url, init] = fetch.mock.calls[0]!;
     expect(url).toBe(`${BACKEND_URL}/api/readings`);
-    // not a member: no authorization, the Turnstile token is the proof
+    // not signed in here: no authorization (the server answers 401)
     expect(init.headers).toEqual({});
     const form = init.body as FormData;
     expect(Object.fromEntries([...form.entries()].filter(([k]) => k !== 'image'))).toEqual({
@@ -38,8 +30,6 @@ describe('reading a map through the backend', () => {
       res: '1.5',
       model: 'claude-haiku-5-5',
       profile: 'wojskowa',
-      deviceId: 'device-0123456789abcdef',
-      turnstile: 'turnstile-token',
     });
     expect(form.get('image')).toBeInstanceOf(Blob);
   });
@@ -49,11 +39,11 @@ describe('reading a map through the backend', () => {
       'fetch',
       answer(429, { error: 'Dzienny limit odczytów map został wykorzystany, spróbuj jutro' }),
     );
-    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 'topo', 't')).rejects.toThrow(
+    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 'topo')).rejects.toThrow(
       /limit odczytów/,
     );
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('offline')));
-    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 'topo', 't')).rejects.toThrow(
+    await expect(readMapWithAi(image, 10, 10, 1, 'claude-haiku-5-5', 'topo')).rejects.toThrow(
       'Brak połączenia z serwerem analizy',
     );
   });

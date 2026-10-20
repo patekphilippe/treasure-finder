@@ -11,8 +11,6 @@ export interface ReadingRequest {
   model: PipelineModel;
   /** which kind of map: what to look for and how (readProfiles) */
   profile: ReadProfileId;
-  deviceId: string;
-  turnstileToken: string;
 }
 
 /** The app's form for one view reading, checked; an error message in Polish otherwise. */
@@ -33,8 +31,5 @@ export function parseReading(form: FormData): ReadingRequest | { error: string }
   // older apps send no profile: the topographic one
   const profile = form.get('profile') ?? 'topo';
   if (!isReadProfileId(profile)) return { error: 'Nieznany rodzaj mapy' };
-  const deviceId = String(form.get('deviceId') ?? '');
-  if (!/^[A-Za-z0-9_-]{16,64}$/.test(deviceId)) return { error: 'Brak identyfikatora urządzenia' };
-  const turnstileToken = String(form.get('turnstile') ?? '');
-  return { image, w, h, res, model: model as PipelineModel, profile, deviceId, turnstileToken };
+  return { image, w, h, res, model: model as PipelineModel, profile };
 }

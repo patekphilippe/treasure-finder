@@ -7,19 +7,18 @@ import TextField from '@mui/material/TextField';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { SOURCES_PRIVACY_NOTE } from '@/features/safety';
 import { trackActivity } from '@/shared/store/trackActivity';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import type { SubmissionMode } from '@/shared/types/sources';
-import { Icon, useToastStore } from '@/shared/ui';
+import { Icon, SignInPrompt, useToastStore } from '@/shared/ui';
 import { MAX_FILES } from '../config/sourcesApi';
 import { sourcesApi } from '../services/sourcesApi';
 import { useSourcesStore } from '../store/useSourcesStore';
 import { deviceId } from '@/shared/lib/deviceId';
 import { useMembership } from '@/shared/store/useMembership';
 import { shrinkImage } from '../utils/shrinkImage';
-import { TurnstileWidget } from '@/shared/ui';
 
 interface SendSourceFormProps {
   onSent: () => void;
@@ -34,18 +33,14 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
   const [link, setLink] = useState('');
   const [mode, setMode] = useState<SubmissionMode>('private');
   const [consent, setConsent] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
-  const [resetKey, setResetKey] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const add = useSourcesStore((s) => s.add);
   const showToast = useToastStore((s) => s.show);
-  const onToken = useCallback((t: string | null) => setToken(t), []);
 
   const empty = !files.length && !text.trim() && !link.trim();
   const member = useMembership((st) => st.email !== null);
-  const canSend =
-    !disabled && !busy && !empty && (!!token || member) && (mode === 'private' || consent);
+  const canSend = !disabled && member && !busy && !empty && (mode === 'private' || consent);
 
   // a task on the activity chip: the upload goes on with the sheet closed
   const send = async () => {
@@ -64,7 +59,6 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
           const form = new FormData();
           form.append('mode', mode);
           form.append('deviceId', deviceId());
-          if (token) form.append('turnstile', token);
           if (text.trim()) form.append('text', text.trim());
           if (link.trim()) form.append('link', link.trim());
           if (consent) form.append('consentPublish', 'true');
@@ -96,8 +90,6 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
       // seen also when the sheet was closed meanwhile
       showToast(message);
     } finally {
-      // a Turnstile token works once
-      setResetKey((k) => k + 1);
       setBusy(false);
     }
   };
@@ -171,7 +163,7 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
           }
         />
       )}
-      {!disabled && !member && <TurnstileWidget onToken={onToken} resetKey={resetKey} />}
+      {!disabled && !member && <SignInPrompt what="Analiza źródeł na serwerze" />}
       {error && <Alert severity="error">{error}</Alert>}
       <Button
         variant="contained"
