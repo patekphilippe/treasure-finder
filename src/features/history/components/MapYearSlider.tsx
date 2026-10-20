@@ -15,7 +15,14 @@ export function MapYearSlider() {
   const year = useOwnMapsStore((s) => s.yearFilter);
   const setYear = useOwnMapsStore((s) => s.setYearFilter);
   const years = useMemo(() => mapYears(maps), [maps]);
-  if (years.length < 2) return null;
+  if (!maps.length) return null;
+  if (years.length < 2)
+    return (
+      <Typography variant="caption" color="text.secondary">
+        Suwak lat pojawi się przy mapach z co najmniej dwóch lat
+        {years.length ? ` (teraz: ${years[0]})` : ''}. Rok mapy wpiszesz w Danych → Własne mapy.
+      </Typography>
+    );
 
   return (
     <Stack data-tour="maps-year" spacing={0.25}>
