@@ -1,15 +1,20 @@
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { HISTORICAL_LAYERS } from '@/features/layers';
 import { bottomSheetOffset } from '@/shared/lib/bottomSheetOffset';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { ConfirmDialog, Icon, Sheet } from '@/shared/ui';
 import { CONTEXT_KINDS } from '../config/contextKinds';
 import { useContextStore } from '../store/useContextStore';
+import { useOwnMapsStore } from '../store/useOwnMapsStore';
+import { knownMaps } from '../utils/knownMaps';
 import { representativePoint } from '../utils/representativePoint';
+import { sightingsOf } from '../utils/sightingsOf';
 import { CommunityObjectBlock } from './CommunityObjectBlock';
+import { SightingRow } from './SightingRow';
 
 interface ContextDetailsSheetProps {
   onClose: () => void;
@@ -19,8 +24,13 @@ export function ContextDetailsSheet({ onClose }: ContextDetailsSheetProps) {
   const id = useUiStore((s) => s.selectedContextId);
   const feature = useContextStore((s) => s.features.find((f) => f.id === id));
   const remove = useContextStore((s) => s.remove);
+  const ownMaps = useOwnMapsStore((s) => s.maps);
   const flyTo = useMapViewStore((s) => s.flyTo);
   const [confirm, setConfirm] = useState(false);
+  const sightings = useMemo(
+    () => (feature ? sightingsOf(feature, knownMaps(HISTORICAL_LAYERS, ownMaps)) : []),
+    [feature, ownMaps],
+  );
   if (!feature) return null;
   const kind = CONTEXT_KINDS[feature.kind];
   const at = representativePoint(feature.geometry);
@@ -28,14 +38,9 @@ export function ContextDetailsSheet({ onClose }: ContextDetailsSheetProps) {
   return (
     <Sheet title={kind.label} onClose={onClose}>
       <Stack spacing={2}>
-        <Typography variant="body2" color="text.secondary">
-          Obiekt z mapy archiwalnej. Kandydaci z analizy NMT w pobliżu dostają wyższy wynik (osada
-          do 400 m, młyn i karczma do 300 m, bród do 200 m).
-        </Typography>
         <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
-          <Icon name="book" size={20} />
           <Typography variant="body2" sx={{ flex: 1 }}>
-            Źródło: {feature.source || 'brak opisu'}
+            {feature.label || feature.source || 'brak opisu'}
           </Typography>
           {at && (
             <IconButton
@@ -52,6 +57,22 @@ export function ContextDetailsSheet({ onClose }: ContextDetailsSheetProps) {
             </IconButton>
           )}
         </Stack>
+        <Stack spacing={1}>
+          <Typography variant="overline" color="text.secondary">
+            Widziany na mapach ({sightings.length})
+          </Typography>
+          {sightings.map((s, i) => (
+            <SightingRow key={i} sighting={s} at={at} />
+          ))}
+        </Stack>
+        <Typography variant="body2" color="text.secondary">
+          Obiekt liczy się w analizie NMT zawsze, bez względu na widoczną mapę.{' '}
+          {feature.kind === 'grob_wojenny'
+            ? 'Kandydaci do 150 m dostają ostrzeżenie, a do 50 m są chronieni.'
+            : feature.kind === 'wojsko'
+              ? 'Kandydaci do 300 m dostają wyższy wynik i ostrzeżenie o niewybuchach.'
+              : 'Kandydaci w pobliżu dostają wyższy wynik (osada do 400 m, młyn i karczma do 300 m, bród do 200 m).'}
+        </Typography>
         <CommunityObjectBlock feature={feature} />
       </Stack>
       <ConfirmDialog
