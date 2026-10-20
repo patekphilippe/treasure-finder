@@ -5,7 +5,10 @@ import type { AddedCounts } from '../services/addSightedObjects';
  * z tej mapy)". With `what` for a single object: "Dodano: młyn", "Młyn: dopisano tę mapę do
  * obiektu w pobliżu".
  */
-export function addedToast(c: AddedCounts, what?: string): string {
+export function addedToast(
+  c: Pick<AddedCounts, 'added' | 'merged' | 'duplicates'>,
+  what?: string,
+): string {
   if (what && c.added + c.merged + c.duplicates === 1) {
     const name = what.charAt(0).toUpperCase() + what.slice(1);
     if (c.merged) return `${name}: dopisano tę mapę do obiektu w pobliżu`;

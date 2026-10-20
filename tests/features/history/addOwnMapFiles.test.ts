@@ -4,6 +4,11 @@ import type { OwnMap } from '@/shared/types/domain';
 const seen: { step: string | null; importing: string | null }[] = [];
 let importResult: 'fit' | 'placed' | 'crs' = 'fit';
 
+const autoRead = vi.fn<(id: string) => Promise<void>>(async () => {});
+// the background AI reading after placing (its own browser code stays out of this test)
+vi.mock('@/features/history/services/autoReadMap', () => ({
+  autoReadMap: (id: string) => autoRead(id),
+}));
 vi.mock('@/features/history/services/placeOwnMap', () => ({
   placeOwnMap: async () => {
     record();
@@ -61,6 +66,7 @@ describe('adding an own map as a background task', () => {
     added.length = 0;
     fitted.length = 0;
     importResult = 'fit';
+    autoRead.mockClear();
     useActivityStore.setState({ tasks: [] });
     useOwnMapsStore.setState({
       importing: null,
@@ -77,8 +83,17 @@ describe('adding an own map as a background task', () => {
     ]);
     expect(added[0]?.year).toBe(1921);
     expect(fitted).toEqual(['m1']);
+    // a scan still to be fitted is read after "Gotowe", not now
+    expect(autoRead).not.toHaveBeenCalled();
     expect(useActivityStore.getState().tasks).toEqual([]);
     expect(useOwnMapsStore.getState().importing).toBeNull();
+  });
+
+  it('a georeferenced map needs no fitting: Claude starts reading it at once', async () => {
+    importResult = 'placed';
+    expect(await addOwnMapFiles([scan])).toBe('done');
+    expect(fitted).toEqual([]);
+    expect(autoRead).toHaveBeenCalledWith('m1');
   });
 
   it('a georeference in an unknown system asks for it; the task ends either way', async () => {

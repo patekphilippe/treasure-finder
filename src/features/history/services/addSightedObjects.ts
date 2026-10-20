@@ -13,6 +13,8 @@ export interface AddedCounts {
   merged: number;
   /** already there on the same map: nothing added */
   duplicates: number;
+  /** the objects written: new ones and those that got the new map */
+  changed: ContextFeature[];
 }
 
 /**
@@ -29,7 +31,7 @@ export async function addSightedObjects(incoming: readonly ContextFeature[]): Pr
   };
   const working = [...useContextStore.getState().features];
   const changed = new Map<string, ContextFeature>();
-  const counts: AddedCounts = { added: 0, merged: 0, duplicates: 0 };
+  const counts: AddedCounts = { added: 0, merged: 0, duplicates: 0, changed: [] };
   for (const f of incoming) {
     const r = mergeSighting(working, f, opts);
     if (r.result === 'duplicate') {
@@ -43,6 +45,7 @@ export async function addSightedObjects(incoming: readonly ContextFeature[]): Pr
     else working.push(r.feature);
     changed.set(r.feature.id, r.feature);
   }
-  if (changed.size > 0) await useContextStore.getState().add([...changed.values()]);
+  counts.changed = [...changed.values()];
+  if (changed.size > 0) await useContextStore.getState().add(counts.changed);
   return counts;
 }

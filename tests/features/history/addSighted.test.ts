@@ -53,12 +53,20 @@ describe('adding objects to the one shared layer', () => {
 
   it('the same map twice is skipped, another map is added to the object', async () => {
     const first = createContextPoint('mlyn', 50.9, 15.7, 'a', [older]);
-    expect(await addSightedObjects([first])).toEqual({ added: 1, merged: 0, duplicates: 0 });
+    const one = await addSightedObjects([first]);
+    expect(one).toMatchObject({ added: 1, merged: 0, duplicates: 0 });
+    // the written objects come back (to share them, e.g. after an automatic reading)
+    expect(one.changed.map((f) => f.id)).toEqual([first.id]);
     const again = createContextPoint('mlyn', 50.9001, 15.7, 'a', [older]);
-    expect(await addSightedObjects([again])).toEqual({ added: 0, merged: 0, duplicates: 1 });
+    expect(await addSightedObjects([again])).toMatchObject({
+      added: 0,
+      merged: 0,
+      duplicates: 1,
+      changed: [],
+    });
     const second = createContextPoint('mlyn', 50.9003, 15.7, 'b', [onOwn]);
     const pair = createContextPoint('karczma', 50.9, 15.7, 'b', [onOwn]);
-    expect(await addSightedObjects([second, pair])).toEqual({
+    expect(await addSightedObjects([second, pair])).toMatchObject({
       added: 1,
       merged: 1,
       duplicates: 0,

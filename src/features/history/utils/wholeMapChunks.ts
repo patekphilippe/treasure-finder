@@ -1,9 +1,10 @@
 import { crsTransform, fromEpsg2180 } from '@/shared/lib/geo';
 import { applyHomography } from '@/shared/lib/georef';
-import { coverChunks, READ_PROFILES, type ReadProfileId } from '@/shared/lib/history';
+import { coverChunks, type ReadProfileId } from '@/shared/lib/history';
 import type { Bounds } from '@/shared/store/useMapViewStore';
 import type { OwnMap } from '@/shared/types/domain';
 import { AI_MAX_SIDE } from '../config/aiReading';
+import { readResM } from './readResM';
 
 /** a window a little under the profile's widest view: its WGS84 box grows slightly in EPSG:2180 */
 const SIZE_MARGIN = 0.9;
@@ -26,7 +27,7 @@ export function wholeMapChunks(map: OwnMap, profile: ReadProfileId): Bounds[] | 
     const p = applyHomography(map.pixelToSource, { x: x!, y: y! });
     return crs.to2180(p.x, p.y);
   });
-  const sizeM = READ_PROFILES[profile].maxResM * AI_MAX_SIDE * SIZE_MARGIN;
+  const sizeM = readResM(map, profile) * AI_MAX_SIDE * SIZE_MARGIN;
   return coverChunks(footprint, sizeM, Math.max(MIN_OVERLAP_M, sizeM * 0.05)).map((c) => {
     const corners = [
       fromEpsg2180(c.minE, c.maxN),

@@ -16,7 +16,7 @@ describe('importZip', () => {
       zones: [],
       context: [],
       maps: [
-        makeOwnMap({ id: 'm', year: 1886 }),
+        makeOwnMap({ id: 'm', year: 1886, readAt: 1_700_000_000_000 }),
         makeOwnMap({ id: 'j', image: new Blob([jpeg], { type: 'image/jpeg' }) }),
       ],
     };

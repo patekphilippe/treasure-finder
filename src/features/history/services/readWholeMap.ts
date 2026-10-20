@@ -30,6 +30,8 @@ export async function readWholeMap(
   chunks: readonly Bounds[],
   model: AiModelId,
   profile: ReadProfileId,
+  /** metres per pixel of the windows (utils/readResM) */
+  resM: number,
   onProgress: (done: number) => void,
   isCancelled: () => boolean,
 ): Promise<WholeMapResult> {
@@ -43,7 +45,7 @@ export async function readWholeMap(
   const worker = async () => {
     for (let chunk; !stopped && !isCancelled() && (chunk = queue.shift());) {
       try {
-        const r = await findLostBuildings(chunk, source, model, profile, () => {});
+        const r = await findLostBuildings(chunk, source, model, profile, () => {}, resM);
         found.push(...r.proposals);
         usage.inputTokens += r.usage.inputTokens;
         usage.outputTokens += r.usage.outputTokens;

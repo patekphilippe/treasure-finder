@@ -5,6 +5,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { glass, useToastStore } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
+import { autoReadMap } from '../services/autoReadMap';
 
 /** Bottom bar while fitting a scan: how to do it, see-through slider, done / cancel. */
 export function FitCornersBar() {
@@ -63,7 +64,11 @@ export function FitCornersBar() {
           <Button
             variant="contained"
             onClick={() => {
-              void finishFit().then(() => showToast(`Zapisano dopasowanie: ${map.name}`));
+              void finishFit().then(() => {
+                showToast(`Zapisano dopasowanie: ${map.name}`);
+                // placed: Claude reads the whole map in the background (once)
+                void autoReadMap(map.id);
+              });
             }}
           >
             Gotowe

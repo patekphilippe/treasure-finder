@@ -5,6 +5,7 @@ import { useToastStore } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { importOwnMap, NeedCrsError, type ImportOptions } from './importOwnMap';
 import { placeOwnMap } from './placeOwnMap';
+import { autoReadMap } from './autoReadMap';
 import { showOwnMap } from './showOwnMap';
 
 export interface AddOwnMapOptions extends Partial<Omit<ImportOptions, 'view'>> {
@@ -68,6 +69,8 @@ export async function addOwnMapFiles(
           } else {
             showToast(`Wczytano: ${map.name}`);
             showOwnMap(map);
+            // georeferenced already: read at once (a fitted scan is read after "Gotowe")
+            void autoReadMap(map.id);
           }
           return 'done';
         } catch (e) {

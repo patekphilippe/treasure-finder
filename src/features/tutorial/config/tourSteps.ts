@@ -28,7 +28,8 @@ export interface TourStep {
     | 'relief'
     | 'wholeMap'
     | 'compare'
-    | 'activity';
+    | 'activity'
+    | 'mapYears';
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
@@ -196,6 +197,16 @@ export const TOUR_STEPS: readonly TourStep[] = [
       'Twoje skany i GeoTIFF-y: tu je włączasz i ustawiasz krycie. Wczytujesz, dopasowujesz narożnikami i usuwasz je w Danych.',
     mode: 'field',
     sheet: 'layers',
+  },
+  {
+    id: 'maps-year',
+    target: 'maps-year',
+    title: 'Rok mapy',
+    content:
+      'Masz mapy z różnych lat: suwakiem wybierasz rok. Widać wtedy mapy z tego roku i wyraźnie obiekty z nich odczytane, reszta jest przygaszona. „Wszystkie” wraca do przełączników.',
+    mode: 'field',
+    sheet: 'layers',
+    when: 'mapYears',
   },
   {
     id: 'history-filter',

@@ -110,6 +110,10 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   ten sam obiekt z innej mapy (do 80 m) dostaje nową mapę, ponowny odczyt z tej samej mapy (do 40 m) jest
   pomijany (`shared/lib/history/mergeSighting.ts`). Etykiety i odniesienia map tworzy tylko
   `features/history/utils/toViewSource.ts`.
+- Własna mapa po umieszczeniu (po „Gotowe” przy narożnikach albo od razu z georeferencją) jest czytana przez AI cała
+  w tle (`history/services/autoReadMap.ts`, raz: `readAt`), w rozdzielczości skanu (`utils/readResM.ts`); obiekty idą
+  od razu do kontekstu i do wspólnej bazy. Suwak lat w Warstwach (`MapYearSlider`, `yearFilter`) pokazuje mapy z
+  wybranego roku i wyróżnia obiekty z nich odczytane (`utils/idsSeenInYear.ts`).
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
   tylko zalogowani członkowie, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
   (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera

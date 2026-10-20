@@ -22,9 +22,11 @@ export async function readViewSites(
   model: AiModelId,
   profile: ReadProfileId,
   onStep: (step: string) => void,
+  /** metres per pixel; a coarse scan is read at its own resolution (utils/readResM) */
+  resM = READ_PROFILES[profile].maxResM,
 ): Promise<{ sites: SiteProposal[]; usage: AiUsage; read: number }> {
   onStep('Przygotowuję obraz mapy');
-  const { image, grid } = await captureView(bounds, source, READ_PROFILES[profile].maxResM);
+  const { image, grid } = await captureView(bounds, source, resM);
   onStep('Claude czyta mapę');
   const { objects, usage } = await readMapWithAi(image, grid.w, grid.h, grid.res, model, profile);
   if (profile === 'wojskowa')

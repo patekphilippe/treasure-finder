@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
+import { MapYearSlider } from './MapYearSlider';
 import { OwnMapLayerItem } from './OwnMapLayerItem';
 
 /** Warstwy: which own maps are shown; they are loaded and managed in Dane. */
@@ -17,6 +18,7 @@ export function OwnMapsVisibility() {
       <Typography variant="overline" color="text.secondary">
         Własne mapy ({maps.length})
       </Typography>
+      <MapYearSlider />
       {maps.map((m) => (
         <OwnMapLayerItem key={m.id} map={m} onChange={(patch) => void update(m.id, patch)} />
       ))}

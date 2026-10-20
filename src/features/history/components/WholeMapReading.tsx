@@ -9,6 +9,7 @@ import { VIEW_COST_USD, VIEW_SECONDS, type AiModelId } from '../config/aiReading
 import type { ViewSource } from '../services/captureView';
 import { readWholeMap } from '../services/readWholeMap';
 import { useProposalsStore } from '../store/useProposalsStore';
+import { readResM } from '../utils/readResM';
 import { wholeMapChunks } from '../utils/wholeMapChunks';
 
 interface WholeMapReadingProps {
@@ -51,6 +52,7 @@ export function WholeMapReading({ source, map, model, profile }: WholeMapReading
         chunks,
         model,
         profile,
+        readResM(map, profile),
         (done) => {
           if (useProposalsStore.getState().stopRequested) return;
           set({ step: `Cała mapa: fragment ${Math.min(done + 1, n)} z ${n}`, share: done / n });

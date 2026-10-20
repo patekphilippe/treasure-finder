@@ -13,6 +13,7 @@ const base: Conditions = {
   wholeMap: false,
   compare: false,
   activity: false,
+  mapYears: false,
   platform: 'android',
 };
 const ids = (c: Partial<Conditions>) =>

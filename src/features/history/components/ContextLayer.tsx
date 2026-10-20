@@ -5,10 +5,12 @@ import { useUiStore } from '@/shared/store/useUiStore';
 import { CONTEXT_KINDS } from '../config/contextKinds';
 import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useContextStore } from '../store/useContextStore';
+import { useOwnMapsStore } from '../store/useOwnMapsStore';
+import { idsSeenInYear } from '../utils/idsSeenInYear';
 import { contextIcon } from '../utils/contextIcon';
 import { representativePoint } from '../utils/representativePoint';
 
-/** opacity of objects not seen on the visible map, with "Tylko z widocznej mapy" on */
+/** opacity of objects not seen on the visible map ("Tylko z widocznej mapy") or not of the slider's year */
 const DIMMED = 0.35;
 
 /**
@@ -21,7 +23,14 @@ export function ContextLayer() {
   const visible = useContextStore((s) => s.visible);
   const onlyViewMap = useContextStore((s) => s.onlyViewMap);
   const seenOnView = useSeenOnView();
-  const filter = onlyViewMap ? seenOnView : null;
+  const year = useOwnMapsStore((s) => s.yearFilter);
+  // a year on the slider: what was read from maps of that year stands out; with the view filter both
+  const filter = useMemo(() => {
+    const byView = onlyViewMap ? seenOnView : null;
+    const byYear = year === null ? null : idsSeenInYear(features, year);
+    if (byView && byYear) return new Set([...byYear].filter((id) => byView.has(id)));
+    return byYear ?? byView;
+  }, [onlyViewMap, seenOnView, year, features]);
   const showContext = useUiStore((s) => s.showContext);
   const selectedId = useUiStore((s) =>
     s.activeSheet === 'contextDetails' ? s.selectedContextId : null,

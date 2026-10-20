@@ -14,6 +14,7 @@ export function normalizeMapEntry(raw: unknown): OwnMapEntry | null {
   if (!width || !height || !epsg || h.length !== 9 || h.some((v) => v === null)) return null;
   const method = METHODS.find((m) => m === raw.method) ?? 'corners';
   const year = num(raw.year);
+  const readAt = num(raw.readAt);
   return {
     id: raw.id,
     name: str(raw.name) || 'Mapa',
@@ -27,5 +28,6 @@ export function normalizeMapEntry(raw: unknown): OwnMapEntry | null {
     visible: raw.visible !== false,
     opacity: Math.min(1, Math.max(0, num(raw.opacity) ?? 0.8)),
     ...(year !== null && { year }),
+    ...(readAt !== null && { readAt }),
   };
 }

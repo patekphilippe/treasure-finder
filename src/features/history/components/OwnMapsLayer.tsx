@@ -4,10 +4,17 @@ import { crsTransform } from '@/shared/lib/geo';
 import { invertHomography } from '@/shared/lib/georef';
 import { useOwnMapImages } from '../hooks/useOwnMapImages';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
+import { shownMaps } from '../utils/shownMaps';
 
 /** The user's own historical maps, warped onto the map above the base layer. */
 export function OwnMapsLayer() {
-  const maps = useOwnMapsStore((s) => s.maps);
+  const all = useOwnMapsStore((s) => s.maps);
+  const year = useOwnMapsStore((s) => s.yearFilter);
+  // the ones on the map, marked visible so their images are decoded
+  const maps = useMemo(
+    () => shownMaps(all, year).map((m) => ({ ...m, visible: true })),
+    [all, year],
+  );
   const images = useOwnMapImages(maps);
 
   useEffect(() => {

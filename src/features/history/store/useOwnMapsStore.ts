@@ -16,6 +16,9 @@ interface OwnMapsState {
   fitting: Fitting | null;
   /** file name of the map being read or placed right now */
   importing: string | null;
+  /** the year chosen on the slider in Warstwy: only maps of that year; null: the switches decide */
+  yearFilter: number | null;
+  setYearFilter: (year: number | null) => void;
   load: () => Promise<void>;
   add: (map: OwnMap) => Promise<void>;
   update: (id: string, patch: Partial<OwnMap>) => Promise<void>;
@@ -39,6 +42,8 @@ export const useOwnMapsStore = create<OwnMapsState>()((set, get) => ({
   maps: [],
   fitting: null,
   importing: null,
+  yearFilter: null,
+  setYearFilter: (yearFilter) => set({ yearFilter }),
   load: async () => set({ maps: await mapsRepo.getAll() }),
   add: async (map) => {
     await mapsRepo.put(map);

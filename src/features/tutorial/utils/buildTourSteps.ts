@@ -25,6 +25,8 @@ export function buildTourSteps(): Step[] {
     wholeMap: member && ownMapOn,
     compare: member && (ownMapOn || useLayersStore.getState().historicalId !== null),
     activity: useActivityStore.getState().tasks.length > 0,
+    mapYears:
+      new Set(useOwnMapsStore.getState().maps.flatMap((m) => (m.year ? [m.year] : []))).size >= 2,
     platform: detectPlatform(),
     legend:
       (roughness.result !== null && roughness.visible) || (areas.visible && areas.areas.length > 0),

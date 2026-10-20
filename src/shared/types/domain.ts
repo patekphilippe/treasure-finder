@@ -279,6 +279,8 @@ export interface OwnMap {
   opacity: number;
   /** the year the map shows, when known: objects seen on it get it */
   year?: number;
+  /** when the whole map was read by AI after it was placed: it is not read again */
+  readAt?: number;
 }
 
 /** store: rasters — derived analysis rasters cached between reloads */
