@@ -90,6 +90,10 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Cieniowanie NMT z backendu: `server/src/relief` liczy kafelki od przybliżenia 12, aplikacja pokazuje je
   przez `features/map/layers/ReliefGridLayer.ts` z kafelkiem Geoportalu jako zastępstwem, póki nasz się liczy.
   Bez backendu zostaje warstwa Geoportalu (`NmtShadedLayer`).
+- Mapy historyczne UMWD (WMS w EPSG:2180): stała siatka kafelków 512 px (`features/map/utils/wms2180GridSource.ts`),
+  najwyżej 3 zapytania naraz, ostatnio oglądane kafelki (do 250) w Cache Storage `mapa-ogladane-mapy`
+  (`viewedTileImage.ts`). To pamięć oglądania na własny użytek, nie pobieranie obszarów; regulamin UMWD
+  zabrania dalszego udostępniania, więc te mapy nie idą przez backend.
 - Komunikaty prawne są w `features/safety/config/legal.ts` — krótkie, rzeczowe, z linkiem do źródła.
 - Ciężkie biblioteki (JSZip, proj4) ładujemy dynamicznie (`import()`), żeby start na telefonie był lekki.
   `src/shared/lib/geo/crs.ts` rejestruje EPSG:2180 leniwie — bez efektów ubocznych przy imporcie.

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { findHistoricalLayer, historicalWmsParams, useLayersStore } from '@/features/layers';
 import { MAX_ZOOM } from '../config/mapLayers';
 import { PoliteWmsTileLayer } from '../layers/PoliteWmsTileLayer';
-import { Wms2180Layer } from '../layers/Wms2180Layer';
+import { HistoricalWms2180Layer } from '../layers/HistoricalWms2180Layer';
 
 /** The chosen historical map (WMS, online only), above the base map and below custom layers. */
 export function HistoricalMapLayer() {
@@ -24,13 +24,12 @@ export function HistoricalMapLayer() {
   if (!layer) return null;
   if (layer.ask2180)
     return (
-      <Wms2180Layer
+      <HistoricalWms2180Layer
         key={`${layer.id}-${JSON.stringify(params)}`}
         url={layer.url}
         layers={layer.layers}
         params={historicalWmsParams(layer, year)}
         attribution={layer.attribution}
-        tileSize={512}
         maxParallel={layer.maxParallel}
         format={layer.format}
         opacity={opacity}

@@ -52,15 +52,9 @@ export class ReliefGridLayer extends L.GridLayer {
       done(error, canvas);
     };
     const drawStandIn = () => {
-      standIn ??= drawWmts2180Tile(
-        ctx,
-        map,
-        coords,
-        size,
-        DENSITY,
-        this.relief.standIn,
-        () => !oursShown,
-      );
+      standIn ??= drawWmts2180Tile(ctx, map, coords, size, DENSITY, this.relief.standIn, {
+        isCurrent: () => !oursShown,
+      });
       return standIn;
     };
 

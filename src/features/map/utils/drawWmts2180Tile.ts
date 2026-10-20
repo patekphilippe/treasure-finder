@@ -5,13 +5,20 @@ import {
   projectedImageTransform,
   type Wmts2180Source,
 } from '@/shared/lib/tiles';
+import { loadImage } from './loadImage';
 import { tileCorners2180 } from './tileCorners2180';
+
+export interface DrawOptions {
+  /** false skips drawing: the canvas got something better meanwhile */
+  isCurrent?: () => boolean;
+  /** how a source tile is fetched (default: a plain CORS image) */
+  load?: (url: string) => Promise<HTMLImageElement | null>;
+}
 
 /**
  * Draws the EPSG:2180 WMTS tiles overlapping one map tile onto its canvas with an affine
  * transform (rotation + scale), which across one tile matches the true reprojection to well
- * under a pixel. Resolves once every source tile is drawn or failed. `isCurrent` false skips
- * drawing (the canvas got something better meanwhile).
+ * under a pixel. Resolves once every source tile is drawn or failed.
  */
 export function drawWmts2180Tile(
   ctx: CanvasRenderingContext2D,
@@ -20,7 +27,7 @@ export function drawWmts2180Tile(
   size: L.Point,
   dpr: number,
   cfg: Wmts2180Source,
-  isCurrent: () => boolean = () => true,
+  { isCurrent = () => true, load = loadImage }: DrawOptions = {},
 ): Promise<void> {
   const corners = tileCorners2180(map, coords, size);
   const picked = pickSourceTiles(corners, size.x, dpr, cfg);
@@ -36,24 +43,16 @@ export function drawWmts2180Tile(
     for (let col = range.col0; col <= range.col1; col++) {
       const e0 = cfg.originEasting + col * span;
       const n0 = cfg.originNorthing - row * span;
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
       loads.push(
-        new Promise<void>((resolve) => {
-          img.onload = () => {
-            if (isCurrent()) {
-              // source pixel (u, v) → metres (e0 + u·res, n0 − v·res) → tile pixel via m, × dpr
-              const t = projectedImageTransform(m, e0, n0, res, dpr);
-              ctx.setTransform(t.a, t.b, t.c, t.d, t.e, t.f);
-              // half-pixel overlap hides hairline seams between source tiles
-              ctx.drawImage(img, -0.5, -0.5, cfg.tileSize + 1, cfg.tileSize + 1);
-            }
-            resolve();
-          };
-          img.onerror = () => resolve();
+        load(cfg.tileUrl(level, row, col)).then((img) => {
+          if (!img || !isCurrent()) return;
+          // source pixel (u, v) → metres (e0 + u·res, n0 − v·res) → tile pixel via m, × dpr
+          const t = projectedImageTransform(m, e0, n0, res, dpr);
+          ctx.setTransform(t.a, t.b, t.c, t.d, t.e, t.f);
+          // half-pixel overlap hides hairline seams between source tiles
+          ctx.drawImage(img, -0.5, -0.5, cfg.tileSize + 1, cfg.tileSize + 1);
         }),
       );
-      img.src = cfg.tileUrl(level, row, col);
     }
   }
   return Promise.all(loads).then(() => undefined);
