@@ -5,7 +5,7 @@ import { BACKEND_ENABLED } from './backend';
  * browser sees them anyway); a build may override them. Empty: no sign-in, the community is hidden.
  */
 const DEFAULT_AUTH0_DOMAIN = 'dev-7o7mrth2w4xw60zk.us.auth0.com';
-const DEFAULT_AUTH0_CLIENT_ID = 'sYrbEMo9TJ72QKxbRA4XuEqBjjSX2kBL';
+const DEFAULT_AUTH0_CLIENT_ID = 'rlW74xYlha86b4kRS5EoqR5XIdQI97yE';
 
 export const AUTH0_DOMAIN = String(import.meta.env.VITE_AUTH0_DOMAIN || DEFAULT_AUTH0_DOMAIN);
 export const AUTH0_CLIENT_ID = String(
