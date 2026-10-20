@@ -48,35 +48,34 @@ export function App() {
   const startTourIfNew = useTutorialStore((s) => s.startIfNew);
   const admin = useIsAdminRoute();
 
-  if (admin)
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline enableColorScheme />
-        <Suspense fallback={null}>
-          <AdminPanel />
-        </Suspense>
-      </ThemeProvider>
-    );
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline enableColorScheme />
-      <AppGlobalStyles />
-      <div style={{ position: 'relative', height: '100%', overflow: 'hidden' }}>
-        {mode === 'field' ? (
-          <FieldLayout />
-        ) : (
-          <Suspense fallback={null}>
-            <AnalysisView />
-          </Suspense>
-        )}
-        <TopBar />
-        <Toast />
-        <UpdatePrompt />
-        <MovedNotice />
-        <LegalIntroDialog onSeen={startTourIfNew} />
-        <TutorialTour />
-      </div>
+      {admin ? (
+        <Suspense fallback={null}>
+          <AdminPanel />
+        </Suspense>
+      ) : (
+        <>
+          <AppGlobalStyles />
+          <div style={{ position: 'relative', height: '100%', overflow: 'hidden' }}>
+            {mode === 'field' ? (
+              <FieldLayout />
+            ) : (
+              <Suspense fallback={null}>
+                <AnalysisView />
+              </Suspense>
+            )}
+            <TopBar />
+            <Toast />
+            <MovedNotice />
+            <LegalIntroDialog onSeen={startTourIfNew} />
+            <TutorialTour />
+          </div>
+        </>
+      )}
+      {/* on both routes, so a waiting new version can be taken from the owner's panel too */}
+      <UpdatePrompt />
     </ThemeProvider>
   );
 }
