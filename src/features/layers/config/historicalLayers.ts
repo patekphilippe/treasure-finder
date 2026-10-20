@@ -33,8 +33,9 @@ export interface HistoricalLayer {
   format?: string;
 }
 
+// the wording the UMWD terms require (III.3.2): the source and the authority that provides the data
 const UMWD_ATTRIBUTION =
-  'Źródło danych: <a href="https://geoportal.dolnyslask.pl/" target="_blank" rel="noreferrer">Urząd Marszałkowski Województwa Dolnośląskiego</a>';
+  'Źródło danych: <a href="https://geoportal.dolnyslask.pl/" target="_blank" rel="noreferrer">Urząd Marszałkowski Województwa Dolnośląskiego</a> Geodeta Województwa - Wydział Geodezji i Kartografii; dane udostępnia Geodeta Województwa Dolnośląskiego';
 const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
 
 /** Lower Silesian geoportal, ArcGIS WMS: layer "1" is the image (2 and 3 are footprints). */
