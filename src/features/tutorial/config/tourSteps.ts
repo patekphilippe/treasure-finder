@@ -226,6 +226,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'history',
   },
   {
+    id: 'history-filter',
+    target: 'history-filter',
+    title: 'Obiekty z widocznej mapy',
+    content:
+      'Obiekty to jedna wspólna warstwa: każdy liczy się w analizie NMT, bez względu na to, którą mapę oglądasz. Ten przełącznik przyciemnia obiekty, których nie widziano na włączonej mapie. Ten sam młyn z kolejnej mapy nie dubluje się, tylko dostaje nową mapę; w szczegółach obiektu widać, na których mapach i z jakich lat go znaleziono.',
+    mode: 'field',
+    sheet: 'history',
+  },
+  {
     id: 'layers-sources',
     target: 'layers-sources',
     title: 'Źródła historyczne',

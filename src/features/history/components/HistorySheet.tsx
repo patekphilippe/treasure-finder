@@ -21,10 +21,12 @@ import {
   MANUAL_SOURCE,
   type ContextKind,
 } from '../config/contextKinds';
+import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useViewSource } from '../hooks/useViewSource';
 import { addSightedObjects } from '../services/addSightedObjects';
 import { useContextStore } from '../store/useContextStore';
 import { addedToast } from '../utils/addedToast';
+import { contextLine } from '../utils/contextLine';
 import { createContextPoint } from '../utils/createContextPoint';
 import { representativePoint } from '../utils/representativePoint';
 import { viewSighting } from '../utils/viewSighting';
@@ -38,7 +40,8 @@ interface HistorySheetProps {
 
 /** Own historical maps and objects from archival maps: add, show, mark at the crosshair. */
 export function HistorySheet({ onClose }: HistorySheetProps) {
-  const { features, visible, setVisible } = useContextStore();
+  const { features, visible, setVisible, onlyViewMap, setOnlyViewMap } = useContextStore();
+  const seenOnView = useSeenOnView();
   const picking = usePointDraftStore((s) => s.picking);
   const startPicking = usePointDraftStore((s) => s.startPicking);
   const showContext = useUiStore((s) => s.showContext);
@@ -71,9 +74,10 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
   // closing the sheet mid-way must not leave the crosshair on the map
   useEffect(() => () => usePointDraftStore.getState().reset(), []);
 
-  const sorted = [...features].sort(
-    (a, b) => CONTEXT_KIND_ORDER.indexOf(a.kind) - CONTEXT_KIND_ORDER.indexOf(b.kind),
-  );
+  const filter = onlyViewMap && seenOnView;
+  const sorted = features
+    .filter((f) => !filter || filter.has(f.id))
+    .sort((a, b) => CONTEXT_KIND_ORDER.indexOf(a.kind) - CONTEXT_KIND_ORDER.indexOf(b.kind));
 
   return (
     <>
@@ -103,7 +107,8 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
 
           <Typography variant="body2" color="text.secondary">
             Dawne osady, młyny, karczmy, brody i drogi. Kandydaci z analizy NMT blisko nich dostają
-            wyższy wynik. Zaznacz je, patrząc na mapę historyczną.
+            wyższy wynik, bez względu na to, którą mapę oglądasz. Zaznacz je, patrząc na mapę
+            historyczną; obiekt pamięta, na których mapach go widziano.
           </Typography>
           <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
             <Icon name="map-marked-alt" size={22} />
@@ -111,6 +116,21 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
               Pokaż na mapie ({features.length})
             </Typography>
             <Switch checked={visible} onChange={(e) => setVisible(e.target.checked)} />
+          </Stack>
+          <Stack data-tour="history-filter" direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+            <Chip
+              icon={<Icon name="filter" size={16} />}
+              label={`Tylko z widocznej mapy (${seenOnView?.size ?? 0})`}
+              color={filter ? 'primary' : 'default'}
+              variant={filter ? 'filled' : 'outlined'}
+              disabled={!seenOnView}
+              onClick={() => setOnlyViewMap(!onlyViewMap)}
+            />
+            {!seenOnView && (
+              <Typography variant="caption" color="text.secondary">
+                Włącz mapę historyczną
+              </Typography>
+            )}
           </Stack>
 
           <Divider />
@@ -163,7 +183,7 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
                       <ListItemIcon sx={{ minWidth: 36, color: k.color }}>
                         <Icon name={k.icon} size={20} />
                       </ListItemIcon>
-                      <ListItemText primary={k.label} secondary={f.source} />
+                      <ListItemText primary={k.label} secondary={contextLine(f)} />
                     </ListItemButton>
                   );
                 })}

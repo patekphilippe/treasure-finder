@@ -81,6 +81,12 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Własne mapy historyczne: magazyn `maps` (obraz do 16 Mpx + georeferencja w układzie pliku, `shared/lib/georef`),
   nie wchodzą do kopii ZIP. Skan bez georeferencji może umieścić backend (`POST /api/placements`, numer arkusza
   albo nazwy); wynik to tylko start przeciągania narożników. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka.
+- Obiekty z map (`ContextFeature`, magazyn `context`) to jedna wspólna warstwa: analiza NMT liczy każdy
+  bez względu na widoczną mapę. Pochodzenie jest w `seen` (mapa, lata, sposób); starsze obiekty mają je
+  odczytane z `source` (`shared/lib/history/legacySightings.ts`). Nowe obiekty dodaje `addSightedObjects`:
+  ten sam obiekt z innej mapy (do 80 m) dostaje nową mapę, ponowny odczyt z tej samej mapy (do 40 m) jest
+  pomijany (`shared/lib/history/mergeSighting.ts`). Etykiety i odniesienia map tworzy tylko
+  `features/history/utils/toViewSource.ts`.
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
   Turnstile, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
   (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera

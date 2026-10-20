@@ -3,14 +3,25 @@ import { GeoJSON, Marker } from 'react-leaflet';
 import { isDisputed } from '@/shared/types/community';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { CONTEXT_KINDS } from '../config/contextKinds';
+import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useContextStore } from '../store/useContextStore';
 import { contextIcon } from '../utils/contextIcon';
 import { representativePoint } from '../utils/representativePoint';
 
-/** Archival objects: an icon per object, plus the line or outline when it is not a point. */
+/** opacity of objects not seen on the visible map, with "Tylko z widocznej mapy" on */
+const DIMMED = 0.35;
+
+/**
+ * Archival objects: an icon per object, plus the line or outline when it is not a point. With
+ * "Tylko z widocznej mapy" the objects not seen on the visible map are dimmed, not hidden: they
+ * still count in the analysis.
+ */
 export function ContextLayer() {
   const features = useContextStore((s) => s.features);
   const visible = useContextStore((s) => s.visible);
+  const onlyViewMap = useContextStore((s) => s.onlyViewMap);
+  const seenOnView = useSeenOnView();
+  const filter = onlyViewMap ? seenOnView : null;
   const showContext = useUiStore((s) => s.showContext);
   const selectedId = useUiStore((s) =>
     s.activeSheet === 'contextDetails' ? s.selectedContextId : null,
@@ -36,7 +47,8 @@ export function ContextLayer() {
             color: CONTEXT_KINDS[f.kind].color,
             weight: 3,
             dashArray: '6 6',
-            fillOpacity: 0.1,
+            opacity: filter && !filter.has(f.id) ? DIMMED : 1,
+            fillOpacity: filter && !filter.has(f.id) ? 0.03 : 0.1,
           }}
           eventHandlers={{ click: () => showContext(f.id) }}
         />
@@ -54,6 +66,7 @@ export function ContextLayer() {
               !f.community ? 'local' : isDisputed(f.community) ? 'disputed' : 'shared',
             )}
             title={CONTEXT_KINDS[f.kind].label}
+            opacity={filter && !filter.has(f.id) ? DIMMED : 1}
             zIndexOffset={f.id === selectedId ? 900 : -200}
             eventHandlers={{ click: () => showContext(f.id) }}
           />
