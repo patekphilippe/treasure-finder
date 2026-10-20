@@ -9,6 +9,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { useCallback, useRef, useState } from 'react';
 import { SOURCES_PRIVACY_NOTE } from '@/features/safety';
+import { trackActivity } from '@/shared/store/trackActivity';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import type { SubmissionMode } from '@/shared/types/sources';
 import { Icon, useToastStore } from '@/shared/ui';
@@ -46,30 +47,43 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
   const canSend =
     !disabled && !busy && !empty && (!!token || member) && (mode === 'private' || consent);
 
+  // a task on the activity chip: the upload goes on with the sheet closed
   const send = async () => {
     setBusy(true);
     setError(null);
     try {
-      const form = new FormData();
-      form.append('mode', mode);
-      form.append('deviceId', deviceId());
-      if (token) form.append('turnstile', token);
-      if (text.trim()) form.append('text', text.trim());
-      if (link.trim()) form.append('link', link.trim());
-      if (consent) form.append('consentPublish', 'true');
-      const bounds = useMapViewStore.getState().bounds;
-      if (bounds) form.append('viewBbox', JSON.stringify(bounds));
-      for (const f of await Promise.all(files.map(shrinkImage))) form.append('files', f);
-      const created = await sourcesApi.send(form);
-      add({
-        id: created.id,
-        accessKey: created.accessKey,
-        mode,
-        label: files[0]?.name ?? (text.trim().slice(0, 40) || link.trim()),
-        sentAt: Date.now(),
-        view: null,
-        accepted: [],
-      });
+      await trackActivity(
+        {
+          id: 'source-upload',
+          label: 'Wysyłam źródło do analizy',
+          short: 'Wysyłam źródło',
+          step: 'Zmniejszam zdjęcia',
+          open: { mode: 'field', sheet: 'sources' },
+        },
+        async (update) => {
+          const form = new FormData();
+          form.append('mode', mode);
+          form.append('deviceId', deviceId());
+          if (token) form.append('turnstile', token);
+          if (text.trim()) form.append('text', text.trim());
+          if (link.trim()) form.append('link', link.trim());
+          if (consent) form.append('consentPublish', 'true');
+          const bounds = useMapViewStore.getState().bounds;
+          if (bounds) form.append('viewBbox', JSON.stringify(bounds));
+          for (const f of await Promise.all(files.map(shrinkImage))) form.append('files', f);
+          update({ step: 'Wysyłam na serwer' });
+          const created = await sourcesApi.send(form);
+          add({
+            id: created.id,
+            accessKey: created.accessKey,
+            mode,
+            label: files[0]?.name ?? (text.trim().slice(0, 40) || link.trim()),
+            sentAt: Date.now(),
+            view: null,
+            accepted: [],
+          });
+        },
+      );
       setFiles([]);
       setText('');
       setLink('');
@@ -77,7 +91,10 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
       showToast('Wysłano. Wynik pojawi się w „Moje źródła”, zwykle w ciągu godziny');
       onSent();
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Nie udało się wysłać');
+      const message = e instanceof Error ? e.message : 'Nie udało się wysłać';
+      setError(message);
+      // seen also when the sheet was closed meanwhile
+      showToast(message);
     } finally {
       // a Turnstile token works once
       setResetKey((k) => k + 1);

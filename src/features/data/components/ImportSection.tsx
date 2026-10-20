@@ -6,7 +6,9 @@ import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
 import { useContextStore } from '@/features/history';
 import { ImportError } from '@/shared/lib/io/parseBackup';
-import { Icon } from '@/shared/ui';
+import { trackActivity } from '@/shared/store/trackActivity';
+import { useUiStore } from '@/shared/store/useUiStore';
+import { Icon, useToastStore } from '@/shared/ui';
 import { applyImport } from '../services/applyImport';
 import { readImportFile } from '../services/readImportFile';
 import { describeImport } from '../utils/describeImport';
@@ -18,21 +20,39 @@ export function ImportSection() {
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
 
+  // a task on the activity chip; with Dane closed meanwhile the result comes as a toast
   const importFile = async (file: File) => {
     setBusy(true);
     setResult(null);
+    let done: Result;
     try {
-      const summary = await applyImport(await readImportFile(file));
+      const summary = await trackActivity(
+        {
+          id: 'import',
+          label: `Import ${file.name}`,
+          short: 'Import',
+          step: 'Czytam plik',
+          open: { mode: 'field', sheet: 'data' },
+        },
+        async (update) => {
+          const payload = await readImportFile(file);
+          update({ step: 'Zapisuję dane' });
+          return applyImport(payload);
+        },
+      );
       if (summary.contextAdded) void useContextStore.getState().load();
-      setResult({ ok: true, lines: describeImport(summary) });
+      done = { ok: true, lines: describeImport(summary) };
     } catch (e) {
-      setResult({
+      done = {
         ok: false,
         message: e instanceof ImportError ? e.message : 'Nie udało się wczytać pliku',
-      });
+      };
     } finally {
       setBusy(false);
     }
+    setResult(done);
+    if (useUiStore.getState().activeSheet !== 'data')
+      useToastStore.getState().show(done.ok ? (done.lines[0] ?? 'Wczytano') : done.message);
   };
 
   return (

@@ -14,6 +14,8 @@ interface Fitting {
 interface OwnMapsState {
   maps: OwnMap[];
   fitting: Fitting | null;
+  /** file name of the map being read or placed right now */
+  importing: string | null;
   load: () => Promise<void>;
   add: (map: OwnMap) => Promise<void>;
   update: (id: string, patch: Partial<OwnMap>) => Promise<void>;
@@ -36,6 +38,7 @@ const imageCorners = (m: OwnMap) => [
 export const useOwnMapsStore = create<OwnMapsState>()((set, get) => ({
   maps: [],
   fitting: null,
+  importing: null,
   load: async () => set({ maps: await mapsRepo.getAll() }),
   add: async (map) => {
     await mapsRepo.put(map);

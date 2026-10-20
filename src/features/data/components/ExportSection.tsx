@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { usePointsStore } from '@/features/points';
 import { useTracksStore } from '@/features/tracks';
 import { countPhotos, countPoints, countTracks, pluralPl } from '@/shared/lib/format';
+import { trackActivity } from '@/shared/store/trackActivity';
 import { Icon, useToastStore } from '@/shared/ui';
 import { createExport } from '../services/createExport';
 import { canShareFiles } from '../utils/canShareFiles';
@@ -20,7 +21,16 @@ export function ExportSection() {
   const run = async (mode: 'download' | 'share') => {
     setBusy(mode);
     try {
-      const { file, counts } = await createExport();
+      const { file, counts } = await trackActivity(
+        {
+          id: 'export',
+          label: 'Kopia ZIP',
+          short: 'Kopia ZIP',
+          step: 'Pakuję dane i zdjęcia',
+          open: { mode: 'field', sheet: 'data' },
+        },
+        () => createExport(),
+      );
       if (mode === 'share') await navigator.share({ files: [file], title: file.name });
       else downloadBlob(file);
       const maps = counts.maps ? `, ${pluralPl(counts.maps, 'mapa', 'mapy', 'map')}` : '';

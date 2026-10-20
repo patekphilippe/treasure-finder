@@ -3,91 +3,32 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
-import { fromEpsg2180 } from '@/shared/lib/geo';
-import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import type { OwnMap } from '@/shared/types/domain';
-import { ConfirmDialog, Icon, useToastStore } from '@/shared/ui';
+import { ConfirmDialog, Icon } from '@/shared/ui';
 import { OWN_MAP_ACCEPT } from '../config/ownMaps';
-import {
-  importOwnMap,
-  mapCorners2180,
-  NeedCrsError,
-  type ImportOptions,
-} from '../services/importOwnMap';
-import { placeOwnMap } from '../services/placeOwnMap';
+import { addOwnMapFiles, type AddOwnMapOptions } from '../services/addOwnMapFiles';
+import { showOwnMap } from '../services/showOwnMap';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { OwnMapImportDialog } from './OwnMapImportDialog';
 import { OwnMapItem } from './OwnMapItem';
 
 /** Own historical maps: add a GeoTIFF, an image with a world file or a plain scan; list them. */
 export function OwnMapsSection() {
-  const { maps, add, update, remove, startFit } = useOwnMapsStore();
+  const { maps, update, remove, startFit } = useOwnMapsStore();
+  const busy = useOwnMapsStore((s) => s.importing !== null);
   const closeSheet = useUiStore((s) => s.closeSheet);
-  const flyTo = useMapViewStore((s) => s.flyTo);
-  const showToast = useToastStore((s) => s.show);
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<{ files: File[]; mode: 'crs' | 'scan' } | null>(null);
-  const [busy, setBusy] = useState(false);
   const [toDelete, setToDelete] = useState<OwnMap | null>(null);
-
-  const show = (m: OwnMap) => {
-    const c = mapCorners2180(m);
-    const [lat, lng] = fromEpsg2180((c[0]!.x + c[2]!.x) / 2, (c[0]!.y + c[2]!.y) / 2);
-    closeSheet();
-    flyTo({ lat, lng, zoom: 14 });
-  };
 
   const fit = (id: string) => {
     closeSheet();
     startFit(id);
   };
 
-  const run = async (files: File[], opts: Partial<ImportOptions> = {}) => {
-    setBusy(true);
-    try {
-      const { map, needsFit } = await importOwnMap(files, {
-        ...opts,
-        view: useMapViewStore.getState().bounds,
-      });
-      await add(map);
-      if (needsFit) {
-        showToast('Przeciągnij narożniki, aby dopasować mapę');
-        fit(map.id);
-      } else {
-        showToast(`Wczytano: ${map.name}`);
-        show(map);
-      }
-    } catch (e) {
-      if (e instanceof NeedCrsError) setPending({ files, mode: 'crs' });
-      else showToast(e instanceof Error ? e.message : 'Nie udało się wczytać mapy');
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  // the backend places the scan by its names; if it cannot, the scan goes into the view
-  const runAuto = async (files: File[], turnstileToken: string | null) => {
-    const image = files.find((f) => /\.(jpe?g|png|webp)$/i.test(f.name));
-    if (!image) return run(files);
-    setBusy(true);
-    let placed: Partial<ImportOptions> = {};
-    try {
-      const p = await placeOwnMap(image, useMapViewStore.getState().bounds, turnstileToken);
-      placed = { corners: p.corners, ...(p.year && { year: p.year }) };
-      showToast(
-        p.method === 'arkusz'
-          ? `Umieszczono po numerze arkusza ${p.sheetNumber ?? ''}. Sprawdź narożniki.`
-          : `Umieszczono po nazwach: ${p.anchors.slice(0, 4).join(', ')} (błąd ok. ${p.uncertaintyM} m). Sprawdź narożniki.`,
-      );
-    } catch (e) {
-      showToast(
-        `${e instanceof Error ? e.message : 'Nie udało się umieścić mapy'}. Umieść ją ręcznie.`,
-      );
-    } finally {
-      setBusy(false);
-    }
-    await run(files, placed);
+  const run = async (files: File[], opts: AddOwnMapOptions = {}) => {
+    if ((await addOwnMapFiles(files, opts)) === 'needCrs') setPending({ files, mode: 'crs' });
   };
 
   const pick = (files: File[]) => {
@@ -114,7 +55,7 @@ export function OwnMapsSection() {
           key={m.id}
           map={m}
           onChange={(patch) => void update(m.id, patch)}
-          onShow={() => show(m)}
+          onShow={() => showOwnMap(m)}
           onFit={() => fit(m.id)}
           onDelete={() => setToDelete(m)}
         />
@@ -152,7 +93,7 @@ export function OwnMapsSection() {
           onSubmit={({ auto, ...opts }) => {
             const files = pending.files;
             setPending(null);
-            void (auto ? runAuto(files, auto.turnstileToken) : run(files, opts));
+            void run(files, auto ? { auto } : opts);
           }}
         />
       )}
