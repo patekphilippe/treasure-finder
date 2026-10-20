@@ -22,7 +22,9 @@ import {
   type ContextKind,
 } from '../config/contextKinds';
 import { useViewSource } from '../hooks/useViewSource';
+import { addSightedObjects } from '../services/addSightedObjects';
 import { useContextStore } from '../store/useContextStore';
+import { addedToast } from '../utils/addedToast';
 import { createContextPoint } from '../utils/createContextPoint';
 import { representativePoint } from '../utils/representativePoint';
 import { viewSighting } from '../utils/viewSighting';
@@ -36,7 +38,7 @@ interface HistorySheetProps {
 
 /** Own historical maps and objects from archival maps: add, show, mark at the crosshair. */
 export function HistorySheet({ onClose }: HistorySheetProps) {
-  const { features, visible, setVisible, add } = useContextStore();
+  const { features, visible, setVisible } = useContextStore();
   const picking = usePointDraftStore((s) => s.picking);
   const startPicking = usePointDraftStore((s) => s.startPicking);
   const showContext = useUiStore((s) => s.showContext);
@@ -56,14 +58,14 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
           'reczne',
         );
         const point = createContextPoint(kind, lat, lng, view?.label ?? MANUAL_SOURCE, [seen]);
-        void add([point]).then(() => {
-          showToast(`Dodano: ${CONTEXT_KINDS[kind].label.toLowerCase()}`);
+        void addSightedObjects([point]).then((counts) => {
+          showToast(addedToast(counts, CONTEXT_KINDS[kind].label.toLowerCase()));
           setVisible(true);
         });
         setKind(null);
         usePointDraftStore.getState().reset();
       }),
-    [kind, view, add, setVisible, showToast],
+    [kind, view, setVisible, showToast],
   );
 
   // closing the sheet mid-way must not leave the crosshair on the map

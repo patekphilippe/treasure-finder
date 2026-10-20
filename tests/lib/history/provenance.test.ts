@@ -109,7 +109,11 @@ describe('maps of an older object, read from its description', () => {
 
   it('the archival orthophoto with the year shown, and without it', () => {
     expect(legacySightings('auto (AI): Ortofotomapa archiwalna 2004, osada', known)).toEqual([
-      { map: { ...ORTHO, time: 2004 }, how: 'ai', years: { from: 2004, to: 2004 } },
+      {
+        map: { ...ORTHO, time: 2004, label: 'Ortofotomapa archiwalna 2004' },
+        how: 'ai',
+        years: { from: 2004, to: 2004 },
+      },
     ]);
     expect(legacySightings('Ortofotomapa archiwalna (od 1995)', known)).toEqual([
       { map: ORTHO, how: 'reczne' },

@@ -16,10 +16,11 @@ import { useMembership } from '@/shared/store/useMembership';
 import { Icon, TurnstileWidget, useToastStore } from '@/shared/ui';
 import { AI_MAX_SIDE, AI_MODELS, AI_READING_NOTE, type AiModelId } from '../config/aiReading';
 import { useViewSource } from '../hooks/useViewSource';
+import { addSightedObjects } from '../services/addSightedObjects';
 import { findLostBuildings } from '../services/findLostBuildings';
 import { useAiSettings } from '../store/useAiSettings';
-import { useContextStore } from '../store/useContextStore';
 import { useProposalsStore } from '../store/useProposalsStore';
+import { addedToast } from '../utils/addedToast';
 import { proposalToContext } from '../utils/proposalToContext';
 import { CompareMaps } from './CompareMaps';
 import { ProposalItem } from './ProposalItem';
@@ -38,7 +39,6 @@ export function AiReadingSection() {
   const maxViewKm = Math.round((READ_PROFILES[profile].maxResM * AI_MAX_SIDE) / 1000);
   const member = useMembership((st) => st.code !== null);
   const { proposals, step, usage, read, set, drop } = useProposalsStore();
-  const add = useContextStore((s) => s.add);
   const flyTo = useMapViewStore((s) => s.flyTo);
   const showToast = useToastStore((s) => s.show);
   const source = useViewSource();
@@ -69,9 +69,9 @@ export function AiReadingSection() {
 
   const accept = async (ids: string[]) => {
     const chosen = proposals.filter((p) => ids.includes(p.id));
-    await add(chosen.map(proposalToContext));
+    const counts = await addSightedObjects(chosen.map(proposalToContext));
     chosen.forEach((p) => drop(p.id));
-    showToast(`Dodano do kontekstu: ${chosen.length}`);
+    showToast(addedToast(counts));
   };
 
   const isUmwd = source?.kind === 'wms' && source.layer.url.includes('dolnyslask');

@@ -3,7 +3,7 @@ import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useContextStore } from '@/features/history';
+import { addedToast, addSightedObjects } from '@/features/history';
 import { bottomSheetOffset } from '@/shared/lib/bottomSheetOffset';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { Icon, useToastStore } from '@/shared/ui';
@@ -19,7 +19,6 @@ interface AnalysisItemProps {
 /** One sent source: status, what was read, objects to accept into the archival context. */
 export function AnalysisItem({ item }: AnalysisItemProps) {
   const { update, remove, show, shownId } = useSourcesStore();
-  const addContext = useContextStore((s) => s.add);
   const flyTo = useMapViewStore((s) => s.flyTo);
   const showToast = useToastStore((s) => s.show);
   const status = item.view?.status ?? 'nowe';
@@ -28,13 +27,11 @@ export function AnalysisItem({ item }: AnalysisItemProps) {
   const open = objects.map((_, i) => i).filter((i) => !item.accepted.includes(i));
 
   const accept = async (indices: number[]) => {
-    await addContext(indices.map((i) => toContextFeature(objects[i]!, item.label)));
-    update(item.id, { accepted: [...item.accepted, ...indices] });
-    showToast(
-      indices.length === 1
-        ? 'Dodano do obiektów archiwalnych'
-        : `Dodano obiektów: ${indices.length}`,
+    const counts = await addSightedObjects(
+      indices.map((i) => toContextFeature(objects[i]!, item.label)),
     );
+    update(item.id, { accepted: [...item.accepted, ...indices] });
+    showToast(addedToast(counts));
   };
 
   const showOnMap = () => {

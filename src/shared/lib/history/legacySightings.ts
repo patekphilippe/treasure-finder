@@ -36,7 +36,7 @@ export function legacySightings(source: string, known: readonly KnownMap[]): Sig
       const year = /^\s+(\d{4})(?!\d)/.exec(source.slice(end));
       if (year && k.ref.kind === 'wms') {
         const time = Number(year[1]);
-        sighting.map = { ...k.ref, time };
+        sighting.map = { ...k.ref, time, label: `${k.ref.label} ${time}` };
         sighting.years = { from: time, to: time };
       }
     } else if (k.years) sighting.years = k.years;

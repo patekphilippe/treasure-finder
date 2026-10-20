@@ -1,4 +1,5 @@
 import type { ContextFeature } from '@/shared/types/domain';
+import { PROPOSAL_OPTIONS } from './aiReading';
 
 export type ContextKind = ContextFeature['kind'];
 
@@ -26,3 +27,8 @@ export const CONTEXT_KIND_ORDER: readonly ContextKind[] = [
 
 /** `source` of objects marked by hand without a historical map on */
 export const MANUAL_SOURCE = 'zaznaczone ręcznie';
+
+/** the same object on another map may be drawn this far off (as far as a site's buildings link) */
+export const SAME_OBJECT_M = PROPOSAL_OPTIONS.linkM;
+/** on a map it was already seen on: a second reading of the same object, not a second object */
+export const SAME_MAP_DUPLICATE_M = 40;

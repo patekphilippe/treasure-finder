@@ -28,3 +28,4 @@ export {
   type ReadProfile,
   type ReadProfileId,
 } from './readProfiles';
+export { mergeSighting, type MergeOptions, type MergeResult } from './mergeSighting';
