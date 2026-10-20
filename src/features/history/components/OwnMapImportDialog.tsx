@@ -7,20 +7,31 @@ import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { BACKEND_ENABLED } from '@/shared/config/backend';
 import { MAP_CRS } from '@/shared/lib/geo';
 import type { SheetSeries } from '@/shared/lib/georef';
+import { useMembership } from '@/shared/store/useMembership';
+import { TurnstileWidget } from '@/shared/ui';
 import type { ImportOptions } from '../services/importOwnMap';
+
+/** "auto": ask the backend to place the scan by its names (one AI reading) */
+export type DialogChoice = Pick<ImportOptions, 'epsg' | 'sheet'> & {
+  auto?: { turnstileToken: string | null };
+};
 
 interface OwnMapImportDialogProps {
   /** crs: the file is georeferenced but its system is unknown; scan: place a plain image */
   mode: 'crs' | 'scan';
   fileName: string;
-  onSubmit: (opts: Pick<ImportOptions, 'epsg' | 'sheet'>) => void;
+  /** a JPEG, PNG or WebP scan: the backend can read it */
+  canAuto: boolean;
+  onSubmit: (choice: DialogChoice) => void;
   onClose: () => void;
 }
 
-const SERIES: readonly { id: SheetSeries | 'none'; label: string; example: string }[] = [
+const SERIES: readonly { id: SheetSeries | 'none' | 'auto'; label: string; example: string }[] = [
+  { id: 'auto', label: 'Automatycznie: po nazwach na mapie (AI)', example: '' },
   { id: 'none', label: 'Bez numeru: umieść w widoku', example: '' },
   { id: 'messtischblatt', label: 'Messtischblatt 1:25 000', example: 'np. 4868' },
   { id: 'wig100', label: 'WIG 1:100 000', example: 'np. P47 S40' },
@@ -28,9 +39,19 @@ const SERIES: readonly { id: SheetSeries | 'none'; label: string; example: strin
 ];
 
 /** Mounted only while open. Asks for what the file does not say: its system, or where the scan goes. */
-export function OwnMapImportDialog({ mode, fileName, onSubmit, onClose }: OwnMapImportDialogProps) {
+export function OwnMapImportDialog({
+  mode,
+  fileName,
+  canAuto,
+  onSubmit,
+  onClose,
+}: OwnMapImportDialogProps) {
+  const auto = canAuto && BACKEND_ENABLED;
+  const member = useMembership((s) => s.code !== null);
   const [epsg, setEpsg] = useState(2180);
-  const [series, setSeries] = useState<SheetSeries | 'none'>('none');
+  const [series, setSeries] = useState<SheetSeries | 'none' | 'auto'>(auto ? 'auto' : 'none');
+  const [token, setToken] = useState<string | null>(null);
+  const onToken = useCallback((t: string | null) => setToken(t), []);
   const [number, setNumber] = useState('');
   const example = SERIES.find((s) => s.id === series)?.example;
 
@@ -75,15 +96,26 @@ export function OwnMapImportDialog({ mode, fileName, onSubmit, onClose }: OwnMap
                 size="small"
                 label="Seria map"
                 value={series}
-                onChange={(e) => setSeries(e.target.value as SheetSeries | 'none')}
+                onChange={(e) => setSeries(e.target.value as SheetSeries | 'none' | 'auto')}
               >
-                {SERIES.map((s) => (
+                {SERIES.filter((s) => auto || s.id !== 'auto').map((s) => (
                   <MenuItem key={s.id} value={s.id}>
                     {s.label}
                   </MenuItem>
                 ))}
               </TextField>
-              {series !== 'none' && (
+              {series === 'auto' && (
+                <>
+                  <Typography variant="caption" color="text.secondary">
+                    Claude odczyta numer arkusza, ramkę i nazwy miejscowości, a serwer znajdzie je
+                    na dzisiejszej mapie. Idzie tylko pomniejszony obraz i obecny widok jako
+                    podpowiedź; to jeden odczyt z dziennego limitu. Najlepiej działa, gdy mapa w tle
+                    pokazuje okolicę skanu.
+                  </Typography>
+                  {!member && <TurnstileWidget onToken={onToken} resetKey={0} />}
+                </>
+              )}
+              {series !== 'none' && series !== 'auto' && (
                 <TextField
                   size="small"
                   label="Numer arkusza"
@@ -106,12 +138,17 @@ export function OwnMapImportDialog({ mode, fileName, onSubmit, onClose }: OwnMap
         </Button>
         <Button
           variant="contained"
-          disabled={mode === 'scan' && series !== 'none' && !number.trim()}
+          disabled={
+            mode === 'scan' &&
+            (series === 'auto' ? !member && !token : series !== 'none' && !number.trim())
+          }
           onClick={() =>
             onSubmit(
               mode === 'crs'
                 ? { epsg }
-                : { sheet: series === 'none' ? undefined : { series, number } },
+                : series === 'auto'
+                  ? { auto: { turnstileToken: member ? null : token } }
+                  : { sheet: series === 'none' ? undefined : { series, number } },
             )
           }
         >

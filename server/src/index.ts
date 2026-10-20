@@ -3,6 +3,7 @@ import type { Env } from './env';
 import { adminRoutes } from './admin/routes';
 import { communityRoutes } from './community/routes';
 import { aiKeyStatus } from './aiKeyStatus';
+import { placeImage } from './placements/routes';
 import { readView } from './readings/routes';
 import { serveContext } from './context/routes';
 import { serveRelief } from './relief/routes';
@@ -51,6 +52,8 @@ export default {
       return serveContext(env, pathname.slice('/api/kontekst/'.length), cors);
     if (request.method === 'POST' && pathname === '/api/readings')
       return readView(request, env, cors, Date.now());
+    if (request.method === 'POST' && pathname === '/api/placements')
+      return placeImage(request, env, cors, Date.now());
     if (request.method === 'POST' && pathname === '/api/submissions')
       return createSubmission(request, env, cors, Date.now());
     const one = /^\/api\/submissions\/([A-Za-z0-9_-]+)$/.exec(pathname);

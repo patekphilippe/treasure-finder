@@ -116,6 +116,21 @@ odczyt to jedno wywołanie ze schematem JSON.
 - **Prywatność:** obraz służy tylko do tego jednego wywołania, worker go nie zapisuje. Wraz z nim
   idzie losowy identyfikator urządzenia (do limitu) i nic więcej.
 
+## Umieszczanie skanu (`POST /api/placements`)
+
+Przy imporcie własnej mapy bez georeferencji (Historia → Własne mapy, opcja „Automatycznie: po nazwach
+na mapie”) aplikacja wysyła pomniejszony obraz (do 1568 px) i obecny widok jako podpowiedź. Worker
+pyta Claude (Haiku, jedno wywołanie) o serię, numer arkusza, ramkę i nazwy, bez obiektów, więc
+odpowiedź jest krótka, a potem używa `placeMap` z potoku zgłoszeń: najpierw numer arkusza z ramką
+(dokładność starego układu, ok. 150 m), potem nazwy z gazetera. Zwraca narożniki obrazu.
+
+- To tylko punkt startowy: aplikacja od razu otwiera przeciąganie narożników. Nazwy na małym wycinku
+  potrafią wskazać miejsce o setki metrów obok (etykieta lasu zamiast wsi, gmina zamiast miejscowości),
+  więc przy mniej niż sześciu nazwach `placeByNames` wymaga dopasowania z błędem do 150 m, a inaczej
+  zwraca nic. Wtedy aplikacja kładzie skan w widoku jak dotąd.
+- Ochrona i koszt jak przy odczycie widoku: Turnstile albo kod członka, jeden odczyt z dziennego
+  limitu, wspólny budżet; obraz nie jest zapisywany.
+
 ## Dane osobowe (RODO)
 
 - **Co zbieramy:** to, co ktoś sam wyśle (zdjęcie, tekst, link), widok mapy w chwili wysłania, losowy identyfikator urządzenia oraz skrót (hash) adresu IP do limitów. Pełnego adresu IP nie zapisujemy.

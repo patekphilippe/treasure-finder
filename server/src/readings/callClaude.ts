@@ -1,5 +1,12 @@
-import type { ReadProfile } from '@/shared/lib/history/readProfiles';
 import type { PipelineModel, TokenUsage } from '../pipeline/pricing';
+
+/** What to ask about one image: instructions, the JSON schema of the answer and its length. */
+export interface ImageQuestion {
+  system?: string;
+  text: string;
+  schema: object;
+  maxTokens: number;
+}
 
 const API = 'https://api.anthropic.com/v1/messages';
 
@@ -15,15 +22,12 @@ export type ClaudeAnswer =
   | { ok: true; json: unknown; usage: TokenUsage }
   | { ok: false; status: number; message: string; usage: TokenUsage | null };
 
-/** One synchronous Messages call: the view image, the profile's prompt and its JSON schema. */
+/** One synchronous Messages call about one image, answered in the question's JSON schema. */
 export async function callClaude(
   apiKey: string,
   model: PipelineModel,
-  profile: ReadProfile,
+  question: ImageQuestion,
   image: File,
-  w: number,
-  h: number,
-  res: number,
 ): Promise<ClaudeAnswer> {
   let response: Response;
   try {
@@ -36,8 +40,9 @@ export async function callClaude(
       },
       body: JSON.stringify({
         model,
-        max_tokens: profile.maxTokens,
-        output_config: { format: { type: 'json_schema', schema: profile.schema } },
+        max_tokens: question.maxTokens,
+        ...(question.system ? { system: question.system } : {}),
+        output_config: { format: { type: 'json_schema', schema: question.schema } },
         messages: [
           {
             role: 'user',
@@ -46,7 +51,7 @@ export async function callClaude(
                 type: 'image',
                 source: { type: 'base64', media_type: image.type, data: await toBase64(image) },
               },
-              { type: 'text', text: profile.prompt(w, h, res) },
+              { type: 'text', text: question.text },
             ],
           },
         ],

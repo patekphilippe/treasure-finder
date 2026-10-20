@@ -28,6 +28,8 @@ export interface ImportOptions {
   epsg?: number;
   /** a scan: place it by its sheet number… */
   sheet?: { series: SheetSeries; number: string };
+  /** …or at the corners the backend found (top-left, top-right, bottom-right, bottom-left)… */
+  corners?: { lat: number; lng: number }[];
   /** …or in the middle of the current view */
   view?: Bounds | null;
 }
@@ -53,6 +55,13 @@ const rescale = (h: Homography, sx: number, sy: number): number[] => [
 ];
 
 function scanPlacement(w: number, h: number, opts: ImportOptions): Homography {
+  if (opts.corners?.length === 4) {
+    const dst = opts.corners.map(({ lat, lng }) => {
+      const [x, y] = toEpsg2180(lat, lng);
+      return { x, y };
+    });
+    return fitHomography(corners(w, h), dst);
+  }
   if (opts.sheet) {
     const b = sheetCorners(opts.sheet.series, opts.sheet.number);
     if (!b) throw new Error('Nie rozpoznaję numeru arkusza');

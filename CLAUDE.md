@@ -79,7 +79,8 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   Service worker podaje kafelki z tych cache przed siecią i sam nic nie zapisuje. Kafelki NMT wybiera
   `shared/lib/tiles/pickSourceTiles.ts`, wspólne dla warstwy i pobierania: zmiana w jednym miejscu.
 - Własne mapy historyczne: magazyn `maps` (obraz do 16 Mpx + georeferencja w układzie pliku, `shared/lib/georef`),
-  nie wchodzą do kopii ZIP. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka.
+  nie wchodzą do kopii ZIP. Skan bez georeferencji może umieścić backend (`POST /api/placements`, numer arkusza
+  albo nazwy); wynik to tylko start przeciągania narożników. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka.
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
   Turnstile, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
   (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera

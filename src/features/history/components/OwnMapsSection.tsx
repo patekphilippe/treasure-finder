@@ -15,6 +15,7 @@ import {
   NeedCrsError,
   type ImportOptions,
 } from '../services/importOwnMap';
+import { placeOwnMap } from '../services/placeOwnMap';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { OwnMapImportDialog } from './OwnMapImportDialog';
 import { OwnMapItem } from './OwnMapItem';
@@ -63,6 +64,30 @@ export function OwnMapsSection() {
     } finally {
       setBusy(false);
     }
+  };
+
+  // the backend places the scan by its names; if it cannot, the scan goes into the view
+  const runAuto = async (files: File[], turnstileToken: string | null) => {
+    const image = files.find((f) => /\.(jpe?g|png|webp)$/i.test(f.name));
+    if (!image) return run(files);
+    setBusy(true);
+    let corners: ImportOptions['corners'];
+    try {
+      const p = await placeOwnMap(image, useMapViewStore.getState().bounds, turnstileToken);
+      corners = p.corners;
+      showToast(
+        p.method === 'arkusz'
+          ? `Umieszczono po numerze arkusza ${p.sheetNumber ?? ''}. Sprawdź narożniki.`
+          : `Umieszczono po nazwach: ${p.anchors.slice(0, 4).join(', ')} (błąd ok. ${p.uncertaintyM} m). Sprawdź narożniki.`,
+      );
+    } catch (e) {
+      showToast(
+        `${e instanceof Error ? e.message : 'Nie udało się umieścić mapy'}. Umieść ją ręcznie.`,
+      );
+    } finally {
+      setBusy(false);
+    }
+    await run(files, corners ? { corners } : {});
   };
 
   const pick = (files: File[]) => {
@@ -122,11 +147,12 @@ export function OwnMapsSection() {
         <OwnMapImportDialog
           mode={pending.mode}
           fileName={pending.files.map((f) => f.name).join(', ')}
+          canAuto={pending.files.some((f) => /\.(jpe?g|png|webp)$/i.test(f.name))}
           onClose={() => setPending(null)}
-          onSubmit={(opts) => {
+          onSubmit={({ auto, ...opts }) => {
             const files = pending.files;
             setPending(null);
-            void run(files, opts);
+            void (auto ? runAuto(files, auto.turnstileToken) : run(files, opts));
           }}
         />
       )}

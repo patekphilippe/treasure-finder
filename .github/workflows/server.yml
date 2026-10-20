@@ -12,6 +12,7 @@ on:
       - 'src/shared/types/sources.ts'
       - 'src/shared/types/community.ts'
       - 'src/shared/types/readings.ts'
+      - 'src/shared/types/placement.ts'
       - '.github/workflows/server.yml'
   workflow_dispatch:
 

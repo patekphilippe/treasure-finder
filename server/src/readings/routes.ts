@@ -55,11 +55,12 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
   const answer = await callClaude(
     env.ANTHROPIC_API_KEY,
     req.model,
-    profile,
+    {
+      text: profile.prompt(req.w, req.h, req.res),
+      schema: profile.schema,
+      maxTokens: profile.maxTokens,
+    },
     req.image,
-    req.w,
-    req.h,
-    req.res,
   );
   if (answer.usage) await addSpending(env.DB, now, costUsd(req.model, answer.usage, false));
   if (!answer.ok) return fail(answer.status, answer.message, cors);
