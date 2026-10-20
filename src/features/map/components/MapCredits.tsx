@@ -37,7 +37,7 @@ export function MapCredits() {
           color: 'text.secondary',
         })}
       >
-        <Icon name="info" size={14} />
+        <Icon name="info-circle" size={20} />
       </ButtonBase>
       <Popper
         open={open && anchor !== null}
