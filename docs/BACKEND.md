@@ -161,7 +161,7 @@ Bez domeny Auth0 społeczność i panel są zamknięte, a reszta aplikacji dzia�
 
 ## Odczyt widoku mapy (`POST /api/readings`)
 
-„Szukaj zaginionej zabudowy” w aplikacji (Warstwy → Mapa historyczna → Własne mapy i obiekty)
+„Szukaj zaginionej zabudowy” w aplikacji (Analizy → Odczyt mapy historycznej (AI))
 wysyła obraz widoku mapy historycznej i rodzaj mapy (`profile`), a worker od razu pyta Claude
 (zwykłe Messages API, bez Batch, bo użytkownik czeka na wynik) z promptem i schematem JSON tego
 profilu. Zwraca listę obiektów w pikselach obrazu; porównanie z BDOT10k i grupowanie w zaginione wsie

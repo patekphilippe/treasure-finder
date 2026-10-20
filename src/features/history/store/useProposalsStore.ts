@@ -36,7 +36,7 @@ function mirror(s: ProposalsState) {
     share: s.share,
     step: s.step,
     cancel: s.wholeRunning && !s.stopRequested ? s.requestStop : null,
-    open: { mode: 'field', sheet: 'history' },
+    open: { mode: 'field', sheet: 'analyses', card: 'ai' },
   });
 }
 

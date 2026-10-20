@@ -1,6 +1,7 @@
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { NmtAnalysisCard } from '@/features/analysis/field';
+import { AiReadingCard } from '@/features/history';
 import { RoughnessCard } from '@/features/roughness';
 import { useSourcesActivity } from '@/features/sources';
 import { useActivityStore } from '@/shared/store/useActivityStore';
@@ -34,6 +35,7 @@ export function AnalysesSheet({ onClose }: AnalysesSheetProps) {
         </Typography>
         <NmtAnalysisCard />
         <RoughnessCard />
+        <AiReadingCard />
       </Stack>
     </Sheet>
   );

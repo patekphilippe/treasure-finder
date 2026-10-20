@@ -11,3 +11,4 @@ export { useOwnMapsStore } from './store/useOwnMapsStore';
 export { ProposalsLayer } from './components/ProposalsLayer';
 export { useCommunitySignIn } from './hooks/useCommunitySignIn';
 export { CONTEXT_KINDS } from './config/contextKinds';
+export { AiReadingCard } from './components/AiReadingCard';

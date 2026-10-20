@@ -191,44 +191,6 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'history',
   },
   {
-    id: 'ai-reading',
-    target: 'ai-reading',
-    title: 'Zaginiona zabudowa (AI)',
-    content:
-      'Claude czyta przez serwer analizy widoczny fragment mapy historycznej: domy, młyny, karczmy, folwarki. Aplikacja porównuje je z dzisiejszymi budynkami i proponuje miejsca, których już nie ma. Przyjęte trafiają do kontekstu i podnoszą wynik kandydatów w pobliżu.',
-    mode: 'field',
-    sheet: 'history',
-  },
-  {
-    id: 'ai-profile',
-    target: 'ai-profile',
-    title: 'Rodzaj mapy',
-    content:
-      'Mapa topograficzna: Claude szuka zabudowy, młynów i karczm. Mapa wojskowa (np. sztabowa z 1945 r.): linii frontu, okopów, stanowisk, przepraw i mogił. Pozycje ostrzegają przed niewybuchami u pobliskich kandydatów, a kandydaci tuż przy mogile stają się chronieni.',
-    mode: 'field',
-    sheet: 'history',
-  },
-  {
-    id: 'ai-whole-map',
-    target: 'ai-whole-map',
-    when: 'wholeMap',
-    title: 'Cała mapa naraz',
-    content:
-      'Przy własnej mapie członkowie społeczności mogą przeczytać ją całą jednym przyciskiem: aplikacja dzieli ją na fragmenty, pokazuje ich liczbę, koszt i czas, a potem łączy wyniki z sąsiednich fragmentów.',
-    mode: 'field',
-    sheet: 'history',
-  },
-  {
-    id: 'ai-compare',
-    target: 'ai-compare',
-    when: 'compare',
-    title: 'Porównaj dwie mapy',
-    content:
-      'Ten sam widok na dwóch mapach z różnych lat. Co jest na obu, jest pewniejsze; co jest tylko na jednej, powstało albo zniknęło między nimi. Opis każdej propozycji mówi, na której mapie ją widać.',
-    mode: 'field',
-    sheet: 'history',
-  },
-  {
     id: 'history-add',
     target: 'history-add',
     title: 'Obiekty z map archiwalnych',
@@ -334,6 +296,48 @@ export const TOUR_STEPS: readonly TourStep[] = [
       'Szybka wskazówka bez arkusza: sprawdza widoczny fragment mapy i zaznacza, gdzie jest dużo dołków, kopców i rowów. Zabudowa, drogi i woda są pomijane.',
     mode: 'field',
     sheet: 'analyses',
+  },
+  {
+    id: 'ai-reading',
+    target: 'ai-reading',
+    title: 'Zaginiona zabudowa (AI)',
+    content:
+      'Claude czyta przez serwer analizy widoczny fragment mapy historycznej: domy, młyny, karczmy, folwarki. Aplikacja porównuje je z dzisiejszymi budynkami i proponuje miejsca, których już nie ma. Przyjęte trafiają do kontekstu i podnoszą wynik kandydatów w pobliżu.',
+    mode: 'field',
+    sheet: 'analyses',
+    card: 'ai',
+  },
+  {
+    id: 'ai-profile',
+    target: 'ai-profile',
+    title: 'Rodzaj mapy',
+    content:
+      'Mapa topograficzna: Claude szuka zabudowy, młynów i karczm. Mapa wojskowa (np. sztabowa z 1945 r.): linii frontu, okopów, stanowisk, przepraw i mogił. Pozycje ostrzegają przed niewybuchami u pobliskich kandydatów, a kandydaci tuż przy mogile stają się chronieni.',
+    mode: 'field',
+    sheet: 'analyses',
+    card: 'ai',
+  },
+  {
+    id: 'ai-whole-map',
+    target: 'ai-whole-map',
+    when: 'wholeMap',
+    title: 'Cała mapa naraz',
+    content:
+      'Przy własnej mapie członkowie społeczności mogą przeczytać ją całą jednym przyciskiem: aplikacja dzieli ją na fragmenty, pokazuje ich liczbę, koszt i czas, a potem łączy wyniki z sąsiednich fragmentów.',
+    mode: 'field',
+    sheet: 'analyses',
+    card: 'ai',
+  },
+  {
+    id: 'ai-compare',
+    target: 'ai-compare',
+    when: 'compare',
+    title: 'Porównaj dwie mapy',
+    content:
+      'Ten sam widok na dwóch mapach z różnych lat. Co jest na obu, jest pewniejsze; co jest tylko na jednej, powstało albo zniknęło między nimi. Opis każdej propozycji mówi, na której mapie ją widać.',
+    mode: 'field',
+    sheet: 'analyses',
+    card: 'ai',
   },
   {
     id: 'data-install',

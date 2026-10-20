@@ -30,7 +30,6 @@ import { contextLine } from '../utils/contextLine';
 import { createContextPoint } from '../utils/createContextPoint';
 import { representativePoint } from '../utils/representativePoint';
 import { viewSighting } from '../utils/viewSighting';
-import { AiReadingSection } from './AiReadingSection';
 import { CommunitySection } from './CommunitySection';
 import { OwnMapsSection } from './OwnMapsSection';
 
@@ -98,10 +97,6 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
           </Button>
 
           <OwnMapsSection />
-
-          <Divider />
-
-          <AiReadingSection />
 
           <Divider />
 
