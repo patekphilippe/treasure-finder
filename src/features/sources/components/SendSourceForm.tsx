@@ -58,7 +58,7 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
           label: 'Wysyłam źródło do analizy',
           short: 'Wysyłam źródło',
           step: 'Zmniejszam zdjęcia',
-          open: { mode: 'field', sheet: 'sources' },
+          open: { mode: 'field', sheet: 'analyses', card: 'sources' },
         },
         async (update) => {
           const form = new FormData();

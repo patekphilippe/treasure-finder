@@ -3,7 +3,7 @@ import Typography from '@mui/material/Typography';
 import { NmtAnalysisCard } from '@/features/analysis/field';
 import { AiReadingCard } from '@/features/history';
 import { RoughnessCard } from '@/features/roughness';
-import { useSourcesActivity } from '@/features/sources';
+import { SourcesCard, useSourcesActivity } from '@/features/sources';
 import { useActivityStore } from '@/shared/store/useActivityStore';
 import { Sheet } from '@/shared/ui';
 import { ActivityList } from './ActivityList';
@@ -36,6 +36,7 @@ export function AnalysesSheet({ onClose }: AnalysesSheetProps) {
         <NmtAnalysisCard />
         <RoughnessCard />
         <AiReadingCard />
+        <SourcesCard />
       </Stack>
     </Sheet>
   );

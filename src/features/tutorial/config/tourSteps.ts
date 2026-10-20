@@ -209,15 +209,6 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'history',
   },
   {
-    id: 'layers-sources',
-    target: 'layers-sources',
-    title: 'Źródła historyczne',
-    content:
-      'Masz zdjęcie starej mapy, fragment kroniki albo wspomnienie dziadka? Dodaj je tutaj: AI odczyta młyny, karczmy i dawną zabudowę, pokaże je na mapie, a Ty wybierzesz, co zachować.',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
     id: 'layers-search-zones',
     target: 'layers-search-zones',
     title: 'Strefy poszukiwań',
@@ -338,6 +329,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     mode: 'field',
     sheet: 'analyses',
     card: 'ai',
+  },
+  {
+    id: 'analyses-sources',
+    target: 'analyses-sources',
+    title: 'Zdjęcie mapy lub opis',
+    content:
+      'Masz zdjęcie starej mapy, fragment kroniki albo wspomnienie dziadka? Wyślij je do analizy na serwerze: AI odczyta młyny, karczmy i dawną zabudowę, pokaże je na mapie, a Ty wybierzesz, co zachować. Wynik przychodzi zwykle w ciągu godziny; chip u góry da znać.',
+    mode: 'field',
+    sheet: 'analyses',
   },
   {
     id: 'data-install',

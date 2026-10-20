@@ -34,7 +34,7 @@ export function SourcesActivityRow({ onNavigate }: SourcesActivityRowProps) {
       <Button
         size="small"
         onClick={() => {
-          goTo({ mode: 'field', sheet: 'sources' });
+          goTo({ mode: 'field', sheet: 'analyses', card: 'sources' });
           onNavigate?.();
         }}
       >

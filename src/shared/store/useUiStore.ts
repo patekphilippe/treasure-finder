@@ -14,7 +14,6 @@ export type SheetId =
   | 'area'
   | 'history'
   | 'contextDetails'
-  | 'sources'
   | 'analyses';
 
 /** cards of the Analizy sheet */
