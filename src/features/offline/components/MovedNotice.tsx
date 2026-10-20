@@ -10,7 +10,7 @@ import { useUiStore } from '@/shared/store/useUiStore';
 import { glass, Icon } from '@/shared/ui';
 
 /**
- * On the old GitHub Pages address: the app has moved to trefinder.pl. The data stays with this
+ * On the old GitHub Pages address: the app has moved to treasurefinder.pl. The data stays with this
  * address in the browser, so it moves by a ZIP backup (own maps included).
  */
 export function MovedNotice() {

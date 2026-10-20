@@ -6,7 +6,7 @@
 
 | Element               | Usługa Cloudflare            | Zawartość                                                                                |
 | --------------------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
-| Aplikacja             | Worker `treasure-finder-app` | `trefinder.pl`: PWA z `dist/`, `/api/*` do workera API; sekcja „Adres aplikacji”         |
+| Aplikacja             | Worker `treasure-finder-app` | `treasurefinder.pl`: PWA z `dist/`, `/api/*` do workera API; sekcja „Adres aplikacji”    |
 | API i przetwarzanie   | Worker `treasure-finder-api` | `server/src/`                                                                            |
 | Baza                  | D1 `treasure-finder`         | zgłoszenia, wyniki, licznik wydatków, limity dzienne, pamięć wyszukiwania nazw           |
 | Pliki zgłoszeń        | Workers KV `SOURCES`         | zmniejszone zdjęcia i teksty (prywatne, kasowane razem ze zgłoszeniem)                   |
@@ -34,7 +34,7 @@
 1. Konto Cloudflare, potem w `server/`: `npx wrangler login`.
 2. `npx wrangler d1 create treasure-finder`: wpisz zwrócone `database_id` do `server/wrangler.toml`.
 3. `npx wrangler kv namespace create SOURCES` oraz `npx wrangler kv namespace create CONTEXT`: wpisz zwrócone `id` do `server/wrangler.toml`. Prywatne zgłoszenia starsze niż 30 dni usuwa cron.
-4. Turnstile: w panelu dodaj widżet dla `trefinder.pl` i `patekphilippe.github.io`. Klucz witryny trafia do zmiennej `TURNSTILE_SITE_KEY` (punkt 9), a sekret ustawiasz tak: `npx wrangler secret put TURNSTILE_SECRET`.
+4. Turnstile: w panelu dodaj widżet dla `treasurefinder.pl` i `patekphilippe.github.io`. Klucz witryny trafia do zmiennej `TURNSTILE_SITE_KEY` (punkt 9), a sekret ustawiasz tak: `npx wrangler secret put TURNSTILE_SECRET`.
 5. Klucz Anthropic: `npx wrangler secret put ANTHROPIC_API_KEY`.
 6. `npm run db:migrate`, potem `npm run deploy`.
 7. Automatyczne wdrażanie z GitHuba: w ustawieniach repozytorium dodaj sekrety `CLOUDFLARE_API_TOKEN` (szablon „Edit Cloudflare Workers” plus uprawnienia D1) i `CLOUDFLARE_ACCOUNT_ID`.
@@ -42,20 +42,21 @@
    Workflow `.github/workflows/server.yml` testuje zawsze. Wdraża tylko wtedy, gdy token jest ustawiony.
 
 8. Cieniowanie: w panelu Cloudflare włącz plan Workers Paid i R2, potem `npx wrangler r2 bucket create treasure-finder-tiles` i w `wrangler.toml` wiązanie `[[r2_buckets]]` `TILES`. Token z punktu 7 potrzebuje uprawnienia „Workers R2 Storage: Edit”. Bez wiązania worker liczy każdy kafelek od nowa.
-9. Logowanie i panel przeglądu: Auth0 według sekcji „Logowanie (Auth0)”. Potem otwórz `https://trefinder.pl/#admin` i zaloguj się kontem z `ADMIN_EMAILS`. `ADMIN_TOKEN` (`npx wrangler secret put ADMIN_TOKEN`, co najmniej 24 znaki) jest potrzebny już tylko do wywołań panelu ze skryptów.
-10. Aplikacja: adres workera i klucz witryny Turnstile są wpisane jako domyślne w `src/shared/config/backend.ts` (to wartości publiczne); pod `trefinder.pl` backend ma ten sam adres co aplikacja (sekcja „Adres aplikacji”). Zmienne repozytorium `SOURCES_API_URL` i `TURNSTILE_SITE_KEY` mogą je nadpisać, np. dla testowego workera.
+9. Logowanie i panel przeglądu: Auth0 według sekcji „Logowanie (Auth0)”. Potem otwórz `https://treasurefinder.pl/#admin` i zaloguj się kontem z `ADMIN_EMAILS`. `ADMIN_TOKEN` (`npx wrangler secret put ADMIN_TOKEN`, co najmniej 24 znaki) jest potrzebny już tylko do wywołań panelu ze skryptów.
+10. Aplikacja: adres workera i klucz witryny Turnstile są wpisane jako domyślne w `src/shared/config/backend.ts` (to wartości publiczne); pod `treasurefinder.pl` backend ma ten sam adres co aplikacja (sekcja „Adres aplikacji”). Zmienne repozytorium `SOURCES_API_URL` i `TURNSTILE_SITE_KEY` mogą je nadpisać, np. dla testowego workera.
 
-## Adres aplikacji (`trefinder.pl`)
+## Adres aplikacji (`treasurefinder.pl`)
 
-Aplikacja działa pod `https://trefinder.pl`. Domeny są zarejestrowane w nazwa.pl, a ich DNS
+Aplikacja działa pod `https://treasurefinder.pl`. Domeny są zarejestrowane w nazwa.pl, a ich DNS
 prowadzi Cloudflare.
 
 - **Worker `treasure-finder-app`** (`server/site.wrangler.toml`, `server/src/site/`) podaje
   zbudowaną aplikację z `dist/` i przekazuje `/api/*` do workera API (wiązanie usługi). Backend ma
   więc ten sam adres co aplikacja, bez CORS. Kafelki cieniowania z `/api/relief/` service worker podaje
   offline z pobranych obszarów, tak jak kafelki z innych adresów.
-- **Aliasy:** `tresurefinder.pl`, `treasurefinder.pl` oraz `www.` wszystkich domen przekierowują na stałe (301) na `trefinder.pl`,
-  ze ścieżką.
+- **Aliasy:** `trefinder.pl`, `tresurefinder.pl` oraz `www.` wszystkich domen przekierowują na stałe (301) na `treasurefinder.pl`,
+  ze ścieżką. Pod `/sw.js` aliasy podają service worker, który usuwa kopię aplikacji zainstalowaną tam
+  wcześniej (`trefinder.pl` był przez kilka godzin adresem głównym), żeby kolejne wejście trafiło na przekierowanie.
 - **Stary adres** `patekphilippe.github.io/treasure-finder/` działa dalej (ten sam workflow buduje go z
   `APP_BASE=/treasure-finder/`) i pokazuje pasek z nowym adresem (`offline/components/MovedNotice.tsx`).
   Przeglądarka trzyma dane osobno dla każdego adresu, więc przenosi się je kopią ZIP: na starym
@@ -64,13 +65,13 @@ prowadzi Cloudflare.
 
 ### Przeniesienie domen (jednorazowo)
 
-1. Cloudflare → Add a domain: `trefinder.pl`, `tresurefinder.pl` i `treasurefinder.pl` (plan Free). Cloudflare poda dwa
+1. Cloudflare → Add a domain: `treasurefinder.pl`, `trefinder.pl` i `tresurefinder.pl` (plan Free). Cloudflare poda dwa
    serwery nazw.
 2. nazwa.pl → Domeny → każda z domen → zmiana serwerów DNS na te dwa z Cloudflare. Zmiana działa po
    kilku godzinach (do 48 h); Cloudflare napisze, gdy domena będzie aktywna.
 3. W głównym folderze `npm run build`, potem w `server/`: `npm run deploy:site`. Pierwsze wdrożenie
    zakłada w Cloudflare domeny workera, rekordy DNS i certyfikaty.
-4. Turnstile: w ustawieniach widżetu dopisz nazwę hosta `trefinder.pl`.
+4. Turnstile: w ustawieniach widżetu dopisz nazwę hosta `treasurefinder.pl`.
 5. GitHub: zmienna repozytorium `SITE_ON_CLOUDFLARE` = `true`. Od tej chwili workflow „Deploy app”
    wdraża przy każdym pushu nowy adres i stary. Token `CLOUDFLARE_API_TOKEN` potrzebuje wtedy też
    dostępu do obu domen (Zone → Workers Routes: Edit).
@@ -137,8 +138,8 @@ działa bez konta i offline.
 
 1. Konto na auth0.com (plan Free), tenant w regionie EU, np. `treasure-finder.eu.auth0.com`.
 2. Applications → Create Application → „Single Page Application”. W Settings:
-   - Allowed Callback URLs i Allowed Logout URLs: `https://trefinder.pl/, https://patekphilippe.github.io/treasure-finder/, http://localhost:5173/`
-   - Allowed Web Origins: `https://trefinder.pl, https://patekphilippe.github.io, http://localhost:5173`
+   - Allowed Callback URLs i Allowed Logout URLs: `https://treasurefinder.pl/, https://patekphilippe.github.io/treasure-finder/, http://localhost:5173/`
+   - Allowed Web Origins: `https://treasurefinder.pl, https://patekphilippe.github.io, http://localhost:5173`
    - Refresh Token Rotation: włączona.
 3. Authentication → Database → Username-Password-Authentication → Applications: wyłącz tę aplikację.
    Authentication → Social → Google: włącz dla aplikacji. Klucze deweloperskie Auth0 nadają się tylko
@@ -152,7 +153,7 @@ działa bez konta i offline.
    `npx wrangler secret put AUTH0_ACTION_SECRET` (`openssl rand -base64 32`), `npm run db:migrate`,
    `npm run deploy`.
 6. Actions → Library → Create Action → „Login / Post Login”: wklej `server/auth0/postLogin.js`, w
-   Secrets dodaj `API_URL` (`https://trefinder.pl`) i `ACTION_SECRET` (ta sama wartość co
+   Secrets dodaj `API_URL` (`https://treasurefinder.pl`) i `ACTION_SECRET` (ta sama wartość co
    `AUTH0_ACTION_SECRET`), Deploy. Actions → Triggers → post-login: przeciągnij akcję, Apply.
 7. Aplikacja: domena i Client ID jako domyślne w `src/shared/config/auth.ts` (wartości publiczne)
    albo zmienne repozytorium `AUTH0_DOMAIN` i `AUTH0_CLIENT_ID`.

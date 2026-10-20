@@ -91,8 +91,8 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   dostaje `fresh` i toast. Stan pracy, który ma przetrwać zamknięcie arkusza, trzymaj w magazynie, nie w komponencie.
 - Przewodnik (react-joyride) jest w `features/tutorial/config/tourSteps.ts`. Kroki wskazują elementy przez
   atrybut `data-tour`; nowy element UI dostaje krok i atrybut (test sprawdza, że każdy cel istnieje).
-- Adres: `trefinder.pl` (worker `server/site.wrangler.toml`: pliki z `dist/`, `/api/*` do backendu pod tym samym adresem,
-  aliasy `tresurefinder.pl` i `treasurefinder.pl` przekierowują). Stary adres GitHub Pages (build z `APP_BASE=/treasure-finder/`) pokazuje
+- Adres: `treasurefinder.pl` (worker `server/site.wrangler.toml`: pliki z `dist/`, `/api/*` do backendu pod tym samym adresem,
+  aliasy `trefinder.pl` i `tresurefinder.pl` przekierowują). Stary adres GitHub Pages (build z `APP_BASE=/treasure-finder/`) pokazuje
   pasek przeprowadzki (`offline/components/MovedNotice.tsx`); dane przenosi kopia ZIP.
 - PWA: `vite-plugin-pwa` w `vite.config.ts` (manifest, precache całej aplikacji). Aktualizacja tylko
   po kliknięciu „Odśwież” (`offline/components/UpdatePrompt.tsx`), żeby nie przerwać nagrywania trasy.

@@ -35,7 +35,7 @@ jobs:
       - run: npm run lint
       - run: npm run test
 
-      # trefinder.pl (docs/BACKEND.md, "Adres aplikacji"): the app from /, deployed once the
+      # treasurefinder.pl (docs/BACKEND.md, "Adres aplikacji"): the app from /, deployed once the
       # domains are on Cloudflare and the repository variable SITE_ON_CLOUDFLARE is "true"
       - run: npm run build
       - if: vars.SITE_ON_CLOUDFLARE == 'true'
@@ -45,7 +45,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npm ci && npm run deploy:site
 
-      # the old address on GitHub Pages stays while data moves over (a banner points to trefinder.pl)
+      # the old address on GitHub Pages stays while data moves over (a banner points to treasurefinder.pl)
       - run: npm run build
         env:
           APP_BASE: /treasure-finder/

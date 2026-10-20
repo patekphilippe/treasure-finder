@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  // trefinder.pl serves the app from /; the old GitHub Pages address is built with
+  // treasurefinder.pl serves the app from /; the old GitHub Pages address is built with
   // APP_BASE=/treasure-finder/ (.github/workflows/deploy.yml)
   base: process.env.APP_BASE || '/',
   plugins: [
@@ -34,12 +34,12 @@ export default defineConfig({
         // browsers use woff2; the old font formats only weigh the cache down
         globIgnores: ['**/la-*.svg', '**/*.eot', '**/*.ttf', '**/*.woff'],
         navigateFallback: 'index.html',
-        // on trefinder.pl the backend shares the origin: its answers are never the app
+        // on treasurefinder.pl the backend shares the origin: its answers are never the app
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
         // map tiles: a downloaded area (Cache Storage, features/offline) first, then the network.
         // Nothing is stored here, so browsing never fills the phone. Our relief tiles come from
-        // the same origin on trefinder.pl (/api/relief/), from the workers.dev backend elsewhere.
+        // the same origin on treasurefinder.pl (/api/relief/), from the workers.dev backend elsewhere.
         runtimeCaching: [
           {
             urlPattern: ({ request, url, sameOrigin }) =>
