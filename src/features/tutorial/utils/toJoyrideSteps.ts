@@ -12,6 +12,8 @@ export interface TourConditions {
   wholeMap: boolean;
   /** a community member with a historical or own map on: map comparison is there */
   compare: boolean;
+  /** something runs: the activity chip is in the top bar */
+  activity: boolean;
   platform: Platform;
 }
 
@@ -24,6 +26,7 @@ const applies = (step: TourStep, c: TourConditions) => {
   if (step.when === 'relief') return c.relief;
   if (step.when === 'wholeMap') return c.wholeMap;
   if (step.when === 'compare') return c.compare;
+  if (step.when === 'activity') return c.activity;
   return true;
 };
 

@@ -2,7 +2,6 @@ import Button from '@mui/material/Button';
 import LinearProgress from '@mui/material/LinearProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { cancelSheetAnalysis } from '../services/runSheetAnalysis';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 
 export function AnalysisProgress() {
@@ -19,9 +18,11 @@ export function AnalysisProgress() {
         <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }} noWrap>
           {run.name}: {run.step} ({Math.round(run.share * 100)}%)
         </Typography>
-        <Button size="small" color="inherit" onClick={cancelSheetAnalysis}>
-          Przerwij
-        </Button>
+        {run.cancel && (
+          <Button size="small" color="inherit" onClick={run.cancel}>
+            Przerwij
+          </Button>
+        )}
       </Stack>
     </Stack>
   );

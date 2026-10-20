@@ -5,6 +5,7 @@ import { useLayersStore } from '@/features/layers';
 import { useAreasStore, useRoughnessStore } from '@/features/roughness';
 import { detectPlatform } from '@/shared/lib/pwa/detectPlatform';
 import { isInstalled } from '@/shared/lib/pwa/isInstalled';
+import { useActivityStore } from '@/shared/store/useActivityStore';
 import { useMembership } from '@/shared/store/useMembership';
 import { TOUR_STEPS } from '../config/tourSteps';
 import { toJoyrideSteps } from './toJoyrideSteps';
@@ -23,6 +24,7 @@ export function buildTourSteps(): Step[] {
     relief: useReliefStore.getState().records.length > 0,
     wholeMap: member && ownMapOn,
     compare: member && (ownMapOn || useLayersStore.getState().historicalId !== null),
+    activity: useActivityStore.getState().tasks.length > 0,
     platform: detectPlatform(),
     legend:
       (roughness.result !== null && roughness.visible) || (areas.visible && areas.areas.length > 0),

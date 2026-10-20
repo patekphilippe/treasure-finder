@@ -12,6 +12,7 @@ const base: Conditions = {
   relief: false,
   wholeMap: false,
   compare: false,
+  activity: false,
   platform: 'android',
 };
 const ids = (c: Partial<Conditions>) =>

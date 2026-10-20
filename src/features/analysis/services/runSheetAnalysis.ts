@@ -70,7 +70,13 @@ export async function runSheetAnalysis(
       current = { worker, reject };
       worker.onmessage = (e: MessageEvent<AnalysisResponse>) => {
         const msg = e.data;
-        if (msg.type === 'progress') setRun({ name: file.name, share: msg.share, step: msg.step });
+        if (msg.type === 'progress')
+          setRun({
+            name: file.name,
+            share: msg.share,
+            step: msg.step,
+            cancel: cancelSheetAnalysis,
+          });
         else if (msg.type === 'done')
           resolve({
             sheet: msg.sheet,
@@ -84,8 +90,8 @@ export async function runSheetAnalysis(
       worker.postMessage(request, [request.buffer]);
     });
   } finally {
+    // the run state stays until the results are saved (analyseSheetFile)
     worker.terminate();
     if (current?.worker === worker) current = null;
-    setRun(null);
   }
 }

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { candidatesRepo } from '@/shared/db';
+import { useActivityStore } from '@/shared/store/useActivityStore';
 import type { Candidate } from '@/shared/types/domain';
 import { DEFAULT_FILTERS, type CandidateFilters } from '../config/filters';
 import type { ExclusionResult } from '../workers/messages';
@@ -9,6 +10,8 @@ export interface RunState {
   name: string;
   share: number;
   step: string;
+  /** stops the analysis; only while the worker runs */
+  cancel?: () => void;
 }
 
 /** BDOT10k exclusion of the last analysed sheet (this session only) */
@@ -54,7 +57,21 @@ export const useAnalysisStore = create<AnalysisState>((set) => ({
   },
   select: (selectedId) => set({ selectedId }),
   setFilters: (filters) => set((s) => ({ filters: { ...s.filters, ...filters } })),
-  setRun: (run) => set({ run }),
+  setRun: (run) => {
+    set({ run });
+    // the activity chip shows it everywhere, also in Teren
+    const activity = useActivityStore.getState();
+    if (!run) return activity.end('nmt');
+    activity.upsert({
+      id: 'nmt',
+      label: `Arkusz NMT ${run.name}`,
+      short: 'Arkusz NMT',
+      share: run.share,
+      step: run.step,
+      cancel: run.cancel ?? null,
+      open: { mode: 'analysis' },
+    });
+  },
   setExclusion: (exclusion) => set({ exclusion }),
   setExclusionVisible: (exclusionVisible) => set({ exclusionVisible }),
 }));

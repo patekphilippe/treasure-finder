@@ -16,6 +16,12 @@ export type SheetId =
   | 'contextDetails'
   | 'sources';
 
+/** where something is shown in full: a mode and, in Teren, a sheet */
+export interface UiTarget {
+  mode: AppMode;
+  sheet?: SheetId;
+}
+
 interface UiState {
   mode: AppMode;
   activeSheet: SheetId | null;
@@ -33,6 +39,8 @@ interface UiState {
   showArea: (id: string) => void;
   showContext: (id: string) => void;
   closeSheet: () => void;
+  /** switches the mode (which closes sheets) and then opens the target's sheet */
+  goTo: (target: UiTarget) => void;
 }
 
 export const useUiStore = create<UiState>()(
@@ -52,6 +60,7 @@ export const useUiStore = create<UiState>()(
       showArea: (id) => set({ activeSheet: 'area', selectedAreaId: id }),
       showContext: (id) => set({ activeSheet: 'contextDetails', selectedContextId: id }),
       closeSheet: () => set({ activeSheet: null }),
+      goTo: (target) => set({ mode: target.mode, activeSheet: target.sheet ?? null }),
     }),
     {
       // remember Teren / Analiza between visits (laptop reopens in Analiza)

@@ -25,7 +25,8 @@ export interface TourStep {
     | 'notInstalled'
     | 'relief'
     | 'wholeMap'
-    | 'compare';
+    | 'compare'
+    | 'activity';
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
@@ -51,6 +52,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: 'Sygnał GPS',
     content:
       'Dokładność Twojej pozycji w metrach. Podczas nagrywania trasy obok pojawia się czerwony znacznik Nagrywanie.',
+    mode: 'field',
+  },
+  {
+    id: 'activity',
+    target: 'activity',
+    when: 'activity',
+    title: 'Co trwa w tle',
+    content:
+      'Gdy aplikacja pracuje w tle (analiza arkusza, odczyt mapy, wczytywanie pliku), tu widać postęp, także po zamknięciu arkusza. Dotknij, aby zobaczyć listę, przejść do widoku zadania albo je przerwać.',
     mode: 'field',
   },
   {

@@ -3,6 +3,7 @@ import { TutorialButton } from '@/features/tutorial';
 import { ZoneAlertBar } from '@/features/zones';
 import { StatusChips } from '@/shared/ui';
 import { useUiStore } from '@/shared/store/useUiStore';
+import { ActivityChip } from './ActivityChip';
 import { ModeSwitch } from './ModeSwitch';
 
 /** Floating controls in the top-left corner, above the map. */
@@ -28,6 +29,7 @@ export function TopBar() {
       <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
         <ModeSwitch />
         <TutorialButton />
+        <ActivityChip />
       </Stack>
       {mode === 'field' && <StatusChips />}
     </Stack>
