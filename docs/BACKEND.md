@@ -54,7 +54,7 @@ prowadzi Cloudflare.
   zbudowaną aplikację z `dist/` i przekazuje `/api/*` do workera API (wiązanie usługi). Backend ma
   więc ten sam adres co aplikacja, bez CORS. Kafelki cieniowania z `/api/relief/` service worker podaje
   offline z pobranych obszarów, tak jak kafelki z innych adresów.
-- **Alias:** `tresurefinder.pl` oraz `www.` obu domen przekierowują na stałe (301) na `trefinder.pl`,
+- **Aliasy:** `tresurefinder.pl`, `treasurefinder.pl` oraz `www.` wszystkich domen przekierowują na stałe (301) na `trefinder.pl`,
   ze ścieżką.
 - **Stary adres** `patekphilippe.github.io/treasure-finder/` działa dalej (ten sam workflow buduje go z
   `APP_BASE=/treasure-finder/`) i pokazuje pasek z nowym adresem (`offline/components/MovedNotice.tsx`).
@@ -64,7 +64,7 @@ prowadzi Cloudflare.
 
 ### Przeniesienie domen (jednorazowo)
 
-1. Cloudflare → Add a domain: `trefinder.pl` i `tresurefinder.pl` (plan Free). Cloudflare poda dwa
+1. Cloudflare → Add a domain: `trefinder.pl`, `tresurefinder.pl` i `treasurefinder.pl` (plan Free). Cloudflare poda dwa
    serwery nazw.
 2. nazwa.pl → Domeny → każda z domen → zmiana serwerów DNS na te dwa z Cloudflare. Zmiana działa po
    kilku godzinach (do 48 h); Cloudflare napisze, gdy domena będzie aktywna.

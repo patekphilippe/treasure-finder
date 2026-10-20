@@ -6,14 +6,14 @@ interface SiteEnv {
   API: Fetcher;
 }
 
-/** the main address; www and the alias domain redirect to it (a worker exports only handlers) */
+/** the main address; www and the alias domains redirect to it (a worker exports only handlers) */
 const MAIN_HOST = 'trefinder.pl';
 const LOCAL = new Set(['localhost', '127.0.0.1']);
 
 /**
  * The app on its own address (docs/BACKEND.md, "Adres aplikacji"): `/api/…` goes to the API worker,
  * so the backend has the same origin and needs no CORS; everything else is the built PWA. Other
- * hostnames (www, tresurefinder.pl) redirect for good, path and query kept.
+ * hostnames (www, tresurefinder.pl, treasurefinder.pl) redirect for good, path and query kept.
  */
 export default {
   async fetch(request, env): Promise<Response> {

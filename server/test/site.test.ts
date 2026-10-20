@@ -19,11 +19,13 @@ describe('the app on trefinder.pl', () => {
     expect(await (await get('https://trefinder.pl/api-docs')).text()).toBe('app /api-docs');
   });
 
-  it('sends www and the alias domain to trefinder.pl for good', async () => {
+  it('sends www and the alias domains to trefinder.pl for good', async () => {
     for (const from of [
       'https://www.trefinder.pl/?x=1',
       'https://tresurefinder.pl/?x=1',
       'http://www.tresurefinder.pl/?x=1',
+      'https://treasurefinder.pl/?x=1',
+      'https://www.treasurefinder.pl/?x=1',
     ]) {
       const res = await get(from);
       expect(res.status).toBe(301);

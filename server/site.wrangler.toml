@@ -1,5 +1,5 @@
 # The app on its own address (docs/BACKEND.md, "Adres aplikacji"): the built PWA from ../dist,
-# /api/* passed to the API worker, www and the alias domain redirected to trefinder.pl.
+# /api/* passed to the API worker, www and the alias domains redirected to trefinder.pl.
 # Deploy: `npm run build` in the repository root, then `npm run deploy:site` here.
 name = "treasure-finder-app"
 main = "src/site/index.ts"
@@ -11,6 +11,8 @@ routes = [
   { pattern = "www.trefinder.pl", custom_domain = true },
   { pattern = "tresurefinder.pl", custom_domain = true },
   { pattern = "www.tresurefinder.pl", custom_domain = true },
+  { pattern = "treasurefinder.pl", custom_domain = true },
+  { pattern = "www.treasurefinder.pl", custom_domain = true },
 ]
 
 [assets]
