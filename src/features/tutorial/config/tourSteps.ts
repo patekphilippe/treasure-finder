@@ -17,7 +17,8 @@ export interface TourStep {
   sheet?: SheetId;
   placement?: Step['placement'];
   /** step only makes sense when its element exists */
-  when?: 'candidates' | 'noCandidates' | 'legend' | 'exclusion' | 'notInstalled' | 'relief';
+  when?:
+    'candidates' | 'noCandidates' | 'legend' | 'exclusion' | 'notInstalled' | 'relief' | 'wholeMap';
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
@@ -185,6 +186,16 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: 'Rodzaj mapy',
     content:
       'Mapa topograficzna: Claude szuka zabudowy, młynów i karczm. Mapa wojskowa (np. sztabowa z 1945 r.): linii frontu, okopów, stanowisk, przepraw i mogił. Pozycje ostrzegają przed niewybuchami u pobliskich kandydatów, a kandydaci tuż przy mogile stają się chronieni.',
+    mode: 'field',
+    sheet: 'history',
+  },
+  {
+    id: 'ai-whole-map',
+    target: 'ai-whole-map',
+    when: 'wholeMap',
+    title: 'Cała mapa naraz',
+    content:
+      'Przy własnej mapie członkowie społeczności mogą przeczytać ją całą jednym przyciskiem: aplikacja dzieli ją na fragmenty, pokazuje ich liczbę, koszt i czas, a potem łączy wyniki z sąsiednich fragmentów.',
     mode: 'field',
     sheet: 'history',
   },

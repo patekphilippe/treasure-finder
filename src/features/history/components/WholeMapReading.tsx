@@ -1,0 +1,113 @@
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
+import { useMemo, useRef, useState } from 'react';
+import type { ReadProfileId } from '@/shared/lib/history';
+import type { OwnMap } from '@/shared/types/domain';
+import { Icon, useToastStore } from '@/shared/ui';
+import { VIEW_COST_USD, VIEW_SECONDS, type AiModelId } from '../config/aiReading';
+import type { ViewSource } from '../services/captureView';
+import { readWholeMap } from '../services/readWholeMap';
+import { useProposalsStore } from '../store/useProposalsStore';
+import { wholeMapChunks } from '../utils/wholeMapChunks';
+
+interface WholeMapReadingProps {
+  source: ViewSource;
+  map: OwnMap;
+  model: AiModelId;
+  profile: ReadProfileId;
+  member: boolean;
+}
+
+/**
+ * "Przeczytaj całą mapę": an own map read window by window instead of view by view, with the
+ * number of windows, cost and time shown first. Members only: every window is one reading,
+ * and a Turnstile check per window would not work.
+ */
+export function WholeMapReading({ source, map, model, profile, member }: WholeMapReadingProps) {
+  const { step, set } = useProposalsStore();
+  const showToast = useToastStore((s) => s.show);
+  const [asking, setAsking] = useState(false);
+  const [running, setRunning] = useState(false);
+  const cancelled = useRef(false);
+  const chunks = useMemo(() => wholeMapChunks(map, profile), [map, profile]);
+
+  if (!chunks?.length) return null;
+  if (!member)
+    return (
+      <Typography variant="caption" color="text.secondary">
+        Całą mapę naraz czytają członkowie społeczności. Ty możesz czytać ją widok po widoku.
+      </Typography>
+    );
+
+  const n = chunks.length;
+  const cost = (n * VIEW_COST_USD[model]).toFixed(2).replace('.', ',');
+  const minutes = Math.max(1, Math.round((n * VIEW_SECONDS) / 2 / 60));
+
+  const start = async () => {
+    setAsking(false);
+    setRunning(true);
+    cancelled.current = false;
+    set({ step: `Cała mapa: fragment 1 z ${n}`, proposals: [], usage: null, read: null });
+    try {
+      const r = await readWholeMap(
+        source,
+        chunks,
+        model,
+        profile,
+        (done) => set({ step: `Cała mapa: fragment ${Math.min(done + 1, n)} z ${n}` }),
+        () => cancelled.current,
+      );
+      set({ proposals: r.proposals, usage: r.usage, read: r.read });
+      showToast(
+        r.stopped
+          ? `${r.stopped}. Propozycje z przeczytanej części: ${r.proposals.length}`
+          : `Propozycje: ${r.proposals.length}` +
+              (r.failed ? `, nieudanych fragmentów: ${r.failed}` : ''),
+      );
+    } finally {
+      set({ step: null });
+      setRunning(false);
+    }
+  };
+
+  if (running)
+    return (
+      <Button
+        size="small"
+        color="inherit"
+        onClick={() => (cancelled.current = true)}
+        startIcon={<Icon name="stop" size={16} />}
+      >
+        Przerwij czytanie całej mapy
+      </Button>
+    );
+  if (asking)
+    return (
+      <Stack spacing={1}>
+        <Typography variant="body2">
+          {n} fragmentów, do ok. {cost} $ ze wspólnego budżetu, ok. {minutes} min. Każdy fragment to
+          jeden odczyt z dziennego limitu.
+        </Typography>
+        <Stack direction="row" sx={{ gap: 1 }}>
+          <Button variant="contained" sx={{ flex: 1 }} onClick={() => void start()}>
+            Czytaj
+          </Button>
+          <Button color="inherit" onClick={() => setAsking(false)}>
+            Anuluj
+          </Button>
+        </Stack>
+      </Stack>
+    );
+  return (
+    <Button
+      data-tour="ai-whole-map"
+      variant="outlined"
+      disabled={Boolean(step)}
+      startIcon={<Icon name="th" size={18} />}
+      onClick={() => setAsking(true)}
+    >
+      Przeczytaj całą mapę ({n})
+    </Button>
+  );
+}

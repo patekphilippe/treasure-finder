@@ -22,6 +22,7 @@ import { useContextStore } from '../store/useContextStore';
 import { useProposalsStore } from '../store/useProposalsStore';
 import { proposalToContext } from '../utils/proposalToContext';
 import { ProposalItem } from './ProposalItem';
+import { WholeMapReading } from './WholeMapReading';
 
 const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
 
@@ -163,6 +164,15 @@ export function AiReadingSection() {
                 Szukaj w widoku
               </Button>
             </Stack>
+          )}
+          {source?.kind === 'own' && (
+            <WholeMapReading
+              source={source}
+              map={source.map}
+              model={model}
+              profile={profile}
+              member={member}
+            />
           )}
           {usage && (
             <Typography variant="caption" color="text.secondary">

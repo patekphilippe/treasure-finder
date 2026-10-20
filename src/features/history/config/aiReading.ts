@@ -11,6 +11,14 @@ export const AI_MAX_RES_M = 2;
 /** Proposal rules: reading error absorbed, houses joined into one site, weak readings dropped. */
 export const PROPOSAL_OPTIONS = { bufferM: 25, linkM: 80, minConfidence: 0.35 } as const;
 
+/** Most one view costs (docs/BACKEND.md: Haiku 0.0005–0.002 $, Sonnet ~20× more), for estimates. */
+export const VIEW_COST_USD: Record<AiModelId, number> = {
+  'claude-haiku-5-5': 0.002,
+  'claude-sonnet-5-5': 0.04,
+};
+/** about how long one window takes, for the whole-map estimate */
+export const VIEW_SECONDS = 15;
+
 /** What the user should know before sending (the backend's privacy rules, docs/BACKEND.md). */
 export const AI_READING_NOTE =
-  'Do serwera analizy i do Anthropic trafia tylko obraz mapy z widoku, bez Twojej pozycji, punktów i tras. Serwer go nie zapisuje. Limit: 30 odczytów dziennie.';
+  'Do serwera analizy i do Anthropic trafia tylko obraz mapy z widoku, bez Twojej pozycji, punktów i tras. Serwer go nie zapisuje. Limit: 30 odczytów dziennie, dla członków społeczności 100.';

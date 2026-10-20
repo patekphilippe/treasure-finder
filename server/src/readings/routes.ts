@@ -9,7 +9,7 @@ import { costUsd } from '../pipeline/pricing';
 import { consumeDaily } from '../submissions/dailyLimit';
 import { humanCheck } from '../community/humanCheck';
 import { callClaude } from './callClaude';
-import { READ_DAILY_LIMIT, READ_ESTIMATE_INPUT_TOKENS } from './limits';
+import { READ_DAILY_LIMIT, READ_ESTIMATE_INPUT_TOKENS, READ_MEMBER_DAILY_LIMIT } from './limits';
 import { parseReading } from './parseReading';
 
 type Cors = Record<string, string>;
@@ -46,7 +46,7 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
     check.member
       ? [`read:member:${check.member.id}`]
       : [`read:device:${req.deviceId}`, `read:${subject}`],
-    READ_DAILY_LIMIT,
+    check.member ? READ_MEMBER_DAILY_LIMIT : READ_DAILY_LIMIT,
     now,
   );
   if (!allowed)

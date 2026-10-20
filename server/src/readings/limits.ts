@@ -1,5 +1,7 @@
 /** view readings a day per device and per IP: plenty for field work, little for abuse */
 export const READ_DAILY_LIMIT = 30;
+/** a community member's readings a day: enough to read a few whole maps window by window */
+export const READ_MEMBER_DAILY_LIMIT = 100;
 /** a view image is at most 1568 px on a side: a few hundred kB as JPEG */
 export const MAX_READ_IMAGE_BYTES = 3 * 1024 * 1024;
 export const READ_IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp'] as const;

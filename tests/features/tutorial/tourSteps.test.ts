@@ -10,6 +10,7 @@ const base: Conditions = {
   exclusion: false,
   installed: false,
   relief: false,
+  wholeMap: false,
   platform: 'android',
 };
 const ids = (c: Partial<Conditions>) =>

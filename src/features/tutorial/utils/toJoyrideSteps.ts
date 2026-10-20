@@ -8,6 +8,8 @@ export interface TourConditions {
   exclusion: boolean;
   installed: boolean;
   relief: boolean;
+  /** a community member with an own map on: the whole-map reading button is there */
+  wholeMap: boolean;
   platform: Platform;
 }
 
@@ -18,6 +20,7 @@ const applies = (step: TourStep, c: TourConditions) => {
   if (step.when === 'exclusion') return c.exclusion;
   if (step.when === 'notInstalled') return !c.installed;
   if (step.when === 'relief') return c.relief;
+  if (step.when === 'wholeMap') return c.wholeMap;
   return true;
 };
 

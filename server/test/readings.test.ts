@@ -173,6 +173,12 @@ describe('view readings', () => {
     expect(((await over.json()) as { error: string }).error).toMatch(/limit odczytów/);
   });
 
+  it('a community member may read more a day (whole maps window by window)', async () => {
+    const auth = await member('Wiesia');
+    for (let i = 0; i <= READ_DAILY_LIMIT; i++)
+      expect((await read({ turnstile: '' }, `10.1.0.${i}`, auth)).status).toBe(200);
+  });
+
   it('stops before the call when the monthly budget would be passed', async () => {
     await addSpending(db, Date.now(), 4.999);
     const res = await read();

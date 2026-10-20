@@ -1,6 +1,8 @@
 export { buildMilitaryProposals } from './buildMilitaryProposals';
 export { buildProposals, type ProposalOptions, type SiteProposal } from './buildProposals';
 export { clusterPoints } from './clusterPoints';
+export { coverChunks, type Chunk } from './coverChunks';
+export { siteTitle } from './siteTitle';
 export { existsToday } from './existsToday';
 export { parseMapObjects } from './parseMapObjects';
 export {

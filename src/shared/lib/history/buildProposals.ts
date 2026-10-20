@@ -1,7 +1,7 @@
 import type { ContextKind } from '@/shared/types/domain';
-import { pluralPl } from '../format';
 import { clusterPoints } from './clusterPoints';
 import { existsToday } from './existsToday';
+import { siteTitle } from './siteTitle';
 import type { ImageGrid, MapObject, ReadKind } from './types';
 
 export interface SiteProposal {
@@ -62,10 +62,9 @@ export function buildProposals(
     const x = pts.reduce((s, p) => s + p.x, 0) / pts.length;
     const y = pts.reduce((s, p) => s + p.y, 0) / pts.length;
     const n = pts.length;
-    const what = n >= 6 ? 'Zaginiona wieś' : n >= 3 ? 'Zaginiony przysiółek' : 'Zaginiona zagroda';
     return {
       kind: n >= 3 ? 'osada' : 'inne',
-      title: `${what} (${pluralPl(n, 'budynek', 'budynki', 'budynków')})`,
+      title: siteTitle(n),
       ...at(x, y),
       buildings: n,
       lost: true,

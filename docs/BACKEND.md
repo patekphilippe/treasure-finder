@@ -103,7 +103,9 @@ Skille Claude API (Agent Skills) się tu nie nadają: działają tylko w kontene
 odczyt to jedno wywołanie ze schematem JSON.
 
 - **Ochrona:** Turnstile przy każdym odczycie, limit 30 odczytów dziennie na urządzenie i na adres IP
-  (własny licznik `read:…`, nie zużywa limitu zgłoszeń), obraz do 3 MB i 1600 px na bok.
+  (własny licznik `read:…`, nie zużywa limitu zgłoszeń), obraz do 3 MB i 1600 px na bok. Członek
+  społeczności zamiast Turnstile podaje kod i ma 100 odczytów dziennie: tyle potrzeba, by przeczytać
+  kilka własnych map w całości (aplikacja dzieli mapę na okna wielkości widoku i łączy wyniki).
 - **Budżet:** wspólny z potokiem zgłoszeń (`MONTHLY_BUDGET_USD`). Przed wywołaniem worker sprawdza,
   czy najgorszy przypadek (3000 tokenów wejścia i limit wyjścia profilu: 4096, a dla mapy wojskowej 8192) zmieści się w budżecie; liczy koszt bez rabatu Batch.
 - **Koszt:** Haiku ok. 0,0005–0,002 $ za widok, Sonnet ok. 20 razy więcej.
