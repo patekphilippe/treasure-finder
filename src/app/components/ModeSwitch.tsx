@@ -22,8 +22,8 @@ export function ModeSwitch() {
           Teren
         </ToggleButton>
         <ToggleButton value="analysis" sx={{ gap: 0.75 }}>
-          <Icon name="microscope" size={18} />
-          Analiza
+          <Icon name="clipboard-list" size={18} />
+          Kandydaci
         </ToggleButton>
       </ToggleButtonGroup>
     </Paper>

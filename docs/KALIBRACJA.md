@@ -30,5 +30,5 @@ Przegląd: dla każdej interpretacji losowe przykłady na ortofotomapie i LRM.
 - **Dawna droga**: wiele trafień to dzisiejsze drogi leśne we wcięciu. Często to rzeczywiście dawne
   drogi, ale priorytet „wysoki” może być za wysoki bez potwierdzenia na mapie archiwalnej.
 - **Nieokreślone** (~4600 na 2 arkusze): drobne nierówności; ukryte domyślnie w filtrach.
-- Potrzebne **wyniki z terenu**: zestawienie „znaleziska na interpretację” w trybie Analiza pokaże,
+- Potrzebne **wyniki z terenu**: zestawienie „znaleziska na interpretację” w trybie Kandydaci pokaże,
   które wagi oceny podnieść.

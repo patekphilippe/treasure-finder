@@ -63,7 +63,7 @@ export const useUiStore = create<UiState>()(
       goTo: (target) => set({ mode: target.mode, activeSheet: target.sheet ?? null }),
     }),
     {
-      // remember Teren / Analiza between visits (laptop reopens in Analiza)
+      // remember Teren / Kandydaci between visits (laptop reopens in Kandydaci)
       name: 'mapa.ui',
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ mode: s.mode }),

@@ -41,9 +41,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: 'mode',
     target: 'mode-switch',
-    title: 'Teren i Analiza',
+    title: 'Teren i Kandydaci',
     content:
-      'Teren to praca w polu na telefonie: mapa, GPS, punkty i trasy. Analiza to praca przy komputerze: wczytujesz arkusz NMT i oceniasz miejsca warte sprawdzenia.',
+      'Teren to praca w polu na telefonie: mapa, GPS, punkty i trasy. Kandydaci to praca przy komputerze: przeglądasz miejsca wskazane przez analizę arkusza NMT i oceniasz, które warto sprawdzić.',
     mode: 'field',
   },
   {
@@ -258,7 +258,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-search-zones',
     title: 'Strefy poszukiwań',
     content:
-      'Miejsca przyjęte w trybie Analiza razem z obszarem wokół formy terenu, gdzie warto szukać.',
+      'Miejsca przyjęte w trybie Kandydaci razem z obszarem wokół formy terenu, gdzie warto szukać.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -346,7 +346,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: 'analysis',
     target: 'analysis-panel',
-    title: 'Tryb Analiza',
+    title: 'Tryb Kandydaci',
     content:
       'Panel kandydatów, czyli miejsc wskazanych przez analizę terenu. Na komputerze jest z prawej strony, na telefonie na dole.',
     mode: 'analysis',
