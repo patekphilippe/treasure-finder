@@ -2,22 +2,31 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 interface MembershipState {
-  /** invitation code of the trusted community; kept only in this browser, never exported */
-  code: string | null;
+  /** address of the signed-in member (Auth0); kept only in this browser, never exported */
+  email: string | null;
   name: string | null;
-  join: (code: string, name: string) => void;
+  join: (email: string, name: string) => void;
   leave: () => void;
 }
 
-/** Membership of the trusted community (backend, docs/BACKEND.md "Społeczność"). */
+/**
+ * Membership of the trusted community (backend, docs/BACKEND.md "Społeczność"): who is signed in.
+ * The tokens themselves are kept by the Auth0 client (`shared/auth`).
+ */
 export const useMembership = create<MembershipState>()(
   persist(
     (set) => ({
-      code: null,
+      email: null,
       name: null,
-      join: (code, name) => set({ code, name }),
-      leave: () => set({ code: null, name: null }),
+      join: (email, name) => set({ email, name }),
+      leave: () => set({ email: null, name: null }),
     }),
-    { name: 'mapa.member', storage: createJSONStorage(() => localStorage) },
+    {
+      name: 'mapa.member',
+      storage: createJSONStorage(() => localStorage),
+      // version 0 kept an invitation code, which the backend no longer accepts: sign in again
+      version: 1,
+      migrate: () => ({ email: null, name: null }),
+    },
   ),
 );

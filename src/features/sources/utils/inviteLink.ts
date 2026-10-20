@@ -1,3 +1,3 @@
-/** The link a new member opens to join: the app's address with `#dolacz=<kod>`. */
-export const inviteLink = (code: string) =>
-  `${window.location.origin}${window.location.pathname}#dolacz=${code}`;
+/** The link an invited person opens: the app's address with `#zaproszenie=<adres>`, which starts signing in. */
+export const inviteLink = (email: string) =>
+  `${window.location.origin}${window.location.pathname}#zaproszenie=${encodeURIComponent(email)}`;

@@ -9,5 +9,5 @@ export { FitCornersLayer } from './components/FitCornersLayer';
 export { OwnMapsLayer } from './components/OwnMapsLayer';
 export { useOwnMapsStore } from './store/useOwnMapsStore';
 export { ProposalsLayer } from './components/ProposalsLayer';
-export { useJoinFromLink } from './hooks/useJoinFromLink';
+export { useCommunitySignIn } from './hooks/useCommunitySignIn';
 export { CONTEXT_KINDS } from './config/contextKinds';

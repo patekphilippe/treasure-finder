@@ -6,11 +6,11 @@ import { syncCommunity } from '../services/syncCommunity';
  * Brings the view's shared objects in when a member opens the sheet (quietly: offline is fine)
  * and returns how many there are; `set` updates it after a manual refresh.
  */
-export function useCommunityInView(code: string | null): [number | null, (n: number) => void] {
+export function useCommunityInView(email: string | null): [number | null, (n: number) => void] {
   const [inView, setInView] = useState<number | null>(null);
   useEffect(() => {
     const bounds = useMapViewStore.getState().bounds;
-    if (!code || !bounds) return;
+    if (!email || !bounds) return;
     let cancelled = false;
     syncCommunity(bounds)
       .then((n) => {
@@ -20,6 +20,6 @@ export function useCommunityInView(code: string | null): [number | null, (n: num
     return () => {
       cancelled = true;
     };
-  }, [code]);
+  }, [email]);
   return [inView, setInView];
 }

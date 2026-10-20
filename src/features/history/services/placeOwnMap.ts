@@ -1,7 +1,7 @@
+import { memberAuth } from '@/shared/auth/memberAuth';
 import { BACKEND_URL } from '@/shared/config/backend';
 import { deviceId } from '@/shared/lib/deviceId';
 import type { Bounds } from '@/shared/store/useMapViewStore';
-import { useMembership } from '@/shared/store/useMembership';
 import type { MapPlacement } from '@/shared/types/placement';
 import { AI_MAX_SIDE } from '../config/aiReading';
 
@@ -31,13 +31,13 @@ export async function placeOwnMap(
   if (view) form.append('view', [view.south, view.west, view.north, view.east].join(','));
   form.append('deviceId', deviceId());
   if (turnstileToken) form.append('turnstile', turnstileToken);
-  const code = useMembership.getState().code;
+  const headers = await memberAuth();
   let response: Response;
   try {
     response = await fetch(`${BACKEND_URL}/api/placements`, {
       method: 'POST',
       body: form,
-      ...(code ? { headers: { authorization: `Bearer ${code}` } } : {}),
+      headers,
     });
   } catch {
     throw new Error('Brak połączenia z serwerem analizy');

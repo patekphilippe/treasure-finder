@@ -1,5 +1,5 @@
 import type { SubmissionCreated, SubmissionView } from '@/shared/types/sources';
-import { useMembership } from '@/shared/store/useMembership';
+import { memberAuth } from '@/shared/auth/memberAuth';
 import { SOURCES_API_URL } from '../config/sourcesApi';
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
@@ -16,15 +16,13 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const sourcesApi = {
-  send: (form: FormData) => {
-    // a community member's invitation code stands in for the Turnstile check
-    const code = useMembership.getState().code;
-    return call<SubmissionCreated>('/api/submissions', {
+  // a signed-in community member needs no Turnstile check
+  send: async (form: FormData) =>
+    call<SubmissionCreated>('/api/submissions', {
       method: 'POST',
       body: form,
-      ...(code ? { headers: { authorization: `Bearer ${code}` } } : {}),
-    });
-  },
+      headers: await memberAuth(),
+    }),
   get: (id: string, key: string) =>
     call<SubmissionView>(`/api/submissions/${id}?key=${encodeURIComponent(key)}`),
   remove: (id: string, key: string) =>

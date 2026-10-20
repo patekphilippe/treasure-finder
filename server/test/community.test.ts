@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { AdminCommunityObject, AdminMember, CommunityObject } from '@/shared/types/community';
 import { publishObjects } from '../src/context/packs';
 import type { Env } from '../src/env';
+import { signedInAs } from './signIn';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 const testEnv = env as unknown as Env;
@@ -21,13 +22,14 @@ const call = (path: string, auth: string | null, init: RequestInit = {}) =>
     }),
   );
 const invite = async (name: string) => {
+  const email = `${name.toLowerCase()}@example.com`;
   const res = await call('admin/members', ADMIN, {
     method: 'POST',
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ name, email }),
   });
   expect(res.status).toBe(201);
-  const m = (await res.json()) as { id: string; code: string };
-  return { id: m.id, auth: `Bearer ${m.code}` };
+  const m = (await res.json()) as { id: string };
+  return { id: m.id, email, auth: await signedInAs(email) };
 };
 const add = (auth: string, body: Record<string, unknown>) =>
   call('community/objects', auth, { method: 'POST', body: JSON.stringify(body) });
@@ -43,11 +45,15 @@ const mill = {
 };
 
 describe('community', () => {
-  it('only invited, unblocked members get in; the code works only as given', async () => {
+  it('only invited, unblocked members get in', async () => {
     const anna = await invite('Anna');
-    expect(await (await call('community/me', anna.auth)).json()).toEqual({ name: 'Anna' });
+    expect(await (await call('community/me', anna.auth)).json()).toEqual({
+      name: 'Anna',
+      email: 'anna@example.com',
+    });
     expect((await call('community/me', null)).status).toBe(401);
-    expect((await call('community/me', 'Bearer not-a-real-code-0000000')).status).toBe(401);
+    expect((await call('community/me', 'Bearer not-a-real-token-0000000')).status).toBe(401);
+    expect((await call('community/me', await signedInAs('stranger@example.com'))).status).toBe(401);
     expect((await call('community/objects?bbox=' + BBOX, null)).status).toBe(401);
     await call(`admin/members/${anna.id}/block`, ADMIN, { method: 'POST' });
     expect((await call('community/me', anna.auth)).status).toBe(401);

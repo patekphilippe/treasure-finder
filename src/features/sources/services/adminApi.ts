@@ -1,4 +1,5 @@
 import type { AdminCommunityObject, AdminMember } from '@/shared/types/community';
+import { memberAuth } from '@/shared/auth/memberAuth';
 import type { SourceObject, SubmissionResult, ViewBbox } from '@/shared/types/sources';
 import { SOURCES_API_URL } from '../config/sourcesApi';
 
@@ -15,31 +16,13 @@ export interface AdminSubmission {
   files: { id: string; mime: string }[];
 }
 
-const TOKEN_KEY = 'mapa.adminToken';
-
-export const adminToken = {
-  get: () => {
-    try {
-      return localStorage.getItem(TOKEN_KEY) ?? '';
-    } catch {
-      return '';
-    }
-  },
-  set: (t: string) => {
-    try {
-      localStorage.setItem(TOKEN_KEY, t);
-    } catch {
-      // private window: the token lasts until reload
-    }
-  },
-};
-
+/** The owner signs in like a member; the backend knows their address (ADMIN_EMAILS). */
 async function call(path: string, init: RequestInit = {}): Promise<Response> {
   const res = await fetch(`${SOURCES_API_URL}/api/admin/${path}`, {
     ...init,
-    headers: { authorization: `Bearer ${adminToken.get()}`, ...(init.headers ?? {}) },
+    headers: { ...(await memberAuth()), ...(init.headers ?? {}) },
   });
-  if (res.status === 401) throw new Error('Nieprawidłowy token panelu');
+  if (res.status === 401) throw new Error('To konto nie ma dostępu do panelu właściciela');
   if (!res.ok) {
     const body = (await res.json().catch(() => null)) as { error?: string } | null;
     throw new Error(body?.error ?? `Błąd serwera (${res.status})`);
@@ -60,15 +43,22 @@ export const adminApi = {
     }),
   reject: (id: string) => call(`submissions/${id}/reject`, { method: 'POST' }),
   members: async () => (await (await call('members')).json()) as AdminMember[],
-  /** the code comes back only here, once */
-  invite: async (name: string) =>
+  /** the invitation is the address: the first sign-in with it takes this member */
+  invite: async (name: string, email: string) =>
     (await (
       await call('members', {
         method: 'POST',
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, email }),
         headers: { 'content-type': 'application/json' },
       })
-    ).json()) as { id: string; name: string; code: string },
+    ).json()) as { id: string; name: string; email: string },
+  /** a new address frees the member for the account with that address */
+  setEmail: (id: string, email: string) =>
+    call(`members/${id}/email`, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+      headers: { 'content-type': 'application/json' },
+    }),
   block: (id: string, blocked: boolean) =>
     call(`members/${id}/${blocked ? 'block' : 'unblock'}`, { method: 'POST' }),
   objects: async (filter: 'recent' | 'disputed' | 'removed') =>

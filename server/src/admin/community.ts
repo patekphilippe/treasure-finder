@@ -1,7 +1,9 @@
 import type { AdminCommunityObject, AdminMember } from '@/shared/types/community';
 import type { SourceObject } from '@/shared/types/sources';
+import { cleanEmail } from '@/shared/lib/cleanEmail';
+import { unusedCodeHash } from '../community/auth';
 import { OBJECT_SELECT, type ObjectRow } from '../community/objects';
-import { randomToken, sha256Hex } from '../crypto';
+import { randomToken } from '../crypto';
 import type { Env } from '../env';
 import { fail, json } from '../http';
 import { INDEX_KEY, type PackIndexEntry } from '../context/packs';
@@ -36,7 +38,7 @@ export async function insertApproved(
   return objects.length;
 }
 
-/** Owner's part of the community: invitations, blocking, moderation, moving the old packs. */
+/** Owner's part of the community: invitations by e-mail, blocking, moderation, moving the old packs. */
 export async function adminCommunity(
   request: Request,
   env: Env,
@@ -45,31 +47,57 @@ export async function adminCommunity(
   now: number,
 ): Promise<Response | null> {
   if (request.method === 'POST' && path === 'members') {
-    const body = (await request.json().catch(() => null)) as { name?: unknown } | null;
+    const body = (await request.json().catch(() => null)) as {
+      name?: unknown;
+      email?: unknown;
+    } | null;
     const name = String(body?.name ?? '')
       .trim()
       .slice(0, 60);
+    const email = cleanEmail(body?.email);
     if (!name) return fail(400, 'Podaj imię albo pseudonim', cors);
+    if (!email) return fail(400, 'Podaj adres e-mail konta, którym ta osoba się zaloguje', cors);
     const id = randomToken(9);
-    // the code is shown once: only its hash is kept
-    const code = randomToken(24);
-    await env.DB.prepare(
-      'INSERT INTO members (id, name, token_hash, blocked, created_at) VALUES (?, ?, ?, 0, ?)',
+    // the invitation is the address: the first sign-in with it takes this member
+    const res = await env.DB.prepare(
+      'INSERT OR IGNORE INTO members (id, name, token_hash, blocked, created_at, email) VALUES (?, ?, ?, 0, ?, ?)',
     )
-      .bind(id, name, await sha256Hex(code), now)
+      .bind(id, name, await unusedCodeHash(), now, email)
       .run();
-    return json({ id, name, code }, 201, cors);
+    if (!res.meta.changes) return fail(409, 'Ten adres jest już zaproszony', cors);
+    return json({ id, name, email }, 201, cors);
+  }
+
+  // a member from the code days gets an address; a changed one frees the member for the new account
+  const address = /^members\/([A-Za-z0-9_-]+)\/email$/.exec(path);
+  if (request.method === 'POST' && address) {
+    const body = (await request.json().catch(() => null)) as { email?: unknown } | null;
+    const email = cleanEmail(body?.email);
+    if (!email) return fail(400, 'Nieprawidłowy adres e-mail', cors);
+    const taken = await env.DB.prepare('SELECT 1 FROM members WHERE email = ? AND id != ?')
+      .bind(email, address[1])
+      .first();
+    if (taken) return fail(409, 'Ten adres ma już inna osoba', cors);
+    const res = await env.DB.prepare(
+      'UPDATE members SET auth_sub = CASE WHEN email = ?1 THEN auth_sub END, email = ?1 WHERE id = ?2',
+    )
+      .bind(email, address[1])
+      .run();
+    if (!res.meta.changes) return fail(404, 'Nie ma takiej osoby', cors);
+    return json({ ok: true }, 200, cors);
   }
 
   if (request.method === 'GET' && path === 'members') {
     const rows = await env.DB.prepare(
-      `SELECT m.id, m.name, m.blocked, m.created_at, m.last_seen_day,
+      `SELECT m.id, m.name, m.email, m.auth_sub IS NOT NULL AS linked, m.blocked, m.created_at, m.last_seen_day,
          (SELECT count(*) FROM community_objects o WHERE o.author_id = m.id AND o.removed_at IS NULL) AS objects,
          (SELECT count(*) FROM object_votes v WHERE v.member_id = m.id) AS votes
        FROM members m ORDER BY m.created_at`,
     ).all<{
       id: string;
       name: string;
+      email: string | null;
+      linked: number;
       blocked: number;
       created_at: number;
       last_seen_day: string | null;
@@ -80,6 +108,8 @@ export async function adminCommunity(
       rows.results.map((r): AdminMember => ({
         id: r.id,
         name: r.name,
+        email: r.email,
+        linked: Boolean(r.linked),
         blocked: Boolean(r.blocked),
         createdAt: r.created_at,
         lastSeenDay: r.last_seen_day,

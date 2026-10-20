@@ -31,6 +31,9 @@ jobs:
           # optional override of the AI backend address and Turnstile key (defaults in features/sources/config)
           VITE_SOURCES_API_URL: ${{ vars.SOURCES_API_URL }}
           VITE_TURNSTILE_SITE_KEY: ${{ vars.TURNSTILE_SITE_KEY }}
+          # community sign-in (docs/BACKEND.md, "Logowanie"); defaults in src/shared/config/auth.ts
+          VITE_AUTH0_DOMAIN: ${{ vars.AUTH0_DOMAIN }}
+          VITE_AUTH0_CLIENT_ID: ${{ vars.AUTH0_CLIENT_ID }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

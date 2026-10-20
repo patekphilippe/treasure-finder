@@ -165,7 +165,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'community',
     title: 'Społeczność',
     content:
-      'Wspólna baza dawnych wsi, młynów, karczm i brodów dla zaproszonych osób. Dołączasz linkiem od właściciela. Swoje obiekty udostępniasz jednym kliknięciem, a punkty innych potwierdzasz albo kwestionujesz w ich szczegółach; zakwestionowane nie podnoszą oceny kandydatów.',
+      'Wspólna baza dawnych wsi, młynów, karczm i brodów dla zaproszonych osób. Logujesz się kontem Google, na którego adres przyszło zaproszenie od właściciela. Swoje obiekty udostępniasz jednym kliknięciem, a punkty innych potwierdzasz albo kwestionujesz w ich szczegółach; zakwestionowane nie podnoszą oceny kandydatów.',
     mode: 'field',
     sheet: 'history',
   },

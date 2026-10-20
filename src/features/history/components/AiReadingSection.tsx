@@ -37,7 +37,7 @@ export function AiReadingSection() {
   const military = profile === 'wojskowa';
   // the widest view the profile still reads, in km
   const maxViewKm = Math.round((READ_PROFILES[profile].maxResM * AI_MAX_SIDE) / 1000);
-  const member = useMembership((st) => st.code !== null);
+  const member = useMembership((st) => st.email !== null);
   const { proposals, step, usage, read, set, drop } = useProposalsStore();
   const flyTo = useMapViewStore((s) => s.flyTo);
   const showToast = useToastStore((s) => s.show);

@@ -1,27 +1,26 @@
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { COMMUNITY_NOTE } from '@/features/safety';
-import { BACKEND_ENABLED } from '@/shared/config/backend';
+import { signIn } from '@/shared/auth/signIn';
+import { signOut } from '@/shared/auth/signOut';
+import { AUTH_ENABLED } from '@/shared/config/auth';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useMembership } from '@/shared/store/useMembership';
 import { Icon, useToastStore } from '@/shared/ui';
 import { useCommunityInView } from '../hooks/useCommunityInView';
-import { joinCommunity } from '../services/joinCommunity';
 import { shareObjects } from '../services/shareObjects';
 import { syncCommunity } from '../services/syncCommunity';
 import { useContextStore } from '../store/useContextStore';
 
-/** The trusted community: join with a code, bring in the shared base of the view, share own objects. */
+/** The trusted community: sign in (invited only), bring in the shared base of the view, share own objects. */
 export function CommunitySection() {
-  const { code, name, leave } = useMembership();
+  const { email, name } = useMembership();
   const features = useContextStore((s) => s.features);
   const showToast = useToastStore((s) => s.show);
-  const [draft, setDraft] = useState('');
   const [busy, setBusy] = useState(false);
-  const [inView, setInView] = useCommunityInView(code);
+  const [inView, setInView] = useCommunityInView(email);
   const unshared = features.filter((f) => !f.community);
 
   const sync = async () => {
@@ -37,41 +36,34 @@ export function CommunitySection() {
     }
   };
 
-  if (!BACKEND_ENABLED) return null;
+  if (!AUTH_ENABLED) return null;
 
-  if (!code)
+  if (!email)
     return (
       <Stack data-tour="community" spacing={1}>
         <Typography variant="overline" color="text.secondary">
           Społeczność
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Wspólna baza dawnych wsi, młynów, karczm i brodów dla zaproszonych osób. Masz kod albo
-          link zaproszenia? Wklej go tutaj.
+          Wspólna baza dawnych wsi, młynów, karczm i brodów dla zaproszonych osób. Zaloguj się
+          kontem Google, na którego adres przyszło zaproszenie.
         </Typography>
-        <Stack direction="row" sx={{ gap: 1 }}>
-          <TextField
-            size="small"
-            sx={{ flex: 1 }}
-            label="Kod zaproszenia"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value.replace(/^.*#dolacz=/, ''))}
-            autoComplete="off"
-          />
-          <Button
-            variant="contained"
-            disabled={busy || draft.trim().length < 16}
-            onClick={() => {
-              setBusy(true);
-              joinCommunity(draft)
-                .then((n) => showToast(`Witaj w społeczności, ${n}`))
-                .catch((e: unknown) => showToast(e instanceof Error ? e.message : 'Nieważny kod'))
-                .finally(() => setBusy(false));
-            }}
-          >
-            Dołącz
-          </Button>
-        </Stack>
+        <Button
+          variant="contained"
+          disabled={busy}
+          startIcon={<Icon name="sign-in-alt" size={18} />}
+          sx={{ alignSelf: 'flex-start' }}
+          onClick={() => {
+            setBusy(true);
+            signIn()
+              .catch((e: unknown) =>
+                showToast(e instanceof Error ? e.message : 'Nie udało się zalogować'),
+              )
+              .finally(() => setBusy(false));
+          }}
+        >
+          Zaloguj się
+        </Button>
       </Stack>
     );
 
@@ -114,7 +106,7 @@ export function CommunitySection() {
             Udostępnij moje ({unshared.length})
           </Button>
         )}
-        <Button size="small" color="inherit" onClick={leave}>
+        <Button size="small" color="inherit" onClick={() => void signOut()}>
           Wyloguj
         </Button>
       </Stack>

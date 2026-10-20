@@ -50,6 +50,7 @@ export const SOURCES_PRIVACY_NOTE =
   'zatwierdzone obiekty z położeniem, nigdy zdjęcia.';
 
 export const COMMUNITY_NOTE =
+  'Logowanie przez Auth0 (Google): serwer zna Twój adres e-mail tylko po to, by sprawdzić zaproszenie. ' +
   'Do wspólnej bazy trafia rodzaj obiektu z mapy, jego położenie, źródło i Twoje imię; widzą je tylko ' +
   'zaproszeni członkowie. Nie udostępniaj znalezisk ani stanowisk archeologicznych: to chroni miejsca ' +
   'przed rabusiami, a Ciebie przed odpowiedzialnością.';

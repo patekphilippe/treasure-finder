@@ -1,21 +1,20 @@
 import type { SourceObject, SubmissionResult, SubmissionStatus } from '@/shared/types/sources';
 import { monthKey, spentThisMonth } from '../budget';
+import { isOwnerEmail } from '../auth/isOwnerEmail';
+import { signedIn } from '../auth/session';
+import { sameSecret } from '../crypto';
 import type { Env } from '../env';
-import { fail, json } from '../http';
+import { bearer, fail, json } from '../http';
 import { adminCommunity, insertApproved } from './community';
 
 type Cors = Record<string, string>;
 const KINDS: readonly string[] = ['osada', 'droga', 'mlyn', 'karczma', 'brod', 'inne'];
 
-/** Constant-time comparison of the bearer token with the ADMIN_TOKEN secret. */
-export async function isAdmin(request: Request, env: Env): Promise<boolean> {
-  const given = (request.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '');
-  if (!env.ADMIN_TOKEN || env.ADMIN_TOKEN.length < 24 || !given) return false;
-  const enc = new TextEncoder();
-  const [a, b] = await Promise.all(
-    [given, env.ADMIN_TOKEN].map((s) => crypto.subtle.digest('SHA-256', enc.encode(s))),
-  );
-  return crypto.subtle.timingSafeEqual(a!, b!);
+/** The owner: signed in with an address from ADMIN_EMAILS, or (scripts, curl) the ADMIN_TOKEN secret. */
+export async function isAdmin(request: Request, env: Env, now: number): Promise<boolean> {
+  const who = await signedIn(request, env, now);
+  if (who) return isOwnerEmail(who.email, env);
+  return sameSecret(bearer(request), env.ADMIN_TOKEN);
 }
 
 async function dropFiles(env: Env, id: string) {
@@ -55,7 +54,7 @@ export async function adminRoutes(
   cors: Cors,
   now: number,
 ) {
-  if (!(await isAdmin(request, env))) return fail(401, 'Brak dostępu', cors);
+  if (!(await isAdmin(request, env, now))) return fail(401, 'Brak dostępu', cors);
 
   if (request.method === 'GET' && path === 'submissions') {
     const status = (new URL(request.url).searchParams.get('status') ??

@@ -42,7 +42,7 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
   const onToken = useCallback((t: string | null) => setToken(t), []);
 
   const empty = !files.length && !text.trim() && !link.trim();
-  const member = useMembership((st) => st.code !== null);
+  const member = useMembership((st) => st.email !== null);
   const canSend =
     !disabled && !busy && !empty && (!!token || member) && (mode === 'private' || consent);
 

@@ -14,7 +14,7 @@ export function buildTourSteps(): Step[] {
   const roughness = useRoughnessStore.getState();
   const areas = useAreasStore.getState();
   const analysis = useAnalysisStore.getState();
-  const member = useMembership.getState().code !== null;
+  const member = useMembership.getState().email !== null;
   const ownMapOn = useOwnMapsStore.getState().maps.some((m) => m.visible);
   return toJoyrideSteps(TOUR_STEPS, {
     candidates: analysis.candidates.length > 0,

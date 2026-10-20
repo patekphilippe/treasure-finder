@@ -35,12 +35,18 @@ export interface NewCommunityObject {
 
 export interface Member {
   name: string;
+  /** the address the member was invited with and signs in with */
+  email: string | null;
 }
 
 /** Owner's panel: one member. */
 export interface AdminMember {
   id: string;
   name: string;
+  /** invitation address; null for members from the invitation-code days until the owner adds one */
+  email: string | null;
+  /** has signed in with the address at least once */
+  linked: boolean;
   blocked: boolean;
   createdAt: number;
   lastSeenDay: string | null;

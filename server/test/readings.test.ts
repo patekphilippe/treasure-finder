@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapReading } from '@/shared/types/readings';
 import { addSpending, spentThisMonth } from '../src/budget';
 import { READ_DAILY_LIMIT } from '../src/readings/limits';
+import { signedInAs } from './signIn';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 const db = (env as unknown as { DB: D1Database }).DB;
@@ -34,14 +35,15 @@ function read(fields: Record<string, string | File> = {}, ip = '198.51.100.9', a
 }
 
 async function member(name: string): Promise<string> {
-  const res = await worker.fetch(
+  const email = `${name.toLowerCase()}@example.com`;
+  await worker.fetch(
     new Request('https://api.test/api/admin/members', {
       method: 'POST',
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ name, email }),
       headers: { authorization: 'Bearer test-admin-token-0123456789abcdef' },
     }),
   );
-  return `Bearer ${((await res.json()) as { code: string }).code}`;
+  return signedInAs(email);
 }
 
 describe('view readings', () => {

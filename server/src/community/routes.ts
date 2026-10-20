@@ -17,7 +17,7 @@ import {
 type Cors = Record<string, string>;
 
 /**
- * /api/community/…: the members-only shared base. Every request needs a member's invitation code;
+ * /api/community/…: the members-only shared base. Every request needs a signed-in member (Auth0);
  * members add objects that are visible at once, confirm or dispute others' and remove their own.
  */
 export async function communityRoutes(
@@ -28,11 +28,11 @@ export async function communityRoutes(
   now: number,
 ) {
   const member = await memberFrom(request, env, now);
-  if (!member) return fail(401, 'Nieważny kod członka społeczności', cors);
+  if (!member) return fail(401, 'Zaloguj się kontem z zaproszeniem do społeczności', cors);
   const write = () => consumeDaily(env.DB, [`member:${member.id}`], MEMBER_DAILY_WRITES, now);
 
   if (request.method === 'GET' && path === 'me')
-    return json({ name: member.name } satisfies Member, 200, cors);
+    return json({ name: member.name, email: member.email } satisfies Member, 200, cors);
 
   if (request.method === 'GET' && path === 'objects') {
     const b = parseBbox(new URL(request.url).searchParams.get('bbox'));

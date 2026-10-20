@@ -1,35 +1,55 @@
-import { sha256Hex } from '../crypto';
+import { isOwnerEmail } from '../auth/isOwnerEmail';
+import { signedIn, type SignedIn } from '../auth/session';
+import { randomToken, sha256Hex } from '../crypto';
 import type { Env } from '../env';
 
 export interface MemberRow {
   id: string;
   name: string;
+  email: string | null;
   blocked: number;
   last_seen_day: string | null;
 }
 
-/** The member's invitation code from `Authorization: Bearer <kod>`; null when absent. */
-export function bearer(request: Request): string | null {
-  const given = (request.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
-  return given || null;
+const SELECT = 'SELECT id, name, email, blocked, last_seen_day FROM members';
+
+/** `token_hash` is left from the invitation codes (NOT NULL UNIQUE): a random hash nobody knows. */
+export const unusedCodeHash = () => sha256Hex(randomToken(24));
+
+/** The owner needs no invitation: their member row is made at the first sign-in. */
+async function addOwner(env: Env, who: SignedIn, now: number): Promise<MemberRow | null> {
+  await env.DB.prepare(
+    `INSERT OR IGNORE INTO members (id, name, token_hash, blocked, created_at, email, auth_sub)
+     VALUES (?, ?, ?, 0, ?, ?, ?)`,
+  )
+    .bind(randomToken(9), who.name || 'Właściciel', await unusedCodeHash(), now, who.email, who.sub)
+    .run();
+  return env.DB.prepare(`${SELECT} WHERE auth_sub = ?`).bind(who.sub).first<MemberRow>();
 }
 
 /**
- * The member behind the invitation code, or null (no code, unknown, blocked). Codes are stored
- * only as SHA-256, so a leaked database does not let anyone in. Notes the day of the last visit.
+ * The member behind the Auth0 sign-in, or null (not signed in, not invited, blocked). The
+ * invitation is the e-mail address: the first sign-in with it ties the member to that account
+ * (`auth_sub`), later sign-ins go by the account. Notes the day of the last visit.
  */
 export async function memberFrom(
   request: Request,
   env: Env,
   now: number,
 ): Promise<MemberRow | null> {
-  const code = bearer(request);
-  if (!code || code.length < 16) return null;
-  const row = await env.DB.prepare(
-    'SELECT id, name, blocked, last_seen_day FROM members WHERE token_hash = ?',
-  )
-    .bind(await sha256Hex(code))
-    .first<MemberRow>();
+  const who = await signedIn(request, env, now);
+  if (!who) return null;
+  let row = await env.DB.prepare(`${SELECT} WHERE auth_sub = ?`).bind(who.sub).first<MemberRow>();
+  if (!row) {
+    row = await env.DB.prepare(`${SELECT} WHERE email = ? AND auth_sub IS NULL`)
+      .bind(who.email)
+      .first<MemberRow>();
+    if (row)
+      await env.DB.prepare('UPDATE members SET auth_sub = ? WHERE id = ? AND auth_sub IS NULL')
+        .bind(who.sub, row.id)
+        .run();
+    else if (isOwnerEmail(who.email, env)) row = await addOwner(env, who, now);
+  }
   if (!row || row.blocked) return null;
   const day = new Date(now).toISOString().slice(0, 10);
   if (row.last_seen_day !== day)

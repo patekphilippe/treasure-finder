@@ -4,18 +4,21 @@ import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { signIn } from '@/shared/auth/signIn';
+import { signOut } from '@/shared/auth/signOut';
+import { AUTH_ENABLED } from '@/shared/config/auth';
+import { useMembership } from '@/shared/store/useMembership';
 import { SOURCES_ENABLED } from '../config/sourcesApi';
-import { adminApi, adminToken, type AdminSubmission } from '../services/adminApi';
+import { adminApi, type AdminSubmission } from '../services/adminApi';
 import { AdminCommunityObjects } from './AdminCommunityObjects';
 import { AdminMembers } from './AdminMembers';
 import { AdminSubmissionCard } from './AdminSubmissionCard';
 
-/** Owner's panel (…/#admin): submissions, community members and the shared base. Token only for the owner. */
+/** Owner's panel (…/#admin): submissions, community members and the shared base. Only for the owner's account. */
 export function AdminPanel() {
-  const [token, setToken] = useState(adminToken.get());
+  const email = useMembership((s) => s.email);
   const [items, setItems] = useState<AdminSubmission[] | null>(null);
   const [budget, setBudget] = useState<{
     month: string;
@@ -25,21 +28,9 @@ export function AdminPanel() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<'submissions' | 'members' | 'objects'>('submissions');
 
-  const load = useCallback(async () => {
-    try {
-      const [list, b] = await Promise.all([adminApi.list(), adminApi.budget()]);
-      setError(null);
-      setItems(list);
-      setBudget(b);
-    } catch (e) {
-      setItems(null);
-      setError(e instanceof Error ? e.message : 'Nie udało się wczytać');
-    }
-  }, []);
-
-  // first load with a saved token; state is set only from the promise, after the effect
+  // load once signed in; state is set only from the promise, after the effect
   useEffect(() => {
-    if (!SOURCES_ENABLED || !adminToken.get()) return;
+    if (!SOURCES_ENABLED || !email) return;
     let alive = true;
     Promise.all([adminApi.list(), adminApi.budget()])
       .then(([list, b]) => {
@@ -53,7 +44,7 @@ export function AdminPanel() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [email]);
 
   return (
     <Box sx={{ position: 'absolute', inset: 0, overflowY: 'auto', bgcolor: 'background.default' }}>
@@ -67,26 +58,46 @@ export function AdminPanel() {
         {!SOURCES_ENABLED && (
           <Alert severity="info">Backend analizy nie jest skonfigurowany w tej wersji.</Alert>
         )}
-        <Stack direction="row" sx={{ gap: 1 }}>
-          <TextField
-            size="small"
-            type="password"
-            label="Token panelu (ADMIN_TOKEN)"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            sx={{ flex: 1 }}
-          />
-          <Button
-            variant="contained"
-            disabled={!SOURCES_ENABLED}
-            onClick={() => {
-              adminToken.set(token.trim());
-              void load();
-            }}
-          >
-            Wczytaj
-          </Button>
-        </Stack>
+        {SOURCES_ENABLED && !AUTH_ENABLED && (
+          <Alert severity="info">
+            Logowanie nie jest skonfigurowane w tej wersji (docs/BACKEND.md, „Logowanie”).
+          </Alert>
+        )}
+        {AUTH_ENABLED && !email && (
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" sx={{ flex: 1 }}>
+              Zaloguj się kontem właściciela.
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={() =>
+                signIn('#admin').catch((e: unknown) =>
+                  setError(e instanceof Error ? e.message : 'Nie udało się zalogować'),
+                )
+              }
+            >
+              Zaloguj się
+            </Button>
+          </Stack>
+        )}
+        {email && (
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
+              Zalogowano: {email}
+            </Typography>
+            <Button
+              color="inherit"
+              onClick={() => {
+                setItems(null);
+                setBudget(null);
+                setError(null);
+                void signOut();
+              }}
+            >
+              Wyloguj
+            </Button>
+          </Stack>
+        )}
         {budget && (
           <Typography variant="body2" color="text.secondary">
             Wydatki na AI w {budget.month}: {budget.spentUsd.toFixed(3)} $ z {budget.budgetUsd} $

@@ -6,13 +6,12 @@ import { communityApi } from './communityApi';
 
 /** Puts the member's own context objects into the shared base and links them locally. */
 export async function shareObjects(features: readonly ContextFeature[]): Promise<number> {
-  const code = useMembership.getState().code;
-  if (!code) throw new Error('Najpierw dołącz do społeczności');
+  if (!useMembership.getState().email) throw new Error('Najpierw zaloguj się do społeczności');
   const linked: ContextFeature[] = [];
   for (const f of features) {
     const obj = toNewCommunityObject(f);
     if (!obj || f.community) continue;
-    const { id } = await communityApi.add(code, obj);
+    const { id } = await communityApi.add(obj);
     linked.push({
       ...f,
       community: {

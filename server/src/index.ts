@@ -1,6 +1,7 @@
 import { spentThisMonth } from './budget';
 import type { Env } from './env';
 import { adminRoutes } from './admin/routes';
+import { authCheck } from './auth/check';
 import { communityRoutes } from './community/routes';
 import { aiKeyStatus } from './aiKeyStatus';
 import { placeImage } from './placements/routes';
@@ -46,6 +47,8 @@ export default {
         cors,
         Date.now(),
       );
+    if (request.method === 'POST' && pathname === '/api/auth/check')
+      return authCheck(request, env, cors);
     if (pathname.startsWith('/api/admin/'))
       return adminRoutes(request, env, pathname.slice('/api/admin/'.length), cors, Date.now());
     if (request.method === 'GET' && pathname.startsWith('/api/kontekst/'))

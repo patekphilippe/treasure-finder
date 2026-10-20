@@ -17,10 +17,9 @@ const clip = (b: Bounds): Bounds => {
 
 /** Brings the shared base of the view into the local context objects; returns how many are in it. */
 export async function syncCommunity(view: Bounds): Promise<number> {
-  const code = useMembership.getState().code;
-  if (!code) return 0;
+  if (!useMembership.getState().email) return 0;
   const area = clip(view);
-  const remote = await communityApi.objects(code, area);
+  const remote = await communityApi.objects(area);
   const store = useContextStore.getState();
   const { put, remove } = mergeCommunity(store.features, remote, area);
   if (put.length) await store.add(put);

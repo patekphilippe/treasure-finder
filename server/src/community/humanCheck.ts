@@ -3,8 +3,8 @@ import { verifyTurnstile } from '../submissions/verifyTurnstile';
 import { memberFrom, type MemberRow } from './auth';
 
 /**
- * A person, not a bot: either a community member (their invitation code is the proof) or a
- * passed Turnstile check. Returns the member when there is one, `false` when the check failed.
+ * A person, not a bot: either a signed-in community member or a passed Turnstile check. Returns
+ * the member when there is one, `false` when the check failed.
  */
 export async function humanCheck(
   request: Request,

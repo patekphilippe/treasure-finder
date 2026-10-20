@@ -29,7 +29,8 @@ describe('reading a map through the backend', () => {
     expect(r.usage).toEqual({ inputTokens: 2100, outputTokens: 180 });
     const [url, init] = fetch.mock.calls[0]!;
     expect(url).toBe(`${BACKEND_URL}/api/readings`);
-    expect(init.headers).toBeUndefined();
+    // not a member: no authorization, the Turnstile token is the proof
+    expect(init.headers).toEqual({});
     const form = init.body as FormData;
     expect(Object.fromEntries([...form.entries()].filter(([k]) => k !== 'image'))).toEqual({
       w: '800',

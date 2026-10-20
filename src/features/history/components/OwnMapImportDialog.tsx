@@ -47,7 +47,7 @@ export function OwnMapImportDialog({
   onClose,
 }: OwnMapImportDialogProps) {
   const auto = canAuto && BACKEND_ENABLED;
-  const member = useMembership((s) => s.code !== null);
+  const member = useMembership((s) => s.email !== null);
   const [epsg, setEpsg] = useState(2180);
   const [series, setSeries] = useState<SheetSeries | 'none' | 'auto'>(auto ? 'auto' : 'none');
   const [token, setToken] = useState<string | null>(null);

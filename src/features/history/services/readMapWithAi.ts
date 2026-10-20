@@ -1,6 +1,6 @@
+import { memberAuth } from '@/shared/auth/memberAuth';
 import { BACKEND_URL } from '@/shared/config/backend';
 import { deviceId } from '@/shared/lib/deviceId';
-import { useMembership } from '@/shared/store/useMembership';
 import type { MapObject, ReadKind, ReadProfileId } from '@/shared/lib/history';
 import type { MapReading } from '@/shared/types/readings';
 import type { AiModelId } from '../config/aiReading';
@@ -30,14 +30,14 @@ export async function readMapWithAi(
   form.append('profile', profile);
   form.append('deviceId', deviceId());
   if (turnstileToken) form.append('turnstile', turnstileToken);
-  // a community member's invitation code stands in for the Turnstile check
-  const code = useMembership.getState().code;
+  // a signed-in community member needs no Turnstile check
+  const headers = await memberAuth();
   let response: Response;
   try {
     response = await fetch(`${BACKEND_URL}/api/readings`, {
       method: 'POST',
       body: form,
-      ...(code ? { headers: { authorization: `Bearer ${code}` } } : {}),
+      headers,
     });
   } catch {
     throw new Error('Brak połączenia z serwerem analizy');

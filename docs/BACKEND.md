@@ -11,7 +11,8 @@
 | Pliki zgłoszeń        | Workers KV `SOURCES`         | zmniejszone zdjęcia i teksty (prywatne, kasowane razem ze zgłoszeniem)                   |
 | Zatwierdzony kontekst | Workers KV `CONTEXT`         | paczki GeoJSON w siatce 0,25° i `index.json`, wydawane przez worker pod `/api/kontekst/` |
 | Ochrona przed botami  | Turnstile                    | token przy każdym wysłaniu                                                               |
-| Panel przeglądu       | aplikacja pod `…/#admin`     | token `ADMIN_TOKEN` (sekret workera), tylko dla właściciela                              |
+| Logowanie             | Auth0 (plan Free)            | tylko OAuth (Google), rejestracja tylko z zaproszenia; sekcja „Logowanie”                |
+| Panel przeglądu       | aplikacja pod `…/#admin`     | logowanie kontem właściciela (`ADMIN_EMAILS`); `ADMIN_TOKEN` już tylko dla skryptów      |
 | Kafelki cieniowania   | R2 `treasure-finder-tiles`   | gotowe kafelki 512 px (`relief/1/z/x/y`), liczone raz z NMT GUGiK                        |
 
 ## Koszty
@@ -40,7 +41,7 @@
    Workflow `.github/workflows/server.yml` testuje zawsze. Wdraża tylko wtedy, gdy token jest ustawiony.
 
 8. Cieniowanie: w panelu Cloudflare włącz plan Workers Paid i R2, potem `npx wrangler r2 bucket create treasure-finder-tiles` i w `wrangler.toml` wiązanie `[[r2_buckets]]` `TILES`. Token z punktu 7 potrzebuje uprawnienia „Workers R2 Storage: Edit”. Bez wiązania worker liczy każdy kafelek od nowa.
-9. Panel przeglądu: `npx wrangler secret put ADMIN_TOKEN` (losowy ciąg, co najmniej 24 znaki, np. `openssl rand -base64 32`). Otwórz `https://patekphilippe.github.io/treasure-finder/#admin` i wpisz token: zostaje tylko w tej przeglądarce.
+9. Logowanie i panel przeglądu: Auth0 według sekcji „Logowanie (Auth0)”. Potem otwórz `https://patekphilippe.github.io/treasure-finder/#admin` i zaloguj się kontem z `ADMIN_EMAILS`. `ADMIN_TOKEN` (`npx wrangler secret put ADMIN_TOKEN`, co najmniej 24 znaki) jest potrzebny już tylko do wywołań panelu ze skryptów.
 10. Aplikacja: adres workera i klucz witryny Turnstile są wpisane jako domyślne w `src/features/sources/config/sourcesApi.ts` (to wartości publiczne). Zmienne repozytorium `SOURCES_API_URL` i `TURNSTILE_SITE_KEY` mogą je nadpisać, np. dla testowego workera.
 
 ## Cieniowanie (`GET /api/relief/1/{z}/{x}/{y}`)
@@ -59,8 +60,9 @@ Własne cieniowanie NMT jako kafelki mapy, w tym samym stylu co w analizie arkus
 Mała społeczność zaufanych osób buduje wspólną bazę obiektów z map (dawne wsie, młyny, karczmy,
 brody, drogi). Bazę widzą i zmieniają tylko zaproszeni członkowie.
 
-- **Zaproszenia:** w panelu `#admin` → Członkowie → imię → link `…/#dolacz=<kod>`. Kod pokazuje się
-  raz; worker trzyma tylko jego SHA-256. Zgubiony kod: zablokuj osobę i zaproś ją jeszcze raz.
+- **Zaproszenia:** w panelu `#admin` → Członkowie → imię i adres e-mail konta Google. Panel otwiera
+  gotową wiadomość w Gmailu albo programie pocztowym właściciela, z linkiem `…/#zaproszenie=<adres>`.
+  Zarejestrować się może tylko zaproszony adres (sekcja „Logowanie (Auth0)”).
 - **Obiekty:** członek dodaje obiekt i jest on od razu widoczny (`POST /api/community/objects`),
   autor może go usunąć, właściciel usuwa i przywraca w panelu (Wspólna baza). Limit 300 zmian dziennie
   na członka.
@@ -69,11 +71,62 @@ brody, drogi). Bazę widzą i zmieniają tylko zaproszeni członkowie.
   kandydatów NMT; właściciel widzi go z notatkami w panelu.
 - **Synchronizacja:** aplikacja pobiera obiekty dla widoku mapy (do 1° × 1°) przy otwarciu arkusza
   historii i przyciskiem; zapisuje je w lokalnym kontekście (`ContextFeature.community`).
-- **Członkowie bez Turnstile:** kod członka zastępuje weryfikację przy odczytach map i zgłoszeniach;
-  limity liczone są wtedy na członka.
+- **Członkowie bez Turnstile:** zalogowany członek nie przechodzi weryfikacji przy odczytach map i
+  zgłoszeniach; limity liczone są wtedy na członka.
 - **Stara publiczna baza:** zatwierdzone zgłoszenia trafiają do D1 (`community_objects`, bez autora).
   Paczki KV przenosi `POST /api/admin/migrate-packs`; `/api/kontekst/` odpowiada 410.
-- **Dane:** imię członka, jego obiekty i głosy z notatkami. Bez e-maili i haseł.
+- **Dane:** imię członka, adres e-mail zaproszenia, identyfikator konta Auth0, jego obiekty i głosy z
+  notatkami. Bez haseł.
+
+## Logowanie (Auth0)
+
+Społeczność i panel właściciela wymagają logowania. Reszta aplikacji (mapa, analiza NMT, teren)
+działa bez konta i offline.
+
+- **Tylko OAuth:** w Auth0 włączone jest wyłącznie połączenie Google: bez haseł i bez rejestracji
+  adresem e-mail.
+- **Tylko z zaproszeniem:** zaproszenie to adres e-mail wpisany przez właściciela w panelu. Akcja
+  Post-Login (`server/auth0/postLogin.js`) przy każdym logowaniu pyta worker (`POST /api/auth/check`,
+  wspólny sekret `AUTH0_ACTION_SECRET`), czy adres jest zaproszony i niezablokowany; inaczej Auth0
+  odmawia z polskim komunikatem i konto nie powstaje. Akcja dopisuje adres i imię do tokenu dostępu.
+- **Worker sprawdza token sam:** RS256, klucze z `https://<AUTH0_DOMAIN>/.well-known/jwks.json`,
+  wystawca, odbiorca `AUTH0_AUDIENCE`, ważność (`server/src/auth/`). Pierwsze logowanie zaproszonym
+  adresem wiąże członka z kontem Auth0 (`auth_sub`), potem liczy się konto, nie adres. Zmiana adresu
+  w panelu odpina konto: członka razem z obiektami i głosami przejmuje pierwsze logowanie nowym adresem.
+- **Właściciel:** adresy z sekretu `ADMIN_EMAILS` (sekret, bo repozytorium jest publiczne) nie
+  potrzebują zaproszenia, mają panel `#admin` i są członkami.
+- **Aplikacja:** `@auth0/auth0-spa-js` ładuje się dopiero przy logowaniu albo zapytaniu członka
+  (`src/shared/auth/`). Tokeny leżą w localStorage razem z tokenem odświeżania, więc sesja przetrwa
+  zamknięcie PWA. Logowanie na chwilę przechodzi do Auth0, dlatego nie działa podczas nagrywania
+  trasy. Wylogowanie dotyczy tylko tego urządzenia.
+- **Dawni członkowie z kodem:** kody przestają działać z wdrożeniem workera (migracja `0006`). Dopisz
+  im adres w panelu („Dopisz adres”) i wyślij zaproszenie: po zalogowaniu zachowują obiekty i głosy.
+
+### Uruchomienie Auth0 (jednorazowo)
+
+1. Konto na auth0.com (plan Free), tenant w regionie EU, np. `treasure-finder.eu.auth0.com`.
+2. Applications → Create Application → „Single Page Application”. W Settings:
+   - Allowed Callback URLs i Allowed Logout URLs: `https://patekphilippe.github.io/treasure-finder/, http://localhost:5173/treasure-finder/`
+   - Allowed Web Origins: `https://patekphilippe.github.io, http://localhost:5173`
+   - Refresh Token Rotation: włączona.
+3. Authentication → Database → Username-Password-Authentication → Applications: wyłącz tę aplikację.
+   Authentication → Social → Google: włącz dla aplikacji. Klucze deweloperskie Auth0 nadają się tylko
+   do testów; potem utwórz klienta OAuth w Google Cloud (Credentials → OAuth client ID → Web
+   application, Authorized redirect URI `https://<AUTH0_DOMAIN>/login/callback`, ekran zgody
+   „External” w stanie „In production”) i wpisz jego Client ID i Secret w Auth0.
+4. Applications → APIs → Create API: Identifier `https://treasure-finder-api` (to samo co
+   `AUTH0_AUDIENCE`), RS256. W Settings włącz „Allow Offline Access” (tokeny odświeżania).
+5. Worker: domena w `AUTH0_DOMAIN` w `server/wrangler.toml`, potem
+   `npx wrangler secret put ADMIN_EMAILS` (Twój adres, kilka po przecinku) i
+   `npx wrangler secret put AUTH0_ACTION_SECRET` (`openssl rand -base64 32`), `npm run db:migrate`,
+   `npm run deploy`.
+6. Actions → Library → Create Action → „Login / Post Login”: wklej `server/auth0/postLogin.js`, w
+   Secrets dodaj `API_URL` (adres workera) i `ACTION_SECRET` (ta sama wartość co
+   `AUTH0_ACTION_SECRET`), Deploy. Actions → Triggers → post-login: przeciągnij akcję, Apply.
+7. Aplikacja: domena i Client ID jako domyślne w `src/shared/config/auth.ts` (wartości publiczne)
+   albo zmienne repozytorium `AUTH0_DOMAIN` i `AUTH0_CLIENT_ID`.
+
+Bez domeny Auth0 społeczność i panel są zamknięte, a reszta aplikacji działa bez zmian.
 
 ## Odczyt widoku mapy (`POST /api/readings`)
 
@@ -108,8 +161,8 @@ odczyt to jedno wywołanie ze schematem JSON. Do dodawania profili jest skill Cl
 `.claude/skills/profil-odczytu-mapy` (wywołanie: `/profil-odczytu-mapy` albo prośba o nowy rodzaj mapy).
 
 - **Ochrona:** Turnstile przy każdym odczycie, limit 300 odczytów dziennie na urządzenie i na adres IP
-  (własny licznik `read:…`, nie zużywa limitu zgłoszeń), obraz do 3 MB i 1600 px na bok. Członek
-  społeczności zamiast Turnstile podaje kod i ma 1000 odczytów dziennie: tyle potrzeba, by przeczytać
+  (własny licznik `read:…`, nie zużywa limitu zgłoszeń), obraz do 3 MB i 1600 px na bok. Zalogowany
+  członek społeczności nie przechodzi Turnstile i ma 1000 odczytów dziennie: tyle potrzeba, by przeczytać
   wiele własnych map w całości (aplikacja dzieli mapę na okna wielkości widoku i łączy wyniki).
   Na czas prac nad odczytem limity są podniesione z 30 i 100; wydatki i tak zatrzymuje budżet miesięczny.
 - **Budżet:** wspólny z potokiem zgłoszeń (`MONTHLY_BUDGET_USD`). Przed wywołaniem worker sprawdza,
@@ -130,13 +183,13 @@ odpowiedź jest krótka, a potem używa `placeMap` z potoku zgłoszeń: najpierw
   potrafią wskazać miejsce o setki metrów obok (etykieta lasu zamiast wsi, gmina zamiast miejscowości),
   więc przy mniej niż sześciu nazwach `placeByNames` wymaga dopasowania z błędem do 150 m, a inaczej
   zwraca nic. Wtedy aplikacja kładzie skan w widoku jak dotąd.
-- Ochrona i koszt jak przy odczycie widoku: Turnstile albo kod członka, jeden odczyt z dziennego
+- Ochrona i koszt jak przy odczycie widoku: Turnstile albo zalogowany członek, jeden odczyt z dziennego
   limitu, wspólny budżet; obraz nie jest zapisywany.
 
 ## Dane osobowe (RODO)
 
 - **Co zbieramy:** to, co ktoś sam wyśle (zdjęcie, tekst, link), widok mapy w chwili wysłania, losowy identyfikator urządzenia oraz skrót (hash) adresu IP do limitów. Pełnego adresu IP nie zapisujemy.
-- **Bez kont i telemetrii.**
+- **Bez telemetrii.** Konta mają tylko zaproszeni członkowie społeczności: Auth0 trzyma konto (adres, imię i zdjęcie z Google), worker adres zaproszenia i identyfikator konta. Reszta aplikacji działa bez konta.
 - **Prywatne zgłoszenia** są usuwane po 30 dniach. Nadawca może je usunąć wcześniej kluczem z aplikacji.
 - **Publiczne zgłoszenia:** do wspólnej bazy trafiają tylko współrzędne, rodzaj obiektu i opis źródła, nigdy zdjęcia. Pliki są usuwane po zatwierdzeniu lub odrzuceniu.
 - **Anthropic** przetwarza wysłane treści na potrzeby analizy. Informacja o tym jest w aplikacji przy wysyłaniu (`features/safety/config/legal.ts`).

@@ -17,6 +17,16 @@ export interface Env {
   PRIVATE_DAILY_LIMIT: string;
   ANTHROPIC_API_KEY: string;
   TURNSTILE_SECRET: string;
-  /** long random secret for the review panel (wrangler secret put ADMIN_TOKEN) */
+  /** long random secret for the review panel from scripts (wrangler secret put ADMIN_TOKEN) */
   ADMIN_TOKEN: string;
+  /** Auth0 tenant, e.g. `treasure-finder.eu.auth0.com`; empty: nobody can sign in (docs/BACKEND.md) */
+  AUTH0_DOMAIN: string;
+  /** identifier of this API in Auth0: the audience of the access tokens */
+  AUTH0_AUDIENCE: string;
+  /** the owner's sign-in addresses, comma-separated (secret: the repository is public) */
+  ADMIN_EMAILS?: string;
+  /** shared with the Auth0 Post-Login Action that asks /api/auth/check */
+  AUTH0_ACTION_SECRET?: string;
+  /** Only for tests: the tenant's JWKS inline instead of fetching it. */
+  AUTH0_JWKS?: string;
 }

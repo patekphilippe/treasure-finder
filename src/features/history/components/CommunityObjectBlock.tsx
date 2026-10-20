@@ -18,14 +18,14 @@ interface CommunityObjectBlockProps {
 
 /** One object and the community: share it, or see who added it and confirm or dispute it. */
 export function CommunityObjectBlock({ feature }: CommunityObjectBlockProps) {
-  const code = useMembership((s) => s.code);
+  const email = useMembership((s) => s.email);
   const add = useContextStore((s) => s.add);
   const showToast = useToastStore((s) => s.show);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
   const [disputing, setDisputing] = useState(false);
   const c = feature.community;
-  if (!code) return null;
+  if (!email) return null;
 
   const run = async (job: () => Promise<void>) => {
     setBusy(true);
@@ -57,7 +57,7 @@ export function CommunityObjectBlock({ feature }: CommunityObjectBlockProps) {
 
   const vote = (v: -1 | 0 | 1, text = '') =>
     run(async () => {
-      await communityApi.vote(code, c.id, v, text);
+      await communityApi.vote(c.id, v, text);
       const up = c.up - (c.mine === 1 ? 1 : 0) + (v === 1 ? 1 : 0);
       const down = c.down - (c.mine === -1 ? 1 : 0) + (v === -1 ? 1 : 0);
       await add([{ ...feature, community: { ...c, up, down, mine: v } }]);
@@ -87,7 +87,7 @@ export function CommunityObjectBlock({ feature }: CommunityObjectBlockProps) {
           disabled={busy}
           onClick={() =>
             void run(async () => {
-              await communityApi.remove(code, c.id);
+              await communityApi.remove(c.id);
               await add([{ ...feature, community: undefined }]);
               showToast('Usunięto ze wspólnej bazy; zostaje u Ciebie');
             })

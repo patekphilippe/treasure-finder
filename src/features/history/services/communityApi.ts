@@ -1,16 +1,15 @@
+import { memberAuth } from '@/shared/auth/memberAuth';
 import { BACKEND_URL } from '@/shared/config/backend';
 import type { CommunityObject, Member, NewCommunityObject } from '@/shared/types/community';
 import type { Bounds } from '@/shared/store/useMapViewStore';
 
-async function call<T>(code: string, path: string, init: RequestInit = {}): Promise<T> {
+async function call<T>(path: string, init: RequestInit = {}, auth?: Record<string, string>) {
+  const headers = auth ?? (await memberAuth());
   let res: Response;
   try {
     res = await fetch(`${BACKEND_URL}/api/community/${path}`, {
       ...init,
-      headers: {
-        authorization: `Bearer ${code}`,
-        ...(init.body ? { 'content-type': 'application/json' } : {}),
-      },
+      headers: { ...headers, ...(init.body ? { 'content-type': 'application/json' } : {}) },
     });
   } catch {
     throw new Error('Brak połączenia z serwerem społeczności');
@@ -21,20 +20,17 @@ async function call<T>(code: string, path: string, init: RequestInit = {}): Prom
   return body as T;
 }
 
-/** The members-only shared base; every call carries the member's invitation code. */
+/** The members-only shared base; every call carries the signed-in member's Auth0 token. */
 export const communityApi = {
-  me: (code: string) => call<Member>(code, 'me'),
-  objects: (code: string, b: Bounds) =>
+  /** right after signing in, before the membership is remembered */
+  me: (token: string) => call<Member>('me', {}, { authorization: `Bearer ${token}` }),
+  objects: (b: Bounds) =>
     call<CommunityObject[]>(
-      code,
       `objects?bbox=${[b.south, b.west, b.north, b.east].map((v) => v.toFixed(5)).join(',')}`,
     ),
-  add: (code: string, o: NewCommunityObject) =>
-    call<{ id: string }>(code, 'objects', { method: 'POST', body: JSON.stringify(o) }),
-  remove: (code: string, id: string) => call<void>(code, `objects/${id}`, { method: 'DELETE' }),
-  vote: (code: string, id: string, vote: -1 | 0 | 1, note = '') =>
-    call<void>(code, `objects/${id}/vote`, {
-      method: 'POST',
-      body: JSON.stringify({ vote, note }),
-    }),
+  add: (o: NewCommunityObject) =>
+    call<{ id: string }>('objects', { method: 'POST', body: JSON.stringify(o) }),
+  remove: (id: string) => call<void>(`objects/${id}`, { method: 'DELETE' }),
+  vote: (id: string, vote: -1 | 0 | 1, note = '') =>
+    call<void>(`objects/${id}/vote`, { method: 'POST', body: JSON.stringify({ vote, note }) }),
 };

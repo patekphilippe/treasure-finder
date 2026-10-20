@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { joinCodeFromHash } from '@/features/history/utils/joinCodeFromHash';
+import { invitationFromHash } from '@/features/history/utils/invitationFromHash';
 import { mergeCommunity } from '@/features/history/utils/mergeCommunity';
 import { toNewCommunityObject } from '@/features/history/utils/toNewCommunityObject';
 import { isDisputed, type CommunityObject } from '@/shared/types/community';
@@ -81,10 +81,17 @@ describe('merging the shared base into local objects', () => {
 });
 
 describe('joining and sharing', () => {
-  it('reads the code from the invitation link only', () => {
-    expect(joinCodeFromHash('#dolacz=abcdefghijklmnop_-1234')).toBe('abcdefghijklmnop_-1234');
-    expect(joinCodeFromHash('#dolacz=short')).toBeNull();
-    expect(joinCodeFromHash('#admin')).toBeNull();
+  it('reads the invited address from the invitation link only', () => {
+    expect(invitationFromHash('#zaproszenie=Jan.Kowalski%2Bmapa%40gmail.com')).toBe(
+      'jan.kowalski+mapa@gmail.com',
+    );
+    expect(invitationFromHash('#zaproszenie')).toBe('');
+    expect(invitationFromHash('#zaproszenie=nie-adres')).toBe('');
+    expect(invitationFromHash('#zaproszenie=%E0%A4%A')).toBe('');
+    // old code links still start signing in
+    expect(invitationFromHash('#dolacz=abcdefghijklmnop_-1234')).toBe('');
+    expect(invitationFromHash('#admin')).toBeNull();
+    expect(invitationFromHash('')).toBeNull();
   });
 
   it('a local object is shared as a point with its kind, label and source', () => {

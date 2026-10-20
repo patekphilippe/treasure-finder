@@ -25,7 +25,9 @@ Testy syntetyczne (12 modeli ze specyfikacji): `tests/lib/detect/interpret.test.
 
 - Interfejs po polsku. Nazwy w kodzie po angielsku, wartości typów
   i pola eksportu dokładnie jak w docs/PLAN.md.
-- Bez kont i telemetrii. Dane użytkownika tylko w IndexedDB. Jedyny backend to `server/`
+- Bez telemetrii. Konta tylko dla zaproszonych członków społeczności: Auth0 wyłącznie przez OAuth
+  (Google), rejestracja tylko z zaproszenia na adres e-mail (docs/BACKEND.md, „Logowanie”). Reszta
+  aplikacji działa bez konta i offline. Dane użytkownika tylko w IndexedDB. Jedyny backend to `server/`
   (Cloudflare Worker, docs/BACKEND.md): przyjmuje zgłoszenia źródeł i analizuje je przez AI,
   prowadzi wspólną bazę społeczności i liczy kafelki cieniowania z NMT GUGiK (R2).
   Jest opcjonalny: aplikacja działa w pełni bez niego i offline. Klucz API Anthropic tylko
@@ -59,6 +61,7 @@ src/
    ├─ lib/                  czyste algorytmy: geo/, raster/, detect/, io/
    ├─ db/                   schemat IndexedDB (idb), migracje, repozytoria
    ├─ store/                stan współdzielony: useUiStore, useFieldStore, usePointDraftStore, useMapViewStore
+   ├─ auth/                 logowanie Auth0 społeczności (leniwy klient, signIn, signOut, memberAuth)
    └─ types/                model danych z docs/PLAN.md
 tests/                      testy Vitest, struktura odpowiada src/
 ```
@@ -93,7 +96,9 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   (docs/BACKEND.md, „Profile odczytu”); mapa wojskowa daje kontekst `wojsko` i `grob_wojenny`
   (ostrzeżenia, ochrona przy mogiłach w `shared/lib/detect/militaryNearby.ts`). Propozycje trafiają do kontekstu
   dopiero po „Przyjmij”. Adres backendu i klucz witryny Turnstile: `shared/config/backend.ts`.
-- Społeczność: członkostwo (kod zaproszenia, imię) w `shared/store/useMembership.ts` (localStorage, nigdy w eksporcie);
+- Społeczność: logowanie w `shared/auth/` (Auth0 ładowany leniwie, nagłówek członka z `memberAuth()`), kto jest
+  zalogowany w `shared/store/useMembership.ts` (localStorage, nigdy w eksporcie); zaproszenia (adres e-mail) wysyła
+  właściciel ze swojej poczty z panelu `#admin`, Akcja Auth0 `server/auth0/postLogin.js` wpuszcza tylko zaproszonych;
   wspólna baza przez `/api/community/` (docs/BACKEND.md), scalanie z lokalnym kontekstem w
   `features/history/utils/mergeCommunity.ts`. Udostępniać wolno tylko obiekty z map, nigdy znaleziska.
 - Cieniowanie NMT z backendu: `server/src/relief` liczy kafelki od przybliżenia 12, aplikacja pokazuje je

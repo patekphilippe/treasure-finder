@@ -23,3 +23,9 @@ export function json(body: unknown, status = 200, headers: Record<string, string
 export function fail(status: number, message: string, headers: Record<string, string> = {}) {
   return json({ error: message }, status, headers);
 }
+
+/** The token from `Authorization: Bearer <token>`; null when absent. */
+export function bearer(request: Request): string | null {
+  const given = (request.headers.get('authorization') ?? '').replace(/^Bearer\s+/i, '').trim();
+  return given || null;
+}
