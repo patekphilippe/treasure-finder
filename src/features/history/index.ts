@@ -14,3 +14,4 @@ export { CONTEXT_KINDS } from './config/contextKinds';
 export { AiReadingCard } from './components/AiReadingCard';
 export { ContextLayerRow } from './components/ContextLayerRow';
 export { OwnMapsVisibility } from './components/OwnMapsVisibility';
+export { OwnMapsSection } from './components/OwnMapsSection';

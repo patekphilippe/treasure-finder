@@ -32,7 +32,7 @@ export async function addOwnMapFiles(
         id: 'own-map',
         label: `Mapa ${name}`,
         short: 'Wczytuję mapę',
-        open: { mode: 'field', sheet: 'history' },
+        open: { mode: 'field', sheet: 'data' },
       },
       async (update) => {
         let placed: Partial<ImportOptions> = {};

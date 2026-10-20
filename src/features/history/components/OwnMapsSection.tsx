@@ -13,7 +13,10 @@ import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { OwnMapImportDialog } from './OwnMapImportDialog';
 import { OwnMapItem } from './OwnMapItem';
 
-/** Own historical maps: add a GeoTIFF, an image with a world file or a plain scan; list them. */
+/**
+ * Dane: own historical maps loaded from files (a GeoTIFF, an image with a world file or a plain
+ * scan), placed and managed here; Warstwy only shows them.
+ */
 export function OwnMapsSection() {
   const { maps, update, remove, startFit } = useOwnMapsStore();
   const busy = useOwnMapsStore((s) => s.importing !== null);
@@ -43,19 +46,22 @@ export function OwnMapsSection() {
   return (
     <Stack data-tour="own-maps" spacing={1}>
       <Typography variant="overline" color="text.secondary">
-        Własne mapy ({maps.length})
+        Mapy historyczne ({maps.length})
       </Typography>
       <Typography variant="body2" color="text.secondary">
         Skan albo GeoTIFF dawnej mapy, np. z PZGiK, SLUB albo mapywig.org. GeoTIFF i obraz z plikiem
         world file trafiają od razu na miejsce, zwykły skan dopasujesz 4 narożnikami. Mapy zostają
-        na tym urządzeniu i działają bez internetu.
+        na tym urządzeniu i działają bez internetu; włączasz je w Warstwach.
       </Typography>
       {maps.map((m) => (
         <OwnMapItem
           key={m.id}
           map={m}
           onChange={(patch) => void update(m.id, patch)}
-          onShow={() => showOwnMap(m)}
+          onShow={() => {
+            if (!m.visible) void update(m.id, { visible: true });
+            showOwnMap(m);
+          }}
           onFit={() => fit(m.id)}
           onDelete={() => setToDelete(m)}
         />

@@ -200,15 +200,6 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'history',
   },
   {
-    id: 'own-maps',
-    target: 'own-maps',
-    title: 'Własne mapy',
-    content:
-      'Wczytaj własną dawną mapę: GeoTIFF albo skan z PZGiK, SLUB czy mapywig.org. Skan dopasujesz, przeciągając 4 narożniki na ortofotomapę; dla Messtischblatt i WIG wystarczy numer arkusza na start. Wpisz rok mapy: obiekty z niej będą go pamiętać. Mapa zostaje w telefonie i działa bez internetu.',
-    mode: 'field',
-    sheet: 'history',
-  },
-  {
     id: 'history-add',
     target: 'history-add',
     title: 'Obiekty z map archiwalnych',
@@ -373,6 +364,24 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: 'Import',
     content:
       'Wczytaj kopię z innego urządzenia albo GeoJSON z QGIS: punkty, kontekst z map archiwalnych lub wody z BDOT10k. Dane są łączone, nic nie zostanie usunięte.',
+    mode: 'field',
+    sheet: 'data',
+  },
+  {
+    id: 'own-maps',
+    target: 'own-maps',
+    title: 'Własne mapy',
+    content:
+      'Wczytaj własną dawną mapę: GeoTIFF albo skan z PZGiK, SLUB czy mapywig.org. Skan dopasujesz, przeciągając 4 narożniki na ortofotomapę; dla Messtischblatt i WIG wystarczy numer arkusza na start. Wpisz rok mapy: obiekty z niej będą go pamiętać. Mapa zostaje w telefonie i działa bez internetu.',
+    mode: 'field',
+    sheet: 'data',
+  },
+  {
+    id: 'data-nmt',
+    target: 'data-nmt',
+    title: 'Arkusz NMT',
+    content:
+      'Arkusz NMT wczytujesz w Analizach, bo wczytanie od razu go analizuje. Ten przycisk tam prowadzi.',
     mode: 'field',
     sheet: 'data',
   },

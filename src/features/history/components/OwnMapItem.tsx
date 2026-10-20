@@ -1,7 +1,5 @@
 import IconButton from '@mui/material/IconButton';
-import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import type { OwnMap } from '@/shared/types/domain';
@@ -21,11 +19,7 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
   return (
     <Stack spacing={0.25} sx={{ py: 0.5 }}>
       <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
-        <Switch
-          size="small"
-          checked={map.visible}
-          onChange={(e) => onChange({ visible: e.target.checked })}
-        />
+        <Icon name="map" size={20} />
         <Stack sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle2" noWrap>
             {map.name}
@@ -34,7 +28,7 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
             {METHOD_LABEL[map.method]}, {map.width} × {map.height} px
           </Typography>
         </Stack>
-        <IconButton size="small" aria-label="Pokaż na mapie" onClick={onShow}>
+        <IconButton size="small" aria-label="Włącz i pokaż na mapie" onClick={onShow}>
           <Icon name="crosshairs" size={18} />
         </IconButton>
         <IconButton size="small" aria-label="Dopasuj narożnikami" onClick={onFit}>
@@ -44,7 +38,7 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
           <Icon name="trash" size={18} />
         </IconButton>
       </Stack>
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 6, pr: 1 }}>
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 3.5, pr: 1 }}>
         <TextField
           key={map.year ?? ''}
           size="small"
@@ -63,22 +57,6 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
           Obiekty oznaczone na tej mapie dostaną ten rok.
         </Typography>
       </Stack>
-      {map.visible && (
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 6, pr: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
-            Krycie
-          </Typography>
-          <Slider
-            size="small"
-            min={0.1}
-            max={1}
-            step={0.05}
-            value={map.opacity}
-            onChange={(_, v) => onChange({ opacity: v as number })}
-            aria-label={`Krycie: ${map.name}`}
-          />
-        </Stack>
-      )}
     </Stack>
   );
 }

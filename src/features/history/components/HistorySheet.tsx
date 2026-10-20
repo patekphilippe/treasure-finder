@@ -30,13 +30,12 @@ import { createContextPoint } from '../utils/createContextPoint';
 import { representativePoint } from '../utils/representativePoint';
 import { viewSighting } from '../utils/viewSighting';
 import { CommunitySection } from './CommunitySection';
-import { OwnMapsSection } from './OwnMapsSection';
 
 interface HistorySheetProps {
   onClose: () => void;
 }
 
-/** Own historical maps and objects from archival maps: add, show, mark at the crosshair. */
+/** Objects from archival maps: the community base, marking at the crosshair, the list. */
 export function HistorySheet({ onClose }: HistorySheetProps) {
   const { features, setVisible, onlyViewMap } = useContextStore();
   const seenOnView = useSeenOnView();
@@ -80,13 +79,9 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
   return (
     <>
       {picking && <PickLocationBar />}
-      <Sheet title="Mapy i obiekty historyczne" onClose={onClose} hidden={picking}>
+      <Sheet title="Obiekty historyczne" onClose={onClose} hidden={picking}>
         <Stack spacing={2}>
           <CommunitySection />
-
-          <Divider />
-
-          <OwnMapsSection />
 
           <Divider />
 
