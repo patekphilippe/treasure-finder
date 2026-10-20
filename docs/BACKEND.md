@@ -104,7 +104,8 @@ Nowy rodzaj mapy (np. katastralna, Urmesstischblatt): nowy plik z promptem i sch
 `READ_PROFILES`, rodzaje w `types.ts`, przełożenie na obiekty kontekstu w aplikacji, test i krok
 przewodnika. Potok zgłoszeń (Batch) ma własne prompty w `server/src/pipeline/prompts.ts`.
 Skille Claude API (Agent Skills) się tu nie nadają: działają tylko w kontenerze code execution, a
-odczyt to jedno wywołanie ze schematem JSON.
+odczyt to jedno wywołanie ze schematem JSON. Do dodawania profili jest skill Claude Code
+`.claude/skills/profil-odczytu-mapy` (wywołanie: `/profil-odczytu-mapy` albo prośba o nowy rodzaj mapy).
 
 - **Ochrona:** Turnstile przy każdym odczycie, limit 30 odczytów dziennie na urządzenie i na adres IP
   (własny licznik `read:…`, nie zużywa limitu zgłoszeń), obraz do 3 MB i 1600 px na bok. Członek
