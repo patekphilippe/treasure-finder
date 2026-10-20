@@ -12,8 +12,8 @@ MONTHLY_BUDGET_USD = "5"
 # private analyses per member a day
 PRIVATE_DAILY_LIMIT = "5"
 # Community sign-in (docs/BACKEND.md, "Logowanie"): the Auth0 tenant and this API's identifier.
-# Empty domain: nobody can sign in, the community and the panel are closed.
-AUTH0_DOMAIN = ""
+# Empty domain: nobody can sign in, the community, the panel and the analyses are closed.
+AUTH0_DOMAIN = "dev-7o7mrth2w4xw60zk.us.auth0.com"
 AUTH0_AUDIENCE = "https://treasure-finder-api"
 
 # Created once with `wrangler d1 create treasure-finder`; paste the id it prints.

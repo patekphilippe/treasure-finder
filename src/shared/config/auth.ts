@@ -4,8 +4,8 @@ import { BACKEND_ENABLED } from './backend';
  * Community sign-in (Auth0, OAuth only, docs/BACKEND.md "Logowanie"). Both values are public (the
  * browser sees them anyway); a build may override them. Empty: no sign-in, the community is hidden.
  */
-const DEFAULT_AUTH0_DOMAIN = '';
-const DEFAULT_AUTH0_CLIENT_ID = '';
+const DEFAULT_AUTH0_DOMAIN = 'dev-7o7mrth2w4xw60zk.us.auth0.com';
+const DEFAULT_AUTH0_CLIENT_ID = 'sYrbEMo9TJ72QKxbRA4XuEqBjjSX2kBL';
 
 export const AUTH0_DOMAIN = String(import.meta.env.VITE_AUTH0_DOMAIN || DEFAULT_AUTH0_DOMAIN);
 export const AUTH0_CLIENT_ID = String(
