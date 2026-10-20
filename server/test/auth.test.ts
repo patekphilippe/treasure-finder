@@ -68,6 +68,7 @@ describe('sign-in with Auth0', () => {
     expect(await (await call('community/me', owner)).json()).toEqual({
       name: 'Philip',
       email: OWNER,
+      owner: true,
     });
     expect((await call('admin/members', owner)).status).toBe(200);
 

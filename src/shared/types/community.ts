@@ -37,6 +37,8 @@ export interface Member {
   name: string;
   /** the address the member was invited with and signs in with */
   email: string | null;
+  /** an admin (ADMIN_EMAILS): the owner's panel under #admin */
+  owner: boolean;
 }
 
 /** Owner's panel: one member. */

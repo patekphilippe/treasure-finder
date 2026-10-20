@@ -1,4 +1,5 @@
 import Stack from '@mui/material/Stack';
+import { AccountButton } from '@/features/account';
 import { MapCredits } from '@/features/map';
 import { TutorialButton } from '@/features/tutorial';
 import { ZoneAlertBar } from '@/features/zones';
@@ -30,6 +31,7 @@ export function TopBar() {
       <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
         <ModeSwitch />
         <TutorialButton />
+        <AccountButton />
         <ActivityChip />
       </Stack>
       <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75, ml: '8px' }}>

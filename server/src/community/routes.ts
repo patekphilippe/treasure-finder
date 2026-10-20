@@ -1,4 +1,5 @@
 import type { Member } from '@/shared/types/community';
+import { isOwnerEmail } from '../auth/isOwnerEmail';
 import { randomToken } from '../crypto';
 import type { Env } from '../env';
 import { fail, json } from '../http';
@@ -32,7 +33,15 @@ export async function communityRoutes(
   const write = () => consumeDaily(env.DB, [`member:${member.id}`], MEMBER_DAILY_WRITES, now);
 
   if (request.method === 'GET' && path === 'me')
-    return json({ name: member.name, email: member.email } satisfies Member, 200, cors);
+    return json(
+      {
+        name: member.name,
+        email: member.email,
+        owner: isOwnerEmail(member.email ?? '', env),
+      } satisfies Member,
+      200,
+      cors,
+    );
 
   if (request.method === 'GET' && path === 'objects') {
     const b = parseBbox(new URL(request.url).searchParams.get('bbox'));

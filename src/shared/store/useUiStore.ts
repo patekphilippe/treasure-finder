@@ -14,7 +14,8 @@ export type SheetId =
   | 'area'
   | 'history'
   | 'contextDetails'
-  | 'analyses';
+  | 'analyses'
+  | 'account';
 
 /** cards of the Analizy sheet */
 export type AnalysesCardId = 'nmt' | 'roughness' | 'ai' | 'sources';

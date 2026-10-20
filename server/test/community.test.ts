@@ -50,6 +50,7 @@ describe('community', () => {
     expect(await (await call('community/me', anna.auth)).json()).toEqual({
       name: 'Anna',
       email: 'anna@example.com',
+      owner: false,
     });
     expect((await call('community/me', null)).status).toBe(401);
     expect((await call('community/me', 'Bearer not-a-real-token-0000000')).status).toBe(401);

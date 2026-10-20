@@ -12,7 +12,7 @@ export async function finishSignIn(url: string): Promise<string> {
   const result = await client.handleRedirectCallback<{ returnTo?: string }>(url);
   try {
     const me = await communityApi.me((await client.getTokenSilently()) ?? '');
-    useMembership.getState().join(me.email ?? '', me.name);
+    useMembership.getState().join(me.email ?? '', me.name, me.owner);
     const returnTo = 'appState' in result ? result.appState?.returnTo : undefined;
     if (returnTo) window.location.hash = returnTo;
     return me.name;

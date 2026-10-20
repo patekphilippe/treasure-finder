@@ -1,3 +1,4 @@
+import { AccountSheet } from '@/features/account';
 import { DataSheet } from '@/features/data';
 import {
   ContextDetailsSheet,
@@ -53,6 +54,8 @@ export function SheetHost() {
       return <AnalysesSheet onClose={closeSheet} />;
     case 'data':
       return <DataSheet onClose={closeSheet} />;
+    case 'account':
+      return <AccountSheet onClose={closeSheet} />;
     default:
       return null;
   }

@@ -5,7 +5,9 @@ interface MembershipState {
   /** address of the signed-in member (Auth0); kept only in this browser, never exported */
   email: string | null;
   name: string | null;
-  join: (email: string, name: string) => void;
+  /** an admin: the account sheet links to the owner's panel */
+  owner: boolean;
+  join: (email: string, name: string, owner: boolean) => void;
   leave: () => void;
 }
 
@@ -18,15 +20,16 @@ export const useMembership = create<MembershipState>()(
     (set) => ({
       email: null,
       name: null,
-      join: (email, name) => set({ email, name }),
-      leave: () => set({ email: null, name: null }),
+      owner: false,
+      join: (email, name, owner) => set({ email, name, owner }),
+      leave: () => set({ email: null, name: null, owner: false }),
     }),
     {
       name: 'mapa.member',
       storage: createJSONStorage(() => localStorage),
       // version 0 kept an invitation code, which the backend no longer accepts: sign in again
       version: 1,
-      migrate: () => ({ email: null, name: null }),
+      migrate: () => ({ email: null, name: null, owner: false }),
     },
   ),
 );

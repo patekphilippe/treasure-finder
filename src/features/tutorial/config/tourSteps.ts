@@ -57,6 +57,14 @@ export const TOUR_STEPS: readonly TourStep[] = [
     mode: 'field',
   },
   {
+    id: 'account',
+    target: 'account',
+    title: 'Moje konto',
+    content:
+      'Logowanie dla osób zaproszonych przez właściciela: daje społeczność i analizy na serwerze. Po zalogowaniu widzisz tu swoje konto, a administrator ma stąd wejście do panelu właściciela.',
+    mode: 'field',
+  },
+  {
     id: 'map-credits',
     target: 'map-credits',
     title: 'Źródła map',
