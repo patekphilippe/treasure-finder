@@ -8,6 +8,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "deploy": "wrangler deploy",
+    "deploy:site": "wrangler deploy -c site.wrangler.toml",
     "db:migrate:local": "wrangler d1 migrations apply treasure-finder --local",
     "db:migrate": "wrangler d1 migrations apply treasure-finder --remote",
     "try-reading": "tsx --tsconfig tsconfig.json scripts/tryReading.ts"

@@ -1,0 +1,26 @@
+# The app on its own address (docs/BACKEND.md, "Adres aplikacji"): the built PWA from ../dist,
+# /api/* passed to the API worker, www and the alias domain redirected to trefinder.pl.
+# Deploy: `npm run build` in the repository root, then `npm run deploy:site` here.
+name = "treasure-finder-app"
+main = "src/site/index.ts"
+compatibility_date = "2026-08-15"
+workers_dev = false
+# Custom Domains: Cloudflare adds the DNS records and certificates (both zones in this account)
+routes = [
+  { pattern = "trefinder.pl", custom_domain = true },
+  { pattern = "www.trefinder.pl", custom_domain = true },
+  { pattern = "tresurefinder.pl", custom_domain = true },
+  { pattern = "www.tresurefinder.pl", custom_domain = true },
+]
+
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+# a reload on any path gets the app
+not_found_handling = "single-page-application"
+# the worker answers first: the redirects and /api/*
+run_worker_first = true
+
+[[services]]
+binding = "API"
+service = "treasure-finder-api"

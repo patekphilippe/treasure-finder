@@ -76,6 +76,9 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   Funkcje nie importują z `app/`. `zones` i `safety` nie importują innych funkcji (unikamy cykli).
 - Przewodnik (react-joyride) jest w `features/tutorial/config/tourSteps.ts`. Kroki wskazują elementy przez
   atrybut `data-tour`; nowy element UI dostaje krok i atrybut (test sprawdza, że każdy cel istnieje).
+- Adres: `trefinder.pl` (worker `server/site.wrangler.toml`: pliki z `dist/`, `/api/*` do backendu pod tym samym adresem,
+  alias `tresurefinder.pl` przekierowuje). Stary adres GitHub Pages (build z `APP_BASE=/treasure-finder/`) pokazuje
+  pasek przeprowadzki (`offline/components/MovedNotice.tsx`); dane przenosi kopia ZIP.
 - PWA: `vite-plugin-pwa` w `vite.config.ts` (manifest, precache całej aplikacji). Aktualizacja tylko
   po kliknięciu „Odśwież” (`offline/components/UpdatePrompt.tsx`), żeby nie przerwać nagrywania trasy.
 - Mapy offline: `features/offline` pobiera kafelki obszaru do Cache Storage (osobny cache na obszar).

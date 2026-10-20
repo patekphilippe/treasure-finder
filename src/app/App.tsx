@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { lazy, Suspense } from 'react';
 import { useLoadCandidates, useLoadReliefs } from '@/features/analysis/field';
 import { useCompass, useGeolocation } from '@/features/gps';
-import { UpdatePrompt } from '@/features/offline';
+import { MovedNotice, UpdatePrompt } from '@/features/offline';
 import { useLoadPoints } from '@/features/points';
 import { useLoadAreas } from '@/features/roughness';
 import { LegalIntroDialog } from '@/features/safety';
@@ -71,6 +71,7 @@ export function App() {
         <TopBar />
         <Toast />
         <UpdatePrompt />
+        <MovedNotice />
         <LegalIntroDialog onSeen={startTourIfNew} />
         <TutorialTour />
       </div>
