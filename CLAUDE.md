@@ -57,23 +57,38 @@ src/
 │  ├─ workers/              Web Workery (np. analysis/workers/analysis.worker.ts)
 │  └─ index.ts              publiczne API funkcji — import z zewnątrz tylko przez ten plik
 └─ shared/                  kod używany przez wiele funkcji
-   ├─ ui/                   Dock, Sheet, Toast, StatusChips, Icon, EmptyState, glass
+   ├─ ui/                   Dock, Sheet, Toast, StatusChips, Icon, EmptyState, AnalysisCard, glass
    ├─ lib/                  czyste algorytmy: geo/, raster/, detect/, io/
    ├─ db/                   schemat IndexedDB (idb), migracje, repozytoria
-   ├─ store/                stan współdzielony: useUiStore, useFieldStore, usePointDraftStore, useMapViewStore
+   ├─ store/                stan współdzielony: useUiStore, useFieldStore, usePointDraftStore, useMapViewStore, useActivityStore
    ├─ auth/                 logowanie Auth0 społeczności (leniwy klient, signIn, signOut, memberAuth)
    └─ types/                model danych z docs/PLAN.md
 tests/                      testy Vitest, struktura odpowiada src/
 ```
 
 Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `analysis`, `zones`, `safety`,
-`roughness`, `tutorial`, `offline`, `history` (obiekty z map archiwalnych, własne mapy, analiza map historycznych, społeczność: wspólna baza członków), `sources` (zgłoszenia źródeł i analiza AI na backendzie `server/`).
+`roughness`, `tutorial`, `offline`, `history` (obiekty z map archiwalnych, własne mapy, odczyt map przez AI, społeczność: wspólna baza członków), `sources` (zgłoszenia źródeł i analiza AI na backendzie `server/`).
 
 - `services/` — logika poza Reactem (np. `tracks/services/trackRecorder.ts`, import/eksport w `data/services/`).
 - Stan współdzielony między funkcjami jest w `src/shared/store/`: `useUiStore` (tryb, otwarty arkusz,
   wybrany punkt/strefa), `useFieldStore` (GPS, kompas, nagrywanie, cel prowadzenia), `usePointDraftStore`,
-  `useMapViewStore` (w tym fly-to z przesunięciem nad arkusz), `useCoverageStore` (szerokość pasa).
+  `useMapViewStore` (w tym fly-to z przesunięciem nad arkusz), `useCoverageStore` (szerokość pasa),
+  `useActivityStore` (długie zadania całej aplikacji).
   Funkcje nie importują z `app/`. `zones` i `safety` nie importują innych funkcji (unikamy cykli).
+- Panele docka: **Warstwy tylko pokazują** (podkład, mapy historyczne i własne: włączanie i krycie, obiekty
+  z map, wyniki analiz), **Analizy** liczą, **Dane** wczytują i zapisują (kopie, pliki GeoJSON, własne mapy
+  historyczne: wczytanie, umieszczenie, rok, narożniki, usuwanie; mapy offline). Wyjątki zostawione w Warstwach:
+  własne warstwy XYZ/WMS po adresie i import stref (Strefy → Zarządzaj). Komponenty `history` trafiają do
+  `LayersSheet` przez sloty z `SheetHost` (layers nie importuje history).
+- Analizy (`app/components/AnalysesSheet.tsx`) tylko układają karty funkcji w ramie `AnalysisCard`
+  (`shared/ui`, jedna otwarta naraz: `useUiStore.analysesCard`, `showAnalyses(card)`): `NmtAnalysisCard`
+  (`analysis/field.ts`; field.ts nie może importować history), `RoughnessCard`, `AiReadingCard` (history),
+  `SourcesCard` (sources). Tryb `'analysis'` nazywa się w interfejsie „Kandydaci” (przegląd wyników NMT).
+- Długie zadania zgłaszają się do `useActivityStore` (najprościej `trackActivity(spec, fn)` z `shared/store`):
+  etykieta, postęp 0–1 albo nieokreślony, krok, `cancel`, `open` (gdzie je widać). Chip w `TopBar`
+  (`app/components/ActivityChip.tsx`) pokazuje je w obu trybach, także po zamknięciu arkusza, oraz zgłoszenia
+  źródeł na serwerze. Statusy źródeł odpytuje globalnie `useSourcesPolling` (montowany w `App`); nowy wynik
+  dostaje `fresh` i toast. Stan pracy, który ma przetrwać zamknięcie arkusza, trzymaj w magazynie, nie w komponencie.
 - Przewodnik (react-joyride) jest w `features/tutorial/config/tourSteps.ts`. Kroki wskazują elementy przez
   atrybut `data-tour`; nowy element UI dostaje krok i atrybut (test sprawdza, że każdy cel istnieje).
 - Adres: `trefinder.pl` (worker `server/site.wrangler.toml`: pliki z `dist/`, `/api/*` do backendu pod tym samym adresem,
