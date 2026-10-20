@@ -18,7 +18,7 @@ describe('importZip', () => {
     const zip = await buildExportZip(data, new Map([['ph', new Blob([jpeg])]]), 0);
     const bundle = await importZip(await zip.generateAsync({ type: 'uint8array' }));
 
-    expect(bundle.version).toBe(2);
+    expect(bundle.version).toBe(3);
     expect(bundle.points).toEqual(data.points);
     expect(bundle.tracks).toEqual(data.tracks);
     expect(new Uint8Array(await bundle.photos.get('ph')!.arrayBuffer())).toEqual(jpeg);

@@ -208,7 +208,7 @@ interface CustomLayer {
 
 Pozostałe magazyny to `photos` (Blob JPEG) i `rasters` (pochodne rastry analizy jako `Float32Array` lub gotowe PNG), żeby nie liczyć ich ponownie po odświeżeniu.
 
-**Eksport ZIP** zawiera pliki `punkty.geojson`, `kandydaci.geojson`, `trasy.geojson`, `strefy.geojson`, `poszukiwania.gpx`, folder `zdjecia/` oraz `kopia.json` z polem `wersja: 2`.
+**Eksport ZIP** zawiera pliki `punkty.geojson`, `kandydaci.geojson`, `trasy.geojson`, `strefy.geojson`, `poszukiwania.gpx`, folder `zdjecia/` oraz `kopia.json` z polem `wersja: 3`. Wersja 3 dodała do obiektów z map archiwalnych pola `label` i `seen`; obiekty z kopii w wersji 1 i 2 wczytujemy bez zmian, a ich mapy i lata odczytujemy z `source`.
 
 **Zgodność wstecz jest obowiązkowa.** Import musi przyjąć `kopia.json` z wersji 1 (`wersja: 1`, klucze `points` i `tracks`, pola `id, type, name, desc, depth, lat, lng, acc, src, created, updated, photo`, zdjęcia w `zdjecia/<photo>.jpg`). Brakujący `status` ustawiamy na `do_sprawdzenia`, a `depth` i `acc` mapujemy na `depthCm` i `accM`.
 

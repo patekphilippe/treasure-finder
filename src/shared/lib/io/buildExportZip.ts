@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { BACKUP_VERSION, photoPath, ZIP_FILES, type BackupV2, type ExportData } from './backup';
+import { BACKUP_VERSION, photoPath, ZIP_FILES, type BackupV3, type ExportData } from './backup';
 import { toCandidatesGeoJSON } from './toCandidatesGeoJSON';
 import { toFindsCsv } from './toFindsCsv';
 import { toGpx } from './toGpx';
@@ -10,7 +10,7 @@ import { toZonesGeoJSON } from './toZonesGeoJSON';
 
 /**
  * Builds the export archive: GeoJSON layers and GPX for QGIS, photos,
- * and kopia.json (wersja 2) for a lossless re-import.
+ * and kopia.json (wersja 3) for a lossless re-import.
  */
 export async function buildExportZip(
   data: ExportData,
@@ -19,7 +19,7 @@ export async function buildExportZip(
 ): Promise<JSZip> {
   const zip = new JSZip();
   const json = (value: unknown) => JSON.stringify(value, null, 2);
-  const backup: BackupV2 = {
+  const backup: BackupV3 = {
     wersja: BACKUP_VERSION,
     utworzono: new Date(now).toISOString(),
     ...data,

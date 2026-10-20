@@ -3,7 +3,7 @@ import type { ImportBundle } from '@/shared/lib/io';
 import type { WaterFeature } from '@/shared/types/domain';
 
 export interface ImportPayload extends Omit<ImportBundle, 'version'> {
-  kind: 'backup-v1' | 'backup-v2' | 'geojson' | 'candidates' | 'context' | 'water';
+  kind: 'backup-v1' | 'backup-v2' | 'backup-v3' | 'geojson' | 'candidates' | 'context' | 'water';
   /** BDOT10k water (only from a water GeoJSON, never in a backup) */
   water: WaterFeature[];
   /** drainage ditches left out of a water GeoJSON */
@@ -13,6 +13,9 @@ export interface ImportPayload extends Omit<ImportBundle, 'version'> {
 const EMPTY = { points: [], tracks: [], candidates: [], zones: [], context: [], water: [] };
 
 const isZip = (bytes: Uint8Array) => bytes[0] === 0x50 && bytes[1] === 0x4b; // "PK"
+
+const backupKind = (version: number) =>
+  version === 1 ? 'backup-v1' : version === 2 ? 'backup-v2' : 'backup-v3';
 
 /**
  * Detects the file type and parses it: ZIP backup, kopia.json, candidates GeoJSON, archival
@@ -35,7 +38,7 @@ export async function readImportFile(file: File, now = Date.now()): Promise<Impo
   const buffer = await file.arrayBuffer();
   if (isZip(new Uint8Array(buffer, 0, Math.min(2, buffer.byteLength)))) {
     const { version, ...bundle } = await importZip(buffer);
-    return { kind: version === 1 ? 'backup-v1' : 'backup-v2', ...bundle, water: [] };
+    return { kind: backupKind(version), ...bundle, water: [] };
   }
 
   let json: unknown;
@@ -73,7 +76,7 @@ export async function readImportFile(file: File, now = Date.now()): Promise<Impo
   }
   const { version, ...backup } = parseBackup(json);
   return {
-    kind: version === 1 ? 'backup-v1' : 'backup-v2',
+    kind: backupKind(version),
     ...backup,
     water: [],
     photos: new Map(),

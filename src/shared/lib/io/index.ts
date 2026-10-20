@@ -1,4 +1,4 @@
-export { BACKUP_VERSION, photoPath, ZIP_FILES, type BackupV2, type ExportData } from './backup';
+export { BACKUP_VERSION, photoPath, ZIP_FILES, type BackupV3, type ExportData } from './backup';
 export { buildExportZip } from './buildExportZip';
 export {
   importCandidatesGeoJSON,

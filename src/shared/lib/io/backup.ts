@@ -1,6 +1,6 @@
 import type { Candidate, ContextFeature, FieldPoint, Track, Zone } from '@/shared/types/domain';
 
-export const BACKUP_VERSION = 2;
+export const BACKUP_VERSION = 3;
 
 export interface ExportData {
   points: FieldPoint[];
@@ -11,7 +11,7 @@ export interface ExportData {
 }
 
 /** kopia.json — the lossless backup read back by import. */
-export interface BackupV2 extends ExportData {
+export interface BackupV3 extends ExportData {
   wersja: typeof BACKUP_VERSION;
   utworzono: string;
 }
