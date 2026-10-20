@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createId } from '@/shared/lib/createId';
+import { useActivityStore } from '@/shared/store/useActivityStore';
 import type { Bounds } from '@/shared/store/useMapViewStore';
 import { AREA_CACHE_PREFIX } from '../config/offlineAreas';
 import type { OfflineArea } from '../types';
@@ -58,10 +59,26 @@ export const useOfflineStore = create<OfflineState>((set, get) => ({
         layers: layerNames,
         tiles: urls.length,
       };
+      const activity = useActivityStore.getState();
+      const step = (done: number) => `${done} z ${urls.length} kafelków`;
+      activity.upsert({
+        id: 'offline',
+        label: `Mapy offline: ${area.name}`,
+        short: 'Mapy offline',
+        share: 0,
+        step: step(0),
+        cancel: () => get().cancelDownload(),
+        open: { mode: 'field' },
+      });
       const result = await downloadArea(
         area,
         urls,
-        (done) => set({ progress: { done, total: urls.length } }),
+        (done) => {
+          set({ progress: { done, total: urls.length } });
+          useActivityStore
+            .getState()
+            .update('offline', { share: done / urls.length, step: step(done) });
+        },
         abort.signal,
       );
       await get().load();
@@ -69,6 +86,7 @@ export const useOfflineStore = create<OfflineState>((set, get) => ({
       return result;
     } finally {
       set({ abort: null, progress: null });
+      useActivityStore.getState().end('offline');
     }
   },
   cancelDownload: () => get().abort?.abort(),

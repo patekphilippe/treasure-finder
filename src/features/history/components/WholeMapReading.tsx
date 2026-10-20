@@ -1,7 +1,7 @@
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ReadProfileId } from '@/shared/lib/history';
 import type { OwnMap } from '@/shared/types/domain';
 import { Icon, useToastStore } from '@/shared/ui';
@@ -25,11 +25,9 @@ interface WholeMapReadingProps {
  * and a Turnstile check per window would not work.
  */
 export function WholeMapReading({ source, map, model, profile, member }: WholeMapReadingProps) {
-  const { step, set } = useProposalsStore();
+  const { step, set, wholeRunning, stopRequested, requestStop } = useProposalsStore();
   const showToast = useToastStore((s) => s.show);
   const [asking, setAsking] = useState(false);
-  const [running, setRunning] = useState(false);
-  const cancelled = useRef(false);
   const chunks = useMemo(() => wholeMapChunks(map, profile), [map, profile]);
 
   if (!chunks?.length) return null;
@@ -44,19 +42,28 @@ export function WholeMapReading({ source, map, model, profile, member }: WholeMa
   const cost = (n * VIEW_COST_USD[model]).toFixed(2).replace('.', ',');
   const minutes = Math.max(1, Math.round((n * VIEW_SECONDS) / 2 / 60));
 
+  // the run lives in the store: closing the sheet keeps it going, and "Przerwij" stays on the chip
   const start = async () => {
     setAsking(false);
-    setRunning(true);
-    cancelled.current = false;
-    set({ step: `Cała mapa: fragment 1 z ${n}`, proposals: [], usage: null, read: null });
+    set({
+      wholeRunning: true,
+      step: `Cała mapa: fragment 1 z ${n}`,
+      share: 0,
+      proposals: [],
+      usage: null,
+      read: null,
+    });
     try {
       const r = await readWholeMap(
         source,
         chunks,
         model,
         profile,
-        (done) => set({ step: `Cała mapa: fragment ${Math.min(done + 1, n)} z ${n}` }),
-        () => cancelled.current,
+        (done) => {
+          if (useProposalsStore.getState().stopRequested) return;
+          set({ step: `Cała mapa: fragment ${Math.min(done + 1, n)} z ${n}`, share: done / n });
+        },
+        () => useProposalsStore.getState().stopRequested,
       );
       set({ proposals: r.proposals, usage: r.usage, read: r.read });
       showToast(
@@ -66,20 +73,20 @@ export function WholeMapReading({ source, map, model, profile, member }: WholeMa
               (r.failed ? `, nieudanych fragmentów: ${r.failed}` : ''),
       );
     } finally {
-      set({ step: null });
-      setRunning(false);
+      set({ step: null, share: null, wholeRunning: false });
     }
   };
 
-  if (running)
+  if (wholeRunning)
     return (
       <Button
         size="small"
         color="inherit"
-        onClick={() => (cancelled.current = true)}
+        disabled={stopRequested}
+        onClick={requestStop}
         startIcon={<Icon name="stop" size={16} />}
       >
-        Przerwij czytanie całej mapy
+        {stopRequested ? 'Kończę bieżące fragmenty' : 'Przerwij czytanie całej mapy'}
       </Button>
     );
   if (asking)

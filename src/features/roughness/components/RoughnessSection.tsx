@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
-import { Icon, useToastStore } from '@/shared/ui';
+import { Icon } from '@/shared/ui';
 import { useAreasStore } from '../store/useAreasStore';
 import { useRoughnessStore } from '../store/useRoughnessStore';
 import { AreaListItem } from './AreaListItem';
@@ -18,23 +18,28 @@ const LIST_LIMIT = 30;
 
 /** Uneven-ground analysis of the visible area and the list of marked places. */
 export function RoughnessSection() {
-  const { status, progress, error, result, visible, opacity, run, clear, setVisible, setOpacity } =
-    useRoughnessStore();
+  const {
+    status,
+    progress,
+    error,
+    result,
+    visible,
+    opacity,
+    run,
+    cancel,
+    clear,
+    setVisible,
+    setOpacity,
+  } = useRoughnessStore();
   const areas = useAreasStore((s) => s.areas);
   const placesVisible = useAreasStore((s) => s.visible);
   const setPlacesVisible = useAreasStore((s) => s.setVisible);
   const showArea = useUiStore((s) => s.showArea);
-  const showToast = useToastStore((s) => s.show);
   const [listOpen, setListOpen] = useState(false);
 
-  const analyse = async () => {
+  const analyse = () => {
     const bounds = useMapViewStore.getState().bounds;
-    if (!bounds) return;
-    await run(bounds);
-    const s = useRoughnessStore.getState();
-    if (s.status === 'done') {
-      showToast(`Oznaczono miejsc: ${s.result?.hotspots.length ?? 0} (nowych: ${s.newPlaces})`);
-    }
+    if (bounds) void run(bounds);
   };
 
   const sorted = [...areas].sort((a, b) => b.strength - a.strength);
@@ -58,11 +63,16 @@ export function RoughnessSection() {
             variant={progress < 1 ? 'determinate' : 'indeterminate'}
             value={progress * 100}
           />
-          <Typography variant="caption" color="text.secondary">
-            {progress < 1
-              ? `Pobieram cieniowanie: ${Math.round(progress * 100)}%`
-              : 'Analizuję i pomijam zabudowę…'}
-          </Typography>
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
+              {progress < 1
+                ? `Pobieram cieniowanie: ${Math.round(progress * 100)}%`
+                : 'Analizuję i pomijam zabudowę…'}
+            </Typography>
+            <Button size="small" color="inherit" onClick={cancel}>
+              Przerwij
+            </Button>
+          </Stack>
         </Stack>
       ) : (
         <Stack direction="row" sx={{ gap: 1 }}>
