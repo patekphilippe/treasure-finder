@@ -41,6 +41,12 @@ export default {
       return Response.redirect(url.toString(), 301);
     }
     if (url.pathname.startsWith('/api/')) return env.API.fetch(request);
+    // the service worker keeps the app under "index.html"; the assets would redirect it to "/",
+    // and Safari refuses a page the service worker answers with a redirected response
+    if (url.pathname === '/index.html') {
+      url.pathname = '/';
+      return env.ASSETS.fetch(new Request(url, request));
+    }
     return env.ASSETS.fetch(request);
   },
 } satisfies ExportedHandler<SiteEnv>;

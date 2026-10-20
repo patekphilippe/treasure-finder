@@ -19,6 +19,8 @@ describe('the app on treasurefinder.pl', () => {
       'api /api/health',
     );
     expect(await (await get('https://treasurefinder.pl/api-docs')).text()).toBe('app /api-docs');
+    // the app shell the service worker caches: served as is, never as a redirect
+    expect(await (await get('https://treasurefinder.pl/index.html')).text()).toBe('app /');
   });
 
   it('sends www and the alias domains to treasurefinder.pl for good', async () => {

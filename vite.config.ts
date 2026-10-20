@@ -35,6 +35,9 @@ export default defineConfig({
         // browsers use woff2; the old font formats only weigh the cache down
         globIgnores: ['**/la-*.svg', '**/*.eot', '**/*.ttf', '**/*.woff'],
         navigateFallback: 'index.html',
+        // a new cache name: phones that saved index.html as a redirect on treasurefinder.pl
+        // (Safari: "Response served by service worker has redirections") fetch the app anew
+        cacheId: 'treasure-finder',
         // on treasurefinder.pl the backend shares the origin: its answers are never the app
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
