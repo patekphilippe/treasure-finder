@@ -13,9 +13,12 @@ export const RELIEF_TILE_PX = 512;
 export const RELIEF_JPEG_QUALITY = 80;
 /** Poland with a margin; tiles wholly outside are not rendered. */
 export const RELIEF_BOUNDS = { south: 48.9, north: 55, west: 14, east: 24.3 } as const;
-/** Newly rendered tiles a day: per IP (an offline area is up to 3000) and for everyone. */
+/**
+ * Newly rendered tiles a day: per IP (an offline area is up to 3000) and for everyone. Each new
+ * tile is one R2 write: 30 000 a day keeps a month under R2's free million writes.
+ */
 export const RELIEF_IP_DAILY = 8000;
-export const RELIEF_ALL_DAILY = 80_000;
+export const RELIEF_ALL_DAILY = 30_000;
 
 /** GUGiK NMT (1 m grid) as WCS 2.0: open data, no fees or access constraints. */
 export const NMT_WCS_URL =

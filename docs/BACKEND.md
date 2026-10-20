@@ -49,7 +49,7 @@ Własne cieniowanie NMT jako kafelki mapy, w tym samym stylu co w analizie arkus
 
 - Kafelek Web Mercator z przybliżeń 12–16, 512 px (w aplikacji na miejscu 256 px, ostry na telefonie). Wysokości z `…/PZGIK/NMT/GRID1/WCS/DigitalTerrainModelFormatTIFF`, okno w EPSG:2180 z komórką wielkości piksela (nie drobniej niż 1 m, przy zmniejszaniu `INTERPOLATION=AVERAGE`). Szara JPEG ok. 10–50 KB; przy granicy i nad morzem PNG z przezroczystością.
 - Pierwsze zapytanie liczy kafelek (2–6 s, głównie czekanie na WCS) i zapisuje go w R2; każde następne, od każdego użytkownika, idzie z R2. Wersja w adresie: nowy sposób liczenia dostaje nowy numer, więc kafelki mają `Cache-Control: immutable`.
-- Limity nowych kafelków dziennie: 8000 na adres IP, 80 000 łącznie (kafelki z R2 się nie liczą).
+- Limity nowych kafelków dziennie: 8000 na adres IP, 30 000 łącznie (kafelki z R2 się nie liczą). Każdy nowy kafelek to jeden zapis do R2, więc miesiąc mieści się w darmowym milionie zapisów.
 - Aplikacja (`features/map/layers/ReliefGridLayer.ts`) pokazuje kafelek Geoportalu, gdy nasz nie przyjdzie w 1,2 s, i podmienia go, gdy przyjdzie. Poniżej przybliżenia 12 zostaje cieniowanie Geoportalu. Pobieranie obszaru offline bierze nasze kafelki.
 - Właściwości WCS sprawdzone 20.10.2026: oś `x` to wschód, `y` północ (sprawdzone na Śnieżce, 1603 m); okna większe niż ok. 7 km wracają w połowie zerami, stąd dopiero od przybliżenia 12; poza Polską usługa zwraca 0 m, co traktujemy jak brak danych.
 - Lokalnie: `wrangler dev` nie otwiera `mapy.geoportal.gov.pl` (jego środowisko nie ufa głównemu certyfikatowi Certum; na serwerach Cloudflare działa). Do testów ustaw zmienną `NMT_WCS_URL` na lokalne proxy HTTP przed tą usługą.
