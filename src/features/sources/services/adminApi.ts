@@ -1,3 +1,4 @@
+import type { AdminCommunityObject, AdminMember } from '@/shared/types/community';
 import type { SourceObject, SubmissionResult, ViewBbox } from '@/shared/types/sources';
 import { SOURCES_API_URL } from '../config/sourcesApi';
 
@@ -58,4 +59,20 @@ export const adminApi = {
       headers: { 'content-type': 'application/json' },
     }),
   reject: (id: string) => call(`submissions/${id}/reject`, { method: 'POST' }),
+  members: async () => (await (await call('members')).json()) as AdminMember[],
+  /** the code comes back only here, once */
+  invite: async (name: string) =>
+    (await (
+      await call('members', {
+        method: 'POST',
+        body: JSON.stringify({ name }),
+        headers: { 'content-type': 'application/json' },
+      })
+    ).json()) as { id: string; name: string; code: string },
+  block: (id: string, blocked: boolean) =>
+    call(`members/${id}/${blocked ? 'block' : 'unblock'}`, { method: 'POST' }),
+  objects: async (filter: 'recent' | 'disputed' | 'removed') =>
+    (await (await call(`objects?filter=${filter}`)).json()) as AdminCommunityObject[],
+  moderate: (id: string, remove: boolean) =>
+    call(`objects/${id}/${remove ? 'remove' : 'restore'}`, { method: 'POST' }),
 };

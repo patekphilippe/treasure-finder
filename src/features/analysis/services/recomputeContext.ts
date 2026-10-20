@@ -1,6 +1,7 @@
 import { candidatesRepo } from '@/shared/db';
 import { rescoreContext } from '@/shared/lib/detect';
 import { geometryTo2180, toEpsg2180 } from '@/shared/lib/geo';
+import { isDisputed } from '@/shared/types/community';
 import type { Candidate, ContextFeature } from '@/shared/types/domain';
 import { useAnalysisSettings } from '../store/useAnalysisSettings';
 import { useAnalysisStore } from '../store/useAnalysisStore';
@@ -10,7 +11,10 @@ import { useAnalysisStore } from '../store/useAnalysisStore';
  * raises nearby candidates at once. Returns how many candidates changed.
  */
 export async function recomputeContext(features: readonly ContextFeature[]): Promise<number> {
-  const local = features.map((f) => ({ geometry: geometryTo2180(f.geometry), kind: f.kind }));
+  // objects the community disputes do not raise anything
+  const local = features
+    .filter((f) => !(f.community && isDisputed(f.community)))
+    .map((f) => ({ geometry: geometryTo2180(f.geometry), kind: f.kind }));
   const weights = useAnalysisSettings.getState().weights;
   const changed: Candidate[] = [];
   for (const c of useAnalysisStore.getState().candidates) {

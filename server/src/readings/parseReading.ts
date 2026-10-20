@@ -30,6 +30,5 @@ export function parseReading(form: FormData): ReadingRequest | { error: string }
   const deviceId = String(form.get('deviceId') ?? '');
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(deviceId)) return { error: 'Brak identyfikatora urządzenia' };
   const turnstileToken = String(form.get('turnstile') ?? '');
-  if (!turnstileToken) return { error: 'Potwierdź, że nie jesteś robotem' };
   return { image, w, h, res, model: model as PipelineModel, deviceId, turnstileToken };
 }

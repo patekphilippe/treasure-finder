@@ -16,6 +16,7 @@ import { MAX_FILES } from '../config/sourcesApi';
 import { sourcesApi } from '../services/sourcesApi';
 import { useSourcesStore } from '../store/useSourcesStore';
 import { deviceId } from '@/shared/lib/deviceId';
+import { useMembership } from '@/shared/store/useMembership';
 import { shrinkImage } from '../utils/shrinkImage';
 import { TurnstileWidget } from '@/shared/ui';
 
@@ -41,7 +42,9 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
   const onToken = useCallback((t: string | null) => setToken(t), []);
 
   const empty = !files.length && !text.trim() && !link.trim();
-  const canSend = !disabled && !busy && !empty && !!token && (mode === 'private' || consent);
+  const member = useMembership((st) => st.code !== null);
+  const canSend =
+    !disabled && !busy && !empty && (!!token || member) && (mode === 'private' || consent);
 
   const send = async () => {
     setBusy(true);
@@ -50,7 +53,7 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
       const form = new FormData();
       form.append('mode', mode);
       form.append('deviceId', deviceId());
-      form.append('turnstile', token ?? '');
+      if (token) form.append('turnstile', token);
       if (text.trim()) form.append('text', text.trim());
       if (link.trim()) form.append('link', link.trim());
       if (consent) form.append('consentPublish', 'true');
@@ -151,7 +154,7 @@ export function SendSourceForm({ onSent, disabled = false }: SendSourceFormProps
           }
         />
       )}
-      {!disabled && <TurnstileWidget onToken={onToken} resetKey={resetKey} />}
+      {!disabled && !member && <TurnstileWidget onToken={onToken} resetKey={resetKey} />}
       {error && <Alert severity="error">{error}</Alert>}
       <Button
         variant="contained"

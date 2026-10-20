@@ -9,6 +9,7 @@ import { ConfirmDialog, Icon, Sheet } from '@/shared/ui';
 import { CONTEXT_KINDS } from '../config/contextKinds';
 import { useContextStore } from '../store/useContextStore';
 import { representativePoint } from '../utils/representativePoint';
+import { CommunityObjectBlock } from './CommunityObjectBlock';
 
 interface ContextDetailsSheetProps {
   onClose: () => void;
@@ -28,7 +29,8 @@ export function ContextDetailsSheet({ onClose }: ContextDetailsSheetProps) {
     <Sheet title={kind.label} onClose={onClose}>
       <Stack spacing={2}>
         <Typography variant="body2" color="text.secondary">
-          Obiekt z mapy archiwalnej. Kandydaci z analizy NMT do 300 m od niego dostają wyższy wynik.
+          Obiekt z mapy archiwalnej. Kandydaci z analizy NMT w pobliżu dostają wyższy wynik (osada
+          do 400 m, młyn i karczma do 300 m, bród do 200 m).
         </Typography>
         <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
           <Icon name="book" size={20} />
@@ -43,10 +45,14 @@ export function ContextDetailsSheet({ onClose }: ContextDetailsSheetProps) {
               <Icon name="search" size={22} />
             </IconButton>
           )}
-          <IconButton aria-label="Usuń obiekt" color="error" onClick={() => setConfirm(true)}>
-            <Icon name="trash-alt" size={22} />
-          </IconButton>
+          {/* objects of others belong to the community: dispute them instead of deleting */}
+          {(!feature.community || feature.community.mineAuthor) && (
+            <IconButton aria-label="Usuń obiekt" color="error" onClick={() => setConfirm(true)}>
+              <Icon name="trash-alt" size={22} />
+            </IconButton>
+          )}
         </Stack>
+        <CommunityObjectBlock feature={feature} />
       </Stack>
       <ConfirmDialog
         open={confirm}

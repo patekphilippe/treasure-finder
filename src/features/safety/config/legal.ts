@@ -48,3 +48,8 @@ export const SOURCES_PRIVACY_NOTE =
   'Zdjęcia i teksty trafiają na serwer aplikacji i do Anthropic (Claude) tylko po to, by je przeanalizować. ' +
   'Prywatne zgłoszenia usuwamy po 30 dniach, możesz je usunąć wcześniej. Do wspólnej bazy trafiają tylko ' +
   'zatwierdzone obiekty z położeniem, nigdy zdjęcia.';
+
+export const COMMUNITY_NOTE =
+  'Do wspólnej bazy trafia rodzaj obiektu z mapy, jego położenie, źródło i Twoje imię; widzą je tylko ' +
+  'zaproszeni członkowie. Nie udostępniaj znalezisk ani stanowisk archeologicznych: to chroni miejsca ' +
+  'przed rabusiami, a Ciebie przed odpowiedzialnością.';

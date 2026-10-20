@@ -153,6 +153,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'layers',
   },
   {
+    id: 'community',
+    target: 'community',
+    title: 'Społeczność',
+    content:
+      'Wspólna baza dawnych wsi, młynów, karczm i brodów dla zaproszonych osób. Dołączasz linkiem od właściciela. Swoje obiekty udostępniasz jednym kliknięciem, a punkty innych potwierdzasz albo kwestionujesz w ich szczegółach; zakwestionowane nie podnoszą oceny kandydatów.',
+    mode: 'field',
+    sheet: 'history',
+  },
+  {
     id: 'own-maps',
     target: 'own-maps',
     title: 'Własne mapy',

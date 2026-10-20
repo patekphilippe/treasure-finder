@@ -171,6 +171,19 @@ export interface ContextFeature {
   kind: ContextKind;
   geometry: Geometry;
   source: string;
+  /** link to the members-only shared base, with its votes as of the last sync */
+  community?: CommunityLink;
+}
+
+export interface CommunityLink {
+  id: string;
+  /** member's name; null for approved submissions */
+  author: string | null;
+  /** this device's member added it */
+  mineAuthor: boolean;
+  up: number;
+  down: number;
+  mine: -1 | 0 | 1;
 }
 
 /** store: water, lines and areas of water from BDOT10k (public data, not in the backup) */

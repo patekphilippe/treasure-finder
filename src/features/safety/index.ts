@@ -1,6 +1,7 @@
 export { LegalIntroDialog } from './components/LegalIntroDialog';
 export { UnexplodedOrdnanceScreen } from './components/UnexplodedOrdnanceScreen';
 export {
+  COMMUNITY_NOTE,
   FIND_REMINDER,
   HISTORICAL_ONLINE_NOTE,
   SOURCES_PRIVACY_NOTE,

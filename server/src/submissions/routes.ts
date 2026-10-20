@@ -11,7 +11,7 @@ import { fail, json } from '../http';
 import { consumeDaily } from './dailyLimit';
 import { PUBLIC_DAILY_LIMIT } from './limits';
 import { parseSubmission } from './parseSubmission';
-import { verifyTurnstile } from './verifyTurnstile';
+import { humanCheck } from '../community/humanCheck';
 
 type Cors = Record<string, string>;
 
@@ -33,18 +33,23 @@ export async function createSubmission(request: Request, env: Env, cors: Cors, n
   if ('error' in parsed) return fail(400, parsed.error, cors);
 
   const { ip, subject } = await ipSubject(request, now);
-  if (!(await verifyTurnstile(parsed.turnstileToken, env.TURNSTILE_SECRET, ip)))
-    return fail(403, 'Weryfikacja nie powiodła się, spróbuj jeszcze raz', cors);
+  const check = await humanCheck(request, env, parsed.turnstileToken, ip, now);
+  if (!check)
+    return parsed.turnstileToken
+      ? fail(403, 'Weryfikacja nie powiodła się, spróbuj jeszcze raz', cors)
+      : fail(400, 'Potwierdź, że nie jesteś robotem', cors);
 
+  // a member is counted by their code, others by device and IP
+  const who = check.member ? `member:${check.member.id}` : null;
   const allowed =
     parsed.mode === 'private'
       ? await consumeDaily(
           env.DB,
-          [`device:${parsed.deviceId}`, subject],
+          who ? [`sub:${who}`] : [`device:${parsed.deviceId}`, subject],
           Number(env.PRIVATE_DAILY_LIMIT),
           now,
         )
-      : await consumeDaily(env.DB, [`public:${subject}`], PUBLIC_DAILY_LIMIT, now);
+      : await consumeDaily(env.DB, [`public:${who ?? subject}`], PUBLIC_DAILY_LIMIT, now);
   if (!allowed) return fail(429, 'Dzienny limit analiz został wykorzystany, spróbuj jutro', cors);
 
   const id = randomToken(12);

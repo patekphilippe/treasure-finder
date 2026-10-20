@@ -11,7 +11,7 @@ let device = 0;
 
 const view = () =>
   new File([new Uint8Array([255, 216, 255, 0])], 'widok.jpg', { type: 'image/jpeg' });
-function read(fields: Record<string, string | File> = {}, ip = '198.51.100.9') {
+function read(fields: Record<string, string | File> = {}, ip = '198.51.100.9', auth?: string) {
   const body = new FormData();
   const all: Record<string, string | File> = {
     image: view(),
@@ -28,9 +28,20 @@ function read(fields: Record<string, string | File> = {}, ip = '198.51.100.9') {
     new Request('https://api.test/api/readings', {
       method: 'POST',
       body,
-      headers: { origin: ORIGIN, 'cf-connecting-ip': ip },
+      headers: { origin: ORIGIN, 'cf-connecting-ip': ip, ...(auth ? { authorization: auth } : {}) },
     }),
   );
+}
+
+async function member(name: string): Promise<string> {
+  const res = await worker.fetch(
+    new Request('https://api.test/api/admin/members', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+      headers: { authorization: 'Bearer test-admin-token-0123456789abcdef' },
+    }),
+  );
+  return `Bearer ${((await res.json()) as { code: string }).code}`;
 }
 
 describe('view readings', () => {
@@ -101,6 +112,18 @@ describe('view readings', () => {
     const pdf = new File([new Uint8Array([1])], 'x.pdf', { type: 'application/pdf' });
     expect((await read({ image: pdf })).status).toBe(400);
     expect(sent).toBeNull();
+  });
+
+  it('a community member needs no Turnstile check; a missing token otherwise says so', async () => {
+    turnstileOk = false;
+    const auth = await member('Ola');
+    expect((await read({ turnstile: '' }, '10.9.9.9', auth)).status).toBe(200);
+    const anonymous = await read({ turnstile: '' });
+    expect(anonymous.status).toBe(400);
+    expect(((await anonymous.json()) as { error: string }).error).toMatch(/robotem/);
+    expect((await read({ turnstile: '' }, '10.9.9.9', 'Bearer wrong-code-0000000000')).status).toBe(
+      400,
+    );
   });
 
   it('has its own daily limit per device', async () => {

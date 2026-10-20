@@ -6,7 +6,7 @@ import { fail, json } from '../http';
 import { ipSubject } from '../ipSubject';
 import { costUsd } from '../pipeline/pricing';
 import { consumeDaily } from '../submissions/dailyLimit';
-import { verifyTurnstile } from '../submissions/verifyTurnstile';
+import { humanCheck } from '../community/humanCheck';
 import { callClaude } from './callClaude';
 import { READ_DAILY_LIMIT, READ_ESTIMATE_TOKENS } from './limits';
 import { parseReading } from './parseReading';
@@ -27,8 +27,11 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
   if ('error' in req) return fail(400, req.error, cors);
 
   const { ip, subject } = await ipSubject(request, now);
-  if (!(await verifyTurnstile(req.turnstileToken, env.TURNSTILE_SECRET, ip)))
-    return fail(403, 'Weryfikacja nie powiodła się, spróbuj jeszcze raz', cors);
+  const check = await humanCheck(request, env, req.turnstileToken, ip, now);
+  if (!check)
+    return req.turnstileToken
+      ? fail(403, 'Weryfikacja nie powiodła się, spróbuj jeszcze raz', cors)
+      : fail(400, 'Potwierdź, że nie jesteś robotem', cors);
 
   const spent = await spentThisMonth(env.DB, now);
   if (spent + costUsd(req.model, READ_ESTIMATE_TOKENS, false) > Number(env.MONTHLY_BUDGET_USD))
@@ -36,7 +39,9 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
   // own prefix: readings do not use up the private submissions of the day
   const allowed = await consumeDaily(
     env.DB,
-    [`read:device:${req.deviceId}`, `read:${subject}`],
+    check.member
+      ? [`read:member:${check.member.id}`]
+      : [`read:device:${req.deviceId}`, `read:${subject}`],
     READ_DAILY_LIMIT,
     now,
   );

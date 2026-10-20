@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { GeoJSON, Marker } from 'react-leaflet';
+import { isDisputed } from '@/shared/types/community';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { CONTEXT_KINDS } from '../config/contextKinds';
 import { useContextStore } from '../store/useContextStore';
@@ -47,7 +48,11 @@ export function ContextLayer() {
           <Marker
             key={f.id}
             position={[at.lat, at.lng]}
-            icon={contextIcon(f.kind, f.id === selectedId)}
+            icon={contextIcon(
+              f.kind,
+              f.id === selectedId,
+              !f.community ? 'local' : isDisputed(f.community) ? 'disputed' : 'shared',
+            )}
             title={CONTEXT_KINDS[f.kind].label}
             zIndexOffset={f.id === selectedId ? 900 : -200}
             eventHandlers={{ click: () => showContext(f.id) }}

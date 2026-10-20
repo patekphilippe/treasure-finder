@@ -1,5 +1,6 @@
 import { BACKEND_URL } from '@/shared/config/backend';
 import { deviceId } from '@/shared/lib/deviceId';
+import { useMembership } from '@/shared/store/useMembership';
 import type { MapObject } from '@/shared/lib/history';
 import type { MapReading } from '@/shared/types/readings';
 import type { AiModelId } from '../config/aiReading';
@@ -17,7 +18,7 @@ export async function readMapWithAi(
   h: number,
   res: number,
   model: AiModelId,
-  turnstileToken: string,
+  turnstileToken: string | null,
 ): Promise<{ objects: MapObject[]; usage: AiUsage }> {
   const form = new FormData();
   form.append('image', image, 'widok.jpg');
@@ -26,10 +27,16 @@ export async function readMapWithAi(
   form.append('res', String(res));
   form.append('model', model);
   form.append('deviceId', deviceId());
-  form.append('turnstile', turnstileToken);
+  if (turnstileToken) form.append('turnstile', turnstileToken);
+  // a community member's invitation code stands in for the Turnstile check
+  const code = useMembership.getState().code;
   let response: Response;
   try {
-    response = await fetch(`${BACKEND_URL}/api/readings`, { method: 'POST', body: form });
+    response = await fetch(`${BACKEND_URL}/api/readings`, {
+      method: 'POST',
+      body: form,
+      ...(code ? { headers: { authorization: `Bearer ${code}` } } : {}),
+    });
   } catch {
     throw new Error('Brak połączenia z serwerem analizy');
   }

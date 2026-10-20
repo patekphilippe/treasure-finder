@@ -8,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import { useCallback, useState } from 'react';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { BACKEND_ENABLED } from '@/shared/config/backend';
+import { useMembership } from '@/shared/store/useMembership';
 import { Icon, TurnstileWidget, useToastStore } from '@/shared/ui';
 import { AI_MODELS, AI_READING_NOTE, type AiModelId } from '../config/aiReading';
 import { useViewSource } from '../hooks/useViewSource';
@@ -23,6 +24,7 @@ const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
 /** Claude reads the visible historical map; lost buildings and named places become proposals. */
 export function AiReadingSection() {
   const { model, setModel } = useAiSettings();
+  const member = useMembership((st) => st.code !== null);
   const { proposals, step, usage, read, set, drop } = useProposalsStore();
   const add = useContextStore((s) => s.add);
   const flyTo = useMapViewStore((s) => s.flyTo);
@@ -35,7 +37,7 @@ export function AiReadingSection() {
 
   const run = async () => {
     const bounds = useMapViewStore.getState().bounds;
-    if (!source || !bounds || !token) return;
+    if (!source || !bounds || (!token && !member)) return;
     set({ step: 'Start', proposals: [], usage: null, read: null });
     try {
       const r = await findLostBuildings(bounds, source, model, token, (s) => set({ step: s }));
@@ -104,7 +106,9 @@ export function AiReadingSection() {
               . Bez wątpliwości działa na własnych mapach.
             </Typography>
           )}
-          {source && !step && <TurnstileWidget key={round} onToken={onToken} resetKey={round} />}
+          {source && !step && !member && (
+            <TurnstileWidget key={round} onToken={onToken} resetKey={round} />
+          )}
           <Typography variant="caption" color="text.secondary">
             {AI_READING_NOTE}
           </Typography>
@@ -120,7 +124,7 @@ export function AiReadingSection() {
               <Button
                 variant="contained"
                 sx={{ flex: 1 }}
-                disabled={!source || !token}
+                disabled={!source || (!token && !member)}
                 startIcon={<Icon name="search" size={18} />}
                 onClick={() => void run()}
               >

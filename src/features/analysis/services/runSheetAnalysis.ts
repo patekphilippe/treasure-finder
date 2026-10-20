@@ -1,4 +1,5 @@
 import { getDb } from '@/shared/db';
+import { isDisputed } from '@/shared/types/community';
 import type { Candidate } from '@/shared/types/domain';
 import { useAnalysisSettings } from '../store/useAnalysisSettings';
 import { useAnalysisStore } from '../store/useAnalysisStore';
@@ -42,7 +43,9 @@ export async function runSheetAnalysis(
   const setRun = useAnalysisStore.getState().setRun;
   setRun({ name: file.name, share: 0, step: 'Wczytywanie pliku' });
   const db = await getDb();
-  const context = (await db.getAll('context')).map((c) => ({ geometry: c.geometry, kind: c.kind }));
+  const context = (await db.getAll('context'))
+    .filter((c) => !(c.community && isDisputed(c.community)))
+    .map((c) => ({ geometry: c.geometry, kind: c.kind }));
   const own = exclusionPrefix(sheetIdFromName(file.name));
   const forbidden = (await db.getAll('zones'))
     .filter((z) => z.kind === 'zakaz' && !z.id.startsWith(own))

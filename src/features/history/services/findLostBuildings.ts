@@ -29,7 +29,7 @@ export async function findLostBuildings(
   bounds: Bounds,
   source: ViewSource,
   model: AiModelId,
-  turnstileToken: string,
+  turnstileToken: string | null,
   onStep: (step: string) => void,
 ): Promise<{ proposals: Proposal[]; usage: AiUsage; read: number }> {
   onStep('Przygotowuję obraz mapy');

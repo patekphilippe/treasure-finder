@@ -41,6 +41,27 @@
 8. Panel przeglądu: `npx wrangler secret put ADMIN_TOKEN` (losowy ciąg, co najmniej 24 znaki, np. `openssl rand -base64 32`). Otwórz `https://patekphilippe.github.io/treasure-finder/#admin` i wpisz token: zostaje tylko w tej przeglądarce.
 9. Aplikacja: adres workera i klucz witryny Turnstile są wpisane jako domyślne w `src/features/sources/config/sourcesApi.ts` (to wartości publiczne). Zmienne repozytorium `SOURCES_API_URL` i `TURNSTILE_SITE_KEY` mogą je nadpisać, np. dla testowego workera.
 
+## Społeczność (`/api/community/`)
+
+Mała społeczność zaufanych osób buduje wspólną bazę obiektów z map (dawne wsie, młyny, karczmy,
+brody, drogi). Bazę widzą i zmieniają tylko zaproszeni członkowie.
+
+- **Zaproszenia:** w panelu `#admin` → Członkowie → imię → link `…/#dolacz=<kod>`. Kod pokazuje się
+  raz; worker trzyma tylko jego SHA-256. Zgubiony kod: zablokuj osobę i zaproś ją jeszcze raz.
+- **Obiekty:** członek dodaje obiekt i jest on od razu widoczny (`POST /api/community/objects`),
+  autor może go usunąć, właściciel usuwa i przywraca w panelu (Wspólna baza). Limit 300 zmian dziennie
+  na członka.
+- **Głosy:** „Potwierdzam” / „Nie zgadza się” z notatką, jeden głos na osobę. Obiekt z co najmniej dwoma
+  głosami „nie” więcej niż „tak” jest zakwestionowany: aplikacja pokazuje go na szaro i nie liczy do oceny
+  kandydatów NMT; właściciel widzi go z notatkami w panelu.
+- **Synchronizacja:** aplikacja pobiera obiekty dla widoku mapy (do 1° × 1°) przy otwarciu arkusza
+  historii i przyciskiem; zapisuje je w lokalnym kontekście (`ContextFeature.community`).
+- **Członkowie bez Turnstile:** kod członka zastępuje weryfikację przy odczytach map i zgłoszeniach;
+  limity liczone są wtedy na członka.
+- **Stara publiczna baza:** zatwierdzone zgłoszenia trafiają do D1 (`community_objects`, bez autora).
+  Paczki KV przenosi `POST /api/admin/migrate-packs`; `/api/kontekst/` odpowiada 410.
+- **Dane:** imię członka, jego obiekty i głosy z notatkami. Bez e-maili i haseł.
+
 ## Odczyt widoku mapy (`POST /api/readings`)
 
 „Szukaj zaginionej zabudowy” w aplikacji (Warstwy → Mapa historyczna → Własne mapy i obiekty)

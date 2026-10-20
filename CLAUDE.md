@@ -63,7 +63,7 @@ tests/                      testy Vitest, struktura odpowiada src/
 ```
 
 Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `analysis`, `zones`, `safety`,
-`roughness`, `tutorial`, `offline`, `history` (obiekty z map archiwalnych, własne mapy, analiza map historycznych), `sources` (zgłoszenia źródeł i analiza AI na backendzie `server/`).
+`roughness`, `tutorial`, `offline`, `history` (obiekty z map archiwalnych, własne mapy, analiza map historycznych, społeczność: wspólna baza członków), `sources` (zgłoszenia źródeł i analiza AI na backendzie `server/`).
 
 - `services/` — logika poza Reactem (np. `tracks/services/trackRecorder.ts`, import/eksport w `data/services/`).
 - Stan współdzielony między funkcjami jest w `src/shared/store/`: `useUiStore` (tryb, otwarty arkusz,
@@ -83,6 +83,9 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   Turnstile, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Prompt i schemat
   w `shared/lib/history/readPrompt.ts`, wspólne dla aplikacji i workera. Propozycje trafiają do kontekstu
   dopiero po „Przyjmij”. Adres backendu i klucz witryny Turnstile: `shared/config/backend.ts`.
+- Społeczność: członkostwo (kod zaproszenia, imię) w `shared/store/useMembership.ts` (localStorage, nigdy w eksporcie);
+  wspólna baza przez `/api/community/` (docs/BACKEND.md), scalanie z lokalnym kontekstem w
+  `features/history/utils/mergeCommunity.ts`. Udostępniać wolno tylko obiekty z map, nigdy znaleziska.
 - Komunikaty prawne są w `features/safety/config/legal.ts` — krótkie, rzeczowe, z linkiem do źródła.
 - Ciężkie biblioteki (JSZip, proj4) ładujemy dynamicznie (`import()`), żeby start na telefonie był lekki.
   `src/shared/lib/geo/crs.ts` rejestruje EPSG:2180 leniwie — bez efektów ubocznych przy imporcie.

@@ -21,7 +21,6 @@ export function parseSubmission(form: FormData): ParsedSubmission | { error: str
   const deviceId = String(form.get('deviceId') ?? '');
   if (!/^[A-Za-z0-9_-]{16,64}$/.test(deviceId)) return { error: 'Brak identyfikatora urządzenia' };
   const turnstileToken = String(form.get('turnstile') ?? '');
-  if (!turnstileToken) return { error: 'Potwierdź, że nie jesteś robotem' };
 
   const text = String(form.get('text') ?? '').trim() || null;
   if (text && text.length > MAX_TEXT_CHARS)

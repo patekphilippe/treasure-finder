@@ -2,14 +2,18 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useCallback, useEffect, useState } from 'react';
 import { SOURCES_ENABLED } from '../config/sourcesApi';
 import { adminApi, adminToken, type AdminSubmission } from '../services/adminApi';
+import { AdminCommunityObjects } from './AdminCommunityObjects';
+import { AdminMembers } from './AdminMembers';
 import { AdminSubmissionCard } from './AdminSubmissionCard';
 
-/** Review of public submissions (address …/#admin). Only the owner has the token. */
+/** Owner's panel (…/#admin): submissions, community members and the shared base. Token only for the owner. */
 export function AdminPanel() {
   const [token, setToken] = useState(adminToken.get());
   const [items, setItems] = useState<AdminSubmission[] | null>(null);
@@ -19,6 +23,7 @@ export function AdminPanel() {
     budgetUsd: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<'submissions' | 'members' | 'objects'>('submissions');
 
   const load = useCallback(async () => {
     try {
@@ -55,7 +60,7 @@ export function AdminPanel() {
       <Stack spacing={2} sx={{ maxWidth: 960, mx: 'auto', p: 2, pt: 3 }}>
         <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
           <Typography variant="h6" sx={{ flex: 1 }}>
-            Przegląd zgłoszeń źródeł
+            Panel właściciela
           </Typography>
           <Button onClick={() => (window.location.hash = '')}>Wróć do mapy</Button>
         </Stack>
@@ -88,18 +93,28 @@ export function AdminPanel() {
           </Typography>
         )}
         {error && <Alert severity="error">{error}</Alert>}
-        {items && !items.length && (
+        {budget && (
+          <Tabs value={tab} onChange={(_, v: typeof tab) => setTab(v)} variant="fullWidth">
+            <Tab value="submissions" label="Zgłoszenia" />
+            <Tab value="members" label="Członkowie" />
+            <Tab value="objects" label="Wspólna baza" />
+          </Tabs>
+        )}
+        {budget && tab === 'members' && <AdminMembers />}
+        {budget && tab === 'objects' && <AdminCommunityObjects />}
+        {tab === 'submissions' && items && !items.length && (
           <Typography variant="body2" color="text.secondary">
             Nic nie czeka na zatwierdzenie.
           </Typography>
         )}
-        {items?.map((it) => (
-          <AdminSubmissionCard
-            key={it.id}
-            item={it}
-            onDone={() => setItems((list) => list?.filter((x) => x.id !== it.id) ?? null)}
-          />
-        ))}
+        {tab === 'submissions' &&
+          items?.map((it) => (
+            <AdminSubmissionCard
+              key={it.id}
+              item={it}
+              onDone={() => setItems((list) => list?.filter((x) => x.id !== it.id) ?? null)}
+            />
+          ))}
       </Stack>
     </Box>
   );
