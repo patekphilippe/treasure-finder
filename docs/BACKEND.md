@@ -107,10 +107,11 @@ Skille Claude API (Agent Skills) się tu nie nadają: działają tylko w kontene
 odczyt to jedno wywołanie ze schematem JSON. Do dodawania profili jest skill Claude Code
 `.claude/skills/profil-odczytu-mapy` (wywołanie: `/profil-odczytu-mapy` albo prośba o nowy rodzaj mapy).
 
-- **Ochrona:** Turnstile przy każdym odczycie, limit 30 odczytów dziennie na urządzenie i na adres IP
+- **Ochrona:** Turnstile przy każdym odczycie, limit 300 odczytów dziennie na urządzenie i na adres IP
   (własny licznik `read:…`, nie zużywa limitu zgłoszeń), obraz do 3 MB i 1600 px na bok. Członek
-  społeczności zamiast Turnstile podaje kod i ma 100 odczytów dziennie: tyle potrzeba, by przeczytać
-  kilka własnych map w całości (aplikacja dzieli mapę na okna wielkości widoku i łączy wyniki).
+  społeczności zamiast Turnstile podaje kod i ma 1000 odczytów dziennie: tyle potrzeba, by przeczytać
+  wiele własnych map w całości (aplikacja dzieli mapę na okna wielkości widoku i łączy wyniki).
+  Na czas prac nad odczytem limity są podniesione z 30 i 100; wydatki i tak zatrzymuje budżet miesięczny.
 - **Budżet:** wspólny z potokiem zgłoszeń (`MONTHLY_BUDGET_USD`). Przed wywołaniem worker sprawdza,
   czy najgorszy przypadek (3000 tokenów wejścia i limit wyjścia profilu: 4096, a dla mapy wojskowej 8192) zmieści się w budżecie; liczy koszt bez rabatu Batch.
 - **Koszt:** Haiku ok. 0,0005–0,002 $ za widok, Sonnet ok. 20 razy więcej.
@@ -143,7 +144,8 @@ odpowiedź jest krótka, a potem używa `placeMap` z potoku zgłoszeń: najpierw
 ## Jak to działa
 
 1. Aplikacja zmniejsza zdjęcia do 1568 px (WebP) i wysyła je z opisem, linkiem i widokiem mapy (`POST /api/submissions`).
-2. Cron co 15 minut:
+2. Cron co minutę na czas prac nad potokiem (docelowo co 15 minut). Blokada w D1 (`pipeline_lock`) pilnuje,
+   żeby przebiegi się nie nakładały: dłuższy przebieg nie odbierze ani nie wyśle tych samych zgłoszeń dwa razy.
    - odbiera zakończone wsady;
    - wysyła nowe zgłoszenia jednym wsadem (Batch API, Files API z plikami wygasającymi po 2 dniach).
 3. Mapa jest umieszczana na dzisiejszej mapie:

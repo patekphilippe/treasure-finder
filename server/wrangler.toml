@@ -35,7 +35,9 @@ id = "001e63b2a1454daea7674193dc9e463d"
 binding = "TILES"
 bucket_name = "treasure-finder-tiles"
 
+# every minute while the pipeline is being worked on (a run lock keeps runs from overlapping);
+# back to "*/15 * * * *" once it settles
 [triggers]
-crons = ["*/15 * * * *"]
+crons = ["* * * * *"]
 
 # Secrets (wrangler secret put): ANTHROPIC_API_KEY, TURNSTILE_SECRET, ADMIN_TOKEN

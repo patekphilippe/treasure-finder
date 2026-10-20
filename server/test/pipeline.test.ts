@@ -5,6 +5,7 @@ import { addSpending } from '../src/budget';
 import type { Env } from '../src/env';
 import type { AiClient, BatchOutcome, BatchRequest } from '../src/pipeline/aiClient';
 import { parseCustomId } from '../src/pipeline/requests';
+import { LOCK_MS, releaseLock, takeLock } from '../src/pipeline/runLock';
 import { runPipeline } from '../src/pipeline/runPipeline';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
@@ -185,5 +186,23 @@ describe('AI pipeline', () => {
     expect(r.submitted).toBe(0);
     expect(ai.batches.size).toBe(0);
     expect((await view(c)).status).toBe('czeka_na_budzet');
+  });
+
+  it('waits while another run is still going, and takes over a crashed one', async () => {
+    const c = await submit({ text: 'młyn nad potokiem' }, true);
+    const ai = fakeAi(() => ({ summary: '', items: [] }));
+    const now = Date.now();
+    const held = await takeLock(testEnv.DB, now);
+    expect(held).not.toBeNull();
+    expect(await takeLock(testEnv.DB, now + 1000)).toBeNull();
+    const busy = await runPipeline(testEnv, ai.client, now + 60_000);
+    expect(busy).toMatchObject({ busy: true, submitted: 0 });
+    expect((await view(c)).status).toBe('nowe');
+    // the run that held it never finished: its lock runs out
+    const later = await runPipeline(testEnv, ai.client, now + LOCK_MS + 1);
+    expect(later.busy).toBe(false);
+    expect((await view(c)).status).not.toBe('nowe');
+    await releaseLock(testEnv.DB, held!);
+    expect(await takeLock(testEnv.DB, now + LOCK_MS + 2)).not.toBeNull();
   });
 });

@@ -21,4 +21,4 @@ export const VIEW_SECONDS = 15;
 
 /** What the user should know before sending (the backend's privacy rules, docs/BACKEND.md). */
 export const AI_READING_NOTE =
-  'Do serwera analizy i do Anthropic trafia tylko obraz mapy z widoku, bez Twojej pozycji, punktów i tras. Serwer go nie zapisuje. Limit: 30 odczytów dziennie, dla członków społeczności 100.';
+  'Do serwera analizy i do Anthropic trafia tylko obraz mapy z widoku, bez Twojej pozycji, punktów i tras. Serwer go nie zapisuje. Limit: 300 odczytów dziennie, dla członków społeczności 1000.';

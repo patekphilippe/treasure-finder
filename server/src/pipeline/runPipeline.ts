@@ -15,6 +15,7 @@ import { costUsd, estimateUsd, FIRST_MODEL, SECOND_MODEL, type PipelineModel } f
 import { parseMapReading, parseTextReading, squareReading } from './readings';
 import { imageSize } from './imageSize';
 import { mapRequest, parseCustomId, textRequest } from './requests';
+import { releaseLock, takeLock } from './runLock';
 
 interface Row {
   id: string;
@@ -266,8 +267,15 @@ async function processOne(env: Env, ai: AiClient, row: Row, outcomes: BatchOutco
 }
 
 export async function runPipeline(env: Env, ai: AiClient, now: number) {
-  const collected = await collectFinished(env, ai, now);
-  const submitted = await submitNew(env, ai, now);
-  const deleted = await deleteExpired(env, now);
-  return { collected, submitted, deleted };
+  // a run still going (the cron fires every minute): it would collect and send the same work twice
+  const lock = await takeLock(env.DB, now);
+  if (lock === null) return { collected: 0, submitted: 0, deleted: 0, busy: true };
+  try {
+    const collected = await collectFinished(env, ai, now);
+    const submitted = await submitNew(env, ai, now);
+    const deleted = await deleteExpired(env, now);
+    return { collected, submitted, deleted, busy: false };
+  } finally {
+    await releaseLock(env.DB, lock);
+  }
 }
