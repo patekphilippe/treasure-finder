@@ -1,4 +1,5 @@
 import Stack from '@mui/material/Stack';
+import { MapCredits } from '@/features/map';
 import { TutorialButton } from '@/features/tutorial';
 import { ZoneAlertBar } from '@/features/zones';
 import { StatusChips } from '@/shared/ui';
@@ -31,7 +32,10 @@ export function TopBar() {
         <TutorialButton />
         <ActivityChip />
       </Stack>
-      {mode === 'field' && <StatusChips />}
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75, ml: '8px' }}>
+        {mode === 'field' && <StatusChips />}
+        <MapCredits />
+      </Stack>
     </Stack>
   );
 }

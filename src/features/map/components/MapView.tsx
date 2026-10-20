@@ -45,6 +45,8 @@ export function MapView({ children }: MapViewProps) {
       zoom={DEFAULT_ZOOM}
       maxZoom={MAX_ZOOM}
       zoomControl={false}
+      // the credits sit behind the ⓘ next to the GPS chip (MapCredits)
+      attributionControl={false}
     >
       {baseLayer === 'osm' && (
         <TileLayer

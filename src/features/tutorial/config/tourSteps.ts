@@ -57,6 +57,14 @@ export const TOUR_STEPS: readonly TourStep[] = [
     mode: 'field',
   },
   {
+    id: 'map-credits',
+    target: 'map-credits',
+    title: 'Źródła map',
+    content:
+      'Skąd pochodzą mapy na ekranie: OpenStreetMap, GUGiK, Urząd Marszałkowski. Po otwarciu aplikacji widać je przez chwilę, potem chowają się pod tym przyciskiem.',
+    mode: 'field',
+  },
+  {
     id: 'activity',
     target: 'activity',
     when: 'activity',

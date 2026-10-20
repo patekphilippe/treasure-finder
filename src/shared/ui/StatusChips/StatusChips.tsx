@@ -10,7 +10,7 @@ export function StatusChips() {
   const recording = useFieldStore((s) => s.recordingTrackId !== null);
 
   return (
-    <Stack data-tour="gps-chip" direction="row" spacing={0.75} sx={{ ml: '8px' }}>
+    <Stack data-tour="gps-chip" direction="row" spacing={0.75}>
       <Chip
         size="small"
         icon={<Icon name="crosshairs" size={16} />}
