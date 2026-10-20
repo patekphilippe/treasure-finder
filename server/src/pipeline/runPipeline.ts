@@ -13,7 +13,8 @@ import { findPlaces, growBbox, nameVariants, uniquePlace, type Place } from './g
 import { placeByNames, placeBySheet, type Placement } from './georef';
 import { deleteExpired } from './cleanup';
 import { costUsd, estimateUsd, FIRST_MODEL, SECOND_MODEL, type PipelineModel } from './pricing';
-import { parseMapReading, parseTextReading, type MapReading } from './readings';
+import { parseMapReading, parseTextReading, squareReading, type MapReading } from './readings';
+import { imageSize } from './imageSize';
 import { mapRequest, parseCustomId, textRequest } from './requests';
 
 interface Row {
@@ -43,6 +44,19 @@ const SHEET_SERIES: Record<string, SheetSeries> = {
 const PER_RUN = 40;
 /** most names looked up per map: each lookup waits a second (Nominatim policy) */
 const NAMES_PER_MAP = 20;
+
+/** Files sent to Anthropic for the current batch: their id and height ÷ width. */
+interface UploadedFile {
+  id: string;
+  aspect: number;
+}
+/** Older rows kept just the id. */
+function readUploads(json: string | null): Record<string, UploadedFile> {
+  const raw = JSON.parse(json ?? '{}') as Record<string, string | UploadedFile>;
+  return Object.fromEntries(
+    Object.entries(raw).map(([k, v]) => [k, typeof v === 'string' ? { id: v, aspect: 1 } : v]),
+  );
+}
 
 const viewOf = (row: Row): ViewBbox | null =>
   row.view_bbox ? (JSON.parse(row.view_bbox) as ViewBbox) : null;
@@ -83,7 +97,7 @@ export async function submitNew(env: Env, ai: AiClient, now: number): Promise<nu
     inFlight.results.reduce((s, r) => s + estimateUsd(r.model, r.images, r.chars), 0);
 
   const requests: BatchRequest[] = [];
-  const sent: { id: string; files: Record<string, string> }[] = [];
+  const sent: { id: string; files: Record<string, UploadedFile> }[] = [];
   for (const row of rows) {
     const files = (
       await env.DB.prepare('SELECT id, r2_key, mime FROM files WHERE submission_id = ?')
@@ -106,12 +120,15 @@ export async function submitNew(env: Env, ai: AiClient, now: number): Promise<nu
       continue;
     }
     committed += estimate;
-    const uploaded: Record<string, string> = {};
+    const uploaded: Record<string, UploadedFile> = {};
     for (const f of files) {
-      const body = await env.SOURCES.get(f.r2_key, 'stream');
+      const body = await env.SOURCES.get(f.r2_key, 'arrayBuffer');
       if (!body) continue;
-      uploaded[f.id] = await ai.uploadFile(`${row.id}-${f.id}`, f.mime, body);
-      requests.push(mapRequest(row.id, f.id, uploaded[f.id]!, f.mime, viewOf(row), row.model));
+      // only the header is read: height ÷ width turns image fractions into square units
+      const size = imageSize(new Uint8Array(body, 0, Math.min(body.byteLength, 64 * 1024)));
+      const id = await ai.uploadFile(`${row.id}-${f.id}`, f.mime, body);
+      uploaded[f.id] = { id, aspect: size ? size.h / size.w : 1 };
+      requests.push(mapRequest(row.id, f.id, id, f.mime, viewOf(row), row.model));
     }
     if (row.text) requests.push(textRequest(row.id, row.text, row.link, row.model));
     sent.push({ id: row.id, files: uploaded });
@@ -203,8 +220,8 @@ export async function collectFinished(env: Env, ai: AiClient, now: number): Prom
 async function processOne(env: Env, ai: AiClient, row: Row, outcomes: BatchOutcome[], now: number) {
   const cost = outcomes.reduce((s, o) => s + (o.usage ? costUsd(row.model, o.usage, true) : 0), 0);
   await addSpending(env.DB, now, cost);
-  for (const id of Object.values(JSON.parse(row.anthropic_files ?? '{}') as Record<string, string>))
-    await ai.deleteFile(id);
+  const uploads = readUploads(row.anthropic_files);
+  for (const u of Object.values(uploads)) await ai.deleteFile(u.id);
 
   const ok = outcomes.filter((o) => o.json !== null);
   if (!ok.length) {
@@ -224,8 +241,9 @@ async function processOne(env: Env, ai: AiClient, row: Row, outcomes: BatchOutco
   let hard = false;
 
   for (const o of ok) {
-    if (parseCustomId(o.customId).fileId !== null) {
-      const reading = parseMapReading(o.json);
+    const { fileId } = parseCustomId(o.customId);
+    if (fileId !== null) {
+      const reading = squareReading(parseMapReading(o.json), uploads[fileId]?.aspect ?? 1);
       if (reading.summary) summaries.push(reading.summary);
       const placement = await placeMap(env, reading, view, now);
       const meanConfidence = reading.objects.length
@@ -236,7 +254,11 @@ async function processOne(env: Env, ai: AiClient, row: Row, outcomes: BatchOutco
         meanConfidence < 0.5 ||
         (!placement && reading.objects.length > 0);
       if (placement) {
-        georef = { method: placement.method, rmsM: placement.rmsM };
+        georef = {
+          method: placement.method,
+          rmsM: placement.rmsM,
+          ...(placement.anchors ? { anchors: placement.anchors } : {}),
+        };
         objects.push(...objectsFromMap(reading, placement));
       } else if (reading.objects.length) {
         const names = reading.placeNames.slice(0, 8).map((p) => p.text);

@@ -100,3 +100,25 @@ export function parseTextReading(raw: unknown): TextReading {
     items: items.slice(0, 50),
   };
 }
+
+/**
+ * Positions come as fractions of width and height; on a non-square image those are different
+ * lengths. Scaling y by height ÷ width gives square units, which shape-keeping fits need.
+ */
+export function squareReading(r: MapReading, aspect: number): MapReading {
+  if (aspect === 1) return r;
+  const sq = <T extends { y: number }>(p: T): T => ({ ...p, y: p.y * aspect });
+  return {
+    ...r,
+    frameCorners: r.frameCorners
+      ? {
+          nw: sq(r.frameCorners.nw),
+          ne: sq(r.frameCorners.ne),
+          se: sq(r.frameCorners.se),
+          sw: sq(r.frameCorners.sw),
+        }
+      : null,
+    placeNames: r.placeNames.map(sq),
+    objects: r.objects.map(sq),
+  };
+}

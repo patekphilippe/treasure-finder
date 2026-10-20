@@ -16,9 +16,9 @@ describe('georeferencing', () => {
   });
 
   it('places a map from three named villages and drops a same-named village far away', () => {
-    // a 4 × 3 km map: true positions of labels → lat/lng through a local plane
+    // a 4 km wide map in square units (the pipeline scales y by height ÷ width first)
     const plane = localPlane({ lat: 50.77, lng: 15.78 });
-    const at = (u: number, v: number) => plane.toLatLng(u * 4000, -v * 3000);
+    const at = (u: number, v: number) => plane.toLatLng(u * 4000, -v * 4000);
     const pairs = [
       { uv: { x: 0.1, y: 0.2 }, at: at(0.1, 0.2) },
       { uv: { x: 0.8, y: 0.3 }, at: at(0.8, 0.3) },
@@ -113,5 +113,47 @@ describe('names read on maps', () => {
       { lat: 50.7752, lng: 15.7569, name: 'Karpacz' },
     ]);
     expect(p).toMatchObject({ lat: 50.7752, lng: 15.7569 });
+  });
+});
+
+describe('few names with one wrong match', () => {
+  const plane = localPlane({ lat: 50.77, lng: 15.79 });
+  // a 3 km wide crop, north up
+  const at = (u: number, v: number, name: string) => ({
+    ...plane.toLatLng(u * 3000, -v * 3000),
+    name,
+  });
+
+  it('fits shift, rotation and scale through three good names with a real error check', () => {
+    const p = placeByNames([
+      { uv: { x: 0.2, y: 0.2 }, at: at(0.2, 0.2, 'Karpacz') },
+      { uv: { x: 0.8, y: 0.3 }, at: at(0.8, 0.3, 'Izbica') },
+      { uv: { x: 0.5, y: 0.9 }, at: at(0.5, 0.9, 'Budniki') },
+    ])!;
+    expect(p.rmsM).toBe(0);
+    expect(p.uncertaintyM).toBe(150);
+    expect(p.anchors).toEqual(['Karpacz', 'Izbica', 'Budniki']);
+  });
+
+  it('refuses three names when one points 3 km off, instead of bending the map through it', () => {
+    const p = placeByNames([
+      { uv: { x: 0.2, y: 0.2 }, at: at(0.2, 0.2, 'Karpacz') },
+      { uv: { x: 0.8, y: 0.3 }, at: at(0.8, 0.3, 'Izbica') },
+      { uv: { x: 0.5, y: 0.9 }, at: at(1.5, 0.9, 'Rabenstein (wrong rock)') },
+    ]);
+    expect(p).toBeNull();
+  });
+
+  it('drops the wrong one when four names are read', () => {
+    const p = placeByNames([
+      { uv: { x: 0.2, y: 0.2 }, at: at(0.2, 0.2, 'Karpacz') },
+      { uv: { x: 0.8, y: 0.3 }, at: at(0.8, 0.3, 'Izbica') },
+      { uv: { x: 0.5, y: 0.9 }, at: at(0.5, 0.9, 'Budniki') },
+      { uv: { x: 0.3, y: 0.7 }, at: at(1.4, 0.7, 'Rabenstein (wrong rock)') },
+    ])!;
+    expect(p.anchors).toEqual(['Karpacz', 'Izbica', 'Budniki']);
+    const corner = p.toLatLng({ x: 1, y: 1 });
+    const want = at(1, 1, '');
+    expect(Math.abs(corner.lat - want.lat) * 110_574).toBeLessThan(1);
   });
 });

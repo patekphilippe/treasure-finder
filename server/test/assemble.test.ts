@@ -67,3 +67,23 @@ describe('text reading → context objects', () => {
     expect(o.reasons[1]).toBe('Ok. 300 m na północ od: Kowary');
   });
 });
+
+describe('square units', () => {
+  it('scales y by height ÷ width so a landscape photo keeps its shape', async () => {
+    const { squareReading } = await import('../src/pipeline/readings');
+    const r = parseMapReading({
+      summary: '',
+      series: 'messtischblatt',
+      year: null,
+      sheetNumber: null,
+      legibility: 'dobra',
+      frameCorners: null,
+      placeNames: [{ text: 'Krummhübel', x: 0.5, y: 0.5 }],
+      objects: [{ kind: 'mlyn', label: '', x: 0.2, y: 1, confidence: 1 }],
+    });
+    const sq = squareReading(r, 600 / 1500);
+    expect(sq.placeNames[0]).toMatchObject({ x: 0.5, y: 0.2 });
+    expect(sq.objects[0]).toMatchObject({ x: 0.2, y: 0.4 });
+    expect(squareReading(r, 1)).toBe(r);
+  });
+});

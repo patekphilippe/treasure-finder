@@ -18,6 +18,8 @@ export interface Placement {
   rmsM: number | null;
   /** how far a placed object may be off */
   uncertaintyM: number;
+  /** names the placement rests on (for the review panel) */
+  anchors?: string[];
 }
 
 const M_PER_DEG_LAT = 110_574;
@@ -87,12 +89,47 @@ export function fitAffine(src: readonly UV[], dst: readonly { x: number; y: numb
   return { apply, rms, residuals };
 }
 
+/** Least-squares shift, rotation and scale (u, v) → (x, y); image v grows down, y up. */
+export function fitSimilarity(src: readonly UV[], dst: readonly { x: number; y: number }[]) {
+  const n = src.length;
+  // complex numbers: w = u − i·v (flipped so north is up), z = x + i·y
+  const w = src.map((p) => ({ re: p.x, im: -p.y }));
+  const mw = { re: w.reduce((s, q) => s + q.re, 0) / n, im: w.reduce((s, q) => s + q.im, 0) / n };
+  const mz = { re: dst.reduce((s, q) => s + q.x, 0) / n, im: dst.reduce((s, q) => s + q.y, 0) / n };
+  let num = { re: 0, im: 0 };
+  let den = 0;
+  for (let i = 0; i < n; i++) {
+    const a = { re: w[i]!.re - mw.re, im: w[i]!.im - mw.im };
+    const b = { re: dst[i]!.x - mz.re, im: dst[i]!.y - mz.im };
+    // conj(a) · b
+    num = { re: num.re + a.re * b.re + a.im * b.im, im: num.im + a.re * b.im - a.im * b.re };
+    den += a.re * a.re + a.im * a.im;
+  }
+  if (den < 1e-12) return null;
+  const k = { re: num.re / den, im: num.im / den };
+  const apply = (p: UV) => {
+    const u = p.x - mw.re;
+    const v = -p.y - mw.im;
+    return { x: mz.re + k.re * u - k.im * v, y: mz.im + k.im * u + k.re * v };
+  };
+  const residuals = src.map((p, i) => Math.hypot(apply(p).x - dst[i]!.x, apply(p).y - dst[i]!.y));
+  const rms = Math.sqrt(residuals.reduce((s, r) => s + r * r, 0) / n);
+  /** metres per image width: a sanity check of the fit */
+  const scale = Math.hypot(k.re, k.im);
+  return { apply, rms, residuals, scale };
+}
+
+/** From this many names a full affine fit (photos taken a little askew); below it a similarity. */
+const AFFINE_FROM = 6;
+
 /**
  * Places the image from named places read on it and found in the gazetteer. Wrong matches
- * (another village with the same name) are dropped one by one while the fit stays poor.
+ * (another place with the same name) are dropped one by one while the fit stays poor. With
+ * fewer than six names only shift, rotation and scale are fitted, so even three names can
+ * reveal a wrong one; an exact fit through three points could not.
  */
 export function placeByNames(
-  pairs: readonly { uv: UV; at: LatLng }[],
+  pairs: readonly { uv: UV; at: LatLng & { name?: string } }[],
   maxRmsM = 150,
 ): Placement | null {
   let set = [...pairs];
@@ -103,12 +140,13 @@ export function placeByNames(
     lng: set.reduce((s, p) => s + p.at.lng, 0) / set.length,
   });
   for (;;) {
-    const fit = fitAffine(
-      set.map((p) => p.uv),
-      set.map((p) => plane.toXY(p.at)),
-    );
+    const src = set.map((p) => p.uv);
+    const dst = set.map((p) => plane.toXY(p.at));
+    const fit = set.length >= AFFINE_FROM ? fitAffine(src, dst) : fitSimilarity(src, dst);
     if (!fit) return null;
-    if (fit.rms <= maxRmsM) {
+    const scale = 'scale' in fit ? (fit.scale as number) : null;
+    const plausible = scale === null || (scale > 300 && scale < 60_000);
+    if (fit.rms <= maxRmsM && plausible) {
       return {
         method: 'nazwy',
         toLatLng: (p) => {
@@ -116,7 +154,9 @@ export function placeByNames(
           return plane.toLatLng(q.x, q.y);
         },
         rmsM: Math.round(fit.rms),
-        uncertaintyM: Math.round(Math.max(40, 2 * fit.rms)),
+        // three names leave a single check: keep a wide margin
+        uncertaintyM: Math.round(Math.max(set.length === 3 ? 150 : 60, 2 * fit.rms)),
+        anchors: set.map((p) => p.at.name ?? ''),
       };
     }
     if (set.length <= 3) return null;
@@ -183,5 +223,6 @@ function placeByTwoNames(a: { uv: UV; at: LatLng }, b: { uv: UV; at: LatLng }): 
     },
     rmsM: null,
     uncertaintyM: 300,
+    anchors: [a.at, b.at].map((p) => (p as { name?: string }).name ?? ''),
   };
 }

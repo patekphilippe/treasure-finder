@@ -43,7 +43,12 @@ export interface SubmissionResult {
   summary: string;
   objects: SourceObject[];
   /** how the image was placed on the map, null when it could not be */
-  georef: { method: 'arkusz' | 'nazwy' | 'reczne'; rmsM: number | null } | null;
+  georef: {
+    method: 'arkusz' | 'nazwy' | 'reczne';
+    rmsM: number | null;
+    /** places found on today's map that the placement rests on */
+    anchors?: string[];
+  } | null;
 }
 
 /** Answer of POST /api/submissions */
