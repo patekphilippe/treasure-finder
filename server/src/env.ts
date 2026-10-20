@@ -15,6 +15,8 @@ export interface Env {
   ALLOWED_ORIGINS: string;
   MONTHLY_BUDGET_USD: string;
   PRIVATE_DAILY_LIMIT: string;
+  /** "true" in the test phase: what an admin shares goes to the shared base without review */
+  ADMIN_AUTO_PUBLISH?: string;
   ANTHROPIC_API_KEY: string;
   /** long random secret for the review panel from scripts (wrangler secret put ADMIN_TOKEN) */
   ADMIN_TOKEN: string;

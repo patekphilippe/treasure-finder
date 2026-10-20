@@ -1,5 +1,5 @@
-import type { AdminCommunityObject, AdminMember } from '@/shared/types/community';
 import type { SourceObject } from '@/shared/types/sources';
+import type { AdminCommunityObject, AdminMember } from '@/shared/types/community';
 import { cleanEmail } from '@/shared/lib/cleanEmail';
 import { unusedCodeHash } from '../community/auth';
 import { OBJECT_SELECT, type ObjectRow } from '../community/objects';
@@ -9,34 +9,6 @@ import { fail, json } from '../http';
 import { INDEX_KEY, type PackIndexEntry } from '../context/packs';
 
 type Cors = Record<string, string>;
-
-/** Approved objects of a public submission go to the shared base without an author. */
-export async function insertApproved(
-  env: Env,
-  objects: readonly SourceObject[],
-  source: string,
-  now: number,
-): Promise<number> {
-  await env.DB.batch(
-    objects.map((o) =>
-      env.DB.prepare(
-        `INSERT INTO community_objects (id, kind, label, lat, lng, radius_m, source, author_id, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, NULL, ?, ?)`,
-      ).bind(
-        randomToken(12),
-        o.kind,
-        o.label,
-        o.lat,
-        o.lng,
-        Math.round(o.radiusM),
-        source,
-        now,
-        now,
-      ),
-    ),
-  );
-  return objects.length;
-}
 
 /** Owner's part of the community: invitations by e-mail, blocking, moderation, moving the old packs. */
 export async function adminCommunity(

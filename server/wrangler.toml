@@ -11,6 +11,9 @@ ALLOWED_ORIGINS = "https://patekphilippe.github.io,http://localhost:5173,http://
 MONTHLY_BUDGET_USD = "5"
 # private analyses per member a day
 PRIVATE_DAILY_LIMIT = "5"
+# Test phase: sources an admin (ADMIN_EMAILS) shares go to the shared base right after the
+# analysis, without the review in #admin. "false": reviewed like everyone else's.
+ADMIN_AUTO_PUBLISH = "true"
 # Community sign-in (docs/BACKEND.md, "Logowanie"): the Auth0 tenant and this API's identifier.
 # Empty domain: nobody can sign in, the community, the panel and the analyses are closed.
 AUTH0_DOMAIN = "dev-7o7mrth2w4xw60zk.us.auth0.com"

@@ -1,50 +1,20 @@
-import type { SourceObject, SubmissionResult, SubmissionStatus } from '@/shared/types/sources';
+import type { SubmissionResult, SubmissionStatus } from '@/shared/types/sources';
 import { monthKey, spentThisMonth } from '../budget';
 import { isOwnerEmail } from '../auth/isOwnerEmail';
 import { signedIn } from '../auth/session';
 import { sameSecret } from '../crypto';
 import type { Env } from '../env';
 import { bearer, fail, json } from '../http';
-import { adminCommunity, insertApproved } from './community';
+import { dropFiles, publishSubmission, validObjects } from '../submissions/publish';
+import { adminCommunity } from './community';
 
 type Cors = Record<string, string>;
-const KINDS: readonly string[] = ['osada', 'droga', 'mlyn', 'karczma', 'brod', 'inne'];
 
 /** The owner: signed in with an address from ADMIN_EMAILS, or (scripts, curl) the ADMIN_TOKEN secret. */
 export async function isAdmin(request: Request, env: Env, now: number): Promise<boolean> {
   const who = await signedIn(request, env, now);
   if (who) return isOwnerEmail(who.email, env);
   return sameSecret(bearer(request), env.ADMIN_TOKEN);
-}
-
-async function dropFiles(env: Env, id: string) {
-  const files = await env.DB.prepare('SELECT r2_key FROM files WHERE submission_id = ?')
-    .bind(id)
-    .all<{ r2_key: string }>();
-  await Promise.all(files.results.map((f) => env.SOURCES.delete(f.r2_key)));
-  await env.DB.prepare('DELETE FROM files WHERE submission_id = ?').bind(id).run();
-}
-
-/** Objects edited in the panel → only valid ones (kind, coordinates in Poland's area). */
-function cleanObjects(raw: unknown): SourceObject[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.flatMap((o: Record<string, unknown>) => {
-    const lat = Number(o?.lat);
-    const lng = Number(o?.lng);
-    if (!KINDS.includes(String(o?.kind)) || !(lat > 48 && lat < 56 && lng > 13 && lng < 25))
-      return [];
-    return [
-      {
-        kind: o.kind as SourceObject['kind'],
-        label: String(o.label ?? '').slice(0, 160),
-        lat,
-        lng,
-        radiusM: Math.max(10, Math.min(5000, Number(o.radiusM) || 200)),
-        confidence: Math.max(0, Math.min(1, Number(o.confidence) || 0.5)),
-        reasons: [],
-      },
-    ];
-  });
 }
 
 export async function adminRoutes(
@@ -114,23 +84,23 @@ export async function adminRoutes(
     if (!row) return fail(404, 'Nie znaleziono zgłoszenia', cors);
     if (row.mode !== 'public' || row.status !== 'do_przegladu')
       return fail(409, 'Tego zgłoszenia nie można już zatwierdzić', cors);
-    let published = 0;
-    if (verb === 'approve') {
-      if (!row.consent_publish) return fail(409, 'Brak zgody na publikację', cors);
-      const body = (await request.json().catch(() => null)) as {
-        objects?: unknown;
-        source?: unknown;
-      } | null;
-      const objects = cleanObjects(body?.objects);
-      if (!objects.length) return fail(400, 'Brak obiektów do zatwierdzenia', cors);
-      const source = String(body?.source ?? 'Wspólna baza źródeł').slice(0, 120);
-      // the members-only base (D1); the old public packs are no longer written
-      published = await insertApproved(env, objects, source, now);
+    if (verb === 'reject') {
+      await dropFiles(env, id!);
+      await env.DB.prepare('UPDATE submissions SET status = ?, updated_at = ? WHERE id = ?')
+        .bind('odrzucone', now, id)
+        .run();
+      return json({ ok: true, published: 0 }, 200, cors);
     }
-    await dropFiles(env, id!);
-    await env.DB.prepare('UPDATE submissions SET status = ?, updated_at = ? WHERE id = ?')
-      .bind(verb === 'approve' ? 'zatwierdzone' : 'odrzucone', now, id)
-      .run();
+    if (!row.consent_publish) return fail(409, 'Brak zgody na publikację', cors);
+    const body = (await request.json().catch(() => null)) as {
+      objects?: unknown;
+      source?: unknown;
+    } | null;
+    const objects = validObjects(body?.objects);
+    if (!objects.length) return fail(400, 'Brak obiektów do zatwierdzenia', cors);
+    const source = String(body?.source ?? 'Wspólna baza źródeł').slice(0, 120);
+    // the members-only base (D1); the old public packs are no longer written
+    const published = await publishSubmission(env, id!, objects, source, now);
     return json({ ok: true, published }, 200, cors);
   }
   const community = await adminCommunity(request, env, path, cors, now);

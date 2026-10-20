@@ -7,7 +7,7 @@ import type { AiClient, BatchOutcome, BatchRequest } from '../src/pipeline/aiCli
 import { parseCustomId } from '../src/pipeline/requests';
 import { LOCK_MS, releaseLock, takeLock } from '../src/pipeline/runLock';
 import { runPipeline } from '../src/pipeline/runPipeline';
-import { invitedMember } from './signIn';
+import { invitedMember, signedInAs } from './signIn';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 const testEnv = env as unknown as Env;
@@ -46,18 +46,19 @@ function fakeAi(answer: (req: BatchRequest) => unknown) {
 async function submit(
   fields: Record<string, string>,
   withPhoto: boolean,
+  auth?: string,
 ): Promise<SubmissionCreated> {
   const body = new FormData();
-  body.append('mode', 'private');
+  body.append('mode', fields.mode ?? 'private');
   body.append('deviceId', `pipeline-device-${n}-abcdef`);
-  for (const [k, v] of Object.entries(fields)) body.append(k, v);
+  for (const [k, v] of Object.entries(fields)) if (k !== 'mode') body.append(k, v);
   if (withPhoto)
     body.append('files', new File([new Uint8Array([1, 2, 3])], 'm.jpg', { type: 'image/jpeg' }));
   const res = await worker.fetch(
     new Request('https://api.test/api/submissions', {
       method: 'POST',
       body,
-      headers: { authorization: await invitedMember(worker) },
+      headers: { authorization: auth ?? (await invitedMember(worker)) },
     }),
   );
   return (await res.json()) as SubmissionCreated;
@@ -119,6 +120,31 @@ describe('AI pipeline', () => {
     expect(mill.lat).toBeCloseTo(51.05, 6);
     expect(mill.lng).toBeCloseTo(17.0833, 3);
     expect(ai.deleted).toHaveLength(1);
+  });
+
+  it('in the test phase an admin’s shared source goes to the base without review', async () => {
+    const shared = { mode: 'public', consentPublish: 'true' };
+    const byAdmin = await submit(shared, true, await signedInAs('owner@example.com'));
+    const byMember = await submit(shared, true);
+    const ai = fakeAi(() => sheetReading('dobra'));
+    await runPipeline(testEnv, ai.client, Date.now()); // send
+    await runPipeline(testEnv, ai.client, Date.now()); // collect
+
+    expect((await view(byAdmin)).status).toBe('zatwierdzone');
+    expect((await view(byMember)).status).toBe('do_przegladu');
+    const published = await testEnv.DB.prepare(
+      'SELECT kind, author_id FROM community_objects WHERE source = ?',
+    )
+      .bind('Messtischblatt 4968 Breslau')
+      .all<{ kind: string; author_id: string | null }>();
+    expect(published.results).toEqual([{ kind: 'mlyn', author_id: null }]);
+    // the photo goes as after an approval; the member's waits for the panel
+    const files = (id: string) =>
+      testEnv.DB.prepare('SELECT count(*) AS n FROM files WHERE submission_id = ?')
+        .bind(id)
+        .first<{ n: number }>();
+    expect((await files(byAdmin.id))!.n).toBe(0);
+    expect((await files(byMember.id))!.n).toBe(1);
   });
 
   it('gives a hard map a second, careful reading by Sonnet', async () => {

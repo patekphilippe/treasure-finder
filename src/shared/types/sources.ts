@@ -3,6 +3,9 @@
  * Shared by the app and the worker: the worker imports this file through the `@/` alias.
  */
 
+/** objects the owner's panel ticks by default; in the test phase an admin's sources publish these */
+export const PUBLISH_MIN_CONFIDENCE = 0.4;
+
 /** 'public': to the shared base after review; 'private': only for the sender */
 export type SubmissionMode = 'public' | 'private';
 

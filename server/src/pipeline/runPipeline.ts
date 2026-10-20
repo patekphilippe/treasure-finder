@@ -16,6 +16,7 @@ import { parseMapReading, parseTextReading, squareReading } from './readings';
 import { imageSize } from './imageSize';
 import { mapRequest, parseCustomId, textRequest } from './requests';
 import { releaseLock, takeLock } from './runLock';
+import { autoPublished, publishSubmission } from '../submissions/publish';
 
 interface Row {
   id: string;
@@ -27,6 +28,8 @@ interface Row {
   model: PipelineModel;
   anthropic_files: string | null;
   batch_id: string | null;
+  /** an admin's shared source in the test phase: published without review */
+  auto_publish: number;
 }
 interface FileRow {
   id: string;
@@ -149,6 +152,15 @@ async function finish(env: Env, row: Row, result: SubmissionResult, now: number)
       'UPDATE submissions SET status = ?, batch_id = NULL, anthropic_files = NULL, updated_at = ? WHERE id = ?',
     ).bind(status, now, row.id),
   ]);
+  // test phase (ADMIN_AUTO_PUBLISH): what an admin shares goes to the base without the review
+  if (row.mode === 'public' && row.auto_publish)
+    await publishSubmission(
+      env,
+      row.id,
+      autoPublished(result.objects),
+      result.summary.trim().slice(0, 120) || 'Wspólna baza źródeł',
+      now,
+    );
 }
 
 /** Cron step 2: finished batches → placed objects, spending, next status. */

@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
-import type { SourceObject } from '@/shared/types/sources';
+import { PUBLISH_MIN_CONFIDENCE, type SourceObject } from '@/shared/types/sources';
 import { useAdminImages } from '../hooks/useAdminImages';
 import { adminApi, type AdminSubmission } from '../services/adminApi';
 import { AdminMiniMap } from './AdminMiniMap';
@@ -34,7 +34,7 @@ export function AdminSubmissionCard({ item, onDone }: AdminSubmissionCardProps) 
   );
   const [objects, setObjects] = useState<SourceObject[]>(item.result?.objects ?? []);
   const [keep, setKeep] = useState<boolean[]>(() =>
-    (item.result?.objects ?? []).map((o) => o.confidence >= 0.4),
+    (item.result?.objects ?? []).map((o) => o.confidence >= PUBLISH_MIN_CONFIDENCE),
   );
   const [source, setSource] = useState('');
   const [busy, setBusy] = useState(false);

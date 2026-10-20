@@ -243,6 +243,9 @@ odpowiedź jest krótka, a potem używa `placeMap` z potoku zgłoszeń: najpierw
 
 4. Trudne mapy (słaba czytelność, niska pewność, brak położenia) dostają drugi odczyt przez Sonnet.
 5. Wynik prywatny trafia od razu do „Moje analizy”. Publiczny czeka w panelu `#admin`: poprawiasz rodzaj i położenie, zatwierdzasz, a obiekty trafiają do paczki regionu. Zdjęcia są wtedy kasowane.
+
+   **Faza testów:** przy `ADMIN_AUTO_PUBLISH = "true"` (`server/wrangler.toml`) źródło udostępnione przez admina (adres z `ADMIN_EMAILS`) trafia do wspólnej bazy od razu po analizie, bez panelu: obiekty z pewnością od 0,4, tak jak panel zaznacza domyślnie (`PUBLISH_MIN_CONFIDENCE`), zdjęcia są kasowane. Źródła pozostałych członków dalej czekają na zatwierdzenie. Po testach ustaw `"false"`.
+
 6. W aplikacji przycisk „Pobierz dla widoku na mapie” pobiera paczki z widoku do obiektów archiwalnych.
 
 Uwaga: porównanie z dzisiejszą zabudową BDOT10k robi aplikacja (`features/history`), nie worker. Worker nie dekoduje obrazów, żeby zmieścić się w limicie czasu procesora darmowego planu.

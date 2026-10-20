@@ -11,6 +11,7 @@ import { fail, json } from '../http';
 import { consumeDaily } from './dailyLimit';
 import { PUBLIC_DAILY_LIMIT } from './limits';
 import { parseSubmission } from './parseSubmission';
+import { isOwnerEmail } from '../auth/isOwnerEmail';
 import { memberFrom, SIGN_IN_FIRST } from '../community/auth';
 
 type Cors = Record<string, string>;
@@ -45,6 +46,12 @@ export async function createSubmission(request: Request, env: Env, cors: Cors, n
       : await consumeDaily(env.DB, [`public:member:${member.id}`], PUBLIC_DAILY_LIMIT, now);
   if (!allowed) return fail(429, 'Dzienny limit analiz został wykorzystany, spróbuj jutro', cors);
 
+  // test phase (ADMIN_AUTO_PUBLISH): what an admin shares skips the review
+  const autoPublish =
+    env.ADMIN_AUTO_PUBLISH === 'true' &&
+    parsed.mode === 'public' &&
+    parsed.consentPublish &&
+    isOwnerEmail(member.email ?? '', env);
   const id = randomToken(12);
   const accessKey = randomToken(24);
   const files = await Promise.all(
@@ -59,8 +66,8 @@ export async function createSubmission(request: Request, env: Env, cors: Cors, n
   await env.DB.batch([
     env.DB.prepare(
       `INSERT INTO submissions (id, mode, status, access_key_hash, device_id, ip_hash, text, link,
-         view_bbox, consent_publish, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         view_bbox, consent_publish, auto_publish, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).bind(
       id,
       parsed.mode,
@@ -72,6 +79,7 @@ export async function createSubmission(request: Request, env: Env, cors: Cors, n
       parsed.link,
       parsed.viewBbox ? JSON.stringify(parsed.viewBbox) : null,
       parsed.consentPublish ? 1 : 0,
+      autoPublish ? 1 : 0,
       now,
       now,
     ),
