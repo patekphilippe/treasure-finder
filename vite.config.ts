@@ -14,7 +14,7 @@ export default defineConfig({
       // the user decides when to reload: never interrupt a track being recorded
       registerType: 'prompt',
       injectRegister: false,
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['logo.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Mapa poszukiwań',
         short_name: 'Mapa',
