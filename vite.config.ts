@@ -15,8 +15,9 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['logo.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: 'Mapa poszukiwań',
-        short_name: 'Mapa',
+        // the name under the icon on the home screen
+        name: 'Treasure Finder',
+        short_name: 'Treasure Finder',
         description: 'Analiza NMT i praca w terenie: mapa, GPS, punkty i trasy.',
         lang: 'pl',
         display: 'standalone',
