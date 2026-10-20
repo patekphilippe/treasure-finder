@@ -1,5 +1,10 @@
 import { DataSheet } from '@/features/data';
-import { ContextDetailsSheet, HistorySheet } from '@/features/history';
+import {
+  ContextDetailsSheet,
+  ContextLayerRow,
+  HistorySheet,
+  OwnMapsVisibility,
+} from '@/features/history';
 import { LayersSheet } from '@/features/layers';
 import { AddPointSheet, PointDetailsSheet, PointsListSheet } from '@/features/points';
 import { AreaSheet } from '@/features/roughness';
@@ -37,7 +42,13 @@ export function SheetHost() {
     case 'contextDetails':
       return <ContextDetailsSheet key={selectedContextId} onClose={closeSheet} />;
     case 'layers':
-      return <LayersSheet onClose={closeSheet} />;
+      return (
+        <LayersSheet
+          onClose={closeSheet}
+          ownMaps={<OwnMapsVisibility />}
+          contextObjects={<ContextLayerRow />}
+        />
+      );
     case 'analyses':
       return <AnalysesSheet onClose={closeSheet} />;
     case 'data':

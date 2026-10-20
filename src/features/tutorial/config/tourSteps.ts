@@ -168,7 +168,25 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-historical',
     title: 'Mapa historyczna',
     content:
-      'Dawne mapy na mapie: przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Suwakiem zmienisz krycie.',
+      'Dawne mapy na mapie: przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Suwakiem zmienisz krycie. Warstwy tylko pokazują mapy; własne skany wczytujesz w Danych.',
+    mode: 'field',
+    sheet: 'layers',
+  },
+  {
+    id: 'layers-own-maps',
+    target: 'layers-own-maps',
+    title: 'Własne mapy',
+    content:
+      'Twoje skany i GeoTIFF-y: tu je włączasz i ustawiasz krycie. Wczytujesz, dopasowujesz narożnikami i usuwasz je w Danych.',
+    mode: 'field',
+    sheet: 'layers',
+  },
+  {
+    id: 'history-filter',
+    target: 'history-filter',
+    title: 'Obiekty z map',
+    content:
+      'Obiekty to jedna wspólna warstwa: każdy liczy się w analizie NMT, bez względu na to, którą mapę oglądasz. Tylko z widocznej mapy przyciemnia obiekty, których nie widziano na włączonej mapie. Lista i dodawanie otwiera listę obiektów i ręczne zaznaczanie.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -196,15 +214,6 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: 'Obiekty z map archiwalnych',
     content:
       'Widzisz na dawnej mapie młyn, karczmę albo wieś, której dziś nie ma? Wybierz rodzaj i wskaż miejsce celownikiem. Kandydaci z analizy NMT w pobliżu od razu dostaną wyższy wynik; liczy się rodzaj obiektu (osada działa najdalej).',
-    mode: 'field',
-    sheet: 'history',
-  },
-  {
-    id: 'history-filter',
-    target: 'history-filter',
-    title: 'Obiekty z widocznej mapy',
-    content:
-      'Obiekty to jedna wspólna warstwa: każdy liczy się w analizie NMT, bez względu na to, którą mapę oglądasz. Ten przełącznik przyciemnia obiekty, których nie widziano na włączonej mapie. Ten sam młyn z kolejnej mapy nie dubluje się, tylko dostaje nową mapę; w szczegółach obiektu widać, na których mapach i z jakich lat go znaleziono.',
     mode: 'field',
     sheet: 'history',
   },

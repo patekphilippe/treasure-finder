@@ -6,7 +6,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
 import { PickLocationBar } from '@/features/points';
@@ -39,7 +38,7 @@ interface HistorySheetProps {
 
 /** Own historical maps and objects from archival maps: add, show, mark at the crosshair. */
 export function HistorySheet({ onClose }: HistorySheetProps) {
-  const { features, visible, setVisible, onlyViewMap, setOnlyViewMap } = useContextStore();
+  const { features, setVisible, onlyViewMap } = useContextStore();
   const seenOnView = useSeenOnView();
   const picking = usePointDraftStore((s) => s.picking);
   const startPicking = usePointDraftStore((s) => s.startPicking);
@@ -96,28 +95,11 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
             wyższy wynik, bez względu na to, którą mapę oglądasz. Zaznacz je, patrząc na mapę
             historyczną; obiekt pamięta, na których mapach go widziano.
           </Typography>
-          <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-            <Icon name="map-marked-alt" size={22} />
-            <Typography variant="subtitle2" sx={{ flex: 1 }}>
-              Pokaż na mapie ({features.length})
+          {filter && (
+            <Typography variant="caption" color="text.secondary">
+              Lista pokazuje tylko obiekty z widocznej mapy (filtr w Warstwach).
             </Typography>
-            <Switch checked={visible} onChange={(e) => setVisible(e.target.checked)} />
-          </Stack>
-          <Stack data-tour="history-filter" direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-            <Chip
-              icon={<Icon name="filter" size={16} />}
-              label={`Tylko z widocznej mapy (${seenOnView?.size ?? 0})`}
-              color={filter ? 'primary' : 'default'}
-              variant={filter ? 'filled' : 'outlined'}
-              disabled={!seenOnView}
-              onClick={() => setOnlyViewMap(!onlyViewMap)}
-            />
-            {!seenOnView && (
-              <Typography variant="caption" color="text.secondary">
-                Włącz mapę historyczną
-              </Typography>
-            )}
-          </Stack>
+          )}
 
           <Divider />
 

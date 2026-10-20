@@ -6,7 +6,7 @@ import Switch from '@mui/material/Switch';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { SheetReliefSection } from '@/features/analysis/field';
 import { RoughnessSection } from '@/features/roughness';
 import { useZonesStore } from '@/features/zones';
@@ -22,9 +22,14 @@ import { HistoricalSection } from './HistoricalSection';
 
 interface LayersSheetProps {
   onClose: () => void;
+  /** own maps shown or hidden (history; layers must not import it) */
+  ownMaps?: ReactNode;
+  /** archival objects on the map (history) */
+  contextObjects?: ReactNode;
 }
 
-export function LayersSheet({ onClose }: LayersSheetProps) {
+/** What the map shows: base, relief, historical maps and objects, overlays. Nothing is loaded here. */
+export function LayersSheet({ onClose, ownMaps, contextObjects }: LayersSheetProps) {
   const {
     baseLayer,
     nmtOn,
@@ -104,7 +109,10 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
 
         <Divider />
 
-        <HistoricalSection />
+        <HistoricalSection>
+          {ownMaps}
+          {contextObjects}
+        </HistoricalSection>
 
         <Divider />
 
