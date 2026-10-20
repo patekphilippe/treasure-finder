@@ -1,19 +1,11 @@
-import { BDOT_EXCLUSION } from '@/shared/config/bdotWms';
-import { createId } from '@/shared/lib/createId';
-import { fromEpsg2180 } from '@/shared/lib/geo';
-import {
-  buildMilitaryProposals,
-  buildProposals,
-  READ_PROFILES,
-  type ReadProfileId,
-  type SiteProposal,
-} from '@/shared/lib/history';
-import { fetchBuildingMask } from '@/shared/lib/tiles';
+import type { ReadProfileId } from '@/shared/lib/history';
 import type { Bounds } from '@/shared/store/useMapViewStore';
 import type { ContextKind } from '@/shared/types/domain';
-import { PROPOSAL_OPTIONS, type AiModelId } from '../config/aiReading';
-import { captureView, type ViewSource } from './captureView';
-import { readMapWithAi, type AiUsage } from './readMapWithAi';
+import type { AiModelId } from '../config/aiReading';
+import { siteToProposal } from '../utils/siteToProposal';
+import type { ViewSource } from './captureView';
+import type { AiUsage } from './readMapWithAi';
+import { readViewSites } from './readViewSites';
 
 export interface Proposal {
   id: string;
@@ -42,47 +34,18 @@ export async function findLostBuildings(
   turnstileToken: string | null,
   onStep: (step: string) => void,
 ): Promise<{ proposals: Proposal[]; usage: AiUsage; read: number }> {
-  onStep('Przygotowuję obraz mapy');
-  const { image, grid } = await captureView(bounds, source, READ_PROFILES[profile].maxResM);
-  onStep('Claude czyta mapę');
-  const { objects, usage } = await readMapWithAi(
-    image,
-    grid.w,
-    grid.h,
-    grid.res,
+  const { sites, usage, read } = await readViewSites(
+    bounds,
+    source,
     model,
     profile,
     turnstileToken,
+    onStep,
   );
-  let sites: SiteProposal[];
-  if (profile === 'wojskowa') {
-    sites = buildMilitaryProposals(objects, grid, PROPOSAL_OPTIONS.minConfidence);
-  } else {
-    onStep('Porównuję z dzisiejszymi budynkami (BDOT10k)');
-    const buildings = await fetchBuildingMask(
-      grid.originE,
-      grid.originN,
-      grid.res,
-      grid.w,
-      grid.h,
-      [{ ...BDOT_EXCLUSION[0]!, bufferM: 0 }],
-    );
-    sites = buildProposals(objects, buildings, grid, PROPOSAL_OPTIONS);
-  }
   const what = profile === 'wojskowa' ? 'auto (AI, mapa wojskowa)' : 'auto (AI)';
-  const proposals = sites.map((p) => {
-    const [lat, lng] = fromEpsg2180(p.e, p.n);
-    return {
-      id: createId(),
-      kind: p.kind,
-      title: p.title,
-      lat,
-      lng,
-      buildings: p.buildings,
-      lost: p.lost,
-      ...(p.line ? { line: p.line.map(([e, n]) => fromEpsg2180(e, n)) } : {}),
-      source: `${what}: ${source.label}, ${p.title.charAt(0).toLowerCase()}${p.title.slice(1)}`,
-    };
-  });
-  return { proposals, usage, read: objects.length };
+  return {
+    proposals: sites.map((p) => siteToProposal(p, `${what}: ${source.label}`)),
+    usage,
+    read,
+  };
 }

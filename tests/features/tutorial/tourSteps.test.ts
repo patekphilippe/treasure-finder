@@ -11,6 +11,7 @@ const base: Conditions = {
   installed: false,
   relief: false,
   wholeMap: false,
+  compare: false,
   platform: 'android',
 };
 const ids = (c: Partial<Conditions>) =>

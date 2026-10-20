@@ -10,6 +10,8 @@ export interface TourConditions {
   relief: boolean;
   /** a community member with an own map on: the whole-map reading button is there */
   wholeMap: boolean;
+  /** a community member with a historical or own map on: map comparison is there */
+  compare: boolean;
   platform: Platform;
 }
 
@@ -21,6 +23,7 @@ const applies = (step: TourStep, c: TourConditions) => {
   if (step.when === 'notInstalled') return !c.installed;
   if (step.when === 'relief') return c.relief;
   if (step.when === 'wholeMap') return c.wholeMap;
+  if (step.when === 'compare') return c.compare;
   return true;
 };
 

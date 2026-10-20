@@ -18,7 +18,14 @@ export interface TourStep {
   placement?: Step['placement'];
   /** step only makes sense when its element exists */
   when?:
-    'candidates' | 'noCandidates' | 'legend' | 'exclusion' | 'notInstalled' | 'relief' | 'wholeMap';
+    | 'candidates'
+    | 'noCandidates'
+    | 'legend'
+    | 'exclusion'
+    | 'notInstalled'
+    | 'relief'
+    | 'wholeMap'
+    | 'compare';
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
@@ -196,6 +203,16 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: 'Cała mapa naraz',
     content:
       'Przy własnej mapie członkowie społeczności mogą przeczytać ją całą jednym przyciskiem: aplikacja dzieli ją na fragmenty, pokazuje ich liczbę, koszt i czas, a potem łączy wyniki z sąsiednich fragmentów.',
+    mode: 'field',
+    sheet: 'history',
+  },
+  {
+    id: 'ai-compare',
+    target: 'ai-compare',
+    when: 'compare',
+    title: 'Porównaj dwie mapy',
+    content:
+      'Ten sam widok na dwóch mapach z różnych lat. Co jest na obu, jest pewniejsze; co jest tylko na jednej, powstało albo zniknęło między nimi. Opis każdej propozycji mówi, na której mapie ją widać.',
     mode: 'field',
     sheet: 'history',
   },

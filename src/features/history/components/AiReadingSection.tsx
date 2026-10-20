@@ -21,6 +21,7 @@ import { useAiSettings } from '../store/useAiSettings';
 import { useContextStore } from '../store/useContextStore';
 import { useProposalsStore } from '../store/useProposalsStore';
 import { proposalToContext } from '../utils/proposalToContext';
+import { CompareMaps } from './CompareMaps';
 import { ProposalItem } from './ProposalItem';
 import { WholeMapReading } from './WholeMapReading';
 
@@ -164,6 +165,9 @@ export function AiReadingSection() {
                 Szukaj w widoku
               </Button>
             </Stack>
+          )}
+          {source && (
+            <CompareMaps source={source} model={model} member={member} topographic={!military} />
           )}
           {source?.kind === 'own' && (
             <WholeMapReading

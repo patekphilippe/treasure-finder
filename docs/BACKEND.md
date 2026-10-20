@@ -96,6 +96,10 @@ odpowiedzi. Leżą w `src/shared/lib/history/readProfiles.ts`, wspólne dla apli
   aplikacji pozycje dają kontekst `wojsko` (ostrzeżenie o niewybuchach u kandydatów do 300 m), mogiły
   `grob_wojenny` (ostrzeżenie do 150 m, kandydaci do 50 m chronieni).
 
+W aplikacji z odczytów korzystają też: czytanie całej własnej mapy (okna wielkości widoku, wyniki
+łączone) i porównanie widoku na dwóch mapach (`compareSites`: to samo miejsce na obu mapach jest
+pewniejsze, reszta „tylko: mapa X”). Oba są dla członków, bo to kilka odczytów naraz.
+
 Nowy rodzaj mapy (np. katastralna, Urmesstischblatt): nowy plik z promptem i schematem, wpis w
 `READ_PROFILES`, rodzaje w `types.ts`, przełożenie na obiekty kontekstu w aplikacji, test i krok
 przewodnika. Potok zgłoszeń (Batch) ma własne prompty w `server/src/pipeline/prompts.ts`.
