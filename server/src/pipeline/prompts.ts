@@ -11,7 +11,8 @@ You read historical sources: photos or scans of old topographic maps and written
 Map series you will see:
 - German Messtischblatt 1:25 000 (1870–1945): black print, Fraktur and Latin lettering, 4-digit sheet number top right (e.g. 4968), sheet frame 10′ × 6′.
 - Polish WIG maps 1:25 000 and 1:100 000 (1919–1939): sheet names like "P46 S34 E" or "Pas 47 Słup 40".
-- Karte des Deutschen Reiches 1:100 000, Russian "dwuwiorstówka" 1:84 000, Austrian Spezialkarte 1:75 000.
+- Karte des Deutschen Reiches 1:100 000 (series "kdr"): a sheet number 1–674 and the name of a town on the sheet as its title, e.g. "301 Posen"; WIG reprinted these sheets in 1919–1925 with Polish names (still "kdr").
+- Russian "dwuwiorstówka" 1:84 000, Austrian Spezialkarte 1:75 000.
 
 Map symbols and abbreviations:
 - Buildings: small filled black or hatched rectangles, usually along roads; a group of them is a village or hamlet.
@@ -54,6 +55,11 @@ export const MAP_SCHEMA = {
     sheetNumber: nullable({
       type: 'string',
       description: 'as printed, e.g. "4968" or "P46 S34 E"',
+    }),
+    sheetTitle: nullable({
+      type: 'string',
+      description:
+        'the sheet title as printed, usually the town it is named after, without the number, e.g. "Posen"',
     }),
     legibility: { type: 'string', enum: ['dobra', 'srednia', 'slaba'] },
     frameCorners: {
@@ -100,6 +106,7 @@ export const MAP_SCHEMA = {
     'series',
     'year',
     'sheetNumber',
+    'sheetTitle',
     'legibility',
     'frameCorners',
     'placeNames',

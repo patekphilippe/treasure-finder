@@ -8,6 +8,8 @@ export interface MapReading {
   series: string;
   year: number | null;
   sheetNumber: string | null;
+  /** the town a sheet is named after, e.g. "Posen" */
+  sheetTitle: string | null;
   legibility: 'dobra' | 'srednia' | 'slaba';
   frameCorners: { nw: UV; ne: UV; se: UV; sw: UV } | null;
   placeNames: { text: string; x: number; y: number }[];
@@ -54,6 +56,13 @@ export function parseMapReading(raw: unknown): MapReading {
     year: Number.isInteger(year) && year > 1500 && year < 2100 ? year : null,
     sheetNumber:
       typeof r.sheetNumber === 'string' && r.sheetNumber.trim() ? r.sheetNumber.trim() : null,
+    sheetTitle:
+      typeof r.sheetTitle === 'string' && r.sheetTitle.trim()
+        ? r.sheetTitle
+            .replace(/^\d+\s*/, '')
+            .trim()
+            .slice(0, 80) || null
+        : null,
     legibility: r.legibility === 'dobra' || r.legibility === 'slaba' ? r.legibility : 'srednia',
     frameCorners:
       corners && corners.nw && corners.ne && corners.se && corners.sw

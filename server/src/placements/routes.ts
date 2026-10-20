@@ -16,6 +16,7 @@ import {
   READ_MEMBER_DAILY_LIMIT,
 } from '../readings/limits';
 import { consumeDaily } from '../submissions/dailyLimit';
+import { plausiblePlacement } from './plausiblePlacement';
 import { placementQuestion } from './question';
 
 type Cors = Record<string, string>;
@@ -86,13 +87,17 @@ export async function placeImage(request: Request, env: Env, cors: Cors, now: nu
         : 'Na mapie nie widać nazw ani numeru arkusza',
       cors,
     );
+  const corners = [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: aspect },
+    { x: 0, y: aspect },
+  ].map((p) => placement.toLatLng(p));
+  // names matched far apart give a huge skewed map: better put in the view by hand
+  if (!plausiblePlacement(corners))
+    return fail(422, 'Odczytane nazwy nie pasują do jednego arkusza', cors);
   const body: MapPlacement = {
-    corners: [
-      { x: 0, y: 0 },
-      { x: 1, y: 0 },
-      { x: 1, y: aspect },
-      { x: 0, y: aspect },
-    ].map((p) => placement.toLatLng(p)),
+    corners,
     method: placement.method,
     rmsM: placement.rmsM,
     uncertaintyM: placement.uncertaintyM,

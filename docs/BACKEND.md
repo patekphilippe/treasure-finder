@@ -212,6 +212,12 @@ pyta Claude (Haiku, jedno wywołanie) o serię, numer arkusza, ramkę i nazwy, b
 odpowiedź jest krótka, a potem używa `placeMap` z potoku zgłoszeń: najpierw numer arkusza z ramką
 (dokładność starego układu, ok. 150 m), potem nazwy z gazetera. Zwraca narożniki obrazu.
 
+- **Arkusze 1:100 000 po tytule:** Karte des Deutschen Reiches ma numery bez siatki („301 Posen”), ale
+  leży w tej samej siatce 30′ × 15′ co WIG 1:100 000, a arkusz nosi nazwę miejscowości, która na nim
+  leży. Claude odczytuje tytuł (`sheetTitle`), worker szuka tej miejscowości (Nominatim, Polska i dawne
+  ziemie niemieckie) i bierze oczko siatki wokół niej (`gridSheetAt`); ramka mapy trafia w jego narożniki.
+- **Odrzucanie absurdów:** położenie szersze niż 150 km, wklęsłe albo mocno zniekształcone (nazwy
+  dopasowane w różnych krajach) worker odrzuca (422), a aplikacja kładzie skan w widoku.
 - To tylko punkt startowy: aplikacja od razu otwiera przeciąganie narożników. Nazwy na małym wycinku
   potrafią wskazać miejsce o setki metrów obok (etykieta lasu zamiast wsi, gmina zamiast miejscowości),
   więc przy mniej niż sześciu nazwach `placeByNames` wymaga dopasowania z błędem do 150 m, a inaczej

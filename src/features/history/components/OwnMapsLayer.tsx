@@ -23,6 +23,8 @@ export function OwnMapsLayer() {
           if (!crs) return null;
           const source: WarpedImage = {
             image: images[m.id]!,
+            width: m.width,
+            height: m.height,
             sourceToPixel: invertHomography(m.pixelToSource),
             crs,
           };

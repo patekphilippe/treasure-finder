@@ -1,6 +1,6 @@
 // concrete files, not the index: the index also pulls browser-only canvas code
 import { applyHomography, fitHomography } from '@/shared/lib/georef/homography';
-import { sheetCorners, type SheetSeries } from '@/shared/lib/georef/sheetCorners';
+import { sheetCorners, type SheetBounds, type SheetSeries } from '@/shared/lib/georef/sheetCorners';
 
 export interface LatLng {
   lat: number;
@@ -172,7 +172,14 @@ export function placeBySheet(
   frame: { nw: UV; ne: UV; se: UV; sw: UV },
 ): Placement | null {
   const b = sheetCorners(series, sheetNumber);
-  if (!b) return null;
+  return b ? placeByBounds(b, frame) : null;
+}
+
+/** The printed frame fitted to a sheet's corners in degrees (from its number or its title). */
+export function placeByBounds(
+  b: SheetBounds,
+  frame: { nw: UV; ne: UV; se: UV; sw: UV },
+): Placement {
   const h = fitHomography(
     [frame.nw, frame.ne, frame.se, frame.sw],
     [

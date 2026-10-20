@@ -22,7 +22,7 @@ export function placementQuestion(view: ViewBbox | null): ImageQuestion {
     schema: PLACEMENT_SCHEMA,
     maxTokens: 4096,
     text: `This image is a historical map (or a photo of one) that the user wants to place on today's map. ${hint}
-Identify the series, year and sheet number if printed. Give the four corners of the printed map frame if all are visible.
+Identify the series, year, sheet number and sheet title if printed. Give the four corners of the printed map frame if all are visible.
 List every name printed on the map with its label centre: villages, hamlets, estates, mountains, rocks, streams and forests, settlements first. They are used to place the map, so read them exactly as printed and do not leave any out.
 Positions are fractions of the image: x from 0 (left) to 1 (right), y from 0 (top) to 1 (bottom).`,
   };

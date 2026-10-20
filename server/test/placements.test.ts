@@ -75,7 +75,11 @@ describe('placing a scanned map', () => {
           usage: { input_tokens: 2500, output_tokens: 300 },
         });
       }
-      // no names to look up in these tests
+      // the only place the tests look up: Poznań, the town KdDR sheet 301 is named after
+      if (url.includes('nominatim') && new URL(url).searchParams.get('q') === 'Posen')
+        return Response.json([
+          { lat: '52.4083', lon: '16.9335', display_name: 'Poznań, Polska', category: 'place' },
+        ]);
       return Response.json([]);
     });
   });
@@ -96,6 +100,17 @@ describe('placing a scanned map', () => {
     expect(JSON.stringify(sent!.output_config)).not.toContain('"objects"');
     expect(sent!.max_tokens).toBe(4096);
     expect(sent!.system).toBeTruthy();
+  });
+
+  it('a Karte des Deutschen Reiches sheet by its title: the frame on the grid cell of the town', async () => {
+    answer = reading({ series: 'kdr', sheetNumber: '301', sheetTitle: 'Posen', year: 1921 });
+    const res = await place();
+    expect(res.status).toBe(200);
+    const [nw, ne, se] = ((await res.json()) as MapPlacement).corners;
+    expect(nw!.lat).toBeCloseTo(52.5, 6);
+    expect(nw!.lng).toBeCloseTo(16 + 50 / 60, 6);
+    expect(ne!.lng).toBeCloseTo(17 + 20 / 60, 6);
+    expect(se!.lat).toBeCloseTo(52.25, 6);
   });
 
   it('says so when nothing places the map; only for signed-in members', async () => {

@@ -101,7 +101,9 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   `shared/lib/tiles/pickSourceTiles.ts`, wspólne dla warstwy i pobierania: zmiana w jednym miejscu.
 - Własne mapy historyczne: magazyn `maps` (obraz do 16 Mpx + georeferencja w układzie pliku, `shared/lib/georef`),
   wchodzą do kopii ZIP (wersja 4, obrazy w `mapy/`). Skan bez georeferencji może umieścić backend (`POST /api/placements`, numer arkusza
-  albo nazwy); wynik to tylko start przeciągania narożników. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka.
+  albo nazwy); wynik to tylko start przeciągania narożników. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka, a przy
+  silnym zniekształceniu dzieli kafelek na części (`map/utils/warpCells.ts`). Arkusze 1:100 000 (KdDR, WIG) backend
+  znajduje po tytule: miejscowość z tytułu wskazuje oczko siatki 30′ × 15′ (`shared/lib/georef/gridSheetAt.ts`).
 - Obiekty z map (`ContextFeature`, magazyn `context`) to jedna wspólna warstwa: analiza NMT liczy każdy
   bez względu na widoczną mapę. Pochodzenie jest w `seen` (mapa, lata, sposób); starsze obiekty mają je
   odczytane z `source` (`shared/lib/history/legacySightings.ts`). Nowe obiekty dodaje `addSightedObjects`:
