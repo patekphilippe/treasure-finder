@@ -61,6 +61,6 @@ describe('parseBackup — errors', () => {
   });
 
   it('rejects backups from a newer version', () => {
-    expect(() => parseBackup({ wersja: 4, points: [] })).toThrow(/nowszej wersji/);
+    expect(() => parseBackup({ wersja: 5, points: [] })).toThrow(/nowszej wersji/);
   });
 });

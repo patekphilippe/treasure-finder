@@ -3,19 +3,35 @@ import type { ImportBundle } from '@/shared/lib/io';
 import type { WaterFeature } from '@/shared/types/domain';
 
 export interface ImportPayload extends Omit<ImportBundle, 'version'> {
-  kind: 'backup-v1' | 'backup-v2' | 'backup-v3' | 'geojson' | 'candidates' | 'context' | 'water';
+  kind:
+    | 'backup-v1'
+    | 'backup-v2'
+    | 'backup-v3'
+    | 'backup-v4'
+    | 'geojson'
+    | 'candidates'
+    | 'context'
+    | 'water';
   /** BDOT10k water (only from a water GeoJSON, never in a backup) */
   water: WaterFeature[];
   /** drainage ditches left out of a water GeoJSON */
   ditches?: number;
 }
 
-const EMPTY = { points: [], tracks: [], candidates: [], zones: [], context: [], water: [] };
+const EMPTY = {
+  points: [],
+  tracks: [],
+  candidates: [],
+  zones: [],
+  context: [],
+  maps: [],
+  water: [],
+};
 
 const isZip = (bytes: Uint8Array) => bytes[0] === 0x50 && bytes[1] === 0x4b; // "PK"
 
-const backupKind = (version: number) =>
-  version === 1 ? 'backup-v1' : version === 2 ? 'backup-v2' : 'backup-v3';
+const BACKUP_KINDS = ['backup-v1', 'backup-v2', 'backup-v3', 'backup-v4'] as const;
+const backupKind = (version: number) => BACKUP_KINDS[Math.min(4, Math.max(1, version)) - 1]!;
 
 /**
  * Detects the file type and parses it: ZIP backup, kopia.json, candidates GeoJSON, archival
@@ -69,15 +85,19 @@ export async function readImportFile(file: File, now = Date.now()): Promise<Impo
       candidates: [],
       zones: [],
       context: [],
+      maps: [],
       water: [],
       photos: new Map(),
       skipped: skipped + rejected,
     };
   }
-  const { version, ...backup } = parseBackup(json);
+  // own maps need their images, which only the ZIP carries
+  const { version, maps, ...backup } = parseBackup(json);
   return {
     kind: backupKind(version),
     ...backup,
+    maps: [],
+    skipped: backup.skipped + maps.length,
     water: [],
     photos: new Map(),
   };

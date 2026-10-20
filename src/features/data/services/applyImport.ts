@@ -15,6 +15,7 @@ export interface ImportSummary {
   candidatesAdded: number;
   candidatesUpdated: number;
   contextAdded: number;
+  mapsAdded: number;
   waterAdded: number;
   /** drainage ditches left out of a water file */
   ditches: number;
@@ -29,16 +30,17 @@ const trackTime = (t: Track) => t.end ?? t.start;
  * Merges imported data into IndexedDB by id:
  * points — newer `updated` wins; tracks — later `end` wins, a track being
  * recorded here is never overwritten; candidates — new data, but decisions and notes made
- * here are kept; zones/context/water — only new ids.
+ * here are kept; zones/context/own maps/water — only new ids.
  */
 export async function applyImport(payload: ImportPayload): Promise<ImportSummary> {
   const db = await getDb();
-  const [points, tracks, candidates, zones, context, water, photoKeys] = await Promise.all([
+  const [points, tracks, candidates, zones, context, maps, water, photoKeys] = await Promise.all([
     db.getAll('points'),
     db.getAll('tracks'),
     db.getAll('candidates'),
     db.getAll('zones'),
     db.getAll('context'),
+    db.getAll('maps'),
     db.getAll('water'),
     db.getAllKeys('photos'),
   ]);
@@ -53,6 +55,7 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
   const c = mergeCandidates(candidates, payload.candidates);
   const z = mergeRecords(zones, payload.zones, onlyNew);
   const x = mergeRecords(context, payload.context, onlyNew);
+  const m = mergeRecords(maps, payload.maps, onlyNew);
   const w = mergeRecords(water, payload.water, onlyNew);
 
   const havePhoto = new Set(photoKeys);
@@ -63,7 +66,7 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
   );
 
   const tx = db.transaction(
-    ['points', 'tracks', 'candidates', 'zones', 'context', 'water', 'photos'],
+    ['points', 'tracks', 'candidates', 'zones', 'context', 'maps', 'water', 'photos'],
     'readwrite',
   );
   await Promise.all([
@@ -72,6 +75,7 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
     ...c.toWrite.map((r) => tx.objectStore('candidates').put(r)),
     ...z.toWrite.map((r) => tx.objectStore('zones').put(r)),
     ...x.toWrite.map((r) => tx.objectStore('context').put(r)),
+    ...m.toWrite.map((r) => tx.objectStore('maps').put(r)),
     ...w.toWrite.map((r) => tx.objectStore('water').put(r)),
     ...photos.map(([id, blob]) => tx.objectStore('photos').put(blob, id)),
     tx.done,
@@ -82,6 +86,8 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
     useTracksStore.getState().load(),
     useZonesStore.getState().load(),
   ]);
+  // history (with its Leaflet layers) loads only when own maps came in
+  if (m.added) await (await import('@/features/history')).useOwnMapsStore.getState().load();
 
   return {
     pointsAdded: p.added,
@@ -91,10 +97,11 @@ export async function applyImport(payload: ImportPayload): Promise<ImportSummary
     candidatesAdded: c.added,
     candidatesUpdated: c.updated,
     contextAdded: x.added,
+    mapsAdded: m.added,
     waterAdded: w.added,
     ditches: payload.ditches ?? 0,
     photos: photos.length,
-    unchanged: p.unchanged + t.unchanged + x.unchanged + w.unchanged,
+    unchanged: p.unchanged + t.unchanged + x.unchanged + m.unchanged + w.unchanged,
     skipped: payload.skipped,
   };
 }

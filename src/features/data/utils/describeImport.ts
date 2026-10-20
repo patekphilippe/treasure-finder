@@ -29,6 +29,10 @@ export function describeImport(s: ImportSummary): string[] {
     lines.push(
       `Kontekst archiwalny: ${pluralPl(s.contextAdded, 'obiekt', 'obiekty', 'obiektów')} (użyty przy następnej analizie arkusza)`,
     );
+  if (s.mapsAdded)
+    lines.push(
+      `Własne mapy: ${pluralPl(s.mapsAdded, 'mapa', 'mapy', 'map')} (Historia → Własne mapy)`,
+    );
   if (s.waterAdded)
     lines.push(
       `Wody z BDOT10k: ${pluralPl(s.waterAdded, 'obiekt', 'obiekty', 'obiektów')} (użyte przy następnej analizie arkusza)`,

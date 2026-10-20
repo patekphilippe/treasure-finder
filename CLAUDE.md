@@ -82,7 +82,7 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   Service worker podaje kafelki z tych cache przed siecią i sam nic nie zapisuje. Kafelki NMT wybiera
   `shared/lib/tiles/pickSourceTiles.ts`, wspólne dla warstwy i pobierania: zmiana w jednym miejscu.
 - Własne mapy historyczne: magazyn `maps` (obraz do 16 Mpx + georeferencja w układzie pliku, `shared/lib/georef`),
-  nie wchodzą do kopii ZIP. Skan bez georeferencji może umieścić backend (`POST /api/placements`, numer arkusza
+  wchodzą do kopii ZIP (wersja 4, obrazy w `mapy/`). Skan bez georeferencji może umieścić backend (`POST /api/placements`, numer arkusza
   albo nazwy); wynik to tylko start przeciągania narożników. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka.
 - Obiekty z map (`ContextFeature`, magazyn `context`) to jedna wspólna warstwa: analiza NMT liczy każdy
   bez względu na widoczną mapę. Pochodzenie jest w `seen` (mapa, lata, sposób); starsze obiekty mają je

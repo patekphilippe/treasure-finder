@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { usePointsStore } from '@/features/points';
 import { useTracksStore } from '@/features/tracks';
-import { countPhotos, countPoints, countTracks } from '@/shared/lib/format';
+import { countPhotos, countPoints, countTracks, pluralPl } from '@/shared/lib/format';
 import { Icon, useToastStore } from '@/shared/ui';
 import { createExport } from '../services/createExport';
 import { canShareFiles } from '../utils/canShareFiles';
@@ -23,8 +23,9 @@ export function ExportSection() {
       const { file, counts } = await createExport();
       if (mode === 'share') await navigator.share({ files: [file], title: file.name });
       else downloadBlob(file);
+      const maps = counts.maps ? `, ${pluralPl(counts.maps, 'mapa', 'mapy', 'map')}` : '';
       showToast(
-        `Eksport: ${countPoints(counts.points)}, ${countTracks(counts.tracks)}, ${countPhotos(counts.photos)}`,
+        `Eksport: ${countPoints(counts.points)}, ${countTracks(counts.tracks)}, ${countPhotos(counts.photos)}${maps}`,
       );
     } catch (e) {
       if ((e as Error).name !== 'AbortError') showToast('Eksport nie powiódł się');
@@ -40,7 +41,7 @@ export function ExportSection() {
       </Typography>
       <Typography variant="body2" color="text.secondary">
         {countPoints(pointCount)} i {countTracks(trackCount)} w jednym pliku ZIP: GeoJSON i GPX do
-        QGIS, zdjęcia oraz kopia do przeniesienia na inne urządzenie.
+        QGIS, zdjęcia, własne mapy oraz kopia do przeniesienia na inne urządzenie.
       </Typography>
       <Stack direction="row" sx={{ gap: 1 }}>
         <Button

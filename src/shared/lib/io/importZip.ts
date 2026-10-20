@@ -1,10 +1,13 @@
 import JSZip from 'jszip';
-import { ZIP_FILES } from './backup';
+import type { OwnMap } from '@/shared/types/domain';
+import { mapImageType, ZIP_FILES } from './backup';
 import { ImportError, parseBackup, type ParsedBackup } from './parseBackup';
 
-export interface ImportBundle extends ParsedBackup {
+export interface ImportBundle extends Omit<ParsedBackup, 'maps'> {
   /** photo id → JPEG */
   photos: Map<string, Blob>;
+  /** own maps with their images */
+  maps: OwnMap[];
 }
 
 const baseName = (path: string) =>
@@ -13,7 +16,7 @@ const baseName = (path: string) =>
     .pop()
     ?.replace(/\.[^.]+$/, '') ?? '';
 
-/** Reads an export ZIP (this app or version 1): kopia.json plus zdjecia/<photo>.jpg. */
+/** Reads an export ZIP (this app or version 1): kopia.json plus zdjecia/<photo>.jpg and mapy/. */
 export async function importZip(data: Blob | ArrayBuffer | Uint8Array): Promise<ImportBundle> {
   let zip: JSZip;
   try {
@@ -42,5 +45,15 @@ export async function importZip(data: Blob | ArrayBuffer | Uint8Array): Promise<
     if (!wanted.has(id) || photos.has(id)) continue;
     photos.set(id, new Blob([await file.async('arraybuffer')], { type: 'image/jpeg' }));
   }
-  return { ...backup, photos };
+
+  // map paths are relative to kopia.json, which may lie in a folder
+  const root = backupFile.name.slice(0, backupFile.name.lastIndexOf('/') + 1);
+  const maps: OwnMap[] = [];
+  for (const entry of backup.maps) {
+    const file = entry.image.startsWith(ZIP_FILES.mapsDir) ? zip.file(root + entry.image) : null;
+    if (!file) continue;
+    const image = new Blob([await file.async('arraybuffer')], { type: mapImageType(entry.image) });
+    maps.push({ ...entry, image });
+  }
+  return { ...backup, maps, skipped: backup.skipped + backup.maps.length - maps.length, photos };
 }

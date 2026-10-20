@@ -83,13 +83,13 @@ describe('archival objects in a backup', () => {
 
   it('a ZIP export reads back with its sightings', async () => {
     const zip = await buildExportZip(
-      { points: [], tracks: [], candidates: [], zones: [], context: [mill] },
+      { points: [], tracks: [], candidates: [], zones: [], context: [mill], maps: [] },
       new Map(),
       Date.UTC(2026, 9, 20),
     );
     const bytes = await zip.generateAsync({ type: 'arraybuffer' });
     const back = await importZip(bytes);
-    expect(back.version).toBe(3);
+    expect(back.version).toBe(4);
     expect(back.context).toEqual([mill]);
   });
 });

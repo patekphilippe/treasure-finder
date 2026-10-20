@@ -4,7 +4,7 @@ import { readExportData } from './readExportData';
 
 export interface ExportResult {
   file: File;
-  counts: { points: number; tracks: number; photos: number };
+  counts: { points: number; tracks: number; photos: number; maps: number };
 }
 
 /** Saves the recording in progress, then packs the whole database into a ZIP file. */
@@ -18,6 +18,11 @@ export async function createExport(now = Date.now()): Promise<ExportResult> {
   const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
   return {
     file: new File([blob], exportFileName(now), { type: 'application/zip' }),
-    counts: { points: data.points.length, tracks: data.tracks.length, photos: photos.size },
+    counts: {
+      points: data.points.length,
+      tracks: data.tracks.length,
+      photos: photos.size,
+      maps: data.maps.length,
+    },
   };
 }
