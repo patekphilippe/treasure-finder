@@ -139,7 +139,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-nmt',
     title: 'Cieniowanie NMT',
     content:
-      'Cieniowany model terenu z Geoportalu w siatce 1 m. Pokazuje dołki, wały i rowy, także pod lasem. Suwakiem zmienisz krycie.',
+      'Cieniowany model terenu z Geoportalu w siatce 1 m. Z bliska światło pada z 16 kierunków, jak w analizie arkusza, a kafelki przychodzą gotowe z naszego serwera. Pokazuje dołki, wały i rowy, także pod lasem. Suwakiem zmienisz krycie.',
     mode: 'field',
     sheet: 'layers',
   },

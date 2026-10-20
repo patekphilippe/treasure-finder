@@ -5,6 +5,7 @@ import { communityRoutes } from './community/routes';
 import { aiKeyStatus } from './aiKeyStatus';
 import { readView } from './readings/routes';
 import { serveContext } from './context/routes';
+import { serveRelief } from './relief/routes';
 import { corsHeaders, fail, json } from './http';
 import { anthropicClient } from './pipeline/aiClient';
 import { deleteExpired } from './pipeline/cleanup';
@@ -12,7 +13,7 @@ import { runPipeline } from './pipeline/runPipeline';
 import { createSubmission, deleteSubmission, getSubmission } from './submissions/routes';
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const cors = corsHeaders(request, env.ALLOWED_ORIGINS);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     const { pathname } = new URL(request.url);
@@ -28,11 +29,14 @@ export default {
           aiAvailable: aiKey === 'ok' && spent < budget,
           aiKey,
           sourcesAvailable: Boolean(env.TURNSTILE_SECRET),
+          reliefStored: Boolean(env.TILES),
         },
         200,
         cors,
       );
     }
+    if (request.method === 'GET' && pathname.startsWith('/api/relief/'))
+      return serveRelief(request, env, ctx, pathname.slice('/api/relief/'.length), Date.now());
     if (pathname.startsWith('/api/community/'))
       return communityRoutes(
         request,

@@ -1,6 +1,6 @@
 # Backend: analiza źródeł historycznych przez AI
 
-`server/` to Cloudflare Worker, który przyjmuje zgłoszenia źródeł (zdjęcia map, opisy, linki) i analizuje je przez Claude. Aplikacja działa bez niego, także offline. Backend dodaje tylko zgłoszenia i analizę AI.
+`server/` to Cloudflare Worker, który przyjmuje zgłoszenia źródeł (zdjęcia map, opisy, linki) i analizuje je przez Claude, prowadzi wspólną bazę społeczności i liczy kafelki cieniowania terenu. Aplikacja działa bez niego, także offline: bez backendu cieniowanie pochodzi wprost z Geoportalu.
 
 ## Co gdzie leży
 
@@ -12,10 +12,11 @@
 | Zatwierdzony kontekst | Workers KV `CONTEXT`         | paczki GeoJSON w siatce 0,25° i `index.json`, wydawane przez worker pod `/api/kontekst/` |
 | Ochrona przed botami  | Turnstile                    | token przy każdym wysłaniu                                                               |
 | Panel przeglądu       | aplikacja pod `…/#admin`     | token `ADMIN_TOKEN` (sekret workera), tylko dla właściciela                              |
+| Kafelki cieniowania   | R2 `treasure-finder-tiles`   | gotowe kafelki 512 px (`relief/1/z/x/y`), liczone raz z NMT GUGiK                        |
 
 ## Koszty
 
-- **Cloudflare:** plan darmowy wystarcza (Workers 100 tys. zapytań dziennie, D1 5 GB, Workers KV 1 GB i 1000 zapisów dziennie, Cron, Turnstile). Bez karty płatniczej: R2 wymagałby jej podania, dlatego pliki są w KV.
+- **Cloudflare:** Workers Paid (5 $ miesięcznie): policzenie kafelka cieniowania to ok. 0,1 s procesora, a plan darmowy daje 10 ms na zapytanie. Kafelki leżą w R2 (darmowe do 10 GB, 1 mln zapisów i 10 mln odczytów miesięcznie; wymaga karty). Reszta mieści się w limitach planu: D1, Workers KV (pliki zgłoszeń), Cron, Turnstile.
 - **Anthropic:** domyślnie `claude-haiku-5-5` w Batch API (-50%), a `claude-sonnet-5-5` tylko w drugim przebiegu przy trudnych mapach.
 
   | Wejście       | Koszt        |
@@ -38,8 +39,20 @@
 
    Workflow `.github/workflows/server.yml` testuje zawsze. Wdraża tylko wtedy, gdy token jest ustawiony.
 
-8. Panel przeglądu: `npx wrangler secret put ADMIN_TOKEN` (losowy ciąg, co najmniej 24 znaki, np. `openssl rand -base64 32`). Otwórz `https://patekphilippe.github.io/treasure-finder/#admin` i wpisz token: zostaje tylko w tej przeglądarce.
-9. Aplikacja: adres workera i klucz witryny Turnstile są wpisane jako domyślne w `src/features/sources/config/sourcesApi.ts` (to wartości publiczne). Zmienne repozytorium `SOURCES_API_URL` i `TURNSTILE_SITE_KEY` mogą je nadpisać, np. dla testowego workera.
+8. Cieniowanie: w panelu Cloudflare włącz plan Workers Paid i R2, potem `npx wrangler r2 bucket create treasure-finder-tiles` i w `wrangler.toml` wiązanie `[[r2_buckets]]` `TILES`. Token z punktu 7 potrzebuje uprawnienia „Workers R2 Storage: Edit”. Bez wiązania worker liczy każdy kafelek od nowa.
+9. Panel przeglądu: `npx wrangler secret put ADMIN_TOKEN` (losowy ciąg, co najmniej 24 znaki, np. `openssl rand -base64 32`). Otwórz `https://patekphilippe.github.io/treasure-finder/#admin` i wpisz token: zostaje tylko w tej przeglądarce.
+10. Aplikacja: adres workera i klucz witryny Turnstile są wpisane jako domyślne w `src/features/sources/config/sourcesApi.ts` (to wartości publiczne). Zmienne repozytorium `SOURCES_API_URL` i `TURNSTILE_SITE_KEY` mogą je nadpisać, np. dla testowego workera.
+
+## Cieniowanie (`GET /api/relief/1/{z}/{x}/{y}`)
+
+Własne cieniowanie NMT jako kafelki mapy, w tym samym stylu co w analizie arkusza (światło z 16 kierunków wokół północnego zachodu, to samo rozciągnięcie szarości). NMT GUGiK to otwarte dane (usługa WCS: „Fees: none”, „AccessConstraints: none”), więc gotowe kafelki wolno przechowywać i wydawać.
+
+- Kafelek Web Mercator z przybliżeń 12–16, 512 px (w aplikacji na miejscu 256 px, ostry na telefonie). Wysokości z `…/PZGIK/NMT/GRID1/WCS/DigitalTerrainModelFormatTIFF`, okno w EPSG:2180 z komórką wielkości piksela (nie drobniej niż 1 m, przy zmniejszaniu `INTERPOLATION=AVERAGE`). Szara JPEG ok. 10–50 KB; przy granicy i nad morzem PNG z przezroczystością.
+- Pierwsze zapytanie liczy kafelek (2–6 s, głównie czekanie na WCS) i zapisuje go w R2; każde następne, od każdego użytkownika, idzie z R2. Wersja w adresie: nowy sposób liczenia dostaje nowy numer, więc kafelki mają `Cache-Control: immutable`.
+- Limity nowych kafelków dziennie: 8000 na adres IP, 80 000 łącznie (kafelki z R2 się nie liczą).
+- Aplikacja (`features/map/layers/ReliefGridLayer.ts`) pokazuje kafelek Geoportalu, gdy nasz nie przyjdzie w 1,2 s, i podmienia go, gdy przyjdzie. Poniżej przybliżenia 12 zostaje cieniowanie Geoportalu. Pobieranie obszaru offline bierze nasze kafelki.
+- Właściwości WCS sprawdzone 20.10.2026: oś `x` to wschód, `y` północ (sprawdzone na Śnieżce, 1603 m); okna większe niż ok. 7 km wracają w połowie zerami, stąd dopiero od przybliżenia 12; poza Polską usługa zwraca 0 m, co traktujemy jak brak danych.
+- Lokalnie: `wrangler dev` nie otwiera `mapy.geoportal.gov.pl` (jego środowisko nie ufa głównemu certyfikatowi Certum; na serwerach Cloudflare działa). Do testów ustaw zmienną `NMT_WCS_URL` na lokalne proxy HTTP przed tą usługą.
 
 ## Społeczność (`/api/community/`)
 

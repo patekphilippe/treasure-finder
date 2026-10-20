@@ -7,6 +7,7 @@ export { localRelief, validZone } from './localRelief';
 export { readAsc } from './readAsc';
 export { readGeoTiff } from './readGeoTiff';
 export { colorize, type Rgba } from './colorize';
-export { hillshadeMulti } from './hillshadeMulti';
+export { HILLSHADE_HI, HILLSHADE_LO, hillshadeMulti } from './hillshadeMulti';
+export { readFloatTiff, type FloatTiff } from './readFloatTiff';
 export { grayColor, lrmColor } from './reliefColors';
 export { slopeHorn } from './slopeHorn';

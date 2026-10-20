@@ -9,6 +9,8 @@ export default defineConfig(async () => {
       cloudflareTest({
         wrangler: { configPath: './wrangler.toml' },
         miniflare: {
+          // in production the bucket is bound in wrangler.toml (docs/BACKEND.md)
+          r2Buckets: ['TILES'],
           bindings: {
             TEST_MIGRATIONS: migrations,
             ANTHROPIC_API_KEY: 'test-key',

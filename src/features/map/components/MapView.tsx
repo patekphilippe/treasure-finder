@@ -11,7 +11,9 @@ import {
   OSM_LAYER,
   POLAND_CENTER,
 } from '../config/mapLayers';
+import { RELIEF_TILE_URL } from '@/shared/config/backend';
 import { NmtShadedLayer } from '../layers/NmtShadedLayer';
+import { ReliefLayer } from '../layers/ReliefLayer';
 import { TopoLayer } from '../layers/TopoLayer';
 import { AreaMarkers } from './AreaMarkers';
 import { CoverageLayer } from './CoverageLayer';
@@ -66,7 +68,13 @@ export function MapView({ children }: MapViewProps) {
       <HistoricalMapLayer />
       <CustomLayers />
       <RoughnessOverlay />
-      {nmtOn && <NmtShadedLayer opacity={nmtOpacity} zIndex={50} maxZoom={MAX_ZOOM} />}
+      {/* with the backend our own shading (Geoportal's below zoom 12 and as a stand-in) */}
+      {nmtOn &&
+        (RELIEF_TILE_URL ? (
+          <ReliefLayer opacity={nmtOpacity} zIndex={50} maxZoom={MAX_ZOOM} />
+        ) : (
+          <NmtShadedLayer opacity={nmtOpacity} zIndex={50} maxZoom={MAX_ZOOM} />
+        ))}
       <ZoneLayers />
       {showCoverage ? <CoverageLayer /> : <TrackLines />}
       <GuidanceLine />

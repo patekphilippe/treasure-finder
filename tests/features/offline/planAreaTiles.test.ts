@@ -17,13 +17,25 @@ describe('planAreaTiles', () => {
     expect(plan.urls.some((u) => u.includes('TILEMATRIX=EPSG:3857:20&'))).toBe(false);
   });
 
-  it('lists the EPSG:2180 hillshade tiles the NMT layer draws from', () => {
-    const plan = planAreaTiles(small, { ...none, nmt: true }, 2);
+  it('without the backend: lists the EPSG:2180 hillshade tiles the NMT layer draws from', () => {
+    const plan = planAreaTiles(small, { ...none, nmt: true }, 2, '');
     expect(plan.counts.nmt).toBeGreaterThan(0);
     expect(plan.counts.nmt).toBeLessThan(plan.counts.ortho + 400);
     expect(plan.urls.every((u) => u.includes('TILEMATRIXSET=EPSG:2180'))).toBe(true);
     // the finest level shows up at the highest zooms
     expect(plan.urls.some((u) => u.includes('TILEMATRIX=EPSG:2180:12&'))).toBe(true);
+  });
+
+  it('with the backend: our relief tiles for zooms 12–16, not the Geoportal ones', () => {
+    const relief = 'https://api.test/api/relief/1/{z}/{x}/{y}';
+    const plan = planAreaTiles(small, { ...none, nmt: true }, 2, relief);
+    expect(plan.urls).toHaveLength(plan.counts.nmt);
+    expect(plan.urls.every((u) => u.startsWith('https://api.test/api/relief/1/'))).toBe(true);
+    expect(plan.urls.some((u) => u.includes('/relief/1/12/'))).toBe(true);
+    expect(plan.urls.some((u) => u.includes('/relief/1/16/'))).toBe(true);
+    expect(plan.urls.some((u) => u.includes('/relief/1/17/'))).toBe(false);
+    // about 1 km²: a few dozen tiles of ~35 KB instead of hundreds of 180 KB
+    expect(plan.bytes).toBeLessThan(3_000_000);
   });
 
   it('never lists the topographic map (its service forbids harvesting)', () => {
@@ -43,14 +55,14 @@ describe('planAreaTiles', () => {
 
   it('a large area is only counted and marked too large', () => {
     const big = { south: 51.0, west: 16.0, north: 51.3, east: 16.5 };
-    const plan = planAreaTiles(big, { ...none, ortho: true, nmt: true }, 2);
+    const plan = planAreaTiles(big, { ...none, ortho: true, nmt: true }, 2, '');
     expect(plan.tooLarge).toBe(true);
     expect(plan.total).toBeGreaterThan(MAX_AREA_TILES);
     expect(plan.urls).toHaveLength(0);
   });
 
   it('estimates the size from the tile counts', () => {
-    const plan = planAreaTiles(small, { ...none, ortho: true, nmt: true }, 2);
+    const plan = planAreaTiles(small, { ...none, ortho: true, nmt: true }, 2, '');
     expect(plan.bytes).toBeGreaterThan(0);
     expect(plan.total).toBe(plan.counts.ortho + plan.counts.nmt);
   });

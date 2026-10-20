@@ -26,7 +26,8 @@ Testy syntetyczne (12 modeli ze specyfikacji): `tests/lib/detect/interpret.test.
 - Interfejs po polsku. Nazwy w kodzie po angielsku, wartości typów
   i pola eksportu dokładnie jak w docs/PLAN.md.
 - Bez kont i telemetrii. Dane użytkownika tylko w IndexedDB. Jedyny backend to `server/`
-  (Cloudflare Worker, docs/BACKEND.md): przyjmuje zgłoszenia źródeł i analizuje je przez AI.
+  (Cloudflare Worker, docs/BACKEND.md): przyjmuje zgłoszenia źródeł i analizuje je przez AI,
+  prowadzi wspólną bazę społeczności i liczy kafelki cieniowania z NMT GUGiK (R2).
   Jest opcjonalny: aplikacja działa w pełni bez niego i offline. Klucz API Anthropic tylko
   w sekretach workera, nigdy w aplikacji. Aplikacja nie importuje z `server/`; serwer może
   używać czystych funkcji z `src/shared/lib/` przez alias `@/`.
@@ -86,6 +87,9 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Społeczność: członkostwo (kod zaproszenia, imię) w `shared/store/useMembership.ts` (localStorage, nigdy w eksporcie);
   wspólna baza przez `/api/community/` (docs/BACKEND.md), scalanie z lokalnym kontekstem w
   `features/history/utils/mergeCommunity.ts`. Udostępniać wolno tylko obiekty z map, nigdy znaleziska.
+- Cieniowanie NMT z backendu: `server/src/relief` liczy kafelki od przybliżenia 12, aplikacja pokazuje je
+  przez `features/map/layers/ReliefGridLayer.ts` z kafelkiem Geoportalu jako zastępstwem, póki nasz się liczy.
+  Bez backendu zostaje warstwa Geoportalu (`NmtShadedLayer`).
 - Komunikaty prawne są w `features/safety/config/legal.ts` — krótkie, rzeczowe, z linkiem do źródła.
 - Ciężkie biblioteki (JSZip, proj4) ładujemy dynamicznie (`import()`), żeby start na telefonie był lekki.
   `src/shared/lib/geo/crs.ts` rejestruje EPSG:2180 leniwie — bez efektów ubocznych przy imporcie.

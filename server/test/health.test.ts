@@ -27,6 +27,7 @@ describe('health', () => {
       aiAvailable: true,
       aiKey: 'ok',
       sourcesAvailable: true,
+      reliefStored: true,
     });
 
     const other = await api('/api/health', { headers: { origin: 'https://evil.example' } });

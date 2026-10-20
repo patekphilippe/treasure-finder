@@ -7,6 +7,8 @@ on:
       - 'server/**'
       - 'src/shared/lib/history/**'
       - 'src/shared/lib/georef/**'
+      - 'src/shared/lib/raster/**'
+      - 'src/shared/lib/geo/**'
       - 'src/shared/types/sources.ts'
       - '.github/workflows/server.yml'
   workflow_dispatch:

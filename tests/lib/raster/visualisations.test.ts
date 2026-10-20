@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { colorize, grayColor, hillshadeMulti, lrmColor, slopeHorn } from '@/shared/lib/raster';
+import { hornGradient } from '@/shared/lib/raster/hornGradient';
 
 const plane = (w: number, h: number, f: (x: number, y: number) => number) => {
   const a = new Float32Array(w * h);
@@ -71,6 +72,38 @@ describe('multi-directional hillshade', () => {
     const pit = (x: number, y: number) => -Math.max(0, 3 - Math.hypot(x - 10, y - 10));
     const hs = hillshadeMulti(plane(21, 21, pit), 21, 21, 1);
     expect(Math.abs(hs[10 * 21 + 8]! - hs[10 * 21 + 12]!)).toBeGreaterThan(0.2);
+  });
+
+  it('the closed form gives the same values as summing every direction, steep cells included', () => {
+    // straightforward sum over the 16 directions, as the function was first written
+    const reference = (dem: Float32Array, w: number, h: number, cell: number) => {
+      const zen = (55 * Math.PI) / 180;
+      const dirs = Array.from({ length: 16 }, (_, k) => {
+        const az = ((225 + (180 * (k + 0.5)) / 16) * Math.PI) / 180;
+        return [Math.sin(az), Math.cos(az)] as const;
+      });
+      return Float32Array.from({ length: w * h }, (_, i) => {
+        const [dx, dy] = hornGradient(dem, w, h, cell, i % w, Math.floor(i / w));
+        const g = Math.hypot(dx, dy);
+        const cosS = 1 / Math.sqrt(1 + g * g);
+        const [ux, uy] = g ? [-dx / g, -dy / g] : [0, 0];
+        let sum = 0;
+        for (const [ex, ny] of dirs)
+          sum += Math.max(0, Math.cos(zen) * cosS + Math.sin(zen) * g * cosS * (ex * ux + ny * uy));
+        return sum / 16;
+      });
+    };
+    // gentle hills with cliffs: both branches of the fast path
+    const terrain = plane(
+      40,
+      30,
+      (x, y) => 5 * Math.sin(x / 4) * Math.cos(y / 5) + (x > 20 ? 8 : 0),
+    );
+    for (const cell of [0.5, 1, 30]) {
+      const fast = hillshadeMulti(terrain, 40, 30, cell);
+      const slow = reference(terrain, 40, 30, cell);
+      for (let i = 0; i < fast.length; i++) expect(fast[i]).toBeCloseTo(slow[i]!, 5);
+    }
   });
 });
 

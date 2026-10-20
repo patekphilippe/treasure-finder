@@ -5,6 +5,13 @@ export interface Env {
   SOURCES: KVNamespace;
   /** approved context packs and their index */
   CONTEXT: KVNamespace;
+  /** rendered relief tiles (R2, docs/BACKEND.md); without it every tile is rendered anew */
+  TILES?: R2Bucket;
+  /**
+   * Only for local `wrangler dev`, whose runtime cannot open mapy.geoportal.gov.pl (the edge can):
+   * a plain-HTTP proxy in front of the NMT WCS (docs/BACKEND.md).
+   */
+  NMT_WCS_URL?: string;
   ALLOWED_ORIGINS: string;
   MONTHLY_BUDGET_USD: string;
   PRIVATE_DAILY_LIMIT: string;

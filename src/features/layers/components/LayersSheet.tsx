@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { SheetReliefSection } from '@/features/analysis/field';
 import { RoughnessSection } from '@/features/roughness';
 import { useZonesStore } from '@/features/zones';
+import { RELIEF_TILE_URL } from '@/shared/config/backend';
 import { SWATH_MAX_M, SWATH_MIN_M, useCoverageStore } from '@/shared/store/useCoverageStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon, Sheet } from '@/shared/ui';
@@ -74,7 +75,9 @@ export function LayersSheet({ onClose }: LayersSheetProps) {
             <Stack sx={{ flex: 1 }}>
               <Typography variant="subtitle2">Cieniowanie NMT</Typography>
               <Typography variant="caption" color="text.secondary">
-                Geoportal, siatka 1 m
+                {RELIEF_TILE_URL
+                  ? 'NMT Geoportalu 1 m, z bliska światło z 16 kierunków'
+                  : 'Geoportal, siatka 1 m'}
               </Typography>
             </Stack>
             <Switch checked={nmtOn} onChange={(e) => setNmtOn(e.target.checked)} />

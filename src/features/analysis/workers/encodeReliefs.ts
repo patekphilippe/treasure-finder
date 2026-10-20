@@ -1,6 +1,8 @@
 import {
   colorize,
   grayColor,
+  HILLSHADE_HI,
+  HILLSHADE_LO,
   hillshadeMulti,
   lrmColor,
   slopeHorn,
@@ -14,9 +16,6 @@ import type { ReliefImage } from './messages';
 const MAX_SIDE = 4096;
 /** slope shown black from this many degrees: micro-relief lives below 25° */
 const SLOPE_DARK_DEG = 25;
-/** hillshade stretch: flat ground (sin 35° ≈ 0.57) mid-grey, gentle slopes clearly lighter or darker */
-const SHADE_LO = 0.3;
-const SHADE_HI = 0.85;
 
 async function encode(img: Rgba): Promise<Blob> {
   const canvas = new OffscreenCanvas(img.w, img.h);
@@ -51,7 +50,9 @@ export async function encodeReliefs(
     kind: 'hillshade',
     res,
     blob: await encode(
-      colorize(hs, w, h, step, (v, i) => (nodata(i) ? null : grayColor(v, SHADE_LO, SHADE_HI))),
+      colorize(hs, w, h, step, (v, i) =>
+        nodata(i) ? null : grayColor(v, HILLSHADE_LO, HILLSHADE_HI),
+      ),
     ),
   });
   onStep('slope');

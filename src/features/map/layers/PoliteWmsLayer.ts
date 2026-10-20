@@ -1,17 +1,12 @@
 import L from 'leaflet';
 import type { Limiter } from '@/shared/lib/async/createLimiter';
 import { hostLimiter } from '../utils/hostLimiter';
+import { politeTileLoad } from '../utils/politeTileLoad';
 
 export interface PoliteWmsOptions extends L.WMSOptions {
   /** requests in flight to this host at once */
   maxParallel?: number;
 }
-
-/** pauses before each retry; a busy ArcGIS server answers 400 and then serves the same tile */
-const RETRY_DELAYS_MS = [800, 2000, 4000];
-
-/** a request that hangs longer than this frees its slot and counts as failed */
-const LOAD_TIMEOUT_MS = 30_000;
 
 /**
  * WMS for slow public servers: a few requests at a time per host, and failed tiles retried.
@@ -33,43 +28,13 @@ export class PoliteWmsLayer extends L.TileLayer.WMS {
       img.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
     }
     const url = this.getTileUrl(coords);
-
-    const attempt = (n: number): Promise<boolean> =>
-      this.limit(() => this.loadInto(img, n === 0 ? url : `${url}&_retry=${n}`)).then((ok) => {
-        if (ok || n >= RETRY_DELAYS_MS.length || !img.isConnected) return ok;
-        return new Promise<boolean>((r) => setTimeout(r, RETRY_DELAYS_MS[n])).then(() =>
-          attempt(n + 1),
-        );
-      });
-
     // start after Leaflet has put the tile in the DOM, so pruned tiles can be skipped
     queueMicrotask(
       () =>
-        void attempt(0).then((ok) =>
+        void politeTileLoad(img, url, this.limit).then((ok) =>
           done(ok ? undefined : new Error(`WMS tile failed: ${url}`), img),
         ),
     );
     return img;
-  }
-
-  private loadInto(img: HTMLImageElement, src: string): Promise<boolean> {
-    // tile scrolled away while waiting in the queue
-    if (!img.isConnected) return Promise.resolve(false);
-    return new Promise((resolve) => {
-      // listeners, not onload/onerror: Leaflet overwrites those when it aborts tiles on zoom,
-      // and a promise that never settles would hold its queue slot forever
-      const finish = (ok: boolean) => {
-        clearTimeout(timer);
-        img.removeEventListener('load', onLoad);
-        img.removeEventListener('error', onError);
-        resolve(ok);
-      };
-      const onLoad = () => finish(true);
-      const onError = () => finish(false);
-      const timer = setTimeout(() => finish(false), LOAD_TIMEOUT_MS);
-      img.addEventListener('load', onLoad);
-      img.addEventListener('error', onError);
-      img.src = src;
-    });
   }
 }

@@ -14,3 +14,17 @@ export const TURNSTILE_SITE_KEY = String(
   import.meta.env.VITE_TURNSTILE_SITE_KEY || DEFAULT_TURNSTILE_SITE_KEY,
 );
 export const BACKEND_ENABLED = Boolean(BACKEND_URL && TURNSTILE_SITE_KEY);
+
+/**
+ * Our hillshade tiles (server/src/relief, docs/BACKEND.md): the 16-direction shading of the 1 m
+ * NMT, 512 px per map tile, rendered once on the server and kept there. Below zoom 12 the
+ * Geoportal's own shading is shown: the NMT service does not return bigger windows whole.
+ */
+export const RELIEF_TILE_URL = BACKEND_URL ? `${BACKEND_URL}/api/relief/1/{z}/{x}/{y}` : '';
+export const RELIEF_MIN_ZOOM = 12;
+export const RELIEF_MAX_NATIVE_ZOOM = 16;
+/** Poland with a margin, as the server renders it: no requests beyond. */
+export const RELIEF_BOUNDS: [[number, number], [number, number]] = [
+  [48.9, 14],
+  [55, 24.3],
+];
