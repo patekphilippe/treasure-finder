@@ -1,6 +1,11 @@
 import { markTourTarget } from './markTourTarget';
 import { scrollIntoSheet } from './scrollIntoSheet';
-import { useUiStore, type AppMode, type SheetId } from '@/shared/store/useUiStore';
+import {
+  useUiStore,
+  type AnalysesCardId,
+  type AppMode,
+  type SheetId,
+} from '@/shared/store/useUiStore';
 
 const SHEET_SLIDE_MS = 350;
 const TARGET_WAIT_MS = 4000;
@@ -25,6 +30,7 @@ export async function showTourView(
   mode: AppMode,
   sheet: SheetId | null,
   selector: string,
+  card?: AnalysesCardId,
 ): Promise<void> {
   markTourTarget(null);
   const ui = useUiStore.getState();
@@ -32,6 +38,10 @@ export async function showTourView(
   if (useUiStore.getState().activeSheet !== sheet) {
     if (sheet) ui.showSheet(sheet);
     else ui.closeSheet();
+    await wait(SHEET_SLIDE_MS);
+  }
+  if (card && useUiStore.getState().analysesCard !== card) {
+    useUiStore.getState().showAnalyses(card);
     await wait(SHEET_SLIDE_MS);
   }
   const el = await waitForTarget(selector);

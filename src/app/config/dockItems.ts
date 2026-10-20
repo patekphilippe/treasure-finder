@@ -6,5 +6,6 @@ export const DOCK_ITEMS: readonly DockItem<SheetId>[] = [
   { id: 'points', icon: 'list-ul', label: 'Lista' },
   { id: 'addPoint', icon: 'map-marker-alt', label: 'Punkt', primary: true },
   { id: 'layers', icon: 'layer-group', label: 'Warstwy' },
+  { id: 'analyses', icon: 'microscope', label: 'Analizy' },
   { id: 'data', icon: 'exchange-alt', label: 'Dane' },
 ];

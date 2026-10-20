@@ -1,3 +1,4 @@
+export { AnalysisCard } from './AnalysisCard/AnalysisCard';
 export { ConfirmDialog } from './ConfirmDialog/ConfirmDialog';
 export { Dock, type DockItem } from './Dock/Dock';
 export { EmptyState } from './EmptyState/EmptyState';

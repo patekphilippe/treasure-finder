@@ -7,6 +7,7 @@ import { AreaSheet } from '@/features/roughness';
 import { TracksSheet, useTracksStore } from '@/features/tracks';
 import { ZoneDetailsSheet, ZonesSheet } from '@/features/zones';
 import { useUiStore } from '@/shared/store/useUiStore';
+import { AnalysesSheet } from './AnalysesSheet';
 
 export function SheetHost() {
   const activeSheet = useUiStore((s) => s.activeSheet);
@@ -40,6 +41,8 @@ export function SheetHost() {
       return <SourcesSheet onClose={closeSheet} />;
     case 'layers':
       return <LayersSheet onClose={closeSheet} />;
+    case 'analyses':
+      return <AnalysesSheet onClose={closeSheet} />;
     case 'data':
       return <DataSheet onClose={closeSheet} />;
     default:

@@ -51,7 +51,7 @@ export function toJoyrideSteps(steps: readonly TourStep[], c: TourConditions): S
         floatingOptions: { shiftOptions: { crossAxis: true, padding: 12 } },
         title: s.title,
         content: s.contentByPlatform?.[c.platform] ?? s.content,
-        before: () => showTourView(s.mode, s.sheet ?? null, target),
+        before: () => showTourView(s.mode, s.sheet ?? null, target, s.card),
       };
     });
 }

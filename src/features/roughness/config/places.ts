@@ -6,4 +6,4 @@ export const SAME_PLACE_M = 40;
 
 export const LOAD_SHEET_HINT =
   'To tylko wskazówka z cieniowania. Aby rozpoznać formy (okopy, leje, ziemianki…) i dostać strefę ' +
-  'poszukiwań, wczytaj arkusz NMT tego miejsca w trybie Analiza.';
+  'poszukiwań, wczytaj arkusz NMT tego miejsca w Analizach (Formy terenu z arkusza NMT).';

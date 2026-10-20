@@ -48,7 +48,7 @@ export const useRoughnessStore = create<RoughnessState>((set, get) => ({
       share: 0,
       step: stepOf(0),
       cancel: () => get().cancel(),
-      open: { mode: 'field', sheet: 'layers' },
+      open: { mode: 'field', sheet: 'analyses', card: 'roughness' },
     });
     try {
       const result = await analyzeView(bounds, (progress) => {

@@ -1,13 +1,11 @@
 import Button from '@mui/material/Button';
 import ButtonBase from '@mui/material/ButtonBase';
 import Collapse from '@mui/material/Collapse';
-import LinearProgress from '@mui/material/LinearProgress';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
-import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon } from '@/shared/ui';
 import { useAreasStore } from '../store/useAreasStore';
@@ -16,31 +14,15 @@ import { AreaListItem } from './AreaListItem';
 
 const LIST_LIMIT = 30;
 
-/** Uneven-ground analysis of the visible area and the list of marked places. */
+/** Uneven ground on the map: the last analysis (started in Analizy) and the marked places. */
 export function RoughnessSection() {
-  const {
-    status,
-    progress,
-    error,
-    result,
-    visible,
-    opacity,
-    run,
-    cancel,
-    clear,
-    setVisible,
-    setOpacity,
-  } = useRoughnessStore();
+  const { status, result, visible, opacity, clear, setVisible, setOpacity } = useRoughnessStore();
   const areas = useAreasStore((s) => s.areas);
   const placesVisible = useAreasStore((s) => s.visible);
   const setPlacesVisible = useAreasStore((s) => s.setVisible);
   const showArea = useUiStore((s) => s.showArea);
+  const showAnalyses = useUiStore((s) => s.showAnalyses);
   const [listOpen, setListOpen] = useState(false);
-
-  const analyse = () => {
-    const bounds = useMapViewStore.getState().bounds;
-    if (bounds) void run(bounds);
-  };
 
   const sorted = [...areas].sort((a, b) => b.strength - a.strength);
 
@@ -57,46 +39,21 @@ export function RoughnessSection() {
         </Stack>
         {result && <Switch checked={visible} onChange={(e) => setVisible(e.target.checked)} />}
       </Stack>
-      {status === 'loading' ? (
-        <Stack spacing={0.5}>
-          <LinearProgress
-            variant={progress < 1 ? 'determinate' : 'indeterminate'}
-            value={progress * 100}
-          />
-          <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ flex: 1 }}>
-              {progress < 1
-                ? `Pobieram cieniowanie: ${Math.round(progress * 100)}%`
-                : 'Analizuję i pomijam zabudowę…'}
-            </Typography>
-            <Button size="small" color="inherit" onClick={cancel}>
-              Przerwij
-            </Button>
-          </Stack>
-        </Stack>
-      ) : (
-        <Stack direction="row" sx={{ gap: 1 }}>
-          <Button
-            variant="outlined"
-            color="inherit"
-            sx={{ flex: 1 }}
-            startIcon={<Icon name="search" size={18} />}
-            onClick={analyse}
-          >
-            Analizuj ten widok
+      <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
+        <Button
+          color="inherit"
+          sx={{ flex: 1, justifyContent: 'flex-start' }}
+          startIcon={<Icon name="microscope" size={18} />}
+          onClick={() => showAnalyses('roughness')}
+        >
+          {status === 'loading' ? 'Analiza trwa, zobacz w Analizach' : 'Nowa analiza w Analizach'}
+        </Button>
+        {result && (
+          <Button color="inherit" onClick={clear}>
+            Ukryj mapę
           </Button>
-          {result && (
-            <Button color="inherit" onClick={clear}>
-              Ukryj mapę
-            </Button>
-          )}
-        </Stack>
-      )}
-      {status === 'error' && error && (
-        <Typography variant="caption" color="error.main">
-          {error}
-        </Typography>
-      )}
+        )}
+      </Stack>
       {result && visible && (
         <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 4.5, pr: 1 }}>
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
@@ -133,8 +90,8 @@ export function RoughnessSection() {
           </Stack>
           <Collapse in={listOpen}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-              Wskazówki, gdzie patrzeć. Rozpoznanie form wymaga wczytania arkusza NMT w trybie
-              Analiza.
+              Wskazówki, gdzie patrzeć. Formy rozpoznaje dopiero arkusz NMT (Analizy, karta Formy
+              terenu z arkusza NMT).
             </Typography>
             {sorted.slice(0, LIST_LIMIT).map((a) => (
               <AreaListItem key={a.id} area={a} onClick={() => showArea(a.id)} />

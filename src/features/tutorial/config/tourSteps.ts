@@ -1,6 +1,6 @@
 import type { Step } from 'react-joyride';
 import type { Platform } from '@/shared/lib/pwa/detectPlatform';
-import type { AppMode, SheetId } from '@/shared/store/useUiStore';
+import type { AnalysesCardId, AppMode, SheetId } from '@/shared/store/useUiStore';
 
 export type { Platform };
 
@@ -15,6 +15,8 @@ export interface TourStep {
   /** the app state the step needs: mode and the open sheet */
   mode: AppMode;
   sheet?: SheetId;
+  /** a card of Analizy to open first (its controls exist only while it is open) */
+  card?: AnalysesCardId;
   placement?: Step['placement'];
   /** step only makes sense when its element exists */
   when?:
@@ -85,7 +87,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'dock',
     title: 'Dolny pasek',
     content:
-      'Pięć przycisków otwiera panele: Trasa, Lista, Punkt, Warstwy i Dane. Dotknięcie przycisku otwartego panelu zamyka go.',
+      'Sześć przycisków otwiera panele: Trasa, Lista, Punkt, Warstwy (co widać na mapie), Analizy (co aplikacja może policzyć) i Dane (wczytywanie i kopie). Dotknięcie przycisku otwartego panelu zamyka go.',
     mode: 'field',
     placement: 'top',
   },
@@ -267,7 +269,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-roughness',
     title: 'Teren nierówny',
     content:
-      'Analizuj ten widok sprawdza widoczny fragment mapy i zaznacza, gdzie jest dużo dołków, kopców i rowów. Zabudowa, drogi i woda są pomijane. Oznaczone miejsca dostają numery na mapie i trafiają na listę w tej sekcji.',
+      'Wynik analizy nierówności: mapa ciepła, jej krycie i lista oznaczonych miejsc z numerami na mapie. Nową analizę widoku uruchamiasz w Analizach.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -305,6 +307,33 @@ export const TOUR_STEPS: readonly TourStep[] = [
     content: 'Dodaj podkład XYZ albo usługę WMS, np. mapę archiwalną z własnego serwera.',
     mode: 'field',
     sheet: 'layers',
+  },
+  {
+    id: 'analyses',
+    target: 'analyses-hub',
+    title: 'Analizy',
+    content:
+      'Wszystkie analizy w jednym miejscu. Karta mówi, czego analiza potrzebuje i jaki jest jej stan; dotknij jej, aby ją uruchomić. Analiza trwa dalej po zamknięciu panelu, a postęp widać na chipie u góry ekranu.',
+    mode: 'field',
+    sheet: 'analyses',
+  },
+  {
+    id: 'analyses-nmt',
+    target: 'analyses-nmt',
+    title: 'Formy terenu z arkusza NMT',
+    content:
+      'Wczytaj arkusz NMT (.asc albo GeoTIFF z Geoportalu). Aplikacja rozpozna leje, okopy, ziemianki i kurhany, pominie zabudowę i wskaże strefy poszukiwań. Wyniki przeglądasz w trybie Kandydaci.',
+    mode: 'field',
+    sheet: 'analyses',
+  },
+  {
+    id: 'analyses-roughness',
+    target: 'analyses-roughness',
+    title: 'Teren nierówny w widoku',
+    content:
+      'Szybka wskazówka bez arkusza: sprawdza widoczny fragment mapy i zaznacza, gdzie jest dużo dołków, kopców i rowów. Zabudowa, drogi i woda są pomijane.',
+    mode: 'field',
+    sheet: 'analyses',
   },
   {
     id: 'data-install',

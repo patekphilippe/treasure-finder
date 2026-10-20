@@ -14,12 +14,17 @@ export type SheetId =
   | 'area'
   | 'history'
   | 'contextDetails'
-  | 'sources';
+  | 'sources'
+  | 'analyses';
 
-/** where something is shown in full: a mode and, in Teren, a sheet */
+/** cards of the Analizy sheet */
+export type AnalysesCardId = 'nmt' | 'roughness' | 'ai' | 'sources';
+
+/** where something is shown in full: a mode and, in Teren, a sheet (and a card of Analizy) */
 export interface UiTarget {
   mode: AppMode;
   sheet?: SheetId;
+  card?: AnalysesCardId;
 }
 
 interface UiState {
@@ -30,6 +35,8 @@ interface UiState {
   selectedZoneId: string | null;
   selectedAreaId: string | null;
   selectedContextId: string | null;
+  /** the open card of the Analizy sheet (one at a time) */
+  analysesCard: AnalysesCardId | null;
   setMode: (mode: AppMode) => void;
   /** Dock behaviour: tapping the open sheet's button closes it. */
   toggleSheet: (sheet: SheetId) => void;
@@ -39,6 +46,9 @@ interface UiState {
   showArea: (id: string) => void;
   showContext: (id: string) => void;
   closeSheet: () => void;
+  /** opens Analizy with this card open */
+  showAnalyses: (card: AnalysesCardId) => void;
+  toggleAnalysesCard: (card: AnalysesCardId) => void;
   /** switches the mode (which closes sheets) and then opens the target's sheet */
   goTo: (target: UiTarget) => void;
 }
@@ -52,6 +62,7 @@ export const useUiStore = create<UiState>()(
       selectedZoneId: null,
       selectedAreaId: null,
       selectedContextId: null,
+      analysesCard: null,
       setMode: (mode) => set({ mode, activeSheet: null }),
       toggleSheet: (sheet) => set((s) => ({ activeSheet: s.activeSheet === sheet ? null : sheet })),
       showSheet: (sheet) => set({ activeSheet: sheet }),
@@ -60,7 +71,15 @@ export const useUiStore = create<UiState>()(
       showArea: (id) => set({ activeSheet: 'area', selectedAreaId: id }),
       showContext: (id) => set({ activeSheet: 'contextDetails', selectedContextId: id }),
       closeSheet: () => set({ activeSheet: null }),
-      goTo: (target) => set({ mode: target.mode, activeSheet: target.sheet ?? null }),
+      showAnalyses: (card) => set({ activeSheet: 'analyses', analysesCard: card }),
+      toggleAnalysesCard: (card) =>
+        set((s) => ({ analysesCard: s.analysesCard === card ? null : card })),
+      goTo: (target) =>
+        set({
+          mode: target.mode,
+          activeSheet: target.sheet ?? null,
+          ...(target.card && { analysesCard: target.card }),
+        }),
     }),
     {
       // remember Teren / Kandydaci between visits (laptop reopens in Kandydaci)
