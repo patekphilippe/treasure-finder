@@ -171,12 +171,51 @@ export interface Candidate {
 export type ContextKind =
   'osada' | 'droga' | 'mlyn' | 'karczma' | 'brod' | 'inne' | 'wojsko' | 'grob_wojenny';
 
-/** store: context — features digitised from archival maps */
+/** years a map shows; a single year has from === to */
+export interface YearSpan {
+  from: number;
+  to: number;
+}
+
+/** the map an archival object was seen on; `label` stays readable after an own map is deleted */
+export type MapRef =
+  | {
+      kind: 'wms';
+      id: string;
+      label: string;
+      /** the year shown, for a map with a year to choose (archival orthophoto, WMS TIME) */
+      time?: number;
+    }
+  | { kind: 'own'; id: string; label: string }
+  /** no map: marked by hand without one, a source submission, a file or an older description */
+  | { kind: 'none'; label: string };
+
+/** one map an archival object was seen on */
+export interface Sighting {
+  map: MapRef;
+  years?: YearSpan;
+  /** when it was recorded, ms; absent when read back from an older `source` */
+  at?: number;
+  /** ai: read by AI, reczne: marked by hand, zrodlo: a submitted source, import: a file */
+  how: 'ai' | 'reczne' | 'zrodlo' | 'import';
+  /** 0–1, where the reading gives it */
+  confidence?: number;
+}
+
+/**
+ * store: context — features digitised from archival maps. One shared layer: every object
+ * counts in the analysis whichever map is shown; `seen` says which maps show it.
+ */
 export interface ContextFeature {
   id: string;
   kind: ContextKind;
   geometry: Geometry;
+  /** free description, kept for the community and older backups */
   source: string;
+  /** what the map says, e.g. "Młyn: Wassermühle" */
+  label?: string;
+  /** maps it was seen on; absent in objects from before backup version 3 (read from `source`) */
+  seen?: Sighting[];
   /** link to the members-only shared base, with its votes as of the last sync */
   community?: CommunityLink;
 }

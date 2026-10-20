@@ -156,7 +156,22 @@ interface ContextFeature {
   // o niewybuchach w pobliżu); grob_wojenny: mogiły wojenne (nie podnoszą oceny, kandydaci
   // tuż obok są chronieni)
   geometry: GeoJSON.Geometry;
-  source: string;
+  source: string; // opis tekstowy, zostaje dla społeczności i starszych kopii
+  label?: string; // co mówi mapa, np. "Młyn: Wassermühle"
+  seen?: Sighting[]; // mapy, na których obiekt widziano; brak w obiektach sprzed kopii w wersji 3
+  // (wtedy mapy i lata odczytujemy z source). Jedna wspólna warstwa: analiza liczy każdy obiekt
+  // bez względu na widoczną mapę; ten sam obiekt z kolejnej mapy dostaje nowy wpis w seen
+}
+
+interface Sighting {
+  map:
+    | { kind: 'wms'; id: string; label: string; time?: number } // time: rok ortofotomapy archiwalnej
+    | { kind: 'own'; id: string; label: string } // własna mapa; label zostaje po jej usunięciu
+    | { kind: 'none'; label: string }; // bez mapy: ręcznie, źródło, plik, starszy opis
+  years?: { from: number; to: number };
+  at?: number; // ms
+  how: 'ai' | 'reczne' | 'zrodlo' | 'import';
+  confidence?: number; // 0-1
 }
 
 interface WaterFeature {
