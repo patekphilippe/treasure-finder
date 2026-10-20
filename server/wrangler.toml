@@ -30,6 +30,11 @@ id = "3166279fe80d435ebba9c23bc45b3b2a"
 binding = "CONTEXT"
 id = "001e63b2a1454daea7674193dc9e463d"
 
+# Rendered relief tiles (docs/BACKEND.md, "Cieniowanie"): each one rendered once for everyone.
+[[r2_buckets]]
+binding = "TILES"
+bucket_name = "treasure-finder-tiles"
+
 [triggers]
 crons = ["*/15 * * * *"]
 
