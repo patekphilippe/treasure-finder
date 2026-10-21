@@ -26,6 +26,17 @@ export interface FolderResult {
   known: number;
 }
 
+/** the backend's daily limit or monthly budget: the next maps would fail the same way */
+const OUT_OF_READINGS = /limit|budżet/i;
+class OutOfReadings extends Error {}
+
+/** Reads a placed map whole; a reading cut short stops the folder, to go on another day. */
+async function readWhole(id: string, name: string): Promise<void> {
+  await autoReadMap(id).catch(() => {});
+  if (!useOwnMapsStore.getState().maps.find((m) => m.id === id)?.readAt)
+    throw new OutOfReadings(`mapa ${name} nie została przeczytana do końca`);
+}
+
 async function addOne(
   g: { name: string; files: File[] },
   ai: boolean,
@@ -42,42 +53,56 @@ async function addOne(
         (sheet && sheetCorners(sheet.series, sheet.number)) ?? useMapViewStore.getState().bounds;
       opts = (await placeScanWithAi(image, hint)).placed;
       byAi = true;
-    } catch {
-      // a daily limit or nothing readable: the sheet number still puts it close
+    } catch (e) {
+      // out of readings: the map is left for the next run, not placed roughly
+      if (e instanceof Error && OUT_OF_READINGS.test(e.message)) throw new OutOfReadings(e.message);
+      // nothing readable on it: the sheet number still puts it close
     }
   }
+  let map;
+  let needsFit;
   try {
-    const { map, needsFit } = await importOwnMap(g.files, opts);
+    ({ map, needsFit } = await importOwnMap(g.files, opts));
     await useOwnMapsStore.getState().add(map);
-    // the whole scan on the sheet's corners is off by its margins: reading waits for "Gotowe"
-    if (needsFit && !byAi) return 'toFit';
-    await shareMap(map.id).catch(() => {});
-    if (ai) await autoReadMap(map.id).catch(() => {});
-    return 'added';
   } catch {
     return 'skipped';
   }
+  // the whole scan on the sheet's corners is off by its margins: reading waits for "Gotowe"
+  if (needsFit && !byAi) return 'toFit';
+  await shareMap(map.id).catch(() => {});
+  if (ai) await readWhole(map.id, map.name);
+  return 'added';
 }
+
+const named = (names: string[]) =>
+  `${names.length}${names.length <= 3 ? ` (${names.join(', ')})` : ''}`;
 
 /**
  * Every map of a chosen folder, one after another until the files run out: each scan placed by
  * the backend (with the sheet number from its file name as the hint) and read whole by AI before
- * the next, so the daily limit is spent in order; without signing in, or when placing fails, by
- * the sheet number alone. Maps already loaded are skipped. One task on the activity chip, can be
- * stopped after the current map.
+ * the next. When the daily limit or the monthly budget runs out it stops; the same folder chosen
+ * again finishes the map it stopped on and goes on with the rest (maps already loaded are
+ * skipped by name). Without signing in, or when placing fails, by the sheet number alone. One
+ * task on the activity chip, can be stopped after the current map.
  */
 export async function addOwnMapFolder(files: readonly File[]): Promise<FolderResult> {
   const showToast = useToastStore.getState().show;
-  const known = new Set(useOwnMapsStore.getState().maps.map((m) => m.name));
+  const maps = useOwnMapsStore.getState().maps;
+  const known = new Set(maps.map((m) => m.name));
   const all = mapFileGroups(files);
+  const names = new Set(all.map((g) => g.name));
+  const ai = BACKEND_ENABLED && !!useMembership.getState().email;
+  // placed and shared on an earlier run, its reading cut short: finished first
+  const unread = ai ? maps.filter((m) => names.has(m.name) && m.shared?.mine && !m.readAt) : [];
   const groups = all.filter((g) => !known.has(g.name));
+  const total = unread.length + groups.length;
   const result: FolderResult = {
     added: [],
     toFit: [],
     skipped: [],
-    known: all.length - groups.length,
+    known: all.length - total,
   };
-  if (!groups.length) {
+  if (!total) {
     showToast(
       all.length
         ? 'Wszystkie mapy z folderu są już wczytane'
@@ -85,14 +110,14 @@ export async function addOwnMapFolder(files: readonly File[]): Promise<FolderRes
     );
     return result;
   }
-  const ai = BACKEND_ENABLED && !!useMembership.getState().email;
   let stop = false;
-  useOwnMapsStore.setState({ importing: `${groups.length} map z folderu` });
+  let halted: string | null = null;
+  useOwnMapsStore.setState({ importing: `${total} map z folderu` });
   try {
     await trackActivity(
       {
         id: 'own-map-folder',
-        label: `Mapy z folderu: ${groups.length}`,
+        label: `Mapy z folderu: ${total}`,
         short: 'Wczytuję mapy',
         share: 0,
         cancel: () => {
@@ -101,10 +126,26 @@ export async function addOwnMapFolder(files: readonly File[]): Promise<FolderRes
         open: { mode: 'field', sheet: 'data' },
       },
       async (update) => {
-        for (const [i, g] of groups.entries()) {
-          if (stop) break;
-          update({ share: i / groups.length, step: `${i + 1} z ${groups.length}: ${g.name}` });
-          result[await addOne(g, ai)].push(g.name);
+        let i = 0;
+        const next = (name: string) => {
+          update({ share: i / total, step: `${i + 1} z ${total}: ${name}` });
+          i++;
+        };
+        try {
+          for (const m of unread) {
+            if (stop) return;
+            next(m.name);
+            await readWhole(m.id, m.name);
+            result.added.push(m.name);
+          }
+          for (const g of groups) {
+            if (stop) return;
+            next(g.name);
+            result[await addOne(g, ai)].push(g.name);
+          }
+        } catch (e) {
+          if (!(e instanceof OutOfReadings)) throw e;
+          halted = e.message;
         }
       },
     );
@@ -113,10 +154,15 @@ export async function addOwnMapFolder(files: readonly File[]): Promise<FolderRes
   }
   const parts = [
     `wczytane: ${result.added.length}`,
-    result.toFit.length > 0 && `do poprawy narożników: ${result.toFit.length}`,
-    result.skipped.length > 0 && `pominięte: ${result.skipped.join(', ')}`,
+    result.toFit.length > 0 && `do poprawy narożników: ${named(result.toFit)}`,
+    result.skipped.length > 0 && `pominięte: ${named(result.skipped)}`,
     result.known > 0 && `już były: ${result.known}`,
   ].filter(Boolean);
-  showToast(`Mapy z folderu: ${parts.join(', ')}${stop ? ' (zatrzymane)' : ''}`);
+  const end = halted
+    ? `. Zatrzymane: ${halted}. Wskaż ten sam folder później: aplikacja dokończy i weźmie następne mapy`
+    : stop
+      ? ' (zatrzymane)'
+      : '';
+  showToast(`Mapy z folderu: ${parts.join(', ')}${end}`);
   return result;
 }

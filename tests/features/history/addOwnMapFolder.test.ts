@@ -3,17 +3,29 @@ import type { OwnMap } from '@/shared/types/domain';
 
 const events: string[] = [];
 let placeFails: (name: string) => boolean = () => false;
+let placeLimit = false;
 const hints: unknown[] = [];
 
+let readCut = false;
+// reading whole: done sets readAt, cut short (daily limit) leaves it unread
 vi.mock('@/features/history/services/autoReadMap', () => ({
-  autoReadMap: async (id: string) => void events.push(`read ${id}`),
+  autoReadMap: async (id: string) => {
+    events.push(`read ${id}`);
+    if (readCut) return;
+    const { useOwnMapsStore } = await import('@/features/history/store/useOwnMapsStore');
+    useOwnMapsStore.setState((s) => ({
+      maps: s.maps.map((m) => (m.id === id ? { ...m, readAt: 1 } : m)),
+    }));
+  },
 }));
 vi.mock('@/features/history/services/shareMap', () => ({ shareMap: async () => {} }));
 vi.mock('@/features/history/services/placeScanWithAi', () => ({
   placeScanWithAi: async (scan: File, hint: unknown) => {
     events.push(`place ${scan.name}`);
     hints.push(hint);
-    if (placeFails(scan.name)) throw new Error('limit dzienny');
+    if (placeFails(scan.name)) throw new Error('Na mapie nie widać ramki ani nazw');
+    if (placeLimit)
+      throw new Error('Dzienny limit odczytów map został wykorzystany, spróbuj jutro');
     return { placed: { corners: [{ lat: 1, lng: 1 }] }, note: '' };
   },
 }));
@@ -41,12 +53,17 @@ describe('loading a folder of maps', () => {
     hints.length = 0;
     added.length = 0;
     placeFails = () => false;
+    placeLimit = false;
+    readCut = false;
     useMembership.setState({ email: 'anna@example.com', name: 'Anna', owner: false });
     useActivityStore.setState({ tasks: [] });
     useOwnMapsStore.setState({
-      maps: [{ id: 'old', name: 'P38_S36_WARSZAWA' } as OwnMap],
+      maps: [{ id: 'old', name: 'P38_S36_WARSZAWA', readAt: 1 } as OwnMap],
       importing: null,
-      add: async (m) => void added.push(m.id),
+      add: async (m) => {
+        added.push(m.id);
+        useOwnMapsStore.setState((s) => ({ maps: [...s.maps, m] }));
+      },
     });
   });
 
@@ -95,5 +112,36 @@ describe('loading a folder of maps', () => {
     const r = await addOwnMapFolder([jpg('P39_S24_POZNAN.jpg')]);
     expect(events).toEqual(['import P39_S24_POZNAN (arkusz)']);
     expect(r.toFit).toEqual(['P39_S24_POZNAN']);
+  });
+
+  it('out of readings: stops, and the same folder later finishes the map and goes on', async () => {
+    const folder = [
+      jpg('P39_S24_POZNAN.jpg'),
+      jpg('P48_S30_KRAKOW.jpg'),
+      jpg('P50_S33_TARNOW.jpg'),
+    ];
+    readCut = true;
+    const first = await addOwnMapFolder(folder);
+    // Poznań placed, its reading cut by the limit: nothing more is tried
+    expect(events).toEqual([
+      'place P39_S24_POZNAN.jpg',
+      'import P39_S24_POZNAN',
+      'read P39_S24_POZNAN',
+    ]);
+    expect(first.added).toEqual([]);
+    expect(useToastStore.getState().message).toMatch(/Zatrzymane.*Wskaż ten sam folder później/);
+
+    // the next day: shared before, so Poznań is read first; then placing hits the limit
+    useOwnMapsStore.setState((s) => ({
+      maps: s.maps.map((m) => ({ ...m, shared: { mine: true, author: null, updatedAt: 1 } })),
+    }));
+    events.length = 0;
+    readCut = false;
+    placeLimit = true;
+    const second = await addOwnMapFolder(folder);
+    expect(events).toEqual(['read P39_S24_POZNAN', 'place P48_S30_KRAKOW.jpg']);
+    expect(second.added).toEqual(['P39_S24_POZNAN']);
+    // Kraków was not put on the sheet corners roughly: left for the next run
+    expect(added).toEqual(['P39_S24_POZNAN']);
   });
 });
