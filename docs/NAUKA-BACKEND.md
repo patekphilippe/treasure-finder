@@ -32,6 +32,21 @@ gdy wprost poprosisz.
 
 Kolejność ustalasz sam; proponuję od najprostszej z danymi: logowanie → wspólna baza obiektów → mapy → AI → zgłoszenia → cieniowanie.
 
+## Decyzje projektowe (Twoje)
+
+Konto i społeczność (z przeklikania aplikacji):
+- [zostaje] Zalogowanie i wylogowanie.
+- [zostaje] Panel właściciela.
+- [zostaje] Właściciel zatwierdza i odrzuca zgłoszenia.
+- [zostaje] Właściciel dodaje i usuwa członków.
+- [zostaje] Właściciel usuwa i przywraca obiekty we wspólnej bazie.
+- [upraszczam] Zamiast głosów „Potwierdzam / Nie zgadza się” jest tylko przycisk **„Zgłoś błąd”** przy obiekcie.
+  - Po zgłoszeniu obiekt wygląda normalnie; zgłoszenie czeka w panelu właściciela (usuń obiekt / odrzuć zgłoszenie).
+  - Zgłaszający wybiera powód z listy (np. „złe miejsce”, „nie istnieje”, „zły rodzaj”) + opcjonalny opis.
+  - Jedna osoba zgłasza dany obiekt tylko raz (drugi raz: „już zgłoszone”).
+  - Do przemyślenia przez Ciebie: jakie dokładnie powody na liście; co widzi zgłaszający po decyzji właściciela.
+- [do sprawdzenia] Co robi zwykły członek: skąd biorą się obiekty we wspólnej bazie i kto je dodaje.
+
 ## Zasady
 
 - Kod w `backend/`. Worker działa, póki Twój backend nie przejmie funkcji; aplikacja nic nie traci w trakcie nauki.
