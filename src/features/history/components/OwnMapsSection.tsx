@@ -2,7 +2,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useMembership } from '@/shared/store/useMembership';
 import type { OwnMap } from '@/shared/types/domain';
 import { ConfirmDialog, Icon, useToastStore } from '@/shared/ui';
@@ -14,7 +14,10 @@ import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { OwnMapImportDialog } from './OwnMapImportDialog';
 import { OwnMapItem } from './OwnMapItem';
 import { removeOwnMap } from '../services/removeOwnMap';
+import { removeOrphanObjects } from '../services/removeOrphanObjects';
 import { rereadOwnMap } from '../services/rereadOwnMap';
+import { useContextStore } from '../store/useContextStore';
+import { orphanObjects } from '../utils/orphanObjects';
 import { shareMap } from '../services/shareMap';
 import { startFitting } from '../services/startFitting';
 import { readableMapName } from '../utils/readableMapName';
@@ -32,6 +35,12 @@ export function OwnMapsSection() {
   const [toDelete, setToDelete] = useState<OwnMap | null>(null);
   const [toReread, setToReread] = useState<OwnMap | null>(null);
   const member = useMembership((st) => st.email !== null);
+  const features = useContextStore((s) => s.features);
+  // objects of maps removed before they went with their map
+  const orphans = useMemo(
+    () => orphanObjects(features, new Set(maps.map((m) => m.id))).length,
+    [features, maps],
+  );
 
   const fit = (id: string) => void startFitting(id);
 
@@ -117,6 +126,16 @@ export function OwnMapsSection() {
       >
         Wczytaj folder
       </Button>
+      {orphans > 0 && (
+        <Button
+          variant="outlined"
+          color="warning"
+          startIcon={<Icon name="broom" size={20} />}
+          onClick={() => void removeOrphanObjects()}
+        >
+          Usuń {orphans} obiektów z usuniętych map
+        </Button>
+      )}
       <Typography variant="caption" color="text.secondary">
         Obraz z plikiem world file (.jgw, .pgw, .tfw): wybierz oba pliki naraz. Folder: wszystkie
         skany po kolei, arkusz WIG z nazwy pliku (np. P47_S40), każdy umieszczony i przeczytany
@@ -151,9 +170,9 @@ export function OwnMapsSection() {
         title="Usunąć mapę?"
         message={
           toDelete?.shared?.mine
-            ? `${readableMapName(toDelete.name)}. Zniknie też u innych członków społeczności.`
+            ? `${readableMapName(toDelete.name)}. Zniknie też u innych członków społeczności, razem z obiektami odczytanymi tylko z niej.`
             : toDelete
-              ? readableMapName(toDelete.name)
+              ? `${readableMapName(toDelete.name)}. Obiekty odczytane tylko z tej mapy znikną razem z nią.`
               : undefined
         }
         onConfirm={() => {

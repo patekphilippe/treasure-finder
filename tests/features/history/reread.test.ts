@@ -14,11 +14,17 @@ vi.mock('@/features/history/services/communityApi', () => ({
     },
   },
 }));
+const removedMaps: string[] = [];
+vi.mock('@/features/history/services/sharedMapsApi', () => ({
+  sharedMapsApi: { remove: async (id: string) => void removedMaps.push(id) },
+}));
 vi.mock('@/features/history/services/autoReadMap', () => ({
   autoReadMap: async (id: string) => void reads.push(id),
 }));
 
 const { rereadOwnMap } = await import('@/features/history/services/rereadOwnMap');
+const { removeOwnMap } = await import('@/features/history/services/removeOwnMap');
+const { orphanObjects } = await import('@/features/history/utils/orphanObjects');
 const { profileForMap } = await import('@/features/history/utils/profileForMap');
 const { useContextStore } = await import('@/features/history/store/useContextStore');
 const { useOwnMapsStore } = await import('@/features/history/store/useOwnMapsStore');
@@ -40,6 +46,7 @@ describe('reading a map again', () => {
   let features: ContextFeature[];
   beforeEach(() => {
     removedRemote.length = 0;
+    removedMaps.length = 0;
     reads.length = 0;
     remoteFails = false;
     maps = [makeOwnMap({ readAt: 5 })];
@@ -54,6 +61,8 @@ describe('reading a map again', () => {
     useOwnMapsStore.setState({
       maps,
       add: async (m) => void useOwnMapsStore.setState({ maps: [m] }),
+      remove: async (id) =>
+        void useOwnMapsStore.setState((s) => ({ maps: s.maps.filter((m) => m.id !== id) })),
     });
     useContextStore.setState({
       features,
@@ -87,5 +96,31 @@ describe('reading a map again', () => {
     expect(profileForMap(fine, 'topo')).toBe('topo');
     expect(profileForMap(coarse, 'topo')).toBe('arkusz100');
     expect(profileForMap(coarse, 'wojskowa')).toBe('wojskowa');
+  });
+
+  it('removing a map takes its objects along; when the shared base refuses, the map stays', async () => {
+    useOwnMapsStore.setState({
+      maps: [makeOwnMap({ shared: { mine: true, author: 'Anna', updatedAt: 1 } })],
+    });
+    remoteFails = true;
+    await removeOwnMap('m1');
+    expect(useOwnMapsStore.getState().maps).toHaveLength(1);
+    remoteFails = false;
+    await removeOwnMap('m1');
+    expect(useOwnMapsStore.getState().maps).toEqual([]);
+    expect(removedMaps).toEqual(['m1']);
+    expect(useContextStore.getState().features.map((f) => f.id)).toEqual([
+      'theirs',
+      'both',
+      'other',
+    ]);
+  });
+
+  it('objects left by maps removed earlier are found; hand-marked and legacy ones are not', () => {
+    const left = orphanObjects(
+      [...features, { ...feature('legacy', []), seen: undefined } as ContextFeature],
+      new Set(['m2']),
+    );
+    expect(left.map((f) => f.id)).toEqual(['pin', 'mine', 'theirs']);
   });
 });
