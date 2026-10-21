@@ -402,6 +402,15 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'data',
   },
   {
+    id: 'own-maps-folder',
+    target: 'own-maps-folder',
+    title: 'Cały folder map',
+    content:
+      'Wskaż folder ze skanami, np. arkusze WIG pobrane z mapywig.org. Aplikacja wczyta je po kolei: każdy umieści (numer arkusza z nazwy pliku, np. P47_S40), a AI go przeczyta. Mapy już wczytane pomija, więc po dograniu plików wskaż folder jeszcze raz.',
+    mode: 'field',
+    sheet: 'data',
+  },
+  {
     id: 'data-nmt',
     target: 'data-nmt',
     title: 'Arkusz NMT',
