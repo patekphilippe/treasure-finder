@@ -1,5 +1,6 @@
 import { MILITARY_SCHEMA, militaryPrompt } from './militaryPrompt';
 import { READ_SCHEMA, readPrompt } from './readPrompt';
+import { sheet100CheckPrompt } from './sheet100CheckPrompt';
 import { SHEET100_SCHEMA, sheet100Prompt } from './sheet100Prompt';
 import {
   MAP_OBJECT_KINDS,
@@ -8,7 +9,7 @@ import {
   type ReadKind,
 } from './types';
 
-export type ReadProfileId = 'topo' | 'arkusz100' | 'wojskowa';
+export type ReadProfileId = 'topo' | 'arkusz100' | 'arkusz100_sprawdz' | 'wojskowa';
 
 /**
  * How Claude reads one kind of map: the instructions and legend (prompt), what it may report
@@ -45,6 +46,15 @@ export const READ_PROFILES: Record<ReadProfileId, ReadProfile> = {
     prompt: sheet100Prompt,
     maxResM: 8,
     maxTokens: 4096,
+  },
+  // the second look at one spot of a 1:100 000 sheet: an enlarged close-up, one object or none
+  arkusz100_sprawdz: {
+    id: 'arkusz100_sprawdz',
+    kinds: SHEET100_OBJECT_KINDS,
+    schema: SHEET100_SCHEMA,
+    prompt: sheet100CheckPrompt,
+    maxResM: 8,
+    maxTokens: 512,
   },
   // operational maps are 1:50 000–1:100 000 and their symbols large: a view up to ~12 km
   wojskowa: {

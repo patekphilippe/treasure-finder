@@ -166,6 +166,10 @@ describe('view readings', () => {
     expect(body.objects.map((o) => o.kind)).toEqual(['karczma']);
     expect(sent!.messages[0]!.content[1]!.text).toMatch(/1:100 000 topographic sheet/);
     expect(JSON.stringify(sent!.output_config)).not.toContain('"inne"');
+    // the second look: an enlarged close-up, a short answer
+    await read({ profile: 'arkusz100_sprawdz', res: '2.7' });
+    expect(sent!.messages[0]!.content[1]!.text).toMatch(/enlarged close-up.*report nothing/s);
+    expect((sent as unknown as { max_tokens: number }).max_tokens).toBe(512);
   });
 
   it('refuses anyone not signed in with an invitation, and bad input', async () => {

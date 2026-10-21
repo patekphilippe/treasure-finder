@@ -1,12 +1,7 @@
 import type { ProposalOptions, SiteProposal } from './buildProposals';
 import { buildProposals } from './buildProposals';
-import { existsToday } from './existsToday';
+import { sheet100Candidates } from './sheet100Candidates';
 import type { ImageGrid, MapObject, ReadKind } from './types';
-
-/** a village read as its middle: today's houses this close mean it still stands */
-const VILLAGE_BUFFER_M = 150;
-/** …and at least this many pixels, the model's middle of a village is often by its name */
-const VILLAGE_BUFFER_PX = 40;
 
 /**
  * Objects read from a 1:100 000 sheet → proposals. A village counts only when today's BDOT10k has
@@ -20,13 +15,9 @@ export function buildSheet100Proposals(
   g: ImageGrid,
   o: ProposalOptions,
 ): SiteProposal[] {
-  const lostVillages: SiteProposal[] = objects
-    .filter(
-      (x) =>
-        x.kind === 'wies' &&
-        x.confidence >= o.minConfidence &&
-        !existsToday(mask, g, x.x, x.y, Math.max(VILLAGE_BUFFER_M, g.res * VILLAGE_BUFFER_PX)),
-    )
+  const gone = sheet100Candidates(objects, mask, g, o);
+  const lostVillages: SiteProposal[] = gone
+    .filter((x) => x.kind === 'wies')
     .map((x) => ({
       kind: 'osada',
       title: `Zaginiona wieś${x.label ? `: ${x.label}` : ''}`,
@@ -38,7 +29,7 @@ export function buildSheet100Proposals(
   return [
     ...lostVillages,
     ...buildProposals(
-      objects.filter((x) => x.kind !== 'wies'),
+      gone.filter((x) => x.kind !== 'wies'),
       mask,
       g,
       { ...o, onlyLost: true },

@@ -39,7 +39,7 @@ export interface ProposalOptions {
  * for at least this far, else a church amid today's village reads as gone (at 8 m a pixel the
  * 25 m buffer was less than the error)
  */
-const READ_ERROR_PX = 15;
+export const READ_ERROR_PX = 15;
 
 /** sites of fewer houses are dropped on a coarse map */
 const COARSE_MIN_BUILDINGS = 3;
@@ -59,6 +59,8 @@ const POI: Partial<Record<ReadKind, { kind: ContextKind; label: string }>> = {
   smolarnia: { kind: 'inne', label: 'Smolarnia' },
   inne: { kind: 'inne', label: 'Obiekt' },
 };
+/** the read kinds that become places (not houses) */
+export const POI_KINDS: ReadonlySet<ReadKind> = new Set(Object.keys(POI) as ReadKind[]);
 
 /**
  * Objects read from a historical map → proposals for archival context. Buildings count only when

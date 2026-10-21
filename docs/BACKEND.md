@@ -203,7 +203,10 @@ odpowiedzi. Leżą w `src/shared/lib/history/readProfiles.ts`, wspólne dla apli
   i całe wsie (`wies`, środek zabudowy); położenie przy znaku, nie przy napisie; bez rodzaju `inne`
   (w `topo` AI stawiało nim pinezki na nazwach wsi). W aplikacji wieś zostaje tylko zaginiona (brak
   budynków BDOT10k do 150 m). Własne mapy rzadsze niż 4 m/piksel czyta się nim same
-  (`history/utils/profileForMap.ts`); widok do ok. 12 km.
+  (`history/utils/profileForMap.ts`); widok do ok. 12 km. Każde miejsce, które przeszło filtry, dostaje
+  drugie spojrzenie (`arkusz100_sprawdz`, `sheet100CheckPrompt.ts`): wycinek 128 px wokół niego
+  powiększony 3× i pytanie, co jest na środku. Zostaje tylko potwierdzone tego samego rodzaju, przesunięte
+  na znak; nazwa wsi odczytana jako miejsce nie przechodzi. Kilka małych odczytów na okno.
 - `wojskowa` (`militaryPrompt.ts`): mapy sztabowe z II wojny; linia frontu, okopy, stanowiska, punkty
   dowodzenia, przeprawy, pola minowe, mogiły; linie jako ciąg punktów; widok do ok. 12 km. W
   aplikacji pozycje dają kontekst `wojsko` (ostrzeżenie o niewybuchach u kandydatów do 300 m), mogiły
