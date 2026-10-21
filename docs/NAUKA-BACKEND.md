@@ -42,12 +42,14 @@ Konto i społeczność (z przeklikania aplikacji):
 - [zostaje] Właściciel usuwa i przywraca obiekty we wspólnej bazie.
 - [upraszczam] Zamiast głosów „Potwierdzam / Nie zgadza się” jest tylko przycisk **„Zgłoś błąd”** przy obiekcie.
   - Po zgłoszeniu obiekt wygląda normalnie; zgłoszenie czeka w panelu właściciela (usuń obiekt / odrzuć zgłoszenie).
-  - Zgłaszający wybiera powód z listy + opcjonalny opis. Powody (wersja 1):
-    - „Zły odczyt z legendy”
+  - Zgłaszający wybiera powód z listy. Powody (wersja 2):
+    - „Zła kategoria (zły odczyt z legendy)”
     - „Na mapie nie ma takiego oznaczenia”
-    - „Zła kategoria oznaczenia”
+    - „Złe miejsce” (oznaczenie jest, ale obiekt stoi obok)
+    - „Inne” — opis **obowiązkowy** (serwer odrzuca zgłoszenie bez opisu)
+  - Przy pozostałych powodach opis opcjonalny.
   - Jedna osoba zgłasza dany obiekt tylko raz (drugi raz: „już zgłoszone”).
-  - Do przemyślenia przez Ciebie: czym różni się „zły odczyt z legendy” od „złej kategorii”; czy brakuje „złe miejsce” i „inne”;
+  - Do przemyślenia przez Ciebie: identyfikatory powodów po angielsku (do bazy i API) i dlaczego nie polskie zdania;
     co widzi zgłaszający po decyzji właściciela.
 - [do sprawdzenia] Co robi zwykły członek: skąd biorą się obiekty we wspólnej bazie i kto je dodaje.
 
