@@ -19,8 +19,8 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
   // someone else's shared map: shown and switched here, changed only by its author
   const editable = !map.shared || map.shared.mine;
   return (
-    <Stack spacing={0.25} sx={{ py: 0.5 }}>
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
+    <Stack spacing={1.25} sx={{ bgcolor: 'action.hover', borderRadius: '12px', p: 1.5 }}>
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
         <Icon name="map" size={20} />
         <Stack sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle2" noWrap>
@@ -48,24 +48,33 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
           </IconButton>
         )}
       </Stack>
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 3.5, pr: 1 }}>
-        <TextField
-          key={map.year ?? ''}
-          size="small"
-          label="Rok mapy"
-          placeholder="np. 1936"
-          defaultValue={map.year ?? ''}
-          disabled={!editable}
-          slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 4 } }}
-          sx={{ width: 120 }}
-          onBlur={(e) => {
-            const year = parseMapYear(e.target.value);
-            if (year === null) e.target.value = map.year ? String(map.year) : '';
-            else if (year !== map.year) onChange({ year });
-          }}
-        />
+      <Stack spacing={0.5}>
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
+          <Typography component="label" htmlFor={`rok-${map.id}`} variant="body2" sx={{ flex: 1 }}>
+            Rok mapy
+          </Typography>
+          <TextField
+            key={map.year ?? ''}
+            id={`rok-${map.id}`}
+            size="small"
+            placeholder="np. 1936"
+            defaultValue={map.year ?? ''}
+            disabled={!editable}
+            slotProps={{
+              htmlInput: { inputMode: 'numeric', maxLength: 4, style: { textAlign: 'center' } },
+            }}
+            sx={{ width: 104 }}
+            onBlur={(e) => {
+              const year = parseMapYear(e.target.value);
+              if (year === null) e.target.value = map.year ? String(map.year) : '';
+              else if (year !== map.year) onChange({ year });
+            }}
+          />
+        </Stack>
         <Typography variant="caption" color="text.secondary">
-          Obiekty oznaczone na tej mapie dostaną ten rok.
+          {editable
+            ? 'Obiekty oznaczone na tej mapie dostaną ten rok.'
+            : 'Rok zmienia autor mapy. Obiekty oznaczone na niej dostają ten rok.'}
         </Typography>
       </Stack>
     </Stack>

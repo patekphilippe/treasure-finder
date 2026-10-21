@@ -85,6 +85,7 @@ export function OwnMapsSection() {
         variant="outlined"
         color="inherit"
         disabled={busy}
+        sx={{ mt: maps.length ? 0.5 : 0 }}
         startIcon={busy ? <CircularProgress size={16} /> : <Icon name="file-image" size={20} />}
         onClick={() => inputRef.current?.click()}
       >
