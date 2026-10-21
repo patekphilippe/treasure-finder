@@ -5,7 +5,11 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "types": ["@cloudflare/workers-types", "@cloudflare/vitest-pool-workers/types", "node"],
-    "paths": { "@/*": ["../src/*"] },
+    "paths": {
+      "@/*": ["../src/*"],
+      // the app's shared types (../src) import "geojson": its types live in this package's node_modules
+      "geojson": ["./node_modules/@types/geojson/index.d.ts"]
+    },
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
