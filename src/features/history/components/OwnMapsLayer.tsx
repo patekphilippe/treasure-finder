@@ -9,11 +9,11 @@ import { shownMaps } from '../utils/shownMaps';
 /** The user's own historical maps, warped onto the map above the base layer. */
 export function OwnMapsLayer() {
   const all = useOwnMapsStore((s) => s.maps);
-  const year = useOwnMapsStore((s) => s.yearFilter);
+  const years = useOwnMapsStore((s) => s.years);
   // the ones on the map, marked visible so their images are decoded
   const maps = useMemo(
-    () => shownMaps(all, year).map((m) => ({ ...m, visible: true })),
-    [all, year],
+    () => shownMaps(all, years).map((m) => ({ ...m, visible: true })),
+    [all, years],
   );
   const images = useOwnMapImages(maps);
 

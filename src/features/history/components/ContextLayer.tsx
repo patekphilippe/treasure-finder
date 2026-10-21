@@ -6,7 +6,7 @@ import { CONTEXT_KINDS } from '../config/contextKinds';
 import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useContextStore } from '../store/useContextStore';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
-import { idsSeenInYear } from '../utils/idsSeenInYear';
+import { idsSeenInYears } from '../utils/idsSeenInYears';
 import { contextIcon } from '../utils/contextIcon';
 import { representativePoint } from '../utils/representativePoint';
 
@@ -23,14 +23,14 @@ export function ContextLayer() {
   const visible = useContextStore((s) => s.visible);
   const onlyViewMap = useContextStore((s) => s.onlyViewMap);
   const seenOnView = useSeenOnView();
-  const year = useOwnMapsStore((s) => s.yearFilter);
-  // a year on the slider: what was read from maps of that year stands out; with the view filter both
+  const years = useOwnMapsStore((s) => s.years);
+  // years chosen: what was read from maps of those years stands out; with the view filter both
   const filter = useMemo(() => {
     const byView = onlyViewMap ? seenOnView : null;
-    const byYear = year === null ? null : idsSeenInYear(features, year);
+    const byYear = years === null ? null : idsSeenInYears(features, years);
     if (byView && byYear) return new Set([...byYear].filter((id) => byView.has(id)));
     return byYear ?? byView;
-  }, [onlyViewMap, seenOnView, year, features]);
+  }, [onlyViewMap, seenOnView, years, features]);
   const showContext = useUiStore((s) => s.showContext);
   const selectedId = useUiStore((s) =>
     s.activeSheet === 'contextDetails' ? s.selectedContextId : null,

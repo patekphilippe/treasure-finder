@@ -203,7 +203,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'maps-year',
     title: 'Rok mapy',
     content:
-      'Masz mapy z różnych lat: suwakiem wybierasz rok. Widać wtedy mapy z tego roku i wyraźnie obiekty z nich odczytane, reszta jest przygaszona. „Wszystkie” wraca do przełączników.',
+      'Masz mapy z różnych lat: na liście wybierasz jeden albo kilka lat (wpisz, żeby znaleźć), a suwakiem przechodzisz rok po roku. Widać mapy z tych lat i wyraźnie obiekty z nich odczytane, reszta jest przygaszona. „Wszystkie” wraca do przełączników.',
     mode: 'field',
     sheet: 'layers',
     when: 'mapYears',
