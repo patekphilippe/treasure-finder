@@ -111,6 +111,10 @@ describe('adding an own map as a background task', () => {
     expect(fitStarted).toEqual(['m1']);
     expect(focused).toEqual([]);
     expect(autoRead).not.toHaveBeenCalled();
+    // the reason stays on screen, not hidden by the corners hint
+    expect(useToastStore.getState().message).toBe(
+      'AI nie umieściło mapy: Na mapie nie widać nazw ani numeru arkusza. Przeciągnij narożniki albo Anuluj.',
+    );
   });
 
   it('a georeferenced map needs no fitting: Claude starts reading it at once', async () => {

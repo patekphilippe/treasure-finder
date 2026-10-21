@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { glass } from '@/shared/ui';
 import { finishFitting } from '../services/finishFitting';
+import { removeOwnMap } from '../services/removeOwnMap';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { readableMapName } from '../utils/readableMapName';
 
@@ -63,7 +64,14 @@ export function FitCornersBar() {
           />
         </Stack>
         <Stack direction="row" sx={{ justifyContent: 'flex-end', gap: 1 }}>
-          <Button color="inherit" onClick={cancelFit}>
+          <Button
+            color="inherit"
+            onClick={() => {
+              // a map just added that nothing placed: cancelling it means not adding it
+              if (fitting.isNew) void removeOwnMap(map.id);
+              else cancelFit();
+            }}
+          >
             Anuluj
           </Button>
           <Button variant="contained" onClick={() => void finishFitting()}>

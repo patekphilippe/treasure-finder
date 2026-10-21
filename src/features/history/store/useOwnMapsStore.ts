@@ -9,6 +9,8 @@ interface Fitting {
   id: string;
   /** the map as it was, for "Anuluj" */
   before: OwnMap;
+  /** just added and never placed: "Anuluj" removes it instead of leaving an empty map */
+  isNew?: boolean;
 }
 
 interface OwnMapsState {
@@ -27,7 +29,7 @@ interface OwnMapsState {
   update: (id: string, patch: Partial<OwnMap>) => Promise<void>;
   remove: (id: string) => Promise<void>;
   /** drag the four corners on the map (any map: it is converted to PUWG 1992 corners) */
-  startFit: (id: string) => void;
+  startFit: (id: string, isNew?: boolean) => void;
   /** live while dragging, saved on finishFit */
   moveCorner: (index: number, at: XY) => void;
   finishFit: () => Promise<void>;
@@ -63,7 +65,7 @@ export const useOwnMapsStore = create<OwnMapsState>()((set, get) => ({
     await mapsRepo.remove(id);
     set({ maps: get().maps.filter((m) => m.id !== id), fitting: null });
   },
-  startFit: (id) => {
+  startFit: (id, isNew) => {
     const map = get().maps.find((m) => m.id === id);
     if (!map) return;
     const at = mapCorners2180(map);
@@ -74,7 +76,10 @@ export const useOwnMapsStore = create<OwnMapsState>()((set, get) => ({
       method: 'corners',
       pixelToSource: [...fitHomography(imageCorners(map), at)],
     };
-    set({ fitting: { id, before: map }, maps: get().maps.map((m) => (m.id === id ? fitted : m)) });
+    set({
+      fitting: { id, before: map, ...(isNew && { isNew }) },
+      maps: get().maps.map((m) => (m.id === id ? fitted : m)),
+    });
   },
   moveCorner: (index, at) => {
     const { fitting, maps } = get();

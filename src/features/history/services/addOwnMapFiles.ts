@@ -41,6 +41,8 @@ export async function addOwnMapFiles(
       async (update) => {
         let placed: Partial<ImportOptions> = {};
         let placedNote: string | null = null;
+        // why the AI could not place it: said with the corners hint, not hidden by it
+        let failedNote: string | null = null;
         const scan = files.find((f) => /\.(jpe?g|png|webp)$/i.test(f.name));
         if (auto && scan) {
           update({ step: 'Umieszczam mapę po nazwach (AI)' });
@@ -51,9 +53,7 @@ export async function addOwnMapFiles(
             placed = r.placed;
             placedNote = r.note;
           } catch (e) {
-            showToast(
-              `${e instanceof Error ? e.message : 'Nie udało się umieścić mapy'}. Przeciągnij narożniki.`,
-            );
+            failedNote = e instanceof Error ? e.message : 'Nie udało się umieścić mapy';
           }
         }
         update({ step: 'Wczytuję obraz' });
@@ -66,8 +66,12 @@ export async function addOwnMapFiles(
           await useOwnMapsStore.getState().add(map);
           if (needsFit && !placedNote) {
             // nowhere to start from but the view: the corners are needed, read after "Gotowe"
-            showToast('Przeciągnij narożniki, aby dopasować mapę');
-            await startFitting(map.id);
+            showToast(
+              failedNote
+                ? `AI nie umieściło mapy: ${failedNote}. Przeciągnij narożniki albo Anuluj.`
+                : 'Przeciągnij narożniki, aby dopasować mapę',
+            );
+            await startFitting(map.id, true);
             return 'done';
           }
           await focusOwnMap(map);
