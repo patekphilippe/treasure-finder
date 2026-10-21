@@ -30,6 +30,9 @@ export const communityApi = {
     ),
   add: (o: NewCommunityObject) =>
     call<{ id: string }>('objects', { method: 'POST', body: JSON.stringify(o) }),
+  /** many at once (a whole map's reading): one write of the day */
+  addMany: (objects: NewCommunityObject[]) =>
+    call<{ ids: string[] }>('objects/batch', { method: 'POST', body: JSON.stringify({ objects }) }),
   remove: (id: string) => call<void>(`objects/${id}`, { method: 'DELETE' }),
   /** the member's own objects of a bad reading thrown away at once */
   removeMany: (ids: string[]) =>

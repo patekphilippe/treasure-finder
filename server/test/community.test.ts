@@ -157,6 +157,36 @@ describe('community', () => {
     expect((await removals(hela.auth, { ids: ['../x'] })).status).toBe(400);
   });
 
+  it('a whole reading shared in one write; own objects go even with the day’s limit spent', async () => {
+    const jan = await invite('Jan');
+    const batch = (body: unknown) =>
+      call('community/objects/batch', jan.auth, { method: 'POST', body: JSON.stringify(body) });
+    const objects = [0, 1, 2].map((k) => ({ ...mill, lat: 50.75 + k / 100 }));
+    const res = await batch({ objects });
+    expect(res.status).toBe(201);
+    const { ids } = (await res.json()) as { ids: string[] };
+    expect(ids).toHaveLength(3);
+    expect((await list(jan.auth)).filter((o) => ids.includes(o.id))).toHaveLength(3);
+    // one bad object refuses the whole batch
+    expect((await batch({ objects: [mill, { ...mill, lat: 40 }] })).status).toBe(400);
+
+    // the day's writes spent: adding stops, removing own objects does not
+    await testEnv.DB.prepare(
+      'INSERT OR REPLACE INTO daily_usage (day, subject, count) VALUES (?, ?, 100000)',
+    )
+      .bind(new Date().toISOString().slice(0, 10), `member:${jan.id}`)
+      .run();
+    expect((await batch({ objects })).status).toBe(429);
+    const removals = await call('community/objects/removals', jan.auth, {
+      method: 'POST',
+      body: JSON.stringify({ ids: ids.slice(0, 2) }),
+    });
+    expect(await removals.json()).toEqual({ removed: 2 });
+    expect((await call(`community/objects/${ids[2]}`, jan.auth, { method: 'DELETE' })).status).toBe(
+      204,
+    );
+  });
+
   it('bad objects and huge areas are refused', async () => {
     const d = await invite('Darek');
     expect((await add(d.auth, { ...mill, kind: 'znalezisko' })).status).toBe(400);

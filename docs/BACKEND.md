@@ -98,7 +98,7 @@ brody, drogi). Bazę widzą i zmieniają tylko zaproszeni członkowie.
   Zarejestrować się może tylko zaproszony adres (sekcja „Logowanie (Auth0)”).
 - **Obiekty:** członek dodaje obiekt i jest on od razu widoczny (`POST /api/community/objects`),
   autor może go usunąć, właściciel usuwa i przywraca w panelu (Wspólna baza). Limit 300 zmian dziennie
-  na członka. Po poprawce narożników mapy już przeczytanej autor przesuwa swoje obiekty z tej mapy jednym
+  na członka; odczyt całej mapy udostępnia obiekty paczką (`POST /api/community/objects/batch`, do 1000, jedna zmiana), a usuwanie własnych obiektów (`DELETE`, `objects/removals`) limitu nie zużywa. Po poprawce narożników mapy już przeczytanej autor przesuwa swoje obiekty z tej mapy jednym
   wywołaniem (`POST /api/community/objects/moves`, do 1000 położeń, liczy się jako jedna zmiana; cudze
   obiekty zostają na miejscu). „Przeczytaj od nowa” przy mapie usuwa autorowi jego obiekty widziane tylko
   na niej też jednym wywołaniem (`POST /api/community/objects/removals`, do 1000 id, jedna zmiana).

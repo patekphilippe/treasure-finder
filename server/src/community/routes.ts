@@ -9,6 +9,7 @@ import { communityMaps } from './maps';
 import {
   cleanMoves,
   cleanRemovals,
+  MAX_MOVES,
   cleanObject,
   MAX_OBJECTS_PER_ANSWER,
   MEMBER_DAILY_WRITES,
@@ -83,6 +84,39 @@ export async function communityRoutes(
     return json({ id }, 201, cors);
   }
 
+  // a whole map's reading shared at once (one write for up to 1000 objects): one write per
+  // object spent the day's limit on a couple of maps
+  if (request.method === 'POST' && path === 'objects/batch') {
+    const list = (await request.json().catch(() => null)) as { objects?: unknown } | null;
+    const raw = Array.isArray(list?.objects) ? list.objects : null;
+    const objects = raw && raw.length && raw.length <= MAX_MOVES ? raw.map(cleanObject) : null;
+    if (!objects || objects.some((o) => !o))
+      return fail(400, 'Nieprawidłowe obiekty (najwyżej 1000, w Polsce)', cors);
+    if (!(await write()))
+      return fail(429, 'Dzienny limit zmian został wykorzystany, spróbuj jutro', cors);
+    const ids = objects.map(() => randomToken(12));
+    await env.DB.batch(
+      objects.map((obj, i) =>
+        env.DB.prepare(
+          `INSERT INTO community_objects (id, kind, label, lat, lng, radius_m, source, author_id, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ).bind(
+          ids[i],
+          obj!.kind,
+          obj!.label,
+          obj!.lat,
+          obj!.lng,
+          obj!.radiusM,
+          obj!.source,
+          member.id,
+          now,
+          now,
+        ),
+      ),
+    );
+    return json({ ids }, 201, cors);
+  }
+
   // the author's objects follow their map placed better after reading (all in one write)
   if (request.method === 'POST' && path === 'objects/moves') {
     const moves = cleanMoves(await request.json().catch(() => null));
@@ -100,12 +134,11 @@ export async function communityRoutes(
     return json({ moved: results.reduce((s, r) => s + (r.meta.changes ?? 0), 0) }, 200, cors);
   }
 
-  // the author throws away a whole bad reading of their map (all in one write)
+  // the author throws away a whole bad reading of their map (all at once)
   if (request.method === 'POST' && path === 'objects/removals') {
     const ids = cleanRemovals(await request.json().catch(() => null));
+    // no daily limit: only the member's own objects go, which harms nobody
     if (!ids) return fail(400, 'Nieprawidłowa lista obiektów (najwyżej 1000)', cors);
-    if (!(await write()))
-      return fail(429, 'Dzienny limit zmian został wykorzystany, spróbuj jutro', cors);
     const results = await env.DB.batch(
       ids.map((id) =>
         env.DB.prepare(
@@ -128,10 +161,9 @@ export async function communityRoutes(
   if (!row || row.removed_at) return fail(404, 'Nie ma takiego obiektu', cors);
 
   if (request.method === 'DELETE' && !vote) {
+    // the author's own object: removing it harms nobody, so no daily limit
     if (row.author_id !== member.id)
       return fail(403, 'Usunąć może tylko autor albo właściciel', cors);
-    if (!(await write()))
-      return fail(429, 'Dzienny limit zmian został wykorzystany, spróbuj jutro', cors);
     await env.DB.prepare('UPDATE community_objects SET removed_at = ?, updated_at = ? WHERE id = ?')
       .bind(now, now, id)
       .run();
