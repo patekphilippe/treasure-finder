@@ -1,108 +1,102 @@
-# Plan nauki: backend w FastAPI + DevOps na Azure (na projekcie Treasure Finder)
+# Plan nauki: własny backend (FastAPI) pod istniejący frontend + DevOps na Azure
 
 ## Kontekst
 
-Chcesz nauczyć się backendu i DevOps na prawdziwym projekcie. Docelowo nowy backend w Pythonie
-(FastAPI) ma zastąpić obecny Cloudflare Worker (`server/`, TypeScript), a działać ma na Azure.
-**Ty piszesz kod.** Ja jestem mentorem: tłumaczę pojęcia, daję wskazówki i pytania naprowadzające,
-robię code review Twoich commitów/PR, pomagam przy błędach. Gotowe rozwiązanie daję tylko, gdy
-o nie wprost poprosisz (np. „pokaż”). Python odświeżamy po drodze, nie osobnym kursem.
+Chcesz nauczyć się backendu i DevOps. Backend ma powstać **pod frontend**, nie jako przepisanie
+Workera z `server/`. Punktem wyjścia jest to, czego aplikacja (FE) potrzebuje: jakie zapytania wysyła,
+jakie dane chce dostać, co pokazuje użytkownikowi. Kodu `server/` nie czytasz: bazę, API
+i architekturę projektujesz sam. Docelowo Twój backend zastępuje Workera: aplikacja przełącza się na
+niego jedną zmienną `VITE_SOURCES_API_URL` (`src/shared/config/backend.ts`).
 
-Co dziś robi Worker (to jest „specyfikacja” do przepisania, opis w `docs/BACKEND.md`):
+**Ty piszesz kod.** Ja jestem mentorem: tłumaczę, zadaję pytania naprowadzające, robię review PR,
+pomagam przy błędach. Gotowe rozwiązanie daję tylko, gdy wprost poprosisz.
 
-| Obszar | Endpointy | Dziś (Cloudflare) | Na Azure |
-|---|---|---|---|
-| Zdrowie | `/api/health` | Worker | Container Apps |
-| Logowanie | `/api/auth/check` (JWT z Auth0) | `server/src/auth/` | to samo Auth0, weryfikacja JWT w Pythonie |
-| Społeczność | `/api/community/` (obiekty, głosy, członkowie, mapy) | D1 (SQLite) | PostgreSQL (+ PostGIS później) |
-| Wspólne mapy | `/api/community/maps` | R2 + D1 | Blob Storage + Postgres |
-| Odczyt AI | `/api/readings` | Anthropic API, budżet, limity | to samo, SDK `anthropic` w Pythonie |
-| Zgłoszenia | `/api/submissions` + cron | KV + D1 + Cron | Blob + Postgres + Container Apps Job |
-| Umieszczanie | `/api/placements` | AI + siatka arkuszy | to samo |
-| Cieniowanie | `/api/relief/1/{z}/{x}/{y}` | liczenie kafelków z NMT, R2 | numpy + Blob |
-| Panel | `/api/admin/` | Worker | FastAPI |
+## Skąd brać wymagania (tylko z FE)
 
-Schemat bazy do przeniesienia: `server/migrations/0001…0008_*.sql`. Kontrakt (kształty JSON):
-`src/shared/types/` (`community.ts`, `readings.ts`, `placement.ts`, `sources.ts`) i testy w `server/test/`.
+| Funkcja w aplikacji | Gdzie FE woła backend | Typy danych |
+|---|---|---|
+| Konto, kto jest zalogowany | `src/features/account/services/refreshAccount.ts`, `src/shared/auth/` | — |
+| Wspólna baza obiektów, głosy | `src/features/history/services/communityApi.ts` | `src/shared/types/community.ts` |
+| Wspólne mapy | `src/features/history/services/sharedMapsApi.ts` | |
+| Odczyt mapy przez AI | `src/features/history/services/readMapWithAi.ts` | `src/shared/types/readings.ts` |
+| Umieszczanie skanu | `src/features/history/services/placeOwnMap.ts` | `src/shared/types/placement.ts` |
+| Zgłoszenia źródeł, panel admina | `src/features/sources/services/sourcesApi.ts`, `adminApi.ts` | `src/shared/types/sources.ts` |
+| Cieniowanie terenu | `RELIEF_TILE_URL` w `src/shared/config/backend.ts` | kafelki PNG |
+
+Dla każdej funkcji robisz to samo:
+1. Klikasz funkcję w aplikacji (`npm run dev`) i patrzysz w DevTools → Network, co idzie i co wraca.
+2. Czytasz plik `services/` i typy: spisujesz endpointy, dane wejścia/wyjścia, błędy, których FE się spodziewa.
+3. **Sam piszesz** opis (OpenAPI / modele Pydantic) i projekt tabel, zanim napiszesz logikę. Ja to recenzuję.
+4. Implementujesz, testujesz w `pytest`, potem uruchamiasz FE z `VITE_SOURCES_API_URL=http://localhost:8000` i sprawdzasz, że funkcja działa w aplikacji.
+
+Gdy FE czegoś nie mówi (np. limity, kto może usuwać), to jest decyzja projektowa: proponujesz ją, a my ją omawiamy.
+Wtedy wolno zajrzeć do `docs/BACKEND.md` po wymaganie biznesowe (nie po kod).
 
 ## Zasady współpracy
 
-- Nowy kod w `backend/` (Python), obok `server/`. Worker działa do dnia przełączenia — aplikacja nic nie traci w trakcie nauki.
-- Każdy etap = osobna gałąź i PR. Ty piszesz, ja robię review (komentarze, pytania „a co, jeśli…”).
-- Jeden etap kończy się tylko, gdy: testy `pytest` przechodzą, `ruff` i `mypy` czyste, umiesz wytłumaczyć, co napisałeś.
-- Klucz Anthropic i inne sekrety tylko w Key Vault / sekretach, nigdy w repo (tak jak dziś).
-- Zero telemetrii użytkowników: logi serwera tak, śledzenie ludzi nie.
+- Kod w `backend/`. Worker działa, póki Twój backend nie przejmie danej funkcji. Aplikacja nic nie traci.
+- Każdy krok = gałąź + PR + moje review. Krok jest skończony, gdy przechodzą `pytest`, `ruff` i `mypy`,
+  funkcja działa w prawdziwej aplikacji i umiesz wytłumaczyć swoje decyzje.
+- Kontrakt z FE jest święty: jeśli chcesz go zmienić, to jest osobna zmiana w FE (z testami `npm run test`).
+- Sekrety (klucz Anthropic, Auth0) tylko w Key Vault / `.env` poza repo. Bez telemetrii użytkowników.
 
 ## Etapy
 
-### 0. Warsztat (1 tydzień)
-Nauczysz się: Python 3.12, `uv` (środowiska, zależności), git na gałęziach, struktura projektu.
-Zadanie: `backend/` z `pyproject.toml`, `ruff`, `mypy`, `pytest`; pierwszy test, który przechodzi.
-Wskazówka na start: przeczytaj `docs/BACKEND.md` i spisz własnymi słowami, co robi każdy endpoint.
+### 0. Warsztat (1 tydz.)
+Python 3.12, `uv`, `pytest`, `ruff`, `mypy`, git na gałęziach. Szkielet `backend/` z jednym testem.
+Zadanie dodatkowe: przejdź po aplikacji z otwartym Network i spisz wszystkie zapytania do `/api/`.
 
-### 1. Pierwsze API (1–2 tyg.)
-Nauczysz się: HTTP (metody, statusy, nagłówki, CORS), FastAPI, Pydantic, testy przez `TestClient`.
-Zadanie: `/api/health`, konfiguracja z env (`pydantic-settings`, odpowiednik `[vars]` z `wrangler.toml`), CORS jak w `ALLOWED_ORIGINS`.
+### 1. Pierwsze API + spięcie z FE (1–2 tyg.)
+HTTP, CORS, FastAPI, Pydantic, konfiguracja z env. `/api/health`, a potem FE uruchomione na Twój backend
+(zobaczysz, które funkcje się psują; to Twoja lista zadań).
 
-### 2. Baza danych (2–3 tyg.)
-Nauczysz się: SQL, relacje, indeksy, transakcje, migracje; PostgreSQL w Dockerze (`docker compose`); SQLAlchemy 2 + Alembic.
-Zadanie: przenieś schemat z `server/migrations/*.sql` do migracji Alembic (zastanów się, co się zmienia SQLite → Postgres: typy, `INTEGER` jako bool, czasy).
+### 2. Logowanie (1–2 tyg.)
+OAuth/OIDC, JWT, JWKS. FE już loguje przez Auth0 i wysyła token (`src/shared/auth/`). Ty go weryfikujesz
+i odpowiadasz na sprawdzenie konta (`refreshAccount.ts`). Projektujesz: członkowie, zaproszenia, rola właściciela.
 
-### 3. Logowanie i uprawnienia (1–2 tyg.)
-Nauczysz się: OAuth/OIDC, JWT, JWKS, zależności (`Depends`) w FastAPI, 401 vs 403.
-Zadanie: weryfikacja tokenu Auth0 (porównaj z `server/src/auth/jwt.ts`), `/api/auth/check`, rola właściciela (`ADMIN_EMAILS`).
+### 3. Baza i wspólna baza obiektów (3–4 tyg.)
+SQL, PostgreSQL w Dockerze (`docker compose`), SQLAlchemy 2, Alembic, PostGIS do zapytań po obszarze.
+Sam projektujesz tabele pod `communityApi.ts` i `community.ts`: obiekty, głosy, kto co może, limity.
 
-### 4. Społeczność (2–3 tyg.) — pierwszy „prawdziwy” moduł
-Zadanie: obiekty, głosy, limity dzienne, paczki do 1000, przesunięcia, usuwanie (`server/src/community/`).
-Nauczysz się: walidacja wejścia, limity nadużyć, zapytania po obszarze (bbox), testy integracyjne na prawdziwym Postgresie.
+### 4. Docker i CI (1 tydz.)
+Dockerfile, GitHub Actions: lint + testy + obraz przy każdym PR (`.github/workflows/backend.yml`).
 
-### 5. Docker i CI (1 tydz.)
-Nauczysz się: Dockerfile (wieloetapowy, mały obraz), GitHub Actions: lint + testy + build obrazu przy każdym PR.
-Zadanie: `backend/Dockerfile`, workflow `.github/workflows/backend.yml` (wzór: istniejący `server.yml`).
+### 5. Azure (2 tyg.)
+Container Apps (API), Container Registry, PostgreSQL Flexible Server, Key Vault, Managed Identity,
+infrastruktura w Bicep (`backend/infra/`), wdrożenie z GitHub Actions przez OIDC. Środowisko `dev`.
+Pierwszego dnia ustawiasz alert budżetu. Jeśli jesteś uczniem/studentem: Azure for Students.
 
-### 6. Azure — pierwsze wdrożenie (2 tyg.)
-Nauczysz się: chmura od podstaw: subskrypcja, grupa zasobów, regiony, koszty i alerty budżetu.
-Usługi: **Azure Container Apps** (API, skaluje do zera), **Azure Container Registry** (obrazy), **Azure Database for PostgreSQL Flexible Server**, **Key Vault** (sekrety), **Managed Identity** (bez haseł między usługami).
-Infrastruktura jako kod: **Bicep** (`backend/infra/`), wdrożenie z GitHub Actions przez **OIDC** (bez kluczy w sekretach GitHuba).
-Zadanie: środowisko `dev` na Azure, które samo się wdraża po merge'u.
-Koszty: jeśli jesteś uczniem/studentem — **Azure for Students** (kredyt bez karty); i tak ustaw alert budżetu od pierwszego dnia.
+### 6. Pliki: wspólne mapy (1–2 tyg.)
+Blob Storage, wysyłanie dużych plików, uprawnienia. Pod `sharedMapsApi.ts`.
 
-### 7. Pliki: wspólne mapy (1–2 tyg.)
-Nauczysz się: Blob Storage, SAS / Managed Identity, przesyłanie dużych plików, strumieniowanie.
-Zadanie: `/api/community/maps` (odpowiednik R2 `mapy/<id>`).
+### 7. AI (2–3 tyg.)
+Anthropic SDK w Pythonie: obraz, wynik w schemacie, koszty, budżet, limity dzienne. Pod `readMapWithAi.ts`
+i `placeOwnMap.ts`. Profile odczytu są w `src/shared/lib/history/readProfiles.ts` (FE i backend muszą mieć te same):
+sam zaprojektujesz, jak je współdzielić (np. eksport do JSON przy buildzie).
 
-### 8. AI na backendzie (2–3 tyg.)
-Nauczysz się: Anthropic API w Pythonie (wiadomości z obrazem, wyjście w schemacie, Batch API), liczenie kosztów, budżet miesięczny, limity.
-Zadanie: `/api/readings` i `/api/placements` (profile odczytu są w `src/shared/lib/history/readProfiles.ts` — trzeba je współdzielić, np. eksport do JSON przy buildzie).
+### 8. Zadania w tle (1–2 tyg.)
+Zgłoszenia źródeł (`sourcesApi.ts`) i panel (`adminApi.ts`): FE wysyła i odpytuje status, więc potrzebujesz
+kolejki i zadania cyklicznego (Container Apps Job / Storage Queue). Idempotencja, blokady.
 
-### 9. Zadania w tle (1–2 tyg.)
-Nauczysz się: kolejki, zadania cykliczne, blokady, idempotencja.
-Zadanie: potok zgłoszeń (`server/src/pipeline/`) jako **Container Apps Job** (cron) albo kolejka (Storage Queue).
+### 9. Cieniowanie terenu (2 tyg.)
+numpy, rastry, PNG, cache w Blob. Pod `RELIEF_TILE_URL`.
 
-### 10. Cieniowanie NMT (2 tyg., najtrudniejsze obliczeniowo)
-Nauczysz się: numpy, rastry, kodowanie PNG/JPEG, cache.
-Zadanie: `/api/relief/...` (wzór: `server/src/relief/shadeTile.ts`), kafelki w Blob, przed nimi CDN (Azure Front Door) — opcjonalnie.
-
-### 11. Produkcja i przełączenie (1–2 tyg.)
-Nauczysz się: środowiska dev/prod, migracja danych D1 → Postgres (skrypt), backupy i odtwarzanie, logi (Log Analytics), health checki, rollback.
-Zadanie: eksport danych z D1, import, testy kontraktu przeciw obu backendom, zmiana adresu w `src/shared/config/backend.ts` i routingu `/api/*`, aktualizacja `docs/BACKEND.md` i `CLAUDE.md`. Worker zostaje wyłączony dopiero po tygodniu spokoju.
+### 10. Produkcja i przełączenie (1–2 tyg.)
+Środowiska dev/prod, backupy, logi, health checki, rollback. Przeniesienie istniejących danych społeczności
+(eksport z obecnej bazy, Twój skrypt importu). Zmiana adresu w `backend.ts`, aktualizacja `docs/BACKEND.md` i `CLAUDE.md`.
 
 ## Agenci AI pod projekt (równolegle, od etapu 2)
 
-- Claude Code w repo: własny **subagent** do review backendu (`.claude/agents/backend-reviewer.md`), **skill** „nowy endpoint” (checklista: model Pydantic, test, migracja, dokumentacja), **hook** uruchamiający `ruff`/`pytest` po edycji. Uczysz się pisać instrukcje i ograniczać narzędzia agenta.
-- W etapie 8: agent w samym backendzie — odczyt mapy jako pętla narzędzi (Anthropic SDK, tool use) zamiast jednego zapytania; porównasz koszt i jakość z obecnym podejściem.
+- Claude Code w repo: subagent do review backendu (`.claude/agents/backend-reviewer.md`), skill „nowy endpoint”
+  (kontrakt z FE → model → test → migracja → dokumentacja), hook z `ruff`/`pytest` po edycji.
+- W etapie 7: agent w backendzie (tool use) do odczytu map; porównasz koszt i jakość z jednym zapytaniem.
 
-## Szacunkowo
-
-~4–6 miesięcy przy kilku godzinach tygodniowo. Najważniejsze kamienie: etap 4 (działa coś prawdziwego lokalnie), etap 6 (działa w chmurze), etap 11 (zastępuje Workera).
-
-## Weryfikacja (dla każdego etapu)
+## Weryfikacja (każdy etap)
 
 - `cd backend && uv run pytest && uv run ruff check && uv run mypy .`
-- Od etapu 5: zielony CI w PR.
-- Od etapu 6: `curl https://<dev>.azurecontainerapps.io/api/health`, a dla modułów — aplikacja (`npm run dev`) z adresem backendu ustawionym na dev Azure i ręczny test w przeglądarce.
-- Przed przełączeniem: te same testy kontraktu przechodzą dla Workera i dla FastAPI.
+- FE na Twoim backendzie: `VITE_SOURCES_API_URL=http://localhost:8000 npm run dev`, a funkcja z etapu działa w przeglądarce.
+- Od etapu 4 zielony CI, od etapu 5 to samo na adresie `dev` w Azure.
 
 ## Pierwszy krok
 
-Zaczynasz etap 0: instalujesz `uv`, tworzysz `backend/`, a ja tłumaczę każdy plik, który zakładasz, i robię review pierwszego PR.
+Etap 0: instalujesz `uv`, zakładasz `backend/` i spisujesz zapytania z Network. Ja recenzuję pierwszy PR.
