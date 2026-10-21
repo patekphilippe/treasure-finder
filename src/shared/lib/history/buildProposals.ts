@@ -25,7 +25,17 @@ export interface ProposalOptions {
   linkM: number;
   /** below this a reading is ignored */
   minConfidence: number;
+  /**
+   * coarser than this (metres per pixel, e.g. a 1:100 000 sheet) a farmstead of one or two
+   * houses is mostly a misread symbol: only hamlets and villages are kept
+   */
+  coarseResM: number;
 }
+
+/** sites of fewer houses are dropped on a coarse map */
+const COARSE_MIN_BUILDINGS = 3;
+/** places worth a look even with a building there today: their surroundings hold the finds */
+const KEPT_STANDING: ReadonlySet<ReadKind> = new Set(['mlyn', 'karczma', 'folwark', 'brod']);
 
 const POI: Partial<Record<ReadKind, { kind: ContextKind; label: string }>> = {
   mlyn: { kind: 'mlyn', label: 'Młyn' },
@@ -43,8 +53,10 @@ const POI: Partial<Record<ReadKind, { kind: ContextKind; label: string }>> = {
 
 /**
  * Objects read from a historical map → proposals for archival context. Buildings count only when
- * today's BDOT10k has nothing there; they are grouped into a farmstead, hamlet or village.
- * Named places (mill, inn, manor farm, ford…) are proposed each on their own, gone or not.
+ * today's BDOT10k has nothing there; they are grouped into a farmstead, hamlet or village (on a
+ * coarse map only hamlets and villages). A mill, inn, manor farm or ford is proposed gone or not;
+ * the other places (church, forester's lodge, smithy…) only when gone: one still standing in
+ * today's village is nothing to look for.
  */
 export function buildProposals(
   objects: readonly MapObject<ReadKind>[],
@@ -57,7 +69,11 @@ export function buildProposals(
   const lostBuildings = ok.filter(
     (x) => x.kind === 'budynek' && !existsToday(mask, g, x.x, x.y, o.bufferM),
   );
-  const sites: SiteProposal[] = clusterPoints(lostBuildings, o.linkM / g.res).map((idx) => {
+  const minBuildings = g.res > o.coarseResM ? COARSE_MIN_BUILDINGS : 1;
+  const groups = clusterPoints(lostBuildings, o.linkM / g.res).filter(
+    (idx) => idx.length >= minBuildings,
+  );
+  const sites: SiteProposal[] = groups.map((idx) => {
     const pts = idx.map((i) => lostBuildings[i]!);
     const x = pts.reduce((s, p) => s + p.x, 0) / pts.length;
     const y = pts.reduce((s, p) => s + p.y, 0) / pts.length;
@@ -72,9 +88,10 @@ export function buildProposals(
   });
   const places: SiteProposal[] = ok
     .filter((x) => x.kind !== 'budynek' && POI[x.kind])
-    .map((x) => {
+    .map((x) => ({ x, lost: !existsToday(mask, g, x.x, x.y, o.bufferM) }))
+    .filter(({ x, lost }) => lost || KEPT_STANDING.has(x.kind))
+    .map(({ x, lost }) => {
       const p = POI[x.kind]!;
-      const lost = !existsToday(mask, g, x.x, x.y, o.bufferM);
       return {
         kind: p.kind,
         title: `${p.label}${x.label ? `: ${x.label}` : ''}${lost ? ', dziś bez zabudowy' : ''}`,

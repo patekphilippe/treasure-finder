@@ -8,8 +8,16 @@ export type AiModelId = (typeof AI_MODELS)[number]['id'];
 export const AI_MAX_SIDE = 1568;
 /** Houses on a 1:25 000 sheet are ~10 m: coarser than this the reading is pointless. */
 export const AI_MAX_RES_M = 2;
-/** Proposal rules: reading error absorbed, houses joined into one site, weak readings dropped. */
-export const PROPOSAL_OPTIONS = { bufferM: 25, linkM: 80, minConfidence: 0.35 } as const;
+/**
+ * Proposal rules: reading error absorbed, houses joined into one site, readings the model is
+ * unsure of dropped, and lone houses left out on maps coarser than ~1:25 000 (1:100 000 is ~8 m/px).
+ */
+export const PROPOSAL_OPTIONS = {
+  bufferM: 25,
+  linkM: 80,
+  minConfidence: 0.5,
+  coarseResM: 4,
+} as const;
 
 /** Most one view costs (docs/BACKEND.md: Haiku 0.0005–0.002 $, Sonnet ~20× more), for estimates. */
 export const VIEW_COST_USD: Record<AiModelId, number> = {

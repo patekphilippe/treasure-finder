@@ -8,7 +8,7 @@ import {
 } from '@/shared/lib/history';
 
 const g = { originE: 300_000, originN: 400_000, res: 2, w: 500, h: 500 };
-const opts = { bufferM: 20, linkM: 80, minConfidence: 0.3 };
+const opts = { bufferM: 20, linkM: 80, minConfidence: 0.3, coarseResM: 4 };
 const house = (x: number, y: number, confidence = 0.8): MapObject => ({
   kind: 'budynek',
   label: '',
@@ -86,6 +86,29 @@ describe('proposals', () => {
     const ps = buildProposals([mill, weak], withBuildingAt([[201, 200]]), g, opts);
     expect(ps).toEqual([
       expect.objectContaining({ kind: 'mlyn', title: 'Młyn: Mühle', lost: false }),
+    ]);
+  });
+});
+
+describe('a stricter choice', () => {
+  it('on a coarse map (1:100 000) lone houses are left out, villages stay', () => {
+    const coarse = { ...g, res: 8 };
+    const none = new Uint8Array(g.w * g.h);
+    expect(buildProposals([house(50, 50), house(55, 52)], none, coarse, opts)).toEqual([]);
+    const hamlet = [0, 1, 2].map((i) => house(50 + i * 3, 50));
+    expect(buildProposals(hamlet, none, coarse, opts)).toEqual([
+      expect.objectContaining({ kind: 'osada', buildings: 3 }),
+    ]);
+  });
+
+  it('a church still standing is nothing to look for; a lost one or a standing mill is', () => {
+    const at = withBuildingAt([[201, 200]]);
+    const church: MapObject = { kind: 'kosciol', label: '', x: 200, y: 200, confidence: 0.9 };
+    const lostChurch: MapObject = { ...church, x: 50, y: 50 };
+    const mill: MapObject = { kind: 'mlyn', label: '', x: 200, y: 201, confidence: 0.9 };
+    expect(buildProposals([church, lostChurch, mill], at, g, opts).map((p) => p.title)).toEqual([
+      'Kościół lub kaplica, dziś bez zabudowy',
+      'Młyn',
     ]);
   });
 });
