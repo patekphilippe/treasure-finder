@@ -8,6 +8,8 @@
  *   npm run fetch-wig -- --match "krakow|tarnow|wroclaw"        file names (no Polish letters needed)
  *   npm run fetch-wig -- --sheet "P47 S40" --list               only list what would be fetched
  *   options: --url <folder> --out data/wig100 --limit 10 --delay 1500 --all (no filter)
+ *            --copies (every archive's copy of a sheet, not only one per sheet and year)
+ *            --verso (also the backs of the sheets)
  */
 import { createWriteStream, existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -107,9 +109,36 @@ async function crawl(): Promise<string[]> {
 
 const fileName = (url: string) => decodeURIComponent(url.split('/').pop()!);
 
+const base = (name: string) => name.replace(/\.[^.]+$/, '');
+const IMAGE = /\.(jpe?g|png|webp|tiff?)$/i;
+
+/**
+ * One copy per sheet and year: the folder holds the same edition from several archives
+ * ("…_1930.jpg", "…_1930_APP_Sygn….jpg", "…_BN_Sygn….jpg"), and each would be read by AI again.
+ * The shortest name is the site's own copy. The backs ("verso") have no map. World files follow
+ * their image.
+ */
+function oneCopyEach(urls: string[]): string[] {
+  const kept = new Map<string, string>();
+  for (const u of urls) {
+    const name = fileName(u);
+    if (!IMAGE.test(name) || (!flag('--verso') && /verso/i.test(name))) continue;
+    const sheet = sheetFromName(name)?.number;
+    const key = sheet && !flag('--copies') ? `${sheet}|${/1[89]\d\d/.exec(name)?.[0] ?? ''}` : name;
+    const prev = kept.get(key);
+    if (!prev || fileName(u).length < fileName(prev).length) kept.set(key, u);
+  }
+  const images = new Set([...kept.values()].map((u) => base(fileName(u))));
+  return urls.filter((u) => images.has(base(fileName(u))));
+}
+
 const all = await crawl();
-const picked = all.filter((u) => wanted(fileName(u))).slice(0, LIMIT);
-console.log(`W folderze ${all.length} plików, pasuje ${picked.length}.`);
+const matching = all.filter((u) => wanted(fileName(u)));
+const picked = oneCopyEach(matching).slice(0, LIMIT);
+console.log(
+  `W folderze ${all.length} plików, pasuje ${matching.length}, do pobrania ${picked.length}` +
+    (picked.length < matching.length ? ' (jedna kopia arkusza z roku, bez verso).' : '.'),
+);
 if (flag('--list')) {
   for (const u of picked) console.log(`  ${fileName(u)}  ${u}`);
   process.exit(0);

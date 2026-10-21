@@ -67,7 +67,8 @@ mapy szczegółowej Polski 1:25 000 WIG_ (PPK 2014), OSM wiki (siatka MTB).
 `npm run fetch-wig` (scripts/fetchWig.ts) przegląda folder serii (domyślnie WIG 1:100 000) jak zwykły
 spis plików i pobiera pasujące arkusze do `data/wig100`: po punktach (`--at 50.06,19.94`, arkusz
 z siatki 30′ × 15′), numerach (`--sheet "P47 S40"`) albo nazwach plików (`--match "krakow|tarnow"`).
-Po jednym pliku z przerwą (`--delay`, domyślnie 1,5 s), pobrane pliki są pomijane, `--list` tylko
+Z kilku kopii arkusza z tego samego roku (różne archiwa: APP, BN) bierze jedną, o najkrótszej
+nazwie, i pomija tyły arkuszy (`verso`); `--copies` i `--verso` biorą wszystko. Po jednym pliku z przerwą (`--delay`, domyślnie 1,5 s), pobrane pliki są pomijane, `--list` tylko
 pokazuje. Uruchamiać na własnym komputerze; pliki nie trafiają do repozytorium. Folder wczytuje się
 w aplikacji przyciskiem „Wczytaj folder” (Dane → Mapy historyczne). Przed hurtowym pobieraniem
 sprawdzić warunki korzystania z serwisu.
