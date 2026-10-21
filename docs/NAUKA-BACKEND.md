@@ -51,13 +51,15 @@ Konto i społeczność (z przeklikania aplikacji):
   - Jedna osoba zgłasza dany obiekt tylko raz (drugi raz: „już zgłoszone”).
   - Identyfikatory powodów (baza i API): `wrong_category`, `not_on_map`, `wrong_position`, `other`.
     Polskie napisy są tylko w interfejsie.
-  - Po decyzji właściciela zgłaszający dostaje **powiadomienie w skrzynce w aplikacji**: gdy jest internet,
-    aplikacja pyta serwer o nowe powiadomienia i pokazuje je (licznik / toast). Bez Web Push.
-  - Decyzja właściciela = gotowy tekst (np. „Obiekt usunięty”, „Sprawdziłem, obiekt jest poprawny”)
-    + opcjonalny własny dopisek.
-  - Do przemyślenia przez Ciebie: dlaczego identyfikatory, a nie polskie zdania; czy właściciel może poprawić
-    miejsce/kategorię obiektu (nowa akcja), czy tylko usunąć / zostawić; skąd aplikacja wie, które powiadomienia są nowe.
+  - Właściciel rozpatruje zgłoszenie: usuwa obiekt albo odrzuca zgłoszenie (obiekt zostaje).
+  - Do przemyślenia przez Ciebie: dlaczego identyfikatory, a nie polskie zdania.
 - [do sprawdzenia] Co robi zwykły członek: skąd biorą się obiekty we wspólnej bazie i kto je dodaje.
+
+## Na później (świadomie odłożone)
+
+- Powiadomienia dla zgłaszającego o decyzji właściciela: skrzynka w aplikacji (bez Web Push), gotowy tekst
+  + opcjonalny dopisek. Otwarte pytania: skąd aplikacja wie, które są nowe (pole „przeczytane” vs „od chwili X”).
+- Edycja miejsca i kategorii obiektu przez właściciela.
 
 ## Zasady
 
