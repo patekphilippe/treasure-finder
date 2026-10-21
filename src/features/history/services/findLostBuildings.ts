@@ -38,8 +38,17 @@ export async function findLostBuildings(
   profile: ReadProfileId,
   onStep: (step: string) => void,
   resM?: number,
+  legend: string | null = null,
 ): Promise<{ proposals: Proposal[]; usage: AiUsage; read: number }> {
-  const { sites, usage, read } = await readViewSites(bounds, source, model, profile, onStep, resM);
+  const { sites, usage, read } = await readViewSites(
+    bounds,
+    source,
+    model,
+    profile,
+    onStep,
+    resM,
+    legend,
+  );
   const what = profile === 'wojskowa' ? 'auto (AI, mapa wojskowa)' : 'auto (AI)';
   return {
     proposals: sites.map((p) =>

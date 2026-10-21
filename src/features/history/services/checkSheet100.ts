@@ -22,6 +22,7 @@ export async function checkSheet100(
   grid: ImageGrid,
   spots: readonly MapObject<ReadKind>[],
   model: AiModelId,
+  legend?: string | null,
 ): Promise<{ confirmed: MapObject<ReadKind>[]; usage: AiUsage }> {
   const usage: AiUsage = { inputTokens: 0, outputTokens: 0 };
   if (!spots.length) return { confirmed: [], usage };
@@ -41,7 +42,15 @@ export async function checkSheet100(
     ctx.drawImage(bitmap, x0, y0, CROP_PX, CROP_PX, 0, 0, side, side);
     const image = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.9 });
     try {
-      const r = await readMapWithAi(image, side, side, grid.res / ZOOM, model, 'arkusz100_sprawdz');
+      const r = await readMapWithAi(
+        image,
+        side,
+        side,
+        grid.res / ZOOM,
+        model,
+        'arkusz100_sprawdz',
+        legend,
+      );
       usage.inputTokens += r.usage.inputTokens;
       usage.outputTokens += r.usage.outputTokens;
       const near = r.objects

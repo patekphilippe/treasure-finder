@@ -7,6 +7,7 @@ import type { OwnMap } from '@/shared/types/domain';
 import { Icon, useToastStore } from '@/shared/ui';
 import { VIEW_COST_USD, VIEW_SECONDS, type AiModelId } from '../config/aiReading';
 import type { ViewSource } from '../services/captureView';
+import { readMapLegend } from '../services/readMapLegend';
 import { readWholeMap } from '../services/readWholeMap';
 import { useProposalsStore } from '../store/useProposalsStore';
 import { readResM } from '../utils/readResM';
@@ -47,6 +48,9 @@ export function WholeMapReading({ source, map, model, profile }: WholeMapReading
       read: null,
     });
     try {
+      // the sheet's own legend first: the map is then read by its signs and abbreviations
+      const legend =
+        profile === 'wojskowa' ? null : await readMapLegend(map, model).catch(() => null);
       const r = await readWholeMap(
         source,
         chunks,
@@ -58,6 +62,7 @@ export function WholeMapReading({ source, map, model, profile }: WholeMapReading
           set({ step: `Cała mapa: fragment ${Math.min(done + 1, n)} z ${n}`, share: done / n });
         },
         () => useProposalsStore.getState().stopRequested,
+        legend,
       );
       set({ proposals: r.proposals, usage: r.usage, read: r.read });
       showToast(

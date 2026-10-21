@@ -172,6 +172,44 @@ describe('view readings', () => {
     expect((sent as unknown as { max_tokens: number }).max_tokens).toBe(512);
   });
 
+  it('reads a sheet’s legend from its margin, and reads the map with it', async () => {
+    claude = () =>
+      Response.json({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              entries: [
+                { sign: 'M.', meaning: 'Młyn wodny' },
+                { sign: 'skrzyżowane szable', meaning: 'Pobojowisko' },
+                { sign: '', meaning: 'bez znaku' },
+              ],
+            }),
+          },
+        ],
+        stop_reason: 'end_turn',
+        usage: { input_tokens: 1500, output_tokens: 200 },
+      });
+    const res = await read({ profile: 'legenda', res: '8' });
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as MapReading).legend).toEqual([
+      'M.: Młyn wodny',
+      'skrzyżowane szable: Pobojowisko',
+    ]);
+    expect(sent!.messages[0]!.content[1]!.text).toMatch(/margin of a historical topographic sheet/);
+
+    claude = () =>
+      Response.json({
+        content: [{ type: 'text', text: JSON.stringify({ objects: [] }) }],
+        stop_reason: 'end_turn',
+        usage: { input_tokens: 2000, output_tokens: 50 },
+      });
+    await read({ profile: 'arkusz100', res: '8', legend: 'M.: Młyn wodny' });
+    expect(sent!.messages[0]!.content[1]!.text).toMatch(
+      /legend printed on this very sheet.*M\.: Młyn wodny/s,
+    );
+  });
+
   it('refuses anyone not signed in with an invitation, and bad input', async () => {
     const anonymous = await read({}, null);
     expect(anonymous.status).toBe(401);

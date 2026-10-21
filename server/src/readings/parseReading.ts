@@ -11,7 +11,12 @@ export interface ReadingRequest {
   model: PipelineModel;
   /** which kind of map: what to look for and how (readProfiles) */
   profile: ReadProfileId;
+  /** the sheet's own legend, read from its margin before (lines "sign: meaning"), or "" */
+  legend: string;
 }
+
+/** a legend's relevant part is a few dozen short lines */
+const MAX_LEGEND = 4000;
 
 /** The app's form for one view reading, checked; an error message in Polish otherwise. */
 export function parseReading(form: FormData): ReadingRequest | { error: string } {
@@ -31,5 +36,8 @@ export function parseReading(form: FormData): ReadingRequest | { error: string }
   // older apps send no profile: the topographic one
   const profile = form.get('profile') ?? 'topo';
   if (!isReadProfileId(profile)) return { error: 'Nieznany rodzaj mapy' };
-  return { image, w, h, res, model: model as PipelineModel, profile };
+  const legend = String(form.get('legend') ?? '')
+    .slice(0, MAX_LEGEND)
+    .trim();
+  return { image, w, h, res, model: model as PipelineModel, profile, legend };
 }

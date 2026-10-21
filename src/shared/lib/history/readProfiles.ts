@@ -1,5 +1,6 @@
 import { MILITARY_SCHEMA, militaryPrompt } from './militaryPrompt';
 import { READ_SCHEMA, readPrompt } from './readPrompt';
+import { LEGEND_SCHEMA, legendPrompt } from './legendPrompt';
 import { sheet100CheckPrompt } from './sheet100CheckPrompt';
 import { SHEET100_SCHEMA, sheet100Prompt } from './sheet100Prompt';
 import {
@@ -9,7 +10,7 @@ import {
   type ReadKind,
 } from './types';
 
-export type ReadProfileId = 'topo' | 'arkusz100' | 'arkusz100_sprawdz' | 'wojskowa';
+export type ReadProfileId = 'topo' | 'arkusz100' | 'arkusz100_sprawdz' | 'legenda' | 'wojskowa';
 
 /**
  * How Claude reads one kind of map: the instructions and legend (prompt), what it may report
@@ -25,6 +26,8 @@ export interface ReadProfile {
   maxResM: number;
   /** answer length limit (line objects need more) */
   maxTokens: number;
+  /** what comes back: objects on the map (the default) or the lines of the sheet's legend */
+  answer?: 'objects' | 'legend';
 }
 
 export const READ_PROFILES: Record<ReadProfileId, ReadProfile> = {
@@ -55,6 +58,17 @@ export const READ_PROFILES: Record<ReadProfileId, ReadProfile> = {
     prompt: sheet100CheckPrompt,
     maxResM: 8,
     maxTokens: 512,
+  },
+  // the sheet's own legend, read from its margin once before the map: the reading then knows
+  // this edition's signs and abbreviations
+  legenda: {
+    id: 'legenda',
+    kinds: [],
+    schema: LEGEND_SCHEMA,
+    prompt: legendPrompt,
+    maxResM: 8,
+    maxTokens: 2048,
+    answer: 'legend',
   },
   // operational maps are 1:50 000–1:100 000 and their symbols large: a view up to ~12 km
   wojskowa: {

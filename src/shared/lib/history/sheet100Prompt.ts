@@ -37,6 +37,9 @@ Report only these, each once:
 - church or chapel outside a village: a cross on a small circle or square, "K.", "Kap.", "Kpl." → "kosciol";
 - glassworks: "Glash.", "Hütte", "Huta" → "huta";
 - tar kiln: "Teerofen", "Smol." → "smolarnia";
-- ford: "Furt", "Bród" → "brod".
+- ford: "Furt", "Bród" → "brod";
+- windmill: a post or tower mill symbol, "Wm." next to a windmill sign, "Windm.", "Wiatrak" → "wiatrak";
+- ruins: "Ruine", "Ruinen", "Rn.", "Ruiny", a broken outline → "ruiny";
+- battlefield: crossed swords, often with a year ("1813") → "pobojowisko".
 
 For a place, x and y are the small symbol or the house block the abbreviation belongs to, not the letters; if there is no symbol, the start of the abbreviation. Do NOT report: village and town names on their own, field and forest names (Flurnamen), heights and spot numbers, gravel or sand pits ("Ksgr.", "Sgr.", "Lehmgr."), sheep farms ("Sch."), roads, railways, rivers, contour lines, hachures, tree symbols, grid lines, the sheet margin or its text. Report nothing you cannot tie to a printed symbol or abbreviation. Put the text you read in "label" and how sure you are in "confidence". Answer with the objects in the required JSON format.`;

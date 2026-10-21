@@ -28,11 +28,21 @@ export async function readViewSites(
   onStep: (step: string) => void,
   /** metres per pixel; a coarse scan is read at its own resolution (utils/readResM) */
   resM = READ_PROFILES[profile].maxResM,
+  /** the sheet's own legend (readMapLegend), or null */
+  legend: string | null = null,
 ): Promise<{ sites: SiteProposal[]; usage: AiUsage; read: number }> {
   onStep('Przygotowuję obraz mapy');
   const { image, grid } = await captureView(bounds, source, resM);
   onStep('Claude czyta mapę');
-  const { objects, usage } = await readMapWithAi(image, grid.w, grid.h, grid.res, model, profile);
+  const { objects, usage } = await readMapWithAi(
+    image,
+    grid.w,
+    grid.h,
+    grid.res,
+    model,
+    profile,
+    legend,
+  );
   if (profile === 'wojskowa')
     return {
       sites: buildMilitaryProposals(objects, grid, PROPOSAL_OPTIONS.minConfidence),
@@ -47,7 +57,7 @@ export async function readViewSites(
     // a second, enlarged look at each spot left: a village name read as a place is not confirmed
     onStep('Sprawdzam miejsca z bliska');
     const spots = sheet100Candidates(objects, buildings, grid, PROPOSAL_OPTIONS);
-    const checked = await checkSheet100(image, grid, spots, model);
+    const checked = await checkSheet100(image, grid, spots, model, legend);
     return {
       sites: buildSheet100Proposals(checked.confirmed, buildings, grid, PROPOSAL_OPTIONS),
       usage: {

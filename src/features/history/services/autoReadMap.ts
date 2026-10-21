@@ -12,6 +12,7 @@ import { readResM } from '../utils/readResM';
 import { toViewSource } from '../utils/toViewSource';
 import { wholeMapChunks } from '../utils/wholeMapChunks';
 import { addSightedObjects } from './addSightedObjects';
+import { readMapLegend } from './readMapLegend';
 import { readWholeMap } from './readWholeMap';
 import { shareMap } from './shareMap';
 import { shareObjects } from './shareObjects';
@@ -49,8 +50,14 @@ export async function autoReadMap(mapId: string): Promise<void> {
       },
       open: { mode: 'field', sheet: 'analyses', card: 'ai' },
     },
-    (update) =>
-      readWholeMap(
+    async (update) => {
+      // the sheet's own legend first: the map is then read by its signs and abbreviations
+      let legend: string | null = null;
+      if (profile !== 'wojskowa') {
+        update({ step: 'czytam legendę z marginesu' });
+        legend = await readMapLegend(map, model).catch(() => null);
+      }
+      return readWholeMap(
         toViewSource({ own: map }),
         chunks,
         model,
@@ -58,7 +65,9 @@ export async function autoReadMap(mapId: string): Promise<void> {
         readResM(map, profile),
         (done) => update({ share: done / n, step: `fragment ${Math.min(done + 1, n)} z ${n}` }),
         () => stop,
-      ),
+        legend,
+      );
+    },
   );
 
   // the corners were corrected while it was read: what was found follows the saved placement

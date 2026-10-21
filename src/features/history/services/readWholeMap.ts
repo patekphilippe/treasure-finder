@@ -34,6 +34,8 @@ export async function readWholeMap(
   resM: number,
   onProgress: (done: number) => void,
   isCancelled: () => boolean,
+  /** the sheet's own legend (readMapLegend), or null */
+  legend: string | null = null,
 ): Promise<WholeMapResult> {
   const found: Proposal[] = [];
   const usage: AiUsage = { inputTokens: 0, outputTokens: 0 };
@@ -45,7 +47,7 @@ export async function readWholeMap(
   const worker = async () => {
     for (let chunk; !stopped && !isCancelled() && (chunk = queue.shift());) {
       try {
-        const r = await findLostBuildings(chunk, source, model, profile, () => {}, resM);
+        const r = await findLostBuildings(chunk, source, model, profile, () => {}, resM, legend);
         found.push(...r.proposals);
         usage.inputTokens += r.usage.inputTokens;
         usage.outputTokens += r.usage.outputTokens;

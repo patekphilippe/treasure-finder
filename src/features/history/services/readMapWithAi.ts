@@ -18,7 +18,9 @@ export async function readMapWithAi(
   res: number,
   model: AiModelId,
   profile: ReadProfileId,
-): Promise<{ objects: MapObject<ReadKind>[]; usage: AiUsage }> {
+  /** the sheet's own legend read before (readMapLegend), to read the map by it */
+  legend?: string | null,
+): Promise<{ objects: MapObject<ReadKind>[]; usage: AiUsage; legend: string[] }> {
   const form = new FormData();
   form.append('image', image, 'widok.jpg');
   form.append('w', String(w));
@@ -26,6 +28,7 @@ export async function readMapWithAi(
   form.append('res', String(res));
   form.append('model', model);
   form.append('profile', profile);
+  if (legend) form.append('legend', legend);
   // only signed-in members may read (the owner's key pays)
   const headers = await memberAuth();
   let response: Response;
@@ -41,5 +44,5 @@ export async function readMapWithAi(
   const body = (await response.json().catch(() => null)) as
     (MapReading & { error?: string }) | null;
   if (!response.ok || !body) throw new Error(body?.error ?? `Błąd serwera (${response.status})`);
-  return { objects: body.objects, usage: body.usage };
+  return { objects: body.objects, usage: body.usage, legend: body.legend ?? [] };
 }

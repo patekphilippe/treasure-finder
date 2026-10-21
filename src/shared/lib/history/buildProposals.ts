@@ -58,6 +58,9 @@ const POI: Partial<Record<ReadKind, { kind: ContextKind; label: string }>> = {
   huta: { kind: 'inne', label: 'Huta' },
   smolarnia: { kind: 'inne', label: 'Smolarnia' },
   inne: { kind: 'inne', label: 'Obiekt' },
+  wiatrak: { kind: 'mlyn', label: 'Wiatrak' },
+  ruiny: { kind: 'inne', label: 'Ruiny' },
+  pobojowisko: { kind: 'inne', label: 'Pobojowisko' },
 };
 /** the read kinds that become places (not houses) */
 export const POI_KINDS: ReadonlySet<ReadKind> = new Set(Object.keys(POI) as ReadKind[]);

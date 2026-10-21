@@ -14,6 +14,7 @@ If a place is printed there, report that one object with the centre of its symbo
 - forester's house: "Fh.", "Försterei" → "lesniczowka";
 - brickworks: "Zgl.", "Ziegelei" → "cegielnia";
 - church or chapel: a cross on a small circle or square → "kosciol";
-- glassworks "Glash.", tar kiln "Teerofen", ford "Furt" → "huta", "smolarnia", "brod".
+- glassworks "Glash.", tar kiln "Teerofen", ford "Furt" → "huta", "smolarnia", "brod";
+- windmill → "wiatrak"; ruins "Ruine", "Rn." → "ruiny"; battlefield, crossed swords → "pobojowisko".
 
 If the centre shows only letters of a village, town, field or forest name, a number, a road, a river, contour lines, hachures or empty paper, report nothing: an empty "objects" list. Be strict: a big name in capitals or spaced letters is never a place; when unsure, report nothing. Answer in the required JSON format.`;

@@ -1,3 +1,4 @@
+import { parseLegend } from '@/shared/lib/history/parseLegend';
 import { parseMapObjects } from '@/shared/lib/history/parseMapObjects';
 import { READ_PROFILES } from '@/shared/lib/history/readProfiles';
 import type { MapReading } from '@/shared/types/readings';
@@ -47,7 +48,11 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
     env.ANTHROPIC_API_KEY,
     req.model,
     {
-      text: profile.prompt(req.w, req.h, req.res),
+      text:
+        profile.prompt(req.w, req.h, req.res) +
+        (req.legend
+          ? `\n\nThe legend printed on this very sheet (read from its margin), for its signs and abbreviations:\n${req.legend}\nUse it to recognise what is printed; report only the kinds asked for above.`
+          : ''),
       schema: profile.schema,
       maxTokens: profile.maxTokens,
     },
@@ -56,9 +61,13 @@ export async function readView(request: Request, env: Env, cors: Cors, now: numb
   if (answer.usage) await addSpending(env.DB, now, costUsd(req.model, answer.usage, false));
   if (!answer.ok) return fail(answer.status, answer.message, cors);
 
-  const body: MapReading = {
-    objects: parseMapObjects(answer.json, req.w, req.h, profile.kinds),
-    usage: { inputTokens: answer.usage.input_tokens, outputTokens: answer.usage.output_tokens },
+  const usage = {
+    inputTokens: answer.usage.input_tokens,
+    outputTokens: answer.usage.output_tokens,
   };
+  const body: MapReading =
+    profile.answer === 'legend'
+      ? { objects: [], usage, legend: parseLegend(answer.json) }
+      : { objects: parseMapObjects(answer.json, req.w, req.h, profile.kinds), usage };
   return json(body, 200, cors);
 }

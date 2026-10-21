@@ -1,6 +1,7 @@
 export { buildMilitaryProposals } from './buildMilitaryProposals';
 export { buildSheet100Proposals } from './buildSheet100Proposals';
 export { sheet100Candidates } from './sheet100Candidates';
+export { parseLegend } from './parseLegend';
 export { buildProposals, type ProposalOptions, type SiteProposal } from './buildProposals';
 export { clusterPoints } from './clusterPoints';
 export { compareSites, type SeenOn } from './compareSites';

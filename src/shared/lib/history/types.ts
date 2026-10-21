@@ -39,6 +39,9 @@ export const SHEET100_OBJECT_KINDS = [
   'huta',
   'smolarnia',
   'brod',
+  'wiatrak',
+  'ruiny',
+  'pobojowisko',
 ] as const;
 export type MapObjectKind = (typeof MAP_OBJECT_KINDS)[number];
 export type MilitaryObjectKind = (typeof MILITARY_OBJECT_KINDS)[number];

@@ -207,6 +207,11 @@ odpowiedzi. Leżą w `src/shared/lib/history/readProfiles.ts`, wspólne dla apli
   drugie spojrzenie (`arkusz100_sprawdz`, `sheet100CheckPrompt.ts`): wycinek 128 px wokół niego
   powiększony 3× i pytanie, co jest na środku. Zostaje tylko potwierdzone tego samego rodzaju, przesunięte
   na znak; nazwa wsi odczytana jako miejsce nie przechodzi. Kilka małych odczytów na okno.
+  Przed odczytem własnej mapy aplikacja czyta jej legendę z marginesów (profil `legenda`, prawy 25 % i dolny
+  18 % skanu w kawałkach do 1568 px, `readMapLegend.ts`); wpisy „znak: znaczenie” idą do każdego odczytu tej
+  mapy (pole `legend`, do 4000 znaków, dopisane do promptu). Arkusz 1:100 000 jest czytany tylko wewnątrz
+  ramki (oczko 30′ × 15′ pod środkiem skanu): margines z legendą i numerami arkuszy dawał punkty za ramką.
+  Z legendy doszły rodzaje `wiatrak`, `ruiny`, `pobojowisko`.
 - `wojskowa` (`militaryPrompt.ts`): mapy sztabowe z II wojny; linia frontu, okopy, stanowiska, punkty
   dowodzenia, przeprawy, pola minowe, mogiły; linie jako ciąg punktów; widok do ok. 12 km. W
   aplikacji pozycje dają kontekst `wojsko` (ostrzeżenie o niewybuchach u kandydatów do 300 m), mogiły
