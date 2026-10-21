@@ -10,6 +10,8 @@
  *   options: --url <folder> --out data/wig100 --limit 10 --delay 1500 --all (no filter)
  *            --copies (every archive's copy of a sheet, not only one per sheet and year)
  *            --verso (also the backs of the sheets)
+ *            --latest (only the newest edition of each sheet), --until 1939 (editions up to a year)
+ *            --skip "err|1950" (leave out file names matching)
  */
 import { createWriteStream, existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
@@ -55,16 +57,23 @@ const sheets = new Set([
 ]);
 sheets.delete(undefined);
 const match = options('--match').map((m) => new RegExp(plain(m), 'i'));
+const skip = options('--skip').map((m) => new RegExp(plain(m), 'i'));
+const UNTIL = Number(option('--until', 'Infinity'));
 if (!sheets.size && !match.length && !flag('--all')) {
   console.error('Podaj --at, --sheet albo --match (albo --all, żeby pobrać cały folder).');
   process.exit(1);
 }
 if (sheets.size) console.log(`Arkusze: ${[...sheets].join(', ')}`);
 
+/** the newest year in a name ("…_1933-1939" is 1939); 0 without one */
+const yearOf = (name: string) => Math.max(0, ...[...name.matchAll(/1[89]\d\d/g)].map(Number));
+
 const wanted = (name: string) =>
-  flag('--all') ||
-  (sheets.size > 0 && sheets.has(sheetFromName(name)?.number)) ||
-  match.some((m) => m.test(plain(name)));
+  (flag('--all') ||
+    (sheets.size > 0 && sheets.has(sheetFromName(name)?.number)) ||
+    match.some((m) => m.test(plain(name)))) &&
+  !skip.some((m) => m.test(plain(name))) &&
+  yearOf(name) <= UNTIL;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -124,9 +133,19 @@ function oneCopyEach(urls: string[]): string[] {
     const name = fileName(u);
     if (!IMAGE.test(name) || (!flag('--verso') && /verso/i.test(name))) continue;
     const sheet = sheetFromName(name)?.number;
-    const key = sheet && !flag('--copies') ? `${sheet}|${/1[89]\d\d/.exec(name)?.[0] ?? ''}` : name;
-    const prev = kept.get(key);
-    if (!prev || fileName(u).length < fileName(prev).length) kept.set(key, u);
+    const key =
+      sheet && flag('--latest')
+        ? sheet
+        : sheet && !flag('--copies')
+          ? `${sheet}|${/1[89]\d\d/.exec(name)?.[0] ?? ''}`
+          : name;
+    const prev = kept.get(key) && fileName(kept.get(key)!);
+    // newest edition first (it matters only with --latest), then the shortest name
+    const better =
+      !prev ||
+      yearOf(name) > yearOf(prev) ||
+      (yearOf(name) === yearOf(prev) && name.length < prev.length);
+    if (better) kept.set(key, u);
   }
   const images = new Set([...kept.values()].map((u) => base(fileName(u))));
   return urls.filter((u) => images.has(base(fileName(u))));
@@ -137,7 +156,11 @@ const matching = all.filter((u) => wanted(fileName(u)));
 const picked = oneCopyEach(matching).slice(0, LIMIT);
 console.log(
   `W folderze ${all.length} plików, pasuje ${matching.length}, do pobrania ${picked.length}` +
-    (picked.length < matching.length ? ' (jedna kopia arkusza z roku, bez verso).' : '.'),
+    (picked.length < matching.length
+      ? flag('--latest')
+        ? ' (najnowsze wydanie arkusza, bez verso).'
+        : ' (jedna kopia arkusza z roku, bez verso).'
+      : '.'),
 );
 if (flag('--list')) {
   for (const u of picked) console.log(`  ${fileName(u)}  ${u}`);
