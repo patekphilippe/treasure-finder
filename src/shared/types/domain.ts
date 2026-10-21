@@ -281,6 +281,8 @@ export interface OwnMap {
   year?: number;
   /** when the whole map was read by AI after it was placed: it is not read again */
   readAt?: number;
+  /** on the server for the community (R2 + D1); `mine`: this member shared it and may change it */
+  shared?: { mine: boolean; author: string | null; updatedAt: number };
 }
 
 /** store: rasters — derived analysis rasters cached between reloads */

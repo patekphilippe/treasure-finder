@@ -8,7 +8,7 @@ import { useLoadPoints } from '@/features/points';
 import { useLoadAreas } from '@/features/roughness';
 import { LegalIntroDialog } from '@/features/safety';
 import { useSourcesPolling } from '@/features/sources';
-import { useCommunityAutoSync, useCommunitySignIn } from '@/features/history';
+import { useCommunityAutoSync, useCommunitySignIn, useSharedMapsSync } from '@/features/history';
 import { useTrackRecorder } from '@/features/tracks';
 import { TutorialTour, useTutorialStore } from '@/features/tutorial';
 import { useLoadZones, useZoneAlerts } from '@/features/zones';
@@ -44,6 +44,7 @@ export function App() {
   useContextRecompute();
   useCommunitySignIn();
   useCommunityAutoSync();
+  useSharedMapsSync();
   useSourcesPolling();
   const mode = useUiStore((s) => s.mode);
   const startTourIfNew = useTutorialStore((s) => s.startIfNew);

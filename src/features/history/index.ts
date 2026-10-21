@@ -11,6 +11,7 @@ export { useOwnMapsStore } from './store/useOwnMapsStore';
 export { ProposalsLayer } from './components/ProposalsLayer';
 export { useCommunityAutoSync } from './hooks/useCommunityAutoSync';
 export { useCommunitySignIn } from './hooks/useCommunitySignIn';
+export { useSharedMapsSync } from './hooks/useSharedMapsSync';
 export { CONTEXT_KINDS } from './config/contextKinds';
 export { AiReadingCard } from './components/AiReadingCard';
 export { ContextLayerRow } from './components/ContextLayerRow';

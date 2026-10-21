@@ -10,6 +10,7 @@ import { toViewSource } from '../utils/toViewSource';
 import { wholeMapChunks } from '../utils/wholeMapChunks';
 import { addSightedObjects } from './addSightedObjects';
 import { readWholeMap } from './readWholeMap';
+import { shareMap } from './shareMap';
 import { shareObjects } from './shareObjects';
 
 /**
@@ -64,8 +65,11 @@ export async function autoReadMap(mapId: string): Promise<void> {
     // offline or a daily limit: they stay here and can be shared by hand
   }
   // read whole: not again; stopped or cut short: the next placing reads it again
-  if (!stop && !r.stopped && !r.failed)
+  if (!stop && !r.stopped && !r.failed) {
     await useOwnMapsStore.getState().update(map.id, { readAt: Date.now() });
+    // other devices and members then do not read it again
+    await shareMap(map.id);
+  }
 
   const parts = [
     `nowe obiekty: ${added}`,

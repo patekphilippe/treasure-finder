@@ -1,3 +1,4 @@
+import type { OwnMap } from './domain';
 import type { SourceObject } from './sources';
 
 /** Kinds the shared base holds: the sources' kinds and the military ones from military maps. */
@@ -60,6 +61,27 @@ export interface AdminMember {
 export interface AdminCommunityObject extends Omit<CommunityObject, 'mine' | 'mineAuthor'> {
   removedAt: number | null;
   notes: string[];
+}
+
+/** An own map shared with the community (server/, R2 + D1): everything but the image. */
+export interface SharedMap {
+  id: string;
+  name: string;
+  year: number | null;
+  width: number;
+  height: number;
+  pixelToSource: number[];
+  epsg: number;
+  method: OwnMap['method'];
+  mime: string;
+  bytes: number;
+  /** the member who shared it */
+  author: string | null;
+  /** shared by the asking member: they may change and remove it */
+  mine: boolean;
+  /** read whole by AI already: other devices do not read it again */
+  readAt: number | null;
+  updatedAt: number;
 }
 
 /** Disputed objects do not count in the NMT candidates' score and are shown grey. */

@@ -100,7 +100,8 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   Service worker podaje kafelki z tych cache przed siecią i sam nic nie zapisuje. Kafelki NMT wybiera
   `shared/lib/tiles/pickSourceTiles.ts`, wspólne dla warstwy i pobierania: zmiana w jednym miejscu.
 - Własne mapy historyczne: magazyn `maps` (obraz do 16 Mpx + georeferencja w układzie pliku, `shared/lib/georef`),
-  wchodzą do kopii ZIP (wersja 4, obrazy w `mapy/`). Skan bez georeferencji może umieścić backend (`POST /api/placements`, numer arkusza
+  wchodzą do kopii ZIP (wersja 4, obrazy w `mapy/`). Mapy są wspólne dla członków: skan w R2, umieszczenie w D1
+  (`history/services/shareMap.ts`, `syncSharedMaps.ts`, `useSharedMapsSync`; docs/BACKEND.md, „Wspólne mapy”). Skan bez georeferencji może umieścić backend (`POST /api/placements`, numer arkusza
   albo nazwy); wynik to tylko start przeciągania narożników. Warstwa `WarpedImageGridLayer` przelicza dokładnie narożniki każdego kafelka, a przy
   silnym zniekształceniu dzieli kafelek na części (`map/utils/warpCells.ts`). Arkusze 1:100 000 (KdDR, WIG) backend
   znajduje po tytule: miejscowość z tytułu wskazuje oczko siatki 30′ × 15′ (`shared/lib/georef/gridSheetAt.ts`).

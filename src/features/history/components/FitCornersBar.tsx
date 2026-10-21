@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography';
 import { glass, useToastStore } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { autoReadMap } from '../services/autoReadMap';
+import { shareMap } from '../services/shareMap';
 
 /** Bottom bar while fitting a scan: how to do it, see-through slider, done / cancel. */
 export function FitCornersBar() {
@@ -66,8 +67,8 @@ export function FitCornersBar() {
             onClick={() => {
               void finishFit().then(() => {
                 showToast(`Zapisano dopasowanie: ${map.name}`);
-                // placed: Claude reads the whole map in the background (once)
-                void autoReadMap(map.id);
+                // placed: on the server for the community, then Claude reads it whole (once)
+                void shareMap(map.id).finally(() => autoReadMap(map.id));
               });
             }}
           >

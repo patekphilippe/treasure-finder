@@ -5,20 +5,22 @@ import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
 import { useUiStore } from '@/shared/store/useUiStore';
 import type { OwnMap } from '@/shared/types/domain';
-import { ConfirmDialog, Icon } from '@/shared/ui';
+import { ConfirmDialog, Icon, useToastStore } from '@/shared/ui';
 import { OWN_MAP_ACCEPT } from '../config/ownMaps';
 import { addOwnMapFiles, type AddOwnMapOptions } from '../services/addOwnMapFiles';
 import { showOwnMap } from '../services/showOwnMap';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { OwnMapImportDialog } from './OwnMapImportDialog';
 import { OwnMapItem } from './OwnMapItem';
+import { removeOwnMap } from '../services/removeOwnMap';
+import { shareMap } from '../services/shareMap';
 
 /**
  * Dane: own historical maps loaded from files (a GeoTIFF, an image with a world file or a plain
  * scan), placed and managed here; Warstwy only shows them.
  */
 export function OwnMapsSection() {
-  const { maps, update, remove, startFit } = useOwnMapsStore();
+  const { maps, update, startFit } = useOwnMapsStore();
   const busy = useOwnMapsStore((s) => s.importing !== null);
   const closeSheet = useUiStore((s) => s.closeSheet);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,7 +59,8 @@ export function OwnMapsSection() {
         <OwnMapItem
           key={m.id}
           map={m}
-          onChange={(patch) => void update(m.id, patch)}
+          // a year or name changed on a shared map goes to the community too
+          onChange={(patch) => void update(m.id, patch).then(() => shareMap(m.id))}
           onShow={() => {
             if (!m.visible) void update(m.id, { visible: true });
             showOwnMap(m);
@@ -106,9 +109,18 @@ export function OwnMapsSection() {
       <ConfirmDialog
         open={toDelete !== null}
         title="Usunąć mapę?"
-        message={toDelete?.name}
+        message={
+          toDelete?.shared?.mine
+            ? `${toDelete.name}. Zniknie też u innych członków społeczności.`
+            : toDelete?.name
+        }
         onConfirm={() => {
-          if (toDelete) void remove(toDelete.id);
+          if (toDelete)
+            removeOwnMap(toDelete.id).catch((e: unknown) =>
+              useToastStore
+                .getState()
+                .show(e instanceof Error ? e.message : 'Nie udało się usunąć mapy'),
+            );
           setToDelete(null);
         }}
         onCancel={() => setToDelete(null)}

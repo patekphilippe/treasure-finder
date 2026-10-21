@@ -16,6 +16,8 @@ interface OwnMapItemProps {
 }
 
 export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapItemProps) {
+  // someone else's shared map: shown and switched here, changed only by its author
+  const editable = !map.shared || map.shared.mine;
   return (
     <Stack spacing={0.25} sx={{ py: 0.5 }}>
       <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
@@ -25,18 +27,26 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
             {map.name}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {METHOD_LABEL[map.method]}, {map.width} × {map.height} px
+            {map.shared
+              ? map.shared.mine
+                ? 'Udostępniona społeczności'
+                : `Wspólna, od: ${map.shared.author ?? 'członka społeczności'}`
+              : `${METHOD_LABEL[map.method]}, ${map.width} × ${map.height} px`}
           </Typography>
         </Stack>
         <IconButton size="small" aria-label="Włącz i pokaż na mapie" onClick={onShow}>
           <Icon name="crosshairs" size={18} />
         </IconButton>
-        <IconButton size="small" aria-label="Dopasuj narożnikami" onClick={onFit}>
-          <Icon name="vector-square" size={18} />
-        </IconButton>
-        <IconButton size="small" aria-label="Usuń mapę" color="error" onClick={onDelete}>
-          <Icon name="trash" size={18} />
-        </IconButton>
+        {editable && (
+          <IconButton size="small" aria-label="Dopasuj narożnikami" onClick={onFit}>
+            <Icon name="vector-square" size={18} />
+          </IconButton>
+        )}
+        {editable && (
+          <IconButton size="small" aria-label="Usuń mapę" color="error" onClick={onDelete}>
+            <Icon name="trash" size={18} />
+          </IconButton>
+        )}
       </Stack>
       <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 3.5, pr: 1 }}>
         <TextField
@@ -45,6 +55,7 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
           label="Rok mapy"
           placeholder="np. 1936"
           defaultValue={map.year ?? ''}
+          disabled={!editable}
           slotProps={{ htmlInput: { inputMode: 'numeric', maxLength: 4 } }}
           sx={{ width: 120 }}
           onBlur={(e) => {

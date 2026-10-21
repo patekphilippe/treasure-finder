@@ -5,6 +5,7 @@ import type { Env } from '../env';
 import { fail, json } from '../http';
 import { consumeDaily } from '../submissions/dailyLimit';
 import { memberFrom } from './auth';
+import { communityMaps } from './maps';
 import {
   cleanObject,
   MAX_OBJECTS_PER_ANSWER,
@@ -31,6 +32,9 @@ export async function communityRoutes(
   const member = await memberFrom(request, env, now);
   if (!member) return fail(401, 'Zaloguj się kontem z zaproszeniem do społeczności', cors);
   const write = () => consumeDaily(env.DB, [`member:${member.id}`], MEMBER_DAILY_WRITES, now);
+
+  if (path === 'maps' || path.startsWith('maps/'))
+    return communityMaps(request, env, path, member, cors, now);
 
   if (request.method === 'GET' && path === 'me')
     return json(

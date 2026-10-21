@@ -15,6 +15,7 @@
 | Logowanie             | Auth0 (plan Free)            | tylko OAuth (Google), rejestracja tylko z zaproszenia; sekcja „Logowanie”                |
 | Panel przeglądu       | aplikacja pod `…/#admin`     | logowanie kontem właściciela (`ADMIN_EMAILS`); `ADMIN_TOKEN` już tylko dla skryptów      |
 | Kafelki cieniowania   | R2 `treasure-finder-tiles`   | gotowe kafelki 512 px (`relief/1/z/x/y`), liczone raz z NMT GUGiK                        |
+| Wspólne mapy          | R2 (`mapy/<id>`) + D1        | skany własnych map członków i ich umieszczenie (`shared_maps`); sekcja „Wspólne mapy”    |
 
 ## Koszty
 
@@ -160,6 +161,23 @@ działa bez konta i offline.
    albo zmienne repozytorium `AUTH0_DOMAIN` i `AUTH0_CLIENT_ID`.
 
 Bez domeny Auth0 społeczność i panel są zamknięte, a reszta aplikacji działa bez zmian.
+
+## Wspólne mapy (`/api/community/maps`)
+
+Własne mapy członków są wspólne: skan leży w R2 (`mapy/<id>`, ten sam kubełek co kafelki
+cieniowania), a nazwa, rok, georeferencja, autor i znacznik odczytu AI w tabeli `shared_maps`.
+
+- **Wysyłanie:** po umieszczeniu mapy („Gotowe” przy narożnikach albo od razu z georeferencją)
+  aplikacja wysyła skan (`PUT /api/community/maps/<id>`, formularz: `meta` i `image`), potem już tylko
+  zmiany umieszczenia, roku i nazwy. Mapy dodane wcześniej wysyła sama przy synchronizacji.
+- **Pobieranie:** przy starcie i po każdym powrocie do aplikacji (zalogowany członek) lista
+  (`GET /api/community/maps`), brakujące skany (`…/<id>/image`). Własne mapy z innego urządzenia są
+  od razu widoczne, mapy innych członków do włączenia w Warstwach albo suwakiem lat.
+- **Zmiany i usuwanie:** tylko autor (i właściciel). Usunięcie swojej mapy usuwa ją u wszystkich.
+- **Odczyt AI raz:** `read_at` mówi innym urządzeniom, że mapa jest już przeczytana; jej obiekty są we
+  wspólnej bazie, z tym samym id mapy, więc filtry „Tylko z widocznej mapy” i suwak lat działają wszędzie.
+- **Limity:** skan do 30 MB (mapa w aplikacji ma najwyżej ok. 16 Mpx), 30 nowych skanów dziennie na
+  członka. Skany widzą tylko zaproszeni członkowie.
 
 ## Odczyt widoku mapy (`POST /api/readings`)
 
