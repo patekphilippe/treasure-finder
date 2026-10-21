@@ -11,9 +11,9 @@ routes = [
   { pattern = "www.treasurefinder.pl", custom_domain = true },
   { pattern = "trefinder.pl", custom_domain = true },
   { pattern = "www.trefinder.pl", custom_domain = true },
-  { pattern = "tresurefinder.pl", custom_domain = true },
-  { pattern = "www.tresurefinder.pl", custom_domain = true },
 ]
+# tresurefinder.pl is left out until its zone is in the Cloudflare account and the token's reach:
+# the deploy failed on it ("Can't infer zone", code 10082) and the site stayed old
 
 [assets]
 directory = "../dist"

@@ -24,9 +24,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,14 +33,6 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run test
-
-      # treasurefinder.pl (docs/BACKEND.md, "Adres aplikacji"): the app from /, deployed whenever
-      # the Cloudflare keys are there, like the backend (server.yml); a missing variable used to
-      # skip it silently and the site stayed old
-      - run: npm run build
-      - if: env.CLOUDFLARE_API_TOKEN != ''
-        working-directory: server
-        run: npm ci && npm run deploy:site
 
       # the old address on GitHub Pages stays while data moves over (a banner points to treasurefinder.pl)
       - run: npm run build
@@ -63,3 +52,24 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # treasurefinder.pl (docs/BACKEND.md, "Adres aplikacji"): the app from /, deployed whenever the
+  # Cloudflare keys are there, like the backend (server.yml). A job of its own: its failure shows
+  # as red without holding the old address back.
+  site:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        working-directory: server
+        run: npm ci && npm run deploy:site
