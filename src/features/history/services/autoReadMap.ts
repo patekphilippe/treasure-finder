@@ -5,6 +5,7 @@ import { useToastStore } from '@/shared/ui';
 import { useAiSettings } from '../store/useAiSettings';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { mapPointMover } from '../utils/mapPointMover';
+import { profileForMap } from '../utils/profileForMap';
 import { movedWithMap } from '../utils/movedWithMap';
 import { proposalToContext } from '../utils/proposalToContext';
 import { readResM } from '../utils/readResM';
@@ -29,7 +30,8 @@ export async function autoReadMap(mapId: string): Promise<void> {
     showToast('Zaloguj się, a każda dodana mapa zostanie przeczytana przez AI');
     return;
   }
-  const { model, profile } = useAiSettings.getState();
+  const { model } = useAiSettings.getState();
+  const profile = profileForMap(map, useAiSettings.getState().profile);
   const chunks = wholeMapChunks(map, profile);
   if (!chunks?.length) return;
   const n = chunks.length;

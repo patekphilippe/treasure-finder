@@ -328,7 +328,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'ai-profile',
     title: 'Rodzaj mapy',
     content:
-      'Mapa topograficzna: Claude szuka zabudowy, młynów i karczm. Mapa wojskowa (np. sztabowa z 1945 r.): linii frontu, okopów, stanowisk, przepraw i mogił. Pozycje ostrzegają przed niewybuchami u pobliskich kandydatów, a kandydaci tuż przy mogile stają się chronieni.',
+      'Mapa topograficzna 1:25 000: Claude szuka zabudowy, młynów i karczm. Arkusz 1:100 000 (KdDR, WIG): skrótów z legendy i zaginionych wsi; mapy 1:100 000 dostają go same. Mapa wojskowa (np. sztabowa z 1945 r.): linii frontu, okopów, stanowisk, przepraw i mogił. Pozycje ostrzegają przed niewybuchami u pobliskich kandydatów, a kandydaci tuż przy mogile stają się chronieni.',
     mode: 'field',
     sheet: 'analyses',
     card: 'ai',

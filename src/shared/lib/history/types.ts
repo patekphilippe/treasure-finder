@@ -24,10 +24,27 @@ export const MILITARY_OBJECT_KINDS = [
   'mogila',
   'inne',
 ] as const;
+/**
+ * What a 1:100 000 sheet reading may report (KdDR, WIG): whole villages instead of houses, places
+ * from the legend's abbreviations, and no catch-all kind (it drew pins on place names).
+ */
+export const SHEET100_OBJECT_KINDS = [
+  'wies',
+  'mlyn',
+  'karczma',
+  'folwark',
+  'lesniczowka',
+  'cegielnia',
+  'kosciol',
+  'huta',
+  'smolarnia',
+  'brod',
+] as const;
 export type MapObjectKind = (typeof MAP_OBJECT_KINDS)[number];
 export type MilitaryObjectKind = (typeof MILITARY_OBJECT_KINDS)[number];
+export type Sheet100ObjectKind = (typeof SHEET100_OBJECT_KINDS)[number];
 /** anything a reading profile may report */
-export type ReadKind = MapObjectKind | MilitaryObjectKind;
+export type ReadKind = MapObjectKind | MilitaryObjectKind | Sheet100ObjectKind;
 
 /** One object read from a map image, in image pixels (x right, y down). */
 export interface MapObject<K extends string = MapObjectKind> {

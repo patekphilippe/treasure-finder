@@ -81,7 +81,10 @@ export function AiReadingSection() {
         onChange={(_, v: ReadProfileId | null) => v && setProfile(v)}
       >
         <ToggleButton value="topo" sx={{ flex: 1 }}>
-          Mapa topograficzna
+          Topograficzna 1:25k
+        </ToggleButton>
+        <ToggleButton value="arkusz100" sx={{ flex: 1 }}>
+          Arkusz 1:100k
         </ToggleButton>
         <ToggleButton value="wojskowa" sx={{ flex: 1 }}>
           Mapa wojskowa
@@ -90,7 +93,9 @@ export function AiReadingSection() {
       <Typography variant="body2" color="text.secondary">
         {military
           ? 'Claude czyta naniesioną sytuację bojową: linię frontu, okopy, stanowiska, punkty dowodzenia, przeprawy, pola minowe i mogiły. Kandydaci NMT przy pozycjach dostają ostrzeżenie o niewybuchach.'
-          : 'Claude czyta widoczny fragment mapy historycznej: domy, młyny, karczmy, folwarki. Aplikacja porównuje je z dzisiejszymi budynkami (BDOT10k) i proponuje miejsca, których już nie ma.'}
+          : profile === 'arkusz100'
+            ? 'Arkusz 1:100 000 (KdDR, WIG): Claude czyta skróty z legendy (M. młyn, Whs. karczma, Gut folwark, Fh. leśniczówka, Zgl. cegielnia) i całe wsie. Zostają wsie, których dziś nie ma, oraz miejsca przy znaku, nie przy nazwie.'
+            : 'Claude czyta widoczny fragment mapy historycznej: domy, młyny, karczmy, folwarki. Aplikacja porównuje je z dzisiejszymi budynkami (BDOT10k) i proponuje miejsca, których już nie ma.'}
       </Typography>
       {military && (
         <Typography variant="caption" color="warning.main">

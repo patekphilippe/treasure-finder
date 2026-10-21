@@ -2,6 +2,7 @@ import { BDOT_EXCLUSION } from '@/shared/config/bdotWms';
 import {
   buildMilitaryProposals,
   buildProposals,
+  buildSheet100Proposals,
   READ_PROFILES,
   type ReadProfileId,
   type SiteProposal,
@@ -39,8 +40,9 @@ export async function readViewSites(
   const buildings = await fetchBuildingMask(grid.originE, grid.originN, grid.res, grid.w, grid.h, [
     { ...BDOT_EXCLUSION[0]!, bufferM: 0 },
   ]);
+  const build = profile === 'arkusz100' ? buildSheet100Proposals : buildProposals;
   return {
-    sites: buildProposals(objects, buildings, grid, PROPOSAL_OPTIONS),
+    sites: build(objects, buildings, grid, PROPOSAL_OPTIONS),
     usage,
     read: objects.length,
   };

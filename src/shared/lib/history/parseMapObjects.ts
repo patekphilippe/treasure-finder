@@ -5,13 +5,14 @@ const MAX_LINE_POINTS = 60;
 
 /**
  * The reading's JSON → valid objects inside the image (anything malformed is dropped). `kinds`:
- * what the profile may report (others become "inne"); line points outside the image are dropped.
+ * what the profile may report (others become "inne", or are dropped by a profile without it);
+ * line points outside the image are dropped.
  */
 export function parseMapObjects<K extends string = MapObjectKind>(
   input: unknown,
   w: number,
   h: number,
-  // every profile's kinds include "inne", the fallback
+  // "inne" is the fallback where the profile has it (the 1:100 000 one does not)
   kinds: readonly K[] = MAP_OBJECT_KINDS as unknown as readonly K[],
 ): MapObject<K>[] {
   const list = (input as { objects?: unknown })?.objects;
@@ -23,9 +24,9 @@ export function parseMapObjects<K extends string = MapObjectKind>(
     const x = Number(o?.x);
     const y = Number(o?.y);
     if (!inside(x, y)) continue;
-    const kind = (kinds as readonly string[]).includes(String(o.kind))
-      ? (o.kind as K)
-      : ('inne' as K);
+    const known = (kinds as readonly string[]).includes(String(o.kind));
+    if (!known && !(kinds as readonly string[]).includes('inne')) continue;
+    const kind = known ? (o.kind as K) : ('inne' as K);
     const c = Number(o.confidence);
     const object: MapObject<K> = {
       kind,

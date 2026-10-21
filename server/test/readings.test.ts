@@ -142,6 +142,32 @@ describe('view readings', () => {
     expect((await read({ profile: 'kataster' })).status).toBe(400);
   });
 
+  it('reads a 1:100 000 sheet with its legend; no catch-all kind for place names', async () => {
+    claude = () =>
+      Response.json({
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              objects: [
+                { kind: 'karczma', label: 'Whs. z. Hoffnung', x: 5, y: 5, confidence: 0.8 },
+                { kind: 'inne', label: 'Reppersdorf', x: 9, y: 9, confidence: 0.9 },
+              ],
+            }),
+          },
+        ],
+        stop_reason: 'end_turn',
+        usage: { input_tokens: 2000, output_tokens: 300 },
+      });
+    const res = await read({ profile: 'arkusz100', res: '8' });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as MapReading;
+    // a kind outside the legend is dropped, not turned into a pin
+    expect(body.objects.map((o) => o.kind)).toEqual(['karczma']);
+    expect(sent!.messages[0]!.content[1]!.text).toMatch(/1:100 000 topographic sheet/);
+    expect(JSON.stringify(sent!.output_config)).not.toContain('"inne"');
+  });
+
   it('refuses anyone not signed in with an invitation, and bad input', async () => {
     const anonymous = await read({}, null);
     expect(anonymous.status).toBe(401);

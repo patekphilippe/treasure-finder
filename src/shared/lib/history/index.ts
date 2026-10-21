@@ -1,4 +1,5 @@
 export { buildMilitaryProposals } from './buildMilitaryProposals';
+export { buildSheet100Proposals } from './buildSheet100Proposals';
 export { buildProposals, type ProposalOptions, type SiteProposal } from './buildProposals';
 export { clusterPoints } from './clusterPoints';
 export { compareSites, type SeenOn } from './compareSites';
@@ -22,6 +23,7 @@ export {
 } from './types';
 export { READ_SCHEMA, readPrompt } from './readPrompt';
 export { MILITARY_SCHEMA, militaryPrompt } from './militaryPrompt';
+export { SHEET100_SCHEMA, sheet100Prompt } from './sheet100Prompt';
 export {
   isReadProfileId,
   READ_PROFILES,
