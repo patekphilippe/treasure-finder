@@ -49,8 +49,14 @@ Konto i społeczność (z przeklikania aplikacji):
     - „Inne” — opis **obowiązkowy** (serwer odrzuca zgłoszenie bez opisu)
   - Przy pozostałych powodach opis opcjonalny.
   - Jedna osoba zgłasza dany obiekt tylko raz (drugi raz: „już zgłoszone”).
-  - Do przemyślenia przez Ciebie: identyfikatory powodów po angielsku (do bazy i API) i dlaczego nie polskie zdania;
-    co widzi zgłaszający po decyzji właściciela.
+  - Identyfikatory powodów (baza i API): `wrong_category`, `not_on_map`, `wrong_position`, `other`.
+    Polskie napisy są tylko w interfejsie.
+  - Po decyzji właściciela zgłaszający dostaje **powiadomienie w skrzynce w aplikacji**: gdy jest internet,
+    aplikacja pyta serwer o nowe powiadomienia i pokazuje je (licznik / toast). Bez Web Push.
+  - Decyzja właściciela = gotowy tekst (np. „Obiekt usunięty”, „Sprawdziłem, obiekt jest poprawny”)
+    + opcjonalny własny dopisek.
+  - Do przemyślenia przez Ciebie: dlaczego identyfikatory, a nie polskie zdania; czy właściciel może poprawić
+    miejsce/kategorię obiektu (nowa akcja), czy tylko usunąć / zostawić; skąd aplikacja wie, które powiadomienia są nowe.
 - [do sprawdzenia] Co robi zwykły członek: skąd biorą się obiekty we wspólnej bazie i kto je dodaje.
 
 ## Zasady
