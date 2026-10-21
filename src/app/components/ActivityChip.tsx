@@ -52,6 +52,8 @@ export function ActivityChip() {
             ...glass(theme),
             height: 40,
             px: 0.5,
+            // a long task name ends in "…" instead of running off the screen
+            maxWidth: 'min(70vw, 320px)',
             fontWeight: 600,
             color: summary.tone === 'ready' ? 'primary.main' : 'text.primary',
             '& .MuiChip-icon': { color: summary.tone === 'busy' ? 'primary.main' : 'inherit' },
