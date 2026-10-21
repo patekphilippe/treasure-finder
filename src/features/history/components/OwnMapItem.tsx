@@ -6,6 +6,7 @@ import type { OwnMap } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
 import { METHOD_LABEL } from '../config/ownMaps';
 import { parseMapYear } from '../utils/parseMapYear';
+import { readableMapName } from '../utils/readableMapName';
 
 interface OwnMapItemProps {
   map: OwnMap;
@@ -24,7 +25,7 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
         <Icon name="map" size={20} />
         <Stack sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle2" noWrap>
-            {map.name}
+            {readableMapName(map.name)}
           </Typography>
           <Typography variant="caption" color="text.secondary">
             {map.shared

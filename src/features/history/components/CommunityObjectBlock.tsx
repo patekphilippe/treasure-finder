@@ -66,15 +66,27 @@ export function CommunityObjectBlock({ feature }: CommunityObjectBlockProps) {
     });
 
   return (
-    <Stack spacing={1}>
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+    <Stack spacing={1.25} sx={{ bgcolor: 'action.hover', borderRadius: '12px', p: 1.5 }}>
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1.25 }}>
         <Icon name="users" size={20} />
-        <Typography variant="body2" sx={{ flex: 1 }}>
-          Wspólna baza: {c.mineAuthor ? 'Twój punkt' : (c.author ?? 'zatwierdzone źródło')}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          ✓ {c.up} · ✗ {c.down}
-        </Typography>
+        <Stack sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2">Wspólna baza</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {c.mineAuthor ? 'Twój punkt' : `Od: ${c.author ?? 'zatwierdzone źródło'}`}
+          </Typography>
+        </Stack>
+        <Stack
+          direction="row"
+          aria-label={`Potwierdzenia: ${c.up}, sprzeciwy: ${c.down}`}
+          sx={{ alignItems: 'center', gap: 0.5, color: 'text.secondary' }}
+        >
+          <Icon name="check" size={16} />
+          <Typography variant="body2" sx={{ mr: 1 }}>
+            {c.up}
+          </Typography>
+          <Icon name="times" size={16} />
+          <Typography variant="body2">{c.down}</Typography>
+        </Stack>
       </Stack>
       {isDisputed(c) && (
         <Alert severity="warning">
@@ -83,8 +95,11 @@ export function CommunityObjectBlock({ feature }: CommunityObjectBlockProps) {
       )}
       {c.mineAuthor ? (
         <Button
+          size="small"
+          variant="outlined"
           color="inherit"
           disabled={busy}
+          sx={{ alignSelf: 'flex-start' }}
           onClick={() =>
             void run(async () => {
               await communityApi.remove(c.id);

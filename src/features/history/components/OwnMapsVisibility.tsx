@@ -10,6 +10,7 @@ import type { OwnMap } from '@/shared/types/domain';
 import { Icon } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { shownMaps } from '../utils/shownMaps';
+import { readableMapName } from '../utils/readableMapName';
 
 /**
  * Warstwy: which of your maps are shown, in one field grouped by year (by name or year, a whole
@@ -55,14 +56,18 @@ export function OwnMapsVisibility() {
           options={sorted}
           value={shownList}
           groupBy={yearOf}
-          getOptionLabel={(m) => m.name}
+          getOptionLabel={(m) => readableMapName(m.name)}
           isOptionEqualToValue={(a, b) => a.id === b.id}
           noOptionsText="Brak takiej mapy"
+          // a long name stays on one line with the typing space next to it
+          sx={{ '& .MuiAutocomplete-tag': { maxWidth: 'calc(100% - 72px)' } }}
           // typing finds a map by its name or its year
           filterOptions={(options, { inputValue }) => {
             const q = inputValue.trim().toLowerCase();
             return q
-              ? options.filter((m) => `${m.name} ${m.year ?? ''}`.toLowerCase().includes(q))
+              ? options.filter((m) =>
+                  `${readableMapName(m.name)} ${m.year ?? ''}`.toLowerCase().includes(q),
+                )
               : options;
           }}
           renderGroup={(group) => (
@@ -87,7 +92,9 @@ export function OwnMapsVisibility() {
           renderOption={({ key, ...props }, m) => (
             <li key={key} {...props}>
               <Stack sx={{ minWidth: 0 }}>
-                <Typography variant="body2">{m.name}</Typography>
+                <Typography variant="body2" sx={{ overflowWrap: 'anywhere' }}>
+                  {readableMapName(m.name)}
+                </Typography>
                 {m.shared && !m.shared.mine && (
                   <Typography variant="caption" color="text.secondary">
                     od: {m.shared.author ?? 'członka społeczności'}

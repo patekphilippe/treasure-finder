@@ -20,6 +20,7 @@ import {
   WORLD_EXT,
 } from '../config/ownMaps';
 import { encodeImage } from '../utils/encodeImage';
+import { readableMapName } from '../utils/readableMapName';
 
 /** The file has a georeference but no system the app knows: ask the user for it. */
 export class NeedCrsError extends Error {}
@@ -159,7 +160,8 @@ export async function importOwnMap(
   const image = files.find((f) => IMAGE_EXT.test(f.name));
   if (!image) throw new Error('Wybierz plik mapy: GeoTIFF, JPG, PNG albo WebP');
   const world = files.find((f) => WORLD_EXT.test(f.name));
-  const name = image.name.replace(/\.[^.]+$/, '');
+  // a file name read as a name: "P44_S24_BRESLAU" → "P44 S24 BRESLAU"
+  const name = readableMapName(image.name.replace(/\.[^.]+$/, ''));
   const named = yearsFromText(name);
   const year = opts.year ?? (named && named.from === named.to ? named.from : undefined);
   const base = {

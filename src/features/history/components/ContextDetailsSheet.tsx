@@ -1,4 +1,4 @@
-import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useMemo, useState } from 'react';
@@ -40,28 +40,38 @@ export function ContextDetailsSheet({ onClose }: ContextDetailsSheetProps) {
       <Stack spacing={2}>
         {/* the maps it was seen on are listed below; an older object shows its description */}
         {(feature.label || !feature.seen) && (
-          <Typography variant="body2">{feature.label || feature.source || 'brak opisu'}</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600, overflowWrap: 'anywhere' }}>
+            {feature.label || feature.source || 'brak opisu'}
+          </Typography>
         )}
+        <Stack direction="row" sx={{ gap: 1 }}>
+          {at && (
+            <Button
+              variant="outlined"
+              color="inherit"
+              startIcon={<Icon name="search" size={18} />}
+              onClick={() => flyTo({ ...at, zoom: 17, offsetY: bottomSheetOffset() })}
+              sx={{ flex: 1 }}
+            >
+              Pokaż na mapie
+            </Button>
+          )}
+          {/* objects of others belong to the community: dispute them instead of deleting */}
+          {(!feature.community || feature.community.mineAuthor) && (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<Icon name="trash-alt" size={18} />}
+              onClick={() => setConfirm(true)}
+            >
+              Usuń
+            </Button>
+          )}
+        </Stack>
         <Stack spacing={1}>
-          <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
-            <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>
-              Widziany na mapach ({sightings.length})
-            </Typography>
-            {at && (
-              <IconButton
-                aria-label="Pokaż na mapie"
-                onClick={() => flyTo({ ...at, zoom: 17, offsetY: bottomSheetOffset() })}
-              >
-                <Icon name="search" size={22} />
-              </IconButton>
-            )}
-            {/* objects of others belong to the community: dispute them instead of deleting */}
-            {(!feature.community || feature.community.mineAuthor) && (
-              <IconButton aria-label="Usuń obiekt" color="error" onClick={() => setConfirm(true)}>
-                <Icon name="trash-alt" size={22} />
-              </IconButton>
-            )}
-          </Stack>
+          <Typography variant="overline" color="text.secondary">
+            Widziany na mapach ({sightings.length})
+          </Typography>
           {sightings.map((s, i) => (
             <SightingRow key={i} sighting={s} at={at} />
           ))}

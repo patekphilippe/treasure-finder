@@ -2,6 +2,7 @@ import { pluralPl } from '@/shared/lib/format';
 import { contextYears } from '@/shared/lib/history';
 import type { ContextFeature } from '@/shared/types/domain';
 import { describeSighting } from './describeSighting';
+import { readableMapName } from './readableMapName';
 
 /**
  * An object's second line in the list: what the map says with the years and the number of maps
@@ -13,6 +14,6 @@ export function contextLine(f: ContextFeature): string {
   const maps = f.seen && f.seen.length > 1 ? pluralPl(f.seen.length, 'mapa', 'mapy', 'map') : null;
   if (f.label) return [f.label, years, maps].filter(Boolean).join(' · ');
   if (!f.seen?.length) return f.source;
-  if (f.seen.length === 1) return describeSighting(f.seen[0]!).title;
+  if (f.seen.length === 1) return readableMapName(describeSighting(f.seen[0]!).title);
   return [maps, years].filter(Boolean).join(' · ');
 }

@@ -14,6 +14,7 @@ import { OwnMapItem } from './OwnMapItem';
 import { removeOwnMap } from '../services/removeOwnMap';
 import { shareMap } from '../services/shareMap';
 import { startFitting } from '../services/startFitting';
+import { readableMapName } from '../utils/readableMapName';
 
 /**
  * Dane: own historical maps loaded from files (a GeoTIFF, an image with a world file or a plain
@@ -108,8 +109,10 @@ export function OwnMapsSection() {
         title="Usunąć mapę?"
         message={
           toDelete?.shared?.mine
-            ? `${toDelete.name}. Zniknie też u innych członków społeczności.`
-            : toDelete?.name
+            ? `${readableMapName(toDelete.name)}. Zniknie też u innych członków społeczności.`
+            : toDelete
+              ? readableMapName(toDelete.name)
+              : undefined
         }
         onConfirm={() => {
           if (toDelete)

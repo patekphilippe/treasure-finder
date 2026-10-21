@@ -7,6 +7,7 @@ import { useUiStore } from '@/shared/store/useUiStore';
 import { glass } from '@/shared/ui';
 import { finishFitting } from '../services/finishFitting';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
+import { readableMapName } from '../utils/readableMapName';
 
 /**
  * Bottom bar while fitting a scan: how to do it, see-through slider, done / cancel. A sheet opened
@@ -41,7 +42,7 @@ export function FitCornersBar() {
     >
       <Stack spacing={1}>
         <Typography variant="subtitle2" noWrap>
-          Dopasuj: {map.name}
+          Dopasuj: {readableMapName(map.name)}
         </Typography>
         <Typography variant="caption" color="text.secondary">
           Przeciągaj zielone narożniki 1–4, aż drogi, rzeki i wsie na skanie pokryją się z

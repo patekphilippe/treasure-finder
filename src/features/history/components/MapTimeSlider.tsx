@@ -69,7 +69,7 @@ export function MapTimeSlider() {
           <Typography variant="h6" sx={{ lineHeight: 1.25, fontVariantNumeric: 'tabular-nums' }}>
             {timeYear ?? 'Wybierz rok'}
           </Typography>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>
             {shown === null
               ? 'Mapy z jednego roku: przesuń suwak albo użyj strzałek'
               : shown.length

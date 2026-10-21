@@ -1,5 +1,6 @@
 import type { HistoricalLayer } from '@/features/layers';
 import type { OwnMap } from '@/shared/types/domain';
+import { readableMapName } from './readableMapName';
 
 export interface TimeSelection {
   /** own maps shown: the years with a map of that year (empty: none of them) */
@@ -33,6 +34,9 @@ export function timeSelection(
     years: own.length ? [year] : [],
     layerId: layer?.id ?? null,
     layerYear: byYear ? year : null,
-    shown: [...own.map((m) => `${m.name} (Twoja mapa)`), ...(layer ? [layer.label] : [])],
+    shown: [
+      ...own.map((m) => `${readableMapName(m.name)} (Twoja mapa)`),
+      ...(layer ? [layer.label] : []),
+    ],
   };
 }
