@@ -31,7 +31,7 @@ vi.mock('@/features/history/services/placeScanWithAi', () => ({
 }));
 vi.mock('@/features/history/services/importOwnMap', () => ({
   importOwnMap: async (files: File[], opts: { sheet?: unknown; corners?: unknown }) => {
-    const name = files[0]!.name.replace(/\.[^.]+$/, '');
+    const name = files[0]!.name.replace(/\.[^.]+$/, '').replace(/_/g, ' ');
     if (!opts.sheet && !opts.corners) throw new Error('Przesuń mapę w okolicę skanu');
     events.push(`import ${name}${opts.corners ? '' : ' (arkusz)'}`);
     return { map: { id: name, name } as OwnMap, needsFit: true };
@@ -58,7 +58,7 @@ describe('loading a folder of maps', () => {
     useMembership.setState({ email: 'anna@example.com', name: 'Anna', owner: false });
     useActivityStore.setState({ tasks: [] });
     useOwnMapsStore.setState({
-      maps: [{ id: 'old', name: 'P38_S36_WARSZAWA', readAt: 1 } as OwnMap],
+      maps: [{ id: 'old', name: 'P38 S36 WARSZAWA', readAt: 1 } as OwnMap],
       importing: null,
       add: async (m) => {
         added.push(m.id);
@@ -71,13 +71,13 @@ describe('loading a folder of maps', () => {
     const r = await addOwnMapFolder([jpg('P50_S33_KRAKOW.jpg'), jpg('P39_S24_POZNAN.jpg')]);
     expect(events).toEqual([
       'place P39_S24_POZNAN.jpg',
-      'import P39_S24_POZNAN',
-      'read P39_S24_POZNAN',
+      'import P39 S24 POZNAN',
+      'read P39 S24 POZNAN',
       'place P50_S33_KRAKOW.jpg',
-      'import P50_S33_KRAKOW',
-      'read P50_S33_KRAKOW',
+      'import P50 S33 KRAKOW',
+      'read P50 S33 KRAKOW',
     ]);
-    expect(r.added).toEqual(['P39_S24_POZNAN', 'P50_S33_KRAKOW']);
+    expect(r.added).toEqual(['P39 S24 POZNAN', 'P50 S33 KRAKOW']);
     // the sheet from the file name is the backend's hint where to look
     expect(hints[0]).toMatchObject({ north: 52.5, west: 16.833333333333332 });
     expect(useActivityStore.getState().tasks).toEqual([]);
@@ -89,10 +89,10 @@ describe('loading a folder of maps', () => {
     placeFails = (n) => n.startsWith('P39');
     const r = await addOwnMapFolder([jpg('P39_S24_POZNAN.jpg'), jpg('bez_numeru.jpg')]);
     placeFails = () => true;
-    expect(r.toFit).toEqual(['P39_S24_POZNAN']);
-    expect(events).not.toContain('read P39_S24_POZNAN');
+    expect(r.toFit).toEqual(['P39 S24 POZNAN']);
+    expect(events).not.toContain('read P39 S24 POZNAN');
     // sorted by name; the one without a number was placed by AI
-    expect(added).toEqual(['bez_numeru', 'P39_S24_POZNAN']);
+    expect(added).toEqual(['bez numeru', 'P39 S24 POZNAN']);
     const again = await addOwnMapFolder([jpg('Mapa bez numeru 2.jpg')]);
     expect(again.skipped).toEqual(['Mapa bez numeru 2']);
   });
@@ -103,15 +103,15 @@ describe('loading a folder of maps', () => {
       jpg('P50_S33_KRAKOW.jpg'),
       new File(['0'], 'P50_S33_KRAKOW.jgw'),
     ]);
-    expect(r).toEqual({ added: [], toFit: [], skipped: ['P50_S33_KRAKOW'], known: 1 });
+    expect(r).toEqual({ added: [], toFit: [], skipped: ['P50 S33 KRAKOW'], known: 1 });
     expect(events).toEqual([]);
   });
 
   it('without signing in: by the sheet number only, nothing sent', async () => {
     useMembership.setState({ email: null, name: null, owner: false });
     const r = await addOwnMapFolder([jpg('P39_S24_POZNAN.jpg')]);
-    expect(events).toEqual(['import P39_S24_POZNAN (arkusz)']);
-    expect(r.toFit).toEqual(['P39_S24_POZNAN']);
+    expect(events).toEqual(['import P39 S24 POZNAN (arkusz)']);
+    expect(r.toFit).toEqual(['P39 S24 POZNAN']);
   });
 
   it('out of readings: stops, and the same folder later finishes the map and goes on', async () => {
@@ -125,8 +125,8 @@ describe('loading a folder of maps', () => {
     // Poznań placed, its reading cut by the limit: nothing more is tried
     expect(events).toEqual([
       'place P39_S24_POZNAN.jpg',
-      'import P39_S24_POZNAN',
-      'read P39_S24_POZNAN',
+      'import P39 S24 POZNAN',
+      'read P39 S24 POZNAN',
     ]);
     expect(first.added).toEqual([]);
     expect(useToastStore.getState().message).toMatch(/Zatrzymane.*Wskaż ten sam folder później/);
@@ -139,9 +139,9 @@ describe('loading a folder of maps', () => {
     readCut = false;
     placeLimit = true;
     const second = await addOwnMapFolder(folder);
-    expect(events).toEqual(['read P39_S24_POZNAN', 'place P48_S30_KRAKOW.jpg']);
-    expect(second.added).toEqual(['P39_S24_POZNAN']);
+    expect(events).toEqual(['read P39 S24 POZNAN', 'place P48_S30_KRAKOW.jpg']);
+    expect(second.added).toEqual(['P39 S24 POZNAN']);
     // Kraków was not put on the sheet corners roughly: left for the next run
-    expect(added).toEqual(['P39_S24_POZNAN']);
+    expect(added).toEqual(['P39 S24 POZNAN']);
   });
 });

@@ -7,6 +7,7 @@ import { useToastStore } from '@/shared/ui';
 import { IMAGE_EXT, WORLD_EXT } from '../config/ownMaps';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { mapFileGroups } from '../utils/mapFileGroups';
+import { readableMapName } from '../utils/readableMapName';
 import { autoReadMap } from './autoReadMap';
 import { importOwnMap, type ImportOptions } from './importOwnMap';
 import { placeScanWithAi } from './placeScanWithAi';
@@ -89,7 +90,8 @@ export async function addOwnMapFolder(files: readonly File[]): Promise<FolderRes
   const showToast = useToastStore.getState().show;
   const maps = useOwnMapsStore.getState().maps;
   const known = new Set(maps.map((m) => m.name));
-  const all = mapFileGroups(files);
+  // maps are named readably ("P44 S24 BRESLAU" from "P44_S24_BRESLAU"): compare like that
+  const all = mapFileGroups(files).map((g) => ({ ...g, name: readableMapName(g.name) }));
   const names = new Set(all.map((g) => g.name));
   const ai = BACKEND_ENABLED && !!useMembership.getState().email;
   // placed and shared on an earlier run, its reading cut short: finished first

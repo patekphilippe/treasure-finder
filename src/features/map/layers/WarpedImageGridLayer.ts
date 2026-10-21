@@ -63,7 +63,8 @@ export class WarpedImageGridLayer extends L.GridLayer {
   private mips: (HTMLCanvasElement | undefined)[] = [];
 
   constructor(source: WarpedImage, options?: L.GridLayerOptions) {
-    super({ minZoom: WARPED_MIN_ZOOM, ...options, bounds: footprint(source) });
+    // not `minZoom`: Leaflet would lock the whole map's zoom to it while the layer is on
+    super({ ...options, bounds: footprint(source) });
     this.source = source;
     this.side = imageSide(source);
   }
@@ -99,6 +100,8 @@ export class WarpedImageGridLayer extends L.GridLayer {
     const canvas = document.createElement('canvas');
     canvas.width = size.x * dpr;
     canvas.height = size.y * dpr;
+    // a country's view: the sheet would be a smudge costing the whole scan
+    if (coords.z < WARPED_MIN_ZOOM) return canvas;
     const map = (this as unknown as { _map: L.Map })._map;
     const { sourceToPixel: h, crs } = this.source;
     const proj = getProj4();
