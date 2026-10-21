@@ -7,6 +7,7 @@ import type { OwnMap } from '@/shared/types/domain';
 import { ConfirmDialog, Icon, useToastStore } from '@/shared/ui';
 import { OWN_MAP_ACCEPT } from '../config/ownMaps';
 import { addOwnMapFiles, type AddOwnMapOptions } from '../services/addOwnMapFiles';
+import { addOwnMapFolder } from '../services/addOwnMapFolder';
 import { showOwnMap } from '../services/showOwnMap';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { OwnMapImportDialog } from './OwnMapImportDialog';
@@ -23,6 +24,7 @@ export function OwnMapsSection() {
   const { maps, update } = useOwnMapsStore();
   const busy = useOwnMapsStore((s) => s.importing !== null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const folderRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<{ files: File[]; mode: 'crs' | 'scan' } | null>(null);
   const [toDelete, setToDelete] = useState<OwnMap | null>(null);
 
@@ -87,8 +89,32 @@ export function OwnMapsSection() {
       >
         Dodaj mapę
       </Button>
+      <input
+        ref={folderRef}
+        type="file"
+        hidden
+        // a whole folder: not in React's types, the browsers take it as an attribute
+        {...{ webkitdirectory: '' }}
+        onChange={(e) => {
+          const files = [...(e.target.files ?? [])];
+          if (files.length) void addOwnMapFolder(files);
+          e.target.value = '';
+        }}
+      />
+      <Button
+        data-tour="own-maps-folder"
+        variant="outlined"
+        color="inherit"
+        disabled={busy}
+        startIcon={<Icon name="folder-open" size={20} />}
+        onClick={() => folderRef.current?.click()}
+      >
+        Wczytaj folder
+      </Button>
       <Typography variant="caption" color="text.secondary">
-        Obraz z plikiem world file (.jgw, .pgw, .tfw): wybierz oba pliki naraz.
+        Obraz z plikiem world file (.jgw, .pgw, .tfw): wybierz oba pliki naraz. Folder: wszystkie
+        skany po kolei, arkusz WIG z nazwy pliku (np. P47_S40), każdy umieszczony i przeczytany
+        przez AI; mapy już wczytane są pomijane.
       </Typography>
       {pending && (
         <OwnMapImportDialog

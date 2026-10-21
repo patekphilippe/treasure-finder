@@ -10,6 +10,7 @@ Wersja 1 do przeniesienia: legacy/index.html.
 - npm run test testy Vitest
 - npm run lint ESLint (w tym reguła architektury)
 - npm run build build produkcyjny, musi przejść przed każdym commitem
+- npm run fetch-wig -- --at lat,lng | --match nazwa | --sheet "P47 S40" pobiera arkusze WIG z mapywig.org do `data/wig100` (po jednym, wznawialne)
 - w `server/`: npm run test (testy w runtime Workers), npm run typecheck, npm run dev (wrangler dev)
 
 ## Analiza NMT
@@ -116,7 +117,7 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Dodanie mapy (`history/services/addOwnMapFiles.ts`): skan umieszczony przez AI albo plik z georeferencją jest od razu
   pokazany sam (`focusOwnMap`: suwak lat i mapa z internetu wyłączone, inne Twoje mapy ukryte), udostępniony i czytany
   przez AI cały w tle (`autoReadMap.ts`, raz: `readAt`, w rozdzielczości skanu `utils/readResM.ts`); obiekty idą od razu
-  do kontekstu i do wspólnej bazy. Narożniki są tylko opcją (toast „Popraw narożniki”, Dane). Przeciąganie narożników
+  do kontekstu i do wspólnej bazy. Narożniki są tylko opcją (toast „Popraw narożniki”, Dane). „Wczytaj folder” (`addOwnMapFolder.ts`) bierze po kolei każdą mapę z folderu (pomija już wczytane po nazwie): umieszcza ją backend z arkuszem z nazwy pliku jako wskazówką (`shared/lib/georef/sheetFromName.ts`), AI czyta ją całą przed następną; bez logowania albo gdy umieszczenie się nie uda, tylko z numeru arkusza i bez odczytu do poprawy narożników. Przeciąganie narożników
   (`startFitting`/`finishFitting`) trwa mimo otwierania arkuszy, do „Gotowe” albo „Anuluj”; inne stare mapy są wtedy
   schowane. Poprawka mapy już przeczytanej przesuwa obiekty widziane tylko na niej (`moveObjectsWithMap`, we wspólnej
   bazie przez `POST /api/community/objects/moves`); czytanie w toku dopasowuje znalezione obiekty na końcu. Sekcja „Stare mapy” w Warstwach jest ułożona pod telefon: kafel roku (`MapTimeSlider`, `utils/timeSelection.ts`)

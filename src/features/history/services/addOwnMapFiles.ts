@@ -3,8 +3,7 @@ import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useToastStore } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { importOwnMap, NeedCrsError, type ImportOptions } from './importOwnMap';
-import { placeOwnMap } from './placeOwnMap';
-import { refinePlacement } from './refinePlacement';
+import { placeScanWithAi } from './placeScanWithAi';
 import { autoReadMap } from './autoReadMap';
 import { focusOwnMap } from './focusOwnMap';
 import { shareMap } from './shareMap';
@@ -46,14 +45,11 @@ export async function addOwnMapFiles(
         if (auto && scan) {
           update({ step: 'Umieszczam mapę po nazwach (AI)' });
           try {
-            const p = await placeOwnMap(scan, useMapViewStore.getState().bounds);
-            if (p.frame) update({ step: 'Dopasowuję ramkę do skanu' });
-            const corners = await refinePlacement(scan, p);
-            placed = { corners, ...(p.year && { year: p.year }) };
-            placedNote =
-              p.method === 'arkusz'
-                ? `Umieszczono po ramce arkusza ${p.sheetNumber ?? p.series}`
-                : `Umieszczono po nazwach: ${p.anchors.slice(0, 3).join(', ')} (ok. ${p.uncertaintyM} m)`;
+            const r = await placeScanWithAi(scan, useMapViewStore.getState().bounds, () =>
+              update({ step: 'Dopasowuję ramkę do skanu' }),
+            );
+            placed = r.placed;
+            placedNote = r.note;
           } catch (e) {
             showToast(
               `${e instanceof Error ? e.message : 'Nie udało się umieścić mapy'}. Przeciągnij narożniki.`,
