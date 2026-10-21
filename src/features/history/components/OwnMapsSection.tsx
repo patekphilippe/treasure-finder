@@ -14,6 +14,7 @@ import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { OwnMapImportDialog } from './OwnMapImportDialog';
 import { OwnMapItem } from './OwnMapItem';
 import { removeOwnMap } from '../services/removeOwnMap';
+import { removeAllOwnMaps } from '../services/removeAllOwnMaps';
 import { removeOrphanObjects } from '../services/removeOrphanObjects';
 import { rereadOwnMap } from '../services/rereadOwnMap';
 import { useContextStore } from '../store/useContextStore';
@@ -34,6 +35,8 @@ export function OwnMapsSection() {
   const [pending, setPending] = useState<{ files: File[]; mode: 'crs' | 'scan' } | null>(null);
   const [toDelete, setToDelete] = useState<OwnMap | null>(null);
   const [toReread, setToReread] = useState<OwnMap | null>(null);
+  const [clearAll, setClearAll] = useState(false);
+  const mine = maps.filter((m) => !m.shared || m.shared.mine).length;
   const member = useMembership((st) => st.email !== null);
   const features = useContextStore((s) => s.features);
   // objects of maps removed before they went with their map
@@ -126,6 +129,17 @@ export function OwnMapsSection() {
       >
         Wczytaj folder
       </Button>
+      {mine > 1 && (
+        <Button
+          variant="outlined"
+          color="error"
+          disabled={busy}
+          startIcon={<Icon name="trash" size={20} />}
+          onClick={() => setClearAll(true)}
+        >
+          Usuń wszystkie moje mapy ({mine})
+        </Button>
+      )}
       {orphans > 0 && (
         <Button
           variant="outlined"
@@ -154,6 +168,18 @@ export function OwnMapsSection() {
           }}
         />
       )}
+      <ConfirmDialog
+        open={clearAll}
+        title="Usunąć wszystkie Twoje mapy?"
+        message={`${mine} map zniknie z tego urządzenia i ze wspólnej bazy, razem z obiektami odczytanymi tylko z nich. Mapy innych członków zostają.`}
+        confirmLabel="Usuń wszystkie"
+        destructive
+        onConfirm={() => {
+          setClearAll(false);
+          void removeAllOwnMaps();
+        }}
+        onCancel={() => setClearAll(false)}
+      />
       <ConfirmDialog
         open={toReread !== null}
         title="Przeczytać mapę od nowa?"

@@ -25,6 +25,7 @@ vi.mock('@/features/history/services/autoReadMap', () => ({
 const { rereadOwnMap } = await import('@/features/history/services/rereadOwnMap');
 const { removeOwnMap } = await import('@/features/history/services/removeOwnMap');
 const { orphanObjects } = await import('@/features/history/utils/orphanObjects');
+const { removeAllOwnMaps } = await import('@/features/history/services/removeAllOwnMaps');
 const { profileForMap } = await import('@/features/history/utils/profileForMap');
 const { useContextStore } = await import('@/features/history/store/useContextStore');
 const { useOwnMapsStore } = await import('@/features/history/store/useOwnMapsStore');
@@ -122,5 +123,22 @@ describe('reading a map again', () => {
       new Set(['m2']),
     );
     expect(left.map((f) => f.id)).toEqual(['pin', 'mine', 'theirs']);
+  });
+
+  it('removing all own maps leaves other members’ maps and the objects other maps confirm', async () => {
+    useOwnMapsStore.setState({
+      maps: [
+        makeOwnMap(),
+        makeOwnMap({ id: 'm2', shared: { mine: false, author: 'Bartek', updatedAt: 1 } }),
+      ],
+      load: async () => {},
+    });
+    expect(await removeAllOwnMaps()).toBe(1);
+    expect(useOwnMapsStore.getState().maps.map((m) => m.id)).toEqual(['m2']);
+    expect(useContextStore.getState().features.map((f) => f.id)).toEqual([
+      'theirs',
+      'both',
+      'other',
+    ]);
   });
 });
