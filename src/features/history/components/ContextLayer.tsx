@@ -4,7 +4,7 @@ import { CircleMarker, GeoJSON, Marker } from 'react-leaflet';
 import { isDisputed } from '@/shared/types/community';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
-import { CONTEXT_KINDS } from '../config/contextKinds';
+import { CONTEXT_KINDS, CONTEXT_MIN_ZOOM } from '../config/contextKinds';
 import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useContextStore } from '../store/useContextStore';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
@@ -14,17 +14,18 @@ import { representativePoint } from '../utils/representativePoint';
 
 /** opacity of objects not seen on the visible map ("Tylko z widocznej mapy") or not of the slider's year */
 const DIMMED = 0.35;
-/** icons from this zoom; further out the objects are dots on one canvas, cheap to zoom */
-const ICON_MIN_ZOOM = 13;
+/** icons from this zoom; between CONTEXT_MIN_ZOOM and here dots on one canvas, cheap to zoom */
+const ICON_MIN_ZOOM = 14;
 /** more icons than this in view also fall back to dots: each icon is an element of its own */
 const MAX_ICONS = 250;
 /** objects this far outside the view (share of its size) are drawn too, for smooth panning */
 const VIEW_PAD = 0.5;
 
 /**
- * Archival objects: an icon per object, plus the line or outline when it is not a point; zoomed
- * out, or with many in view, coloured dots on a canvas instead (hundreds of icons made zooming
- * stutter). Only what is near the view is drawn. With "Tylko z widocznej mapy" the objects not
+ * Archival objects: an icon per object, plus the line or outline when it is not a point. Only
+ * from about a town's area on the screen (CONTEXT_MIN_ZOOM) and only near the view; a little
+ * further out, or with many in view, coloured dots on a canvas instead of icons (hundreds of
+ * icons made zooming stutter). The selected object is drawn at any zoom. With "Tylko z widocznej mapy" the objects not
  * seen on the visible map are dimmed, not hidden: they still count in the analysis.
  */
 export function ContextLayer() {
@@ -49,11 +50,6 @@ export function ContextLayer() {
     void useContextStore.getState().load();
   }, []);
 
-  const shapes = useMemo(
-    () => features.filter((f) => f.geometry.type !== 'Point' && f.geometry.type !== 'MultiPoint'),
-    [features],
-  );
-
   const zoom = useMapViewStore((s) => s.zoom);
   const bounds = useMapViewStore((s) => s.bounds);
   const renderer = useMemo(() => L.canvas({ padding: VIEW_PAD }), []);
@@ -65,8 +61,9 @@ export function ContextLayer() {
       }),
     [features],
   );
+  const shown = zoom >= CONTEXT_MIN_ZOOM;
   const near = useMemo(() => {
-    if (!bounds) return points;
+    if (!bounds || !shown) return points.filter(({ f }) => f.id === selectedId);
     const dLat = (bounds.north - bounds.south) * VIEW_PAD;
     const dLng = (bounds.east - bounds.west) * VIEW_PAD;
     return points.filter(
@@ -76,7 +73,14 @@ export function ContextLayer() {
         at.lng > bounds.west - dLng &&
         at.lng < bounds.east + dLng,
     );
-  }, [points, bounds]);
+  }, [points, bounds, shown, selectedId]);
+  const shapes = useMemo(
+    () =>
+      near
+        .map(({ f }) => f)
+        .filter((f) => f.geometry.type !== 'Point' && f.geometry.type !== 'MultiPoint'),
+    [near],
+  );
   const icons = zoom >= ICON_MIN_ZOOM && near.length <= MAX_ICONS;
 
   if (!visible) return null;

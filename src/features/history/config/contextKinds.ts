@@ -25,6 +25,12 @@ export const CONTEXT_KIND_ORDER: readonly ContextKind[] = [
   'inne',
 ];
 
+/**
+ * Objects from maps are drawn from this zoom on (about a town's area on the screen): further
+ * out there are too many to be of use and drawing them all eats the phone's memory.
+ */
+export const CONTEXT_MIN_ZOOM = 12;
+
 /** `source` of objects marked by hand without a historical map on */
 export const MANUAL_SOURCE = 'zaznaczone ręcznie';
 

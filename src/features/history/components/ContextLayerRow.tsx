@@ -3,8 +3,10 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
+import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon } from '@/shared/ui';
+import { CONTEXT_MIN_ZOOM } from '../config/contextKinds';
 import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useContextStore } from '../store/useContextStore';
 
@@ -21,6 +23,7 @@ export function ContextLayerRow() {
   const seenOnView = useSeenOnView();
   const showSheet = useUiStore((s) => s.showSheet);
   const filter = onlyViewMap && seenOnView;
+  const tooFar = useMapViewStore((s) => s.zoom < CONTEXT_MIN_ZOOM);
 
   return (
     <Stack spacing={0.75} sx={{ px: 0.5 }}>
@@ -35,6 +38,11 @@ export function ContextLayerRow() {
           slotProps={{ input: { 'aria-label': 'Pokaż obiekty z map' } }}
         />
       </Stack>
+      {visible && tooFar && count > 0 && (
+        <Typography variant="caption" color="text.secondary">
+          Przybliż mapę do obszaru wielkości miasta, a obiekty się pokażą. Analiza liczy je zawsze.
+        </Typography>
+      )}
       <Stack
         data-tour="history-filter"
         direction="row"
