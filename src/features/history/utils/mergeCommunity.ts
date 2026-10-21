@@ -10,7 +10,7 @@ const inside = (f: ContextFeature, b: Bounds) => {
 
 /**
  * The shared base for one area merged into the local context objects:
- * - a known object (by community id) gets the current votes;
+ * - a known object (by community id) gets the current votes and position (a placement corrected);
  * - an object new here becomes a local context object;
  * - an object gone from the base disappears, except the member's own one, which stays private.
  */
@@ -34,8 +34,23 @@ export function mergeCommunity(
     const known = byCommunity.get(r.id);
     if (known) {
       const old = known.community!;
-      if (old.up !== r.up || old.down !== r.down || old.mine !== r.mine || old.author !== r.author)
-        put.push({ ...known, community: link });
+      const [lng, lat] =
+        known.geometry.type === 'Point'
+          ? (known.geometry.coordinates as [number, number])
+          : [r.lng, r.lat];
+      const moved = Math.abs(lng - r.lng) > 1e-7 || Math.abs(lat - r.lat) > 1e-7;
+      if (
+        moved ||
+        old.up !== r.up ||
+        old.down !== r.down ||
+        old.mine !== r.mine ||
+        old.author !== r.author
+      )
+        put.push({
+          ...known,
+          ...(moved && { geometry: { type: 'Point' as const, coordinates: [r.lng, r.lat] } }),
+          community: link,
+        });
       continue;
     }
     put.push({

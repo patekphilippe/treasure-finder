@@ -1,5 +1,5 @@
 import { createId } from '@/shared/lib/createId';
-import { crsTransform, toEpsg2180 } from '@/shared/lib/geo';
+import { crsTransform, dhdnToWgs84, toEpsg2180 } from '@/shared/lib/geo';
 import {
   affineHomography,
   applyHomography,
@@ -68,13 +68,16 @@ function scanPlacement(w: number, h: number, opts: ImportOptions): Homography {
   if (opts.sheet) {
     const b = sheetCorners(opts.sheet.series, opts.sheet.number);
     if (!b) throw new Error('Nie rozpoznaję numeru arkusza');
+    // a Messtischblatt frame is in the old German datum: ~150–200 m off WGS84 in Poland
+    const german = opts.sheet.series === 'messtischblatt';
     const dst = [
       [b.north, b.west],
       [b.north, b.east],
       [b.south, b.east],
       [b.south, b.west],
     ].map(([lat, lng]) => {
-      const [x, y] = toEpsg2180(lat!, lng!);
+      const p = german ? dhdnToWgs84(lat!, lng!) : { lat: lat!, lng: lng! };
+      const [x, y] = toEpsg2180(p.lat, p.lng);
       return { x, y };
     });
     return fitHomography(corners(w, h), dst);

@@ -2,11 +2,17 @@ import { exports } from 'cloudflare:workers';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MapPlacement } from '@/shared/types/placement';
 import { signedInAs } from './signIn';
+import { dhdnToWgs84 } from '@/shared/lib/geo/dhdnToWgs84';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 let device = 0;
 // a signed-in member for each test (beforeEach)
 let placer: string;
+
+const near = (p: { lat: number; lng: number }) => ({
+  lat: expect.closeTo(p.lat, 6),
+  lng: expect.closeTo(p.lng, 6),
+});
 
 function place(fields: Record<string, string> = {}, auth: string | null = placer) {
   const body = new FormData();
@@ -90,12 +96,22 @@ describe('placing a scanned map', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as MapPlacement;
     expect(body.method).toBe('arkusz');
+    // the sheet corners moved from the old German datum to WGS84
     const [nw, ne, se, sw] = body.corners;
-    expect(nw!.lat).toBeCloseTo(51.2, 6);
-    expect(nw!.lng).toBeCloseTo(17, 6);
-    expect(ne!.lng).toBeCloseTo(17 + 10 / 60, 6);
-    expect(se!.lat).toBeCloseTo(51.1, 6);
-    expect(sw!.lng).toBeCloseTo(17, 6);
+    expect(nw).toEqual(near(dhdnToWgs84(51.2, 17)));
+    expect(ne).toEqual(near(dhdnToWgs84(51.2, 17 + 10 / 60)));
+    expect(se).toEqual(near(dhdnToWgs84(51.1, 17 + 10 / 60)));
+    expect(sw).toEqual(near(dhdnToWgs84(51.1, 17)));
+    // the frame as read and its corners, for the app to snap to the full scan
+    expect(body.frame?.image).toEqual([
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 1, y: 1 },
+      { x: 0, y: 1 },
+    ]);
+    expect(body.frame?.at[2]).toEqual(near(dhdnToWgs84(51.1, 17 + 10 / 60)));
+    expect(sent!.system).toBeTruthy();
+    expect(JSON.stringify(sent)).toContain('neatline');
     // a short answer: names and frame only, no objects
     expect(JSON.stringify(sent!.output_config)).not.toContain('"objects"');
     expect(sent!.max_tokens).toBe(4096);
@@ -107,10 +123,11 @@ describe('placing a scanned map', () => {
     const res = await place();
     expect(res.status).toBe(200);
     const [nw, ne, se] = ((await res.json()) as MapPlacement).corners;
-    expect(nw!.lat).toBeCloseTo(52.5, 6);
-    expect(nw!.lng).toBeCloseTo(16 + 50 / 60, 6);
-    expect(ne!.lng).toBeCloseTo(17 + 20 / 60, 6);
-    expect(se!.lat).toBeCloseTo(52.25, 6);
+    expect(nw).toEqual(near(dhdnToWgs84(52.5, 16 + 50 / 60)));
+    expect(ne).toEqual(near(dhdnToWgs84(52.5, 17 + 20 / 60)));
+    expect(se).toEqual(near(dhdnToWgs84(52.25, 17 + 20 / 60)));
+    // Posen: ~150 m south and west of the printed grid
+    expect((52.5 - nw!.lat) * 111_200).toBeGreaterThan(120);
   });
 
   it('says so when nothing places the map; only for signed-in members', async () => {

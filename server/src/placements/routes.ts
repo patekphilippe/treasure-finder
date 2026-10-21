@@ -105,6 +105,13 @@ export async function placeImage(request: Request, env: Env, cors: Cors, now: nu
     series: reading.series,
     year: reading.year,
     sheetNumber: reading.sheetNumber,
+    // back to fractions of the image height, for snapping the frame to the full scan
+    ...(placement.frame && {
+      frame: {
+        image: placement.frame.uv.map((p) => ({ x: p.x, y: p.y / aspect })),
+        at: placement.frame.at,
+      },
+    }),
   };
   return json(body, 200, cors);
 }

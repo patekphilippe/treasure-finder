@@ -8,6 +8,7 @@ import { parseCustomId } from '../src/pipeline/requests';
 import { LOCK_MS, releaseLock, takeLock } from '../src/pipeline/runLock';
 import { runPipeline } from '../src/pipeline/runPipeline';
 import { invitedMember, signedInAs } from './signIn';
+import { dhdnToWgs84 } from '@/shared/lib/geo/dhdnToWgs84';
 
 const worker = (exports as unknown as { default: Fetcher }).default;
 const testEnv = env as unknown as Env;
@@ -117,8 +118,10 @@ describe('AI pipeline', () => {
     expect(v.result?.georef).toEqual({ method: 'arkusz', rmsM: null });
     const mill = v.result!.objects[0]!;
     expect(mill.kind).toBe('mlyn');
-    expect(mill.lat).toBeCloseTo(51.05, 6);
-    expect(mill.lng).toBeCloseTo(17.0833, 3);
+    // the middle of the Messtischblatt sheet, moved from the old German datum to WGS84
+    const want = dhdnToWgs84(51.05, 17 + 5 / 60);
+    expect(mill.lat).toBeCloseTo(want.lat, 6);
+    expect(mill.lng).toBeCloseTo(want.lng, 3);
     expect(ai.deleted).toHaveLength(1);
   });
 

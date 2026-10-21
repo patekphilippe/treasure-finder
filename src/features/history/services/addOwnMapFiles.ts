@@ -5,6 +5,7 @@ import { useToastStore } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { importOwnMap, NeedCrsError, type ImportOptions } from './importOwnMap';
 import { placeOwnMap } from './placeOwnMap';
+import { refinePlacement } from './refinePlacement';
 import { autoReadMap } from './autoReadMap';
 import { shareMap } from './shareMap';
 import { showOwnMap } from './showOwnMap';
@@ -43,7 +44,9 @@ export async function addOwnMapFiles(
           update({ step: 'Umieszczam mapę po nazwach (AI)' });
           try {
             const p = await placeOwnMap(scan, useMapViewStore.getState().bounds);
-            placed = { corners: p.corners, ...(p.year && { year: p.year }) };
+            if (p.frame) update({ step: 'Dopasowuję ramkę do skanu' });
+            const corners = await refinePlacement(scan, p);
+            placed = { corners, ...(p.year && { year: p.year }) };
             showToast(
               p.method === 'arkusz'
                 ? `Umieszczono po numerze arkusza ${p.sheetNumber ?? ''}. Sprawdź narożniki.`

@@ -51,7 +51,8 @@ export async function placeMap(
     !numbered && GRID_100K.includes(reading.series) && reading.sheetTitle
       ? await sheetByTitle(env, reading.sheetTitle, now)
       : null;
-  if (titled && reading.frameCorners) return placeByBounds(titled, reading.frameCorners);
+  if (titled && reading.frameCorners)
+    return placeByBounds(titled, reading.frameCorners, reading.series === 'kdr');
   const sheet = numbered ?? titled;
   const area = sheet ? growBbox(sheet, 5) : view ? growBbox(view, 15) : null;
   if (!area) return null;

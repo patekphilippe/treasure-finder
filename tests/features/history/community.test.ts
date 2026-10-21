@@ -58,11 +58,20 @@ describe('merging the shared base into local objects', () => {
     ]);
   });
 
-  it('known objects only get new votes; unchanged ones are left alone', () => {
+  it('known objects get new votes and position; unchanged ones are left alone', () => {
     const mine = local('x', link('a1'));
     expect(mergeCommunity([mine], [remote('a1')], area).put).toEqual([]);
     const { put } = mergeCommunity([mine], [remote('a1', { up: 3, mine: 1 })], area);
     expect(put).toEqual([{ ...mine, community: link('a1', { up: 3, mine: 1 }) }]);
+    // the map it was read from was placed better: the point follows the base
+    const moved = mergeCommunity([mine], [remote('a1', { lat: 50.7987, lng: 15.7978 })], area);
+    expect(moved.put).toEqual([
+      {
+        ...mine,
+        geometry: { type: 'Point', coordinates: [15.7978, 50.7987] },
+        community: link('a1'),
+      },
+    ]);
   });
 
   it('gone from the base: others’ objects disappear, my own stays private, outside the area untouched', () => {

@@ -63,7 +63,8 @@ export const MAP_SCHEMA = {
     }),
     legibility: { type: 'string', enum: ['dobra', 'srednia', 'slaba'] },
     frameCorners: {
-      description: 'the four corners of the printed map frame when all are visible, else null',
+      description:
+        'the four corners of the neatline (the innermost line around the map picture, where the corner degrees are printed) when all are visible, else null',
       anyOf: [
         {
           type: 'object',
@@ -145,12 +146,16 @@ export const TEXT_SCHEMA = {
   additionalProperties: false,
 } as const;
 
+/** Which frame is meant: AI readings took the sheet's outer border, ~700 m off on a 1:100 000 sheet. */
+export const FRAME_RULE =
+  "Give the four corners of the map frame if all are visible: the neatline, the innermost line around the map picture, at whose corners the degrees are printed (e.g. 52°30', 34°30'). Not the sheet's outer border or the margin around it.";
+
 export function mapInstruction(view: ViewBbox | null): string {
   const hint = view
     ? `The sender was looking at the area ${view.south.toFixed(3)}–${view.north.toFixed(3)}°N, ${view.west.toFixed(3)}–${view.east.toFixed(3)}°E when sending; the map is probably there.`
     : 'The location is unknown.';
   return `This image is a historical map (or a photo of one). ${hint}
-Identify the series, year and sheet number if printed. Give the four corners of the printed map frame if all are visible.
+Identify the series, year and sheet number if printed. ${FRAME_RULE}
 List every name printed on the map with its label centre: villages, hamlets, estates, mountains, rocks, streams and forests, settlements first. They are used to place the map on today's map, so read them exactly as printed and do not leave any out.
 List every building and every named or symbolised place of historical interest (kinds: ${MAP_OBJECT_KINDS.join(', ')}).
 Positions are fractions of the image: x from 0 (left) to 1 (right), y from 0 (top) to 1 (bottom).`;

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fitAffine, localPlane, placeByNames, placeBySheet } from '../src/pipeline/georef';
+import { dhdnToWgs84 } from '@/shared/lib/geo/dhdnToWgs84';
 
 describe('georeferencing', () => {
   it('fits an exact affine map with zero error', () => {
@@ -39,7 +40,7 @@ describe('georeferencing', () => {
     expect(placeByNames([{ uv: { x: 0, y: 0 }, at: { lat: 50, lng: 16 } }])).toBeNull();
   });
 
-  it('places a Messtischblatt photo from sheet 4968 and its frame corners', () => {
+  it('places a Messtischblatt photo from sheet 4968 and its frame corners (old German datum to WGS84)', () => {
     const frame = {
       nw: { x: 0.05, y: 0.04 },
       ne: { x: 0.95, y: 0.06 },
@@ -48,9 +49,12 @@ describe('georeferencing', () => {
     };
     const p = placeBySheet('messtischblatt', '4968', frame)!;
     const nw = p.toLatLng(frame.nw);
-    expect(nw.lat).toBeCloseTo(51.1, 6);
-    expect(nw.lng).toBeCloseTo(17.0, 6);
-    expect(p.toLatLng(frame.se).lat).toBeCloseTo(51.0, 6);
+    const want = dhdnToWgs84(51.1, 17);
+    expect(nw.lat).toBeCloseTo(want.lat, 6);
+    expect(nw.lng).toBeCloseTo(want.lng, 6);
+    expect(p.toLatLng(frame.se).lat).toBeCloseTo(dhdnToWgs84(51, 17 + 10 / 60).lat, 6);
+    // the frame is ~130 m south of its printed latitude
+    expect((51.1 - nw.lat) * 111_200).toBeGreaterThan(100);
   });
 });
 

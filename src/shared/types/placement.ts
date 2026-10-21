@@ -14,4 +14,9 @@ export interface MapPlacement {
   series: string;
   year: number | null;
   sheetNumber: string | null;
+  /**
+   * Placed by the sheet frame: its corners as read (fractions of the image, top-left first) and
+   * where they lie. The app snaps them to the frame lines of the full scan and fits again.
+   */
+  frame?: { image: { x: number; y: number }[]; at: { lat: number; lng: number }[] };
 }

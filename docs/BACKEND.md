@@ -227,8 +227,22 @@ odczyt to jedno wywołanie ze schematem JSON. Do dodawania profili jest skill Cl
 Przy imporcie własnej mapy bez georeferencji (Historia → Własne mapy, opcja „Automatycznie: po nazwach
 na mapie”) aplikacja wysyła pomniejszony obraz (do 1568 px) i obecny widok jako podpowiedź. Worker
 pyta Claude (Haiku, jedno wywołanie) o serię, numer arkusza, ramkę i nazwy, bez obiektów, więc
-odpowiedź jest krótka, a potem używa `placeMap` z potoku zgłoszeń: najpierw numer arkusza z ramką
-(dokładność starego układu, ok. 150 m), potem nazwy z gazetera. Zwraca narożniki obrazu.
+odpowiedź jest krótka, a potem używa `placeMap` z potoku zgłoszeń: najpierw numer arkusza z ramką,
+potem nazwy z gazetera. Zwraca narożniki obrazu, a przy umieszczeniu po ramce także samą ramkę
+(`frame`: narożniki odczytane na obrazie i ich współrzędne).
+
+- **Ramka mapy, nie obramowanie arkusza:** Claude ma podać narożniki wewnętrznej linii wokół treści
+  mapy, przy których są wypisane stopnie (`FRAME_RULE` w `pipeline/prompts.ts`). Na pomniejszonym
+  obrazie potrafi wziąć zewnętrzne obramowanie: na arkuszu Poznania z 1921 r. dawało to 600–1100 m
+  błędu. Dlatego aplikacja dociąga narożniki do linii ramki na pełnym skanie
+  (`shared/lib/georef/snapFrame.ts`, w Web Workerze): każdy bok trafia na linię, za którą zaczyna się
+  treść mapy, a na zewnątrz jest margines; linie siatki w mapie i obramowanie arkusza są pomijane. Potem
+  dopasowuje skan od nowa (`features/history/services/refinePlacement.ts`). Na tym arkuszu wynik
+  powtarza się co do 1 px (ok. 10 m).
+- **Stary układ niemiecki:** ramki Messtischblatt i Karte des Deutschen Reiches są w układzie DHDN
+  (elipsoida Bessela), w Polsce 150–220 m od WGS84. Narożniki arkusza przechodzą przez
+  `shared/lib/geo/dhdnToWgs84.ts` (7 parametrów jak w PROJ, bez proj4, więc działa i w workerze). WIG
+  zostaje bez zmiany.
 
 - **Arkusze 1:100 000 po tytule:** Karte des Deutschen Reiches ma numery bez siatki („301 Posen”), ale
   leży w tej samej siatce 30′ × 15′ co WIG 1:100 000, a arkusz nosi nazwę miejscowości, która na nim

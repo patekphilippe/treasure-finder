@@ -1,4 +1,5 @@
 // concrete files, not the index: the index also pulls browser-only canvas code
+import { dhdnToWgs84 } from '@/shared/lib/geo/dhdnToWgs84';
 import { applyHomography, fitHomography } from '@/shared/lib/georef/homography';
 import { sheetCorners, type SheetBounds, type SheetSeries } from '@/shared/lib/georef/sheetCorners';
 
@@ -20,6 +21,8 @@ export interface Placement {
   uncertaintyM: number;
   /** names the placement rests on (for the review panel) */
   anchors?: string[];
+  /** placed by the sheet frame: the frame corners as read and where they lie (NW, NE, SE, SW) */
+  frame?: { uv: UV[]; at: LatLng[] };
 }
 
 const M_PER_DEG_LAT = 110_574;
@@ -172,22 +175,30 @@ export function placeBySheet(
   frame: { nw: UV; ne: UV; se: UV; sw: UV },
 ): Placement | null {
   const b = sheetCorners(series, sheetNumber);
-  return b ? placeByBounds(b, frame) : null;
+  // a Messtischblatt frame is in the old German datum
+  return b ? placeByBounds(b, frame, series === 'messtischblatt') : null;
 }
 
-/** The printed frame fitted to a sheet's corners in degrees (from its number or its title). */
+/**
+ * The printed frame fitted to a sheet's corners in degrees (from its number or its title). German
+ * sheets (Messtischblatt, Karte des Deutschen Reiches) have their frame in the old datum: their
+ * corners are moved to WGS84 first (~150–200 m in Poland).
+ */
 export function placeByBounds(
   b: SheetBounds,
   frame: { nw: UV; ne: UV; se: UV; sw: UV },
+  oldGermanDatum = false,
 ): Placement {
+  const at = [
+    [b.north, b.west],
+    [b.north, b.east],
+    [b.south, b.east],
+    [b.south, b.west],
+  ].map(([lat, lng]) => (oldGermanDatum ? dhdnToWgs84(lat!, lng!) : { lat: lat!, lng: lng! }));
+  const uv = [frame.nw, frame.ne, frame.se, frame.sw];
   const h = fitHomography(
-    [frame.nw, frame.ne, frame.se, frame.sw],
-    [
-      { x: b.west, y: b.north },
-      { x: b.east, y: b.north },
-      { x: b.east, y: b.south },
-      { x: b.west, y: b.south },
-    ],
+    uv,
+    at.map((p) => ({ x: p.lng, y: p.lat })),
   );
   return {
     method: 'arkusz',
@@ -196,8 +207,9 @@ export function placeByBounds(
       return { lat: q.y, lng: q.x };
     },
     rmsM: null,
-    // old datum (tens of metres up to 100+ m) plus reading the corners on a photo
+    // reading the corners on a reduced image; the app snaps them to the scan's frame lines
     uncertaintyM: 150,
+    frame: { uv, at },
   };
 }
 
