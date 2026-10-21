@@ -73,9 +73,9 @@ prowadzi Cloudflare.
 3. W głównym folderze `npm run build`, potem w `server/`: `npm run deploy:site`. Pierwsze wdrożenie
    zakłada w Cloudflare domeny workera, rekordy DNS i certyfikaty.
 4. (Turnstile nie jest już potrzebny: analizy na serwerze wymagają logowania.)
-5. GitHub: zmienna repozytorium `SITE_ON_CLOUDFLARE` = `true`. Od tej chwili workflow „Deploy app”
-   wdraża przy każdym pushu nowy adres i stary. Token `CLOUDFLARE_API_TOKEN` potrzebuje wtedy też
-   dostępu do obu domen (Zone → Workers Routes: Edit).
+5. GitHub: workflow „Deploy app” wdraża przy każdym pushu nowy adres (gdy są sekrety Cloudflare,
+   tak jak backend) i stary. Token `CLOUDFLARE_API_TOKEN` potrzebuje do tego też dostępu do obu
+   domen (Zone → Workers Routes: Edit).
 
 ## Cieniowanie (`GET /api/relief/1/{z}/{x}/{y}`)
 
