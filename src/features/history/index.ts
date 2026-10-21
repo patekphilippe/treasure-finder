@@ -9,6 +9,7 @@ export { FitCornersLayer } from './components/FitCornersLayer';
 export { OwnMapsLayer } from './components/OwnMapsLayer';
 export { useOwnMapsStore } from './store/useOwnMapsStore';
 export { ProposalsLayer } from './components/ProposalsLayer';
+export { useCommunityAutoSync } from './hooks/useCommunityAutoSync';
 export { useCommunitySignIn } from './hooks/useCommunitySignIn';
 export { CONTEXT_KINDS } from './config/contextKinds';
 export { AiReadingCard } from './components/AiReadingCard';

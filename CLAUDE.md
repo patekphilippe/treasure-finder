@@ -124,7 +124,7 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Społeczność: logowanie w `shared/auth/` (Auth0 ładowany leniwie, nagłówek członka z `memberAuth()`), kto jest
   zalogowany w `shared/store/useMembership.ts` (localStorage, nigdy w eksporcie); zaproszenia (adres e-mail) wysyła
   właściciel ze swojej poczty z panelu `#admin`, Akcja Auth0 `server/auth0/postLogin.js` wpuszcza tylko zaproszonych;
-  wspólna baza przez `/api/community/` (docs/BACKEND.md), scalanie z lokalnym kontekstem w
+  wspólna baza przez `/api/community/` (docs/BACKEND.md), pobierana sama dla widoku mapy (`hooks/useCommunityAutoSync.ts`), scalanie z lokalnym kontekstem w
   `features/history/utils/mergeCommunity.ts`. Udostępniać wolno tylko obiekty z map, nigdy znaleziska.
 - Cieniowanie NMT z backendu: `server/src/relief` liczy kafelki od przybliżenia 12, aplikacja pokazuje je
   przez `features/map/layers/ReliefGridLayer.ts` z kafelkiem Geoportalu jako zastępstwem, póki nasz się liczy.
