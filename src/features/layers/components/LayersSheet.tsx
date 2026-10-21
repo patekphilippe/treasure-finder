@@ -111,8 +111,7 @@ export function LayersSheet({ onClose, ownMaps, timeline, contextObjects }: Laye
 
         <Divider />
 
-        <HistoricalSection timeline={timeline}>
-          {ownMaps}
+        <HistoricalSection timeline={timeline} ownMaps={ownMaps}>
           {contextObjects}
         </HistoricalSection>
 

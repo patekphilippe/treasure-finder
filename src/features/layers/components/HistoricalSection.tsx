@@ -16,12 +16,17 @@ const NONE = 'brak';
 interface HistoricalSectionProps {
   /** the time slider over all historical maps, owned by history (composed in the app shell) */
   timeline?: ReactNode;
-  /** own maps and archival objects, owned by history (composed in the app shell) */
+  /** which own maps are shown, owned by history */
+  ownMaps?: ReactNode;
+  /** archival objects, owned by history */
   children?: ReactNode;
 }
 
-/** Warstwy: the online historical map shown, then (from history) own maps and objects. */
-export function HistoricalSection({ timeline, children }: HistoricalSectionProps) {
+/**
+ * Warstwy: old maps, laid out for a phone: the year, your maps, the online map, one opacity for
+ * all of them, then (from history) the objects read from maps.
+ */
+export function HistoricalSection({ timeline, ownMaps, children }: HistoricalSectionProps) {
   const historicalId = useLayersStore((s) => s.historicalId);
   const opacity = useLayersStore((s) => s.historicalOpacity);
   const year = useLayersStore((s) => s.historicalYear);
@@ -31,20 +36,75 @@ export function HistoricalSection({ timeline, children }: HistoricalSectionProps
   const layer = findHistoricalLayer(historicalId);
 
   return (
-    <Stack data-tour="layers-historical" spacing={1}>
+    <Stack data-tour="layers-historical" spacing={1.5}>
       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
         <Icon name="history" size={22} />
         <Stack sx={{ flex: 1 }}>
-          <Typography variant="subtitle2">Mapa historyczna</Typography>
+          <Typography variant="subtitle2">Stare mapy</Typography>
           <Typography variant="caption" color="text.secondary">
-            {HISTORICAL_ONLINE_NOTE}
+            Twoje skany i mapy z internetu
           </Typography>
         </Stack>
       </Stack>
       {timeline}
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pr: 1 }}>
-        <Typography variant="caption" color="text.secondary" sx={{ minWidth: 92 }}>
-          Krycie starych map
+      {ownMaps}
+      <Stack spacing={0.75}>
+        <TextField
+          select
+          fullWidth
+          size="small"
+          label="Mapa z internetu"
+          value={layer?.id ?? NONE}
+          onChange={(e) => setHistoricalId(e.target.value === NONE ? null : e.target.value)}
+          slotProps={{
+            select: {
+              // one line in the field; years and area are in the list and under it
+              renderValue: (id) => findHistoricalLayer(id as string)?.label ?? 'Wyłączona',
+            },
+          }}
+        >
+          <MenuItem value={NONE}>Wyłączona</MenuItem>
+          {HISTORICAL_LAYERS.map((l) => (
+            <MenuItem key={l.id} value={l.id} sx={{ whiteSpace: 'normal' }}>
+              <Stack>
+                <Typography variant="body2">{l.label}</Typography>
+                <Typography variant="caption" color="text.secondary">
+                  {l.years}, {l.coverage}
+                </Typography>
+              </Stack>
+            </MenuItem>
+          ))}
+        </TextField>
+        {layer?.yearRange && (
+          <Stack direction="row" sx={{ alignItems: 'center', gap: 2, px: 0.5 }}>
+            <Typography variant="body2" sx={{ minWidth: 92 }}>
+              Zdjęcia z {year}
+            </Typography>
+            <Slider
+              size="small"
+              min={layer.yearRange.min}
+              max={layer.yearRange.max}
+              step={1}
+              value={year}
+              onChange={(_, v) => setYear(v as number)}
+              aria-label="Rok zdjęć"
+            />
+          </Stack>
+        )}
+        <Typography variant="caption" color="text.secondary" sx={{ px: 0.5 }}>
+          {layer && `${layer.years}, ${layer.coverage}. `}
+          {layer?.minZoom ? 'Widać po przybliżeniu mapy. ' : ''}
+          {HISTORICAL_ONLINE_NOTE}{' '}
+          {layer && (
+            <Link href={layer.termsUrl} target="_blank" rel="noreferrer">
+              Źródło i warunki
+            </Link>
+          )}
+        </Typography>
+      </Stack>
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 2, px: 0.5 }}>
+        <Typography variant="body2" sx={{ minWidth: 52 }}>
+          Krycie
         </Typography>
         <Slider
           size="small"
@@ -53,56 +113,16 @@ export function HistoricalSection({ timeline, children }: HistoricalSectionProps
           step={0.05}
           value={opacity}
           onChange={(_, v) => setOpacity(v as number)}
-          valueLabelDisplay="auto"
-          valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
           aria-label="Krycie starych map"
         />
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ minWidth: 34, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}
+        >
+          {Math.round(opacity * 100)}%
+        </Typography>
       </Stack>
-      <TextField
-        select
-        size="small"
-        label="Mapa"
-        value={layer?.id ?? NONE}
-        onChange={(e) => setHistoricalId(e.target.value === NONE ? null : e.target.value)}
-      >
-        <MenuItem value={NONE}>Wyłączona</MenuItem>
-        {HISTORICAL_LAYERS.map((l) => (
-          <MenuItem key={l.id} value={l.id}>
-            <Stack>
-              <Typography variant="body2">{l.label}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                {l.years}, {l.coverage.toLowerCase()}
-              </Typography>
-            </Stack>
-          </MenuItem>
-        ))}
-      </TextField>
-      {layer && (
-        <>
-          {layer.yearRange && (
-            <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 4.5, pr: 1 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
-                Rok {year}
-              </Typography>
-              <Slider
-                size="small"
-                min={layer.yearRange.min}
-                max={layer.yearRange.max}
-                step={1}
-                value={year}
-                onChange={(_, v) => setYear(v as number)}
-                aria-label="Rok zdjęć"
-              />
-            </Stack>
-          )}
-          <Typography variant="caption" color="text.secondary" sx={{ pl: 4.5 }}>
-            {layer.coverage}. {layer.minZoom && 'Widać po przybliżeniu mapy. '}
-            <Link href={layer.termsUrl} target="_blank" rel="noreferrer">
-              Źródło i warunki
-            </Link>
-          </Typography>
-        </>
-      )}
       {children}
     </Stack>
   );

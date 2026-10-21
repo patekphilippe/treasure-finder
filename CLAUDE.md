@@ -115,8 +115,11 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   `features/history/utils/toViewSource.ts`.
 - Własna mapa po umieszczeniu (po „Gotowe” przy narożnikach albo od razu z georeferencją) jest czytana przez AI cała
   w tle (`history/services/autoReadMap.ts`, raz: `readAt`), w rozdzielczości skanu (`utils/readResM.ts`); obiekty idą
-  od razu do kontekstu i do wspólnej bazy. Suwak lat na górze „Mapy historycznej” w Warstwach (`MapTimeSlider`, `utils/timeSelection.ts`) obejmuje własne mapy i mapy z internetu: rok pokazuje Twoje mapy z tego roku i mapę online z tego czasu; lista „Pokazane mapy” (pogrupowana według lat) ukrywa i pokazuje mapy z
-  wybranych lat i wyróżnia obiekty z nich odczytane (`utils/idsSeenInYears.ts`).
+  od razu do kontekstu i do wspólnej bazy. Sekcja „Stare mapy” w Warstwach jest ułożona pod telefon: kafel roku (`MapTimeSlider`, `utils/timeSelection.ts`)
+  obejmuje własne mapy i mapy z internetu, zatrzymuje się tylko na latach z jakąś mapą (`utils/yearStops.ts`), strzałki
+  przechodzą do następnej; rok pokazuje Twoje mapy z tego roku i mapę online z tego czasu. Pole „Twoje mapy”
+  (`OwnMapsVisibility`, pogrupowane według lat) ukrywa i pokazuje mapy z wybranych lat i wyróżnia obiekty z nich
+  odczytane (`utils/idsSeenInYears.ts`); dalej mapa z internetu i jedno krycie dla wszystkich.
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
   tylko zalogowani członkowie, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
   (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera

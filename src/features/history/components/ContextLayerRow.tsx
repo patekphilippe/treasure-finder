@@ -23,7 +23,7 @@ export function ContextLayerRow() {
   const filter = onlyViewMap && seenOnView;
 
   return (
-    <Stack spacing={0.75} sx={{ pl: 4.5 }}>
+    <Stack spacing={0.75} sx={{ px: 0.5 }}>
       <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
         <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>
           Obiekty z map ({count})

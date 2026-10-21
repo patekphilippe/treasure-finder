@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { timeRange } from '@/features/history/utils/timeRange';
 import { timeSelection } from '@/features/history/utils/timeSelection';
+import { yearStops } from '@/features/history/utils/yearStops';
 import { HISTORICAL_LAYERS } from '@/features/layers/config/historicalLayers';
 import { makeOwnMap } from '../../helpers/fixtures';
 
@@ -10,9 +10,23 @@ const maps = [
 ];
 
 describe('the time slider', () => {
-  it('spans every historical map, own and online, even with no own map', () => {
-    expect(timeRange([], HISTORICAL_LAYERS)).toEqual({ min: 1883, max: 2025 });
-    expect(timeRange([makeOwnMap({ year: 1850 })], HISTORICAL_LAYERS)?.min).toBe(1850);
+  it('stops only at years with a map, own or online, even with no own map', () => {
+    const online = yearStops([], HISTORICAL_LAYERS);
+    // the two Messtischblatt editions, then every orthophoto year
+    expect(online.stops.slice(0, 3)).toEqual([1883, 1905, 1995]);
+    expect(online.stops.at(-1)).toBe(2025);
+    expect(online.labelled).toEqual([1883, 2025]);
+    expect(yearStops([makeOwnMap({ year: 1850 })], HISTORICAL_LAYERS).stops[0]).toBe(1850);
+  });
+
+  it('labels your years first; labels never crowd each other', () => {
+    const { stops, labelled } = yearStops(
+      [...maps, makeOwnMap({ id: 'x', year: 1925 }), makeOwnMap({ id: 'y', year: 1890 })],
+      HISTORICAL_LAYERS,
+    );
+    expect(stops).toEqual(expect.arrayContaining([1890, 1921, 1925, 1936]));
+    // 1925 is too close to 1921, 1883 (an end) too close to 1890
+    expect(labelled).toEqual([1890, 1921, 1936, 2025]);
   });
 
   it('a year shows your maps of that year and the online map covering it', () => {

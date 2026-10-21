@@ -1,53 +1,30 @@
-import Autocomplete from '@mui/material/Autocomplete';
-import Chip from '@mui/material/Chip';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
-import ListSubheader from '@mui/material/ListSubheader';
 import Typography from '@mui/material/Typography';
 import { useMemo } from 'react';
 import { HISTORICAL_LAYERS, useLayersStore } from '@/features/layers';
+import { Icon } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
-import type { OwnMap } from '@/shared/types/domain';
-import { mapYears } from '../utils/mapYears';
-import { shownMaps } from '../utils/shownMaps';
-import { timeRange } from '../utils/timeRange';
 import { timeSelection } from '../utils/timeSelection';
+import { yearStops } from '../utils/yearStops';
 
 /**
- * Warstwy: the time slider over all historical maps. A year shows your maps of that year and the
- * online map covering it (an orthophoto of that year, a Messtischblatt edition…); the objects read
- * from maps of that year stand out. "Pokazane mapy" picks your maps to show (by name or year, a
- * whole year at once), the others are hidden; "Wyłącz" goes back to the switches.
+ * Warstwy: the time slider over all historical maps, in its own tile. A year shows your maps of
+ * that year and the online map covering it (an orthophoto of that year, a Messtischblatt
+ * edition…); the objects read from maps of that year stand out. The slider stops only at years
+ * with a map, the arrows step from one to the next; "Wyłącz suwak" goes back to the choice below.
  */
 export function MapTimeSlider() {
   const maps = useOwnMapsStore((s) => s.maps);
-  const chosen = useOwnMapsStore((s) => s.years);
   const timeYear = useOwnMapsStore((s) => s.timeYear);
   const setYears = useOwnMapsStore((s) => s.setYears);
   const setTimeYear = useOwnMapsStore((s) => s.setTimeYear);
-  const update = useOwnMapsStore((s) => s.update);
-  const range = useMemo(() => timeRange(maps, HISTORICAL_LAYERS), [maps]);
-  const ownYears = useMemo(() => mapYears(maps), [maps]);
-  // your maps by year (oldest first, those without a year last), then by name
-  const sorted = useMemo(
-    () =>
-      [...maps].sort(
-        (a, b) => (a.year ?? 9999) - (b.year ?? 9999) || a.name.localeCompare(b.name, 'pl'),
-      ),
-    [maps],
-  );
-  const shownList = useMemo(() => shownMaps(sorted, chosen), [sorted, chosen]);
-  if (!range) return null;
-
-  // the list decides alone: the slider goes off and the chosen maps are switched on, the rest off
-  const show = (picked: readonly OwnMap[]) => {
-    const ids = new Set(picked.map((m) => m.id));
-    setTimeYear(null);
-    setYears(null);
-    for (const m of maps)
-      if (m.visible !== ids.has(m.id)) void update(m.id, { visible: ids.has(m.id) });
-  };
+  const { stops, labelled } = useMemo(() => yearStops(maps, HISTORICAL_LAYERS), [maps]);
+  if (!stops.length) return null;
+  const min = stops[0]!;
+  const max = stops[stops.length - 1]!;
 
   const goTo = (year: number) => {
     const pick = timeSelection(year, maps, HISTORICAL_LAYERS);
@@ -57,100 +34,96 @@ export function MapTimeSlider() {
     layers.setHistoricalId(pick.layerId);
     if (pick.layerYear !== null) layers.setHistoricalYear(pick.layerYear);
   };
+  // from no year the right arrow starts at the oldest map, the left one at the newest
+  const step = (dir: 1 | -1) => {
+    const next =
+      timeYear === null
+        ? dir > 0
+          ? min
+          : max
+        : dir > 0
+          ? stops.find((y) => y > timeYear)
+          : stops.findLast((y) => y < timeYear);
+    if (next !== undefined) goTo(next);
+  };
   const shown = timeYear === null ? null : timeSelection(timeYear, maps, HISTORICAL_LAYERS).shown;
+  const marks = stops.map((y) => ({
+    value: y,
+    ...(labelled.includes(y) && { label: String(y) }),
+  }));
 
   return (
-    <Stack data-tour="maps-year" spacing={0.5}>
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-        <Typography variant="body2" sx={{ flex: 1 }}>
-          Rok: <b>{timeYear ?? 'wybierz suwakiem'}</b>
-        </Typography>
-        {timeYear !== null && (
-          <Chip
-            size="small"
-            label="Wyłącz"
-            onClick={() => {
-              setTimeYear(null);
-              setYears(null);
-            }}
-          />
-        )}
+    <Stack
+      data-tour="maps-year"
+      sx={{ bgcolor: 'action.hover', borderRadius: '12px', px: 1, pt: 1, pb: 0.5 }}
+    >
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 0.5 }}>
+        <IconButton
+          aria-label="Wcześniejszy rok"
+          disabled={timeYear !== null && timeYear <= min}
+          onClick={() => step(-1)}
+        >
+          <Icon name="angle-left" size={22} />
+        </IconButton>
+        <Stack sx={{ flex: 1, minWidth: 0, alignItems: 'center', textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ lineHeight: 1.25, fontVariantNumeric: 'tabular-nums' }}>
+            {timeYear ?? 'Wybierz rok'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {shown === null
+              ? 'Mapy z jednego roku: przesuń suwak albo użyj strzałek'
+              : shown.length
+                ? shown.join(', ')
+                : 'Z tego roku nie ma żadnej mapy'}
+          </Typography>
+        </Stack>
+        <IconButton
+          aria-label="Późniejszy rok"
+          disabled={timeYear !== null && timeYear >= max}
+          onClick={() => step(1)}
+        >
+          <Icon name="angle-right" size={22} />
+        </IconButton>
       </Stack>
       <Slider
-        size="small"
-        min={range.min}
-        max={range.max}
-        step={1}
-        value={timeYear ?? range.min}
-        marks={ownYears.map((y) => ({ value: y, label: String(y) }))}
+        min={min}
+        max={max}
+        step={null}
+        marks={marks}
+        track={false}
+        value={timeYear ?? min}
         valueLabelDisplay="auto"
         onChange={(_, v) => goTo(v as number)}
         aria-label="Rok mapy"
-        // room for the year labels of your maps under the track
-        sx={{ mx: 1, mb: ownYears.length ? 2.5 : 0, width: 'auto' }}
+        sx={{
+          width: 'auto',
+          mx: 2,
+          mt: 0.5,
+          mb: 2.5,
+          // no year yet: no thumb pretending the oldest one is chosen
+          ...(timeYear === null && { '& .MuiSlider-thumb': { opacity: 0 } }),
+          '& .MuiSlider-mark': { width: 4, height: 4, borderRadius: '50%' },
+          '& .MuiSlider-markLabel': { fontSize: 11, top: 30, color: 'text.secondary' },
+          // the end labels stay inside the tile
+          '& .MuiSlider-markLabel[data-index="0"]': { transform: 'translateX(-20%)' },
+          [`& .MuiSlider-markLabel[data-index="${marks.length - 1}"]`]: {
+            transform: 'translateX(-80%)',
+          },
+        }}
       />
-      {shown && (
-        <Typography variant="caption" color="text.secondary">
-          {shown.length ? `Widać: ${shown.join(', ')}` : 'Z tego roku nie ma żadnej mapy'}
-        </Typography>
-      )}
-      {maps.length > 0 && (
-        <Autocomplete
-          multiple
+      {timeYear !== null && (
+        <Button
           size="small"
-          disableCloseOnSelect
-          options={sorted}
-          value={shownList}
-          groupBy={(m) => (m.year ? String(m.year) : 'Bez roku')}
-          getOptionLabel={(m) => m.name}
-          isOptionEqualToValue={(a, b) => a.id === b.id}
-          // typing finds a map by its name or its year
-          filterOptions={(options, { inputValue }) => {
-            const q = inputValue.trim().toLowerCase();
-            return q
-              ? options.filter((m) => `${m.name} ${m.year ?? ''}`.toLowerCase().includes(q))
-              : options;
+          color="inherit"
+          startIcon={<Icon name="times" size={16} />}
+          onClick={() => {
+            setTimeYear(null);
+            setYears(null);
           }}
-          renderGroup={(group) => (
-            <li key={group.key}>
-              <ListSubheader
-                sx={{ cursor: 'pointer', lineHeight: '36px' }}
-                // keep the list open: a click on the year shows all its maps
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() =>
-                  show([
-                    ...shownList,
-                    ...sorted.filter((m) => (m.year ? String(m.year) : 'Bez roku') === group.group),
-                  ])
-                }
-              >
-                {group.group}: pokaż wszystkie
-              </ListSubheader>
-              <ul style={{ padding: 0 }}>{group.children}</ul>
-            </li>
-          )}
-          renderOption={({ key, ...props }, m) => (
-            <li key={key} {...props}>
-              <Stack>
-                <Typography variant="body2">{m.name}</Typography>
-                {m.shared && !m.shared.mine && (
-                  <Typography variant="caption" color="text.secondary">
-                    od: {m.shared.author ?? 'członka społeczności'}
-                  </Typography>
-                )}
-              </Stack>
-            </li>
-          )}
-          onChange={(_, v) => show(v)}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Pokazane mapy"
-              placeholder={shownList.length ? '' : 'Wpisz nazwę albo rok'}
-            />
-          )}
-          sx={{ pt: 0.5 }}
-        />
+          sx={{ alignSelf: 'center', mb: 0.5 }}
+        >
+          Wyłącz suwak
+        </Button>
       )}
     </Stack>
   );

@@ -182,18 +182,18 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: 'layers-historical',
     target: 'layers-historical',
-    title: 'Mapa historyczna',
+    title: 'Stare mapy',
     content:
-      'Dawne mapy na mapie: przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Jeden suwak krycia działa na wszystkie stare mapy, także Twoje. Warstwy tylko pokazują mapy; własne skany wczytujesz w Danych.',
+      'Dawne mapy na mapie: Twoje skany, przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Jeden suwak krycia działa na wszystkie stare mapy. Warstwy tylko pokazują mapy; własne skany wczytujesz w Danych.',
     mode: 'field',
     sheet: 'layers',
   },
   {
     id: 'layers-own-maps',
     target: 'layers-own-maps',
-    title: 'Własne mapy',
+    title: 'Twoje mapy',
     content:
-      'Twoje skany i GeoTIFF-y: tu je włączasz, a krycie wszystkich starych map ustawiasz jednym suwakiem wyżej. Wczytujesz, dopasowujesz narożnikami i usuwasz je w Danych.',
+      'Twoje skany i GeoTIFF-y: w tym polu wybierasz, które widać. Wpisz nazwę albo rok; dotknięcie roku na liście pokazuje wszystkie jego mapy, krzyżyk przy mapie ją chowa. Wczytujesz, dopasowujesz narożnikami i usuwasz je w Danych.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -202,7 +202,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'maps-year',
     title: 'Suwak lat',
     content:
-      'Przesuwasz rok, a mapa się zmienia: widać Twoje mapy z tego roku i mapę z internetu z tego czasu (Messtischblatt, ortofotomapa z danego roku), a obiekty odczytane z map tego roku są wyraźne. W polu „Pokazane mapy” zaznaczasz, które Twoje mapy widać (wpisz nazwę albo rok, kliknięcie roku zaznacza wszystkie jego mapy). „Wyłącz” wraca do zwykłych przełączników.',
+      'Przesuwasz rok, a mapa się zmienia: widać Twoje mapy z tego roku i mapę z internetu z tego czasu (Messtischblatt, ortofotomapa z danego roku), a obiekty odczytane z map tego roku są wyraźne. Suwak zatrzymuje się tylko na latach, z których jest jakaś mapa; strzałki przechodzą do następnej. „Wyłącz suwak” wraca do wyboru w polu „Twoje mapy”.',
     mode: 'field',
     sheet: 'layers',
   },
