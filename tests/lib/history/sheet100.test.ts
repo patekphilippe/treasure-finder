@@ -49,21 +49,22 @@ describe('the 1:100 000 sheet profile', () => {
     ]);
   });
 
-  it('places by their symbol: an inn standing or not, a chapel only when gone', () => {
+  it('places only when gone, with room for the model’s position error', () => {
     const today = withBuildingAt([
       [50, 50],
-      [200, 200],
+      [210, 200], // 80 m from the chapel read at (200, 200): today's village
     ]);
     const ps = buildSheet100Proposals(
       [
-        obj('karczma', 50, 50, 'Whs.'),
-        obj('kosciol', 200, 200, 'Kap.'),
-        obj('mlyn', 250, 250, 'M.', 0.3),
+        obj('karczma', 50, 50, 'Whs.'), // standing: nothing to look for
+        obj('kosciol', 200, 200, 'Kap.'), // amid today's village, though read 80 m off
+        obj('mlyn', 330, 330, 'M.'), // nothing there today
+        obj('mlyn', 250, 250, 'M.', 0.3), // the model unsure
       ],
       today,
       g,
       opts,
     );
-    expect(ps.map((p) => p.title)).toEqual(['Karczma: Whs.']);
+    expect(ps.map((p) => p.title)).toEqual(['Młyn: M., dziś bez zabudowy']);
   });
 });

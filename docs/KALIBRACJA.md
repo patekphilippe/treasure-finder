@@ -31,6 +31,10 @@ Przegląd: dla każdej interpretacji losowe przykłady na ortofotomapie i LRM.
 - Obiekty z map (`PROPOSAL_OPTIONS`): pewność odczytu od 0,5 (było 0,35); na mapach rzadszych niż
   4 m/piksel (1:100 000) tylko przysiółki i wsie, bez pojedynczych zagród; kościół, leśniczówka,
   kuźnia itp. tylko gdy dziś nie ma tam zabudowy (młyn, karczma, folwark i bród zawsze).
+- Arkusze 1:100 000 (profil `arkusz100`, 21.10.2026, Liegnitz 422): model myli położenie znaku o ok.
+  15 pikseli (120 m przy 8 m/px), więc kościoły w dzisiejszych wsiach wychodziły jako „dziś bez
+  zabudowy”, a prawie każda wieś miała folwark „Gut”. Teraz budynek BDOT10k szukany co najmniej
+  15 px od odczytu, wieś 40 px, i na tej skali zostaje tylko to, czego dziś nie ma.
 
 ## Otwarte
 

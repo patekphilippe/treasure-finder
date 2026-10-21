@@ -3,13 +3,16 @@ import { buildProposals } from './buildProposals';
 import { existsToday } from './existsToday';
 import type { ImageGrid, MapObject, ReadKind } from './types';
 
-/** a village read as its middle: today's houses anywhere this close mean it still stands */
+/** a village read as its middle: today's houses this close mean it still stands */
 const VILLAGE_BUFFER_M = 150;
+/** …and at least this many pixels, the model's middle of a village is often by its name */
+const VILLAGE_BUFFER_PX = 40;
 
 /**
  * Objects read from a 1:100 000 sheet → proposals. A village counts only when today's BDOT10k has
  * no house near its middle (a lost village); a standing one is nothing to look for. Places go
- * through `buildProposals` (a mill, inn, manor farm or ford gone or not, the rest only when gone).
+ * through `buildProposals`, here only when gone: on this scale nearly every village has a manor
+ * farm or church, and those standing today are no target.
  */
 export function buildSheet100Proposals(
   objects: readonly MapObject<ReadKind>[],
@@ -22,7 +25,7 @@ export function buildSheet100Proposals(
       (x) =>
         x.kind === 'wies' &&
         x.confidence >= o.minConfidence &&
-        !existsToday(mask, g, x.x, x.y, VILLAGE_BUFFER_M),
+        !existsToday(mask, g, x.x, x.y, Math.max(VILLAGE_BUFFER_M, g.res * VILLAGE_BUFFER_PX)),
     )
     .map((x) => ({
       kind: 'osada',
@@ -38,7 +41,7 @@ export function buildSheet100Proposals(
       objects.filter((x) => x.kind !== 'wies'),
       mask,
       g,
-      o,
+      { ...o, onlyLost: true },
     ),
   ];
 }

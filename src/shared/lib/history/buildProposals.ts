@@ -30,7 +30,16 @@ export interface ProposalOptions {
    * houses is mostly a misread symbol: only hamlets and villages are kept
    */
   coarseResM: number;
+  /** only what is gone today, even a mill or manor farm (1:100 000: nearly every village has a Gut) */
+  onlyLost?: boolean;
 }
+
+/**
+ * how far (image pixels) the model's position of a symbol may be off: today's building is looked
+ * for at least this far, else a church amid today's village reads as gone (at 8 m a pixel the
+ * 25 m buffer was less than the error)
+ */
+const READ_ERROR_PX = 15;
 
 /** sites of fewer houses are dropped on a coarse map */
 const COARSE_MIN_BUILDINGS = 3;
@@ -65,9 +74,10 @@ export function buildProposals(
   o: ProposalOptions,
 ): SiteProposal[] {
   const ok = objects.filter((x) => x.confidence >= o.minConfidence);
+  const buffer = Math.max(o.bufferM, g.res * READ_ERROR_PX);
   const at = (x: number, y: number) => ({ e: g.originE + x * g.res, n: g.originN - y * g.res });
   const lostBuildings = ok.filter(
-    (x) => x.kind === 'budynek' && !existsToday(mask, g, x.x, x.y, o.bufferM),
+    (x) => x.kind === 'budynek' && !existsToday(mask, g, x.x, x.y, buffer),
   );
   const minBuildings = g.res > o.coarseResM ? COARSE_MIN_BUILDINGS : 1;
   const groups = clusterPoints(lostBuildings, o.linkM / g.res).filter(
@@ -88,8 +98,8 @@ export function buildProposals(
   });
   const places: SiteProposal[] = ok
     .filter((x) => x.kind !== 'budynek' && POI[x.kind])
-    .map((x) => ({ x, lost: !existsToday(mask, g, x.x, x.y, o.bufferM) }))
-    .filter(({ x, lost }) => lost || KEPT_STANDING.has(x.kind))
+    .map((x) => ({ x, lost: !existsToday(mask, g, x.x, x.y, buffer) }))
+    .filter(({ x, lost }) => lost || (!o.onlyLost && KEPT_STANDING.has(x.kind)))
     .map(({ x, lost }) => {
       const p = POI[x.kind]!;
       return {

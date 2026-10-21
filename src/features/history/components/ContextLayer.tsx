@@ -107,11 +107,11 @@ export function ContextLayer() {
             <CircleMarker
               key={f.id}
               center={[at.lat, at.lng]}
-              radius={5}
+              radius={7}
               pathOptions={{
                 renderer,
                 color: '#ffffff',
-                weight: 1.5,
+                weight: 2.5,
                 opacity,
                 fillColor: CONTEXT_KINDS[f.kind].color,
                 fillOpacity: opacity,
