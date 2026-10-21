@@ -1,5 +1,6 @@
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import { OwnMapsSection } from '@/features/history';
 import { InstallAppSection, OfflineAreasSection } from '@/features/offline';
 import { Sheet } from '@/shared/ui';
@@ -26,6 +27,15 @@ export function DataSheet({ onClose }: DataSheetProps) {
         <NmtSheetPointer />
         <Divider />
         <OfflineAreasSection />
+        <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center' }}>
+          Wersja {__APP_BUILD__.commit} z{' '}
+          {new Date(__APP_BUILD__.at).toLocaleString('pl-PL', {
+            day: 'numeric',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </Typography>
       </Stack>
     </Sheet>
   );

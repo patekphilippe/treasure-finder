@@ -1,9 +1,22 @@
+import { execSync } from 'node:child_process';
 import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { defineConfig } from 'vitest/config';
 
+/** which build runs (Dane, at the bottom): commit and time, to tell whether an update arrived */
+const commit = (() => {
+  try {
+    return (process.env.GITHUB_SHA ?? execSync('git rev-parse HEAD').toString()).trim().slice(0, 7);
+  } catch {
+    return 'lokalna';
+  }
+})();
+
 export default defineConfig({
+  define: {
+    __APP_BUILD__: JSON.stringify({ commit, at: new Date().toISOString() }),
+  },
   // treasurefinder.pl serves the app from /; the old GitHub Pages address is built with
   // APP_BASE=/treasure-finder/ (.github/workflows/deploy.yml)
   base: process.env.APP_BASE || '/',
