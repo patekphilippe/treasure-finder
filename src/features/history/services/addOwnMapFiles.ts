@@ -1,14 +1,14 @@
 import { trackActivity } from '@/shared/store/trackActivity';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
-import { useUiStore } from '@/shared/store/useUiStore';
 import { useToastStore } from '@/shared/ui';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { importOwnMap, NeedCrsError, type ImportOptions } from './importOwnMap';
 import { placeOwnMap } from './placeOwnMap';
 import { refinePlacement } from './refinePlacement';
 import { autoReadMap } from './autoReadMap';
+import { focusOwnMap } from './focusOwnMap';
 import { shareMap } from './shareMap';
-import { showOwnMap } from './showOwnMap';
+import { startFitting } from './startFitting';
 
 export interface AddOwnMapOptions extends Partial<Omit<ImportOptions, 'view'>> {
   /** place the scan by the names on it (backend AI, signed-in members) before reading it */
@@ -16,10 +16,12 @@ export interface AddOwnMapOptions extends Partial<Omit<ImportOptions, 'view'>> {
 }
 
 /**
- * Reads the chosen files as an own map and puts it on the map: a scan placed by the backend
- * first when asked (if that fails it goes into the view), then fitted by its corners or shown.
- * A task on the activity chip from start to end, so closing the sheet loses nothing.
- * 'needCrs': the file has a georeference in a system the app has to be told.
+ * Reads the chosen files as an own map and puts it on the map. A scan is placed by the backend
+ * (AI) when asked: then it is shown alone, shared and read by AI at once, and the corners are
+ * only an option ("Popraw narożniki" on the toast, or in Dane). A map with a georeference goes
+ * the same way. Only a scan the AI could not place (or placed by hand) opens corner dragging,
+ * and is read after "Gotowe". A task on the activity chip from start to end: closing the sheet
+ * or changing layers meanwhile loses nothing. 'needCrs': the file's system has to be told.
  */
 export async function addOwnMapFiles(
   files: readonly File[],
@@ -39,6 +41,7 @@ export async function addOwnMapFiles(
       },
       async (update) => {
         let placed: Partial<ImportOptions> = {};
+        let placedNote: string | null = null;
         const scan = files.find((f) => /\.(jpe?g|png|webp)$/i.test(f.name));
         if (auto && scan) {
           update({ step: 'Umieszczam mapę po nazwach (AI)' });
@@ -47,14 +50,13 @@ export async function addOwnMapFiles(
             if (p.frame) update({ step: 'Dopasowuję ramkę do skanu' });
             const corners = await refinePlacement(scan, p);
             placed = { corners, ...(p.year && { year: p.year }) };
-            showToast(
+            placedNote =
               p.method === 'arkusz'
-                ? `Umieszczono po numerze arkusza ${p.sheetNumber ?? ''}. Sprawdź narożniki.`
-                : `Umieszczono po nazwach: ${p.anchors.slice(0, 4).join(', ')} (błąd ok. ${p.uncertaintyM} m). Sprawdź narożniki.`,
-            );
+                ? `Umieszczono po ramce arkusza ${p.sheetNumber ?? p.series}`
+                : `Umieszczono po nazwach: ${p.anchors.slice(0, 3).join(', ')} (ok. ${p.uncertaintyM} m)`;
           } catch (e) {
             showToast(
-              `${e instanceof Error ? e.message : 'Nie udało się umieścić mapy'}. Umieść ją ręcznie.`,
+              `${e instanceof Error ? e.message : 'Nie udało się umieścić mapy'}. Przeciągnij narożniki.`,
             );
           }
         }
@@ -66,16 +68,19 @@ export async function addOwnMapFiles(
             view: useMapViewStore.getState().bounds,
           });
           await useOwnMapsStore.getState().add(map);
-          if (needsFit) {
+          if (needsFit && !placedNote) {
+            // nowhere to start from but the view: the corners are needed, read after "Gotowe"
             showToast('Przeciągnij narożniki, aby dopasować mapę');
-            useUiStore.getState().closeSheet();
-            useOwnMapsStore.getState().startFit(map.id);
-          } else {
-            showToast(`Wczytano: ${map.name}`);
-            showOwnMap(map);
-            // georeferenced already: shared and read at once (a fitted scan after "Gotowe")
-            void shareMap(map.id).finally(() => autoReadMap(map.id));
+            await startFitting(map.id);
+            return 'done';
           }
+          await focusOwnMap(map);
+          showToast(placedNote ? `${placedNote}. AI czyta mapę` : `Wczytano: ${map.name}`, {
+            label: 'Popraw narożniki',
+            onClick: () => void startFitting(map.id),
+          });
+          // placed: shared and read at once, whatever the user does meanwhile
+          void shareMap(map.id).finally(() => autoReadMap(map.id));
           return 'done';
         } catch (e) {
           if (e instanceof NeedCrsError) return 'needCrs';

@@ -4,6 +4,8 @@ import { useMembership } from '@/shared/store/useMembership';
 import { useToastStore } from '@/shared/ui';
 import { useAiSettings } from '../store/useAiSettings';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
+import { mapPointMover } from '../utils/mapPointMover';
+import { movedWithMap } from '../utils/movedWithMap';
 import { proposalToContext } from '../utils/proposalToContext';
 import { readResM } from '../utils/readResM';
 import { toViewSource } from '../utils/toViewSource';
@@ -57,7 +59,17 @@ export async function autoReadMap(mapId: string): Promise<void> {
       ),
   );
 
-  const { added, merged, changed } = await addSightedObjects(r.proposals.map(proposalToContext));
+  // the corners were corrected while it was read: what was found follows the saved placement
+  // (one still being dragged moves the objects after "Gotowe")
+  const store = useOwnMapsStore.getState();
+  const placed =
+    store.fitting?.id === map.id ? store.fitting.before : store.maps.find((m) => m.id === map.id);
+  const move =
+    placed && placed.pixelToSource !== map.pixelToSource ? mapPointMover(map, placed) : null;
+  const found = r.proposals
+    .map(proposalToContext)
+    .map((f) => (move ? (movedWithMap([f], map.id, move)[0] ?? f) : f));
+  const { added, merged, changed } = await addSightedObjects(found);
   let shared = 0;
   try {
     shared = await shareObjects(changed.filter((f) => !f.community));

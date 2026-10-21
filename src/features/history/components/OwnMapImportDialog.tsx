@@ -124,8 +124,9 @@ export function OwnMapImportDialog({
                 />
               )}
               <Typography variant="caption" color="text.secondary">
-                Potem przeciągniesz 4 narożniki, aż mapa pokryje się z ortofotomapą. Numer arkusza
-                tylko ustawia ją od razu w dobrym miejscu.
+                {series === 'auto'
+                  ? 'Mapa sama trafi na miejsce, a AI od razu odczyta z niej obiekty. Narożniki poprawisz tylko, jeśli zechcesz.'
+                  : 'Potem przeciągniesz 4 narożniki, aż mapa pokryje się z ortofotomapą. Numer arkusza tylko ustawia ją od razu w dobrym miejscu.'}
               </Typography>
             </>
           )}

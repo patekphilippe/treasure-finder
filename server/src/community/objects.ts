@@ -34,6 +34,25 @@ export function cleanObject(raw: unknown): NewCommunityObject | null {
   };
 }
 
+/** most objects moved at once: a whole map read by AI (a 1:100 000 sheet gives ~200) */
+export const MAX_MOVES = 1000;
+
+/** New positions of objects (a map placed better after it was read), checked; null when unusable. */
+export function cleanMoves(raw: unknown): { id: string; lat: number; lng: number }[] | null {
+  const list = (raw as { moves?: unknown } | null)?.moves;
+  if (!Array.isArray(list) || !list.length || list.length > MAX_MOVES) return null;
+  const moves = list.map((m: unknown) => {
+    const o = m as Record<string, unknown> | null;
+    const lat = Number(o?.lat);
+    const lng = Number(o?.lng);
+    const id = String(o?.id ?? '');
+    if (!/^[A-Za-z0-9_-]{1,40}$/.test(id) || !(lat > 48 && lat < 56 && lng > 13 && lng < 25))
+      return null;
+    return { id, lat: Number(lat.toFixed(6)), lng: Number(lng.toFixed(6)) };
+  });
+  return moves.every((m) => m !== null) ? moves : null;
+}
+
 /** `s,w,n,e` → bbox, or null when malformed or larger than MAX_BBOX_DEG. */
 export function parseBbox(text: string | null) {
   const v = (text ?? '').split(',').map(Number);

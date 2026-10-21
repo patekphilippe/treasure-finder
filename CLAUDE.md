@@ -113,9 +113,13 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   ten sam obiekt z innej mapy (do 80 m) dostaje nową mapę, ponowny odczyt z tej samej mapy (do 40 m) jest
   pomijany (`shared/lib/history/mergeSighting.ts`). Etykiety i odniesienia map tworzy tylko
   `features/history/utils/toViewSource.ts`.
-- Własna mapa po umieszczeniu (po „Gotowe” przy narożnikach albo od razu z georeferencją) jest czytana przez AI cała
-  w tle (`history/services/autoReadMap.ts`, raz: `readAt`), w rozdzielczości skanu (`utils/readResM.ts`); obiekty idą
-  od razu do kontekstu i do wspólnej bazy. Sekcja „Stare mapy” w Warstwach jest ułożona pod telefon: kafel roku (`MapTimeSlider`, `utils/timeSelection.ts`)
+- Dodanie mapy (`history/services/addOwnMapFiles.ts`): skan umieszczony przez AI albo plik z georeferencją jest od razu
+  pokazany sam (`focusOwnMap`: suwak lat i mapa z internetu wyłączone, inne Twoje mapy ukryte), udostępniony i czytany
+  przez AI cały w tle (`autoReadMap.ts`, raz: `readAt`, w rozdzielczości skanu `utils/readResM.ts`); obiekty idą od razu
+  do kontekstu i do wspólnej bazy. Narożniki są tylko opcją (toast „Popraw narożniki”, Dane). Przeciąganie narożników
+  (`startFitting`/`finishFitting`) trwa mimo otwierania arkuszy, do „Gotowe” albo „Anuluj”; inne stare mapy są wtedy
+  schowane. Poprawka mapy już przeczytanej przesuwa obiekty widziane tylko na niej (`moveObjectsWithMap`, we wspólnej
+  bazie przez `POST /api/community/objects/moves`); czytanie w toku dopasowuje znalezione obiekty na końcu. Sekcja „Stare mapy” w Warstwach jest ułożona pod telefon: kafel roku (`MapTimeSlider`, `utils/timeSelection.ts`)
   obejmuje własne mapy i mapy z internetu, zatrzymuje się tylko na latach z jakąś mapą (`utils/yearStops.ts`), strzałki
   przechodzą do następnej; rok pokazuje Twoje mapy z tego roku i mapę online z tego czasu. Pole „Twoje mapy”
   (`OwnMapsVisibility`, pogrupowane według lat) ukrywa i pokazuje mapy z wybranych lat i wyróżnia obiekty z nich

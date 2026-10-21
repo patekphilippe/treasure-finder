@@ -113,6 +113,32 @@ describe('community', () => {
     ).toBe(403);
   });
 
+  it('the author moves their objects after placing the map better; nobody else can', async () => {
+    const dora = await invite('Dora');
+    const emil = await invite('Emil');
+    const ids = await Promise.all(
+      [0, 1].map(async (k) => {
+        const res = await add(dora.auth, { ...mill, lat: 50.8 + k / 100 });
+        return ((await res.json()) as { id: string }).id;
+      }),
+    );
+    const moves = ids.map((id, k) => ({ id, lat: 50.79 + k / 100, lng: 15.79 }));
+    const move = (auth: string, body: unknown) =>
+      call('community/objects/moves', auth, { method: 'POST', body: JSON.stringify(body) });
+
+    // someone else's objects stay where they are
+    expect(await (await move(emil.auth, { moves })).json()).toEqual({ moved: 0 });
+    expect(await (await move(dora.auth, { moves })).json()).toEqual({ moved: 2 });
+    const seen = (await list(emil.auth)).filter((o) => ids.includes(o.id));
+    expect(seen.map((o) => [o.lat, o.lng]).sort()).toEqual([
+      [50.79, 15.79],
+      [50.8, 15.79],
+    ]);
+    // outside Poland or too many: refused whole
+    expect((await move(dora.auth, { moves: [{ id: ids[0], lat: 60, lng: 15 }] })).status).toBe(400);
+    expect((await move(dora.auth, { moves: [] })).status).toBe(400);
+  });
+
   it('bad objects and huge areas are refused', async () => {
     const d = await invite('Darek');
     expect((await add(d.auth, { ...mill, kind: 'znalezisko' })).status).toBe(400);

@@ -98,7 +98,9 @@ brody, drogi). Bazę widzą i zmieniają tylko zaproszeni członkowie.
   Zarejestrować się może tylko zaproszony adres (sekcja „Logowanie (Auth0)”).
 - **Obiekty:** członek dodaje obiekt i jest on od razu widoczny (`POST /api/community/objects`),
   autor może go usunąć, właściciel usuwa i przywraca w panelu (Wspólna baza). Limit 300 zmian dziennie
-  na członka.
+  na członka. Po poprawce narożników mapy już przeczytanej autor przesuwa swoje obiekty z tej mapy jednym
+  wywołaniem (`POST /api/community/objects/moves`, do 1000 położeń, liczy się jako jedna zmiana; cudze
+  obiekty zostają na miejscu).
 - **Głosy:** „Potwierdzam” / „Nie zgadza się” z notatką, jeden głos na osobę. Obiekt z co najmniej dwoma
   głosami „nie” więcej niż „tak” jest zakwestionowany: aplikacja pokazuje go na szaro i nie liczy do oceny
   kandydatów NMT; właściciel widzi go z notatkami w panelu.

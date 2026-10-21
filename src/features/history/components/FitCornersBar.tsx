@@ -3,18 +3,21 @@ import Paper from '@mui/material/Paper';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { glass, useToastStore } from '@/shared/ui';
+import { useUiStore } from '@/shared/store/useUiStore';
+import { glass } from '@/shared/ui';
+import { finishFitting } from '../services/finishFitting';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
-import { autoReadMap } from '../services/autoReadMap';
-import { shareMap } from '../services/shareMap';
 
-/** Bottom bar while fitting a scan: how to do it, see-through slider, done / cancel. */
+/**
+ * Bottom bar while fitting a scan: how to do it, see-through slider, done / cancel. A sheet opened
+ * meanwhile covers it for a while; the fitting goes on until "Gotowe" or "Anuluj".
+ */
 export function FitCornersBar() {
   const fitting = useOwnMapsStore((s) => s.fitting);
   const map = useOwnMapsStore((s) => s.maps.find((m) => m.id === s.fitting?.id));
-  const { finishFit, cancelFit } = useOwnMapsStore();
-  const showToast = useToastStore((s) => s.show);
-  if (!fitting || !map) return null;
+  const cancelFit = useOwnMapsStore((s) => s.cancelFit);
+  const sheetOpen = useUiStore((s) => s.activeSheet !== null);
+  if (!fitting || !map || sheetOpen) return null;
 
   const setOpacity = (opacity: number) =>
     useOwnMapsStore.setState((s) => ({
@@ -62,16 +65,7 @@ export function FitCornersBar() {
           <Button color="inherit" onClick={cancelFit}>
             Anuluj
           </Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              void finishFit().then(() => {
-                showToast(`Zapisano dopasowanie: ${map.name}`);
-                // placed: on the server for the community, then Claude reads it whole (once)
-                void shareMap(map.id).finally(() => autoReadMap(map.id));
-              });
-            }}
-          >
+          <Button variant="contained" onClick={() => void finishFitting()}>
             Gotowe
           </Button>
         </Stack>

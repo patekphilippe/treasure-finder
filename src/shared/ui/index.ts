@@ -8,4 +8,4 @@ export { SignInPrompt } from './SignInPrompt/SignInPrompt';
 export { StatusChips } from './StatusChips/StatusChips';
 export { glass } from './styles/glass';
 export { Toast } from './Toast/Toast';
-export { useToastStore } from './Toast/useToastStore';
+export { useToastStore, type ToastAction } from './Toast/useToastStore';

@@ -3,15 +3,27 @@ import type { OwnMap } from '@/shared/types/domain';
 
 const seen: { step: string | null; importing: string | null }[] = [];
 let importResult: 'fit' | 'placed' | 'crs' = 'fit';
+let placeFails = false;
 
 const autoRead = vi.fn<(id: string) => Promise<void>>(async () => {});
 // the background AI reading after placing (its own browser code stays out of this test)
 vi.mock('@/features/history/services/autoReadMap', () => ({
   autoReadMap: (id: string) => autoRead(id),
 }));
+const focused: string[] = [];
+const fitStarted: string[] = [];
+// showing the map alone and corner dragging touch the map and the layers (browser code)
+vi.mock('@/features/history/services/focusOwnMap', () => ({
+  focusOwnMap: async (m: OwnMap) => void focused.push(m.id),
+}));
+vi.mock('@/features/history/services/startFitting', () => ({
+  startFitting: async (id: string) => void fitStarted.push(id),
+}));
+vi.mock('@/features/history/services/shareMap', () => ({ shareMap: async () => {} }));
 vi.mock('@/features/history/services/placeOwnMap', () => ({
   placeOwnMap: async () => {
     record();
+    if (placeFails) throw new Error('Na mapie nie widać nazw ani numeru arkusza');
     return {
       corners: [],
       method: 'nazwy',
@@ -48,6 +60,7 @@ vi.mock('@/features/history/services/importOwnMap', () => ({
 const { addOwnMapFiles } = await import('@/features/history/services/addOwnMapFiles');
 const { useOwnMapsStore } = await import('@/features/history/store/useOwnMapsStore');
 const { useActivityStore } = await import('@/shared/store/useActivityStore');
+const { useToastStore } = await import('@/shared/ui/Toast/useToastStore');
 
 function record() {
   seen.push({
@@ -60,40 +73,51 @@ const scan = new File(['x'], 'wig.jpg', { type: 'image/jpeg' });
 
 describe('adding an own map as a background task', () => {
   const added: OwnMap[] = [];
-  const fitted: string[] = [];
   beforeEach(() => {
     seen.length = 0;
     added.length = 0;
-    fitted.length = 0;
+    focused.length = 0;
+    fitStarted.length = 0;
     importResult = 'fit';
+    placeFails = false;
     autoRead.mockClear();
     useActivityStore.setState({ tasks: [] });
-    useOwnMapsStore.setState({
-      importing: null,
-      add: async (m) => void added.push(m),
-      startFit: (id) => void fitted.push(id),
-    });
+    useToastStore.setState({ message: null, action: null });
+    useOwnMapsStore.setState({ importing: null, add: async (m) => void added.push(m) });
   });
 
-  it('placed by the backend, then read: the chip shows both steps, then fitting starts', async () => {
+  it('placed by the AI: shown alone and read at once, the corners only offered', async () => {
     expect(await addOwnMapFiles([scan], { auto: true })).toBe('done');
     expect(seen).toEqual([
       { step: 'Umieszczam mapę po nazwach (AI)', importing: 'wig.jpg' },
       { step: 'Wczytuję obraz', importing: 'wig.jpg' },
     ]);
     expect(added[0]?.year).toBe(1921);
-    expect(fitted).toEqual(['m1']);
-    // a scan still to be fitted is read after "Gotowe", not now
-    expect(autoRead).not.toHaveBeenCalled();
+    expect(fitStarted).toEqual([]);
+    expect(focused).toEqual(['m1']);
+    await vi.waitFor(() => expect(autoRead).toHaveBeenCalledWith('m1'));
+    const toast = useToastStore.getState();
+    expect(toast.message).toMatch(/Umieszczono po nazwach: Kowary.*AI czyta mapę/);
+    expect(toast.action?.label).toBe('Popraw narożniki');
+    toast.action!.onClick();
+    expect(fitStarted).toEqual(['m1']);
     expect(useActivityStore.getState().tasks).toEqual([]);
     expect(useOwnMapsStore.getState().importing).toBeNull();
+  });
+
+  it('the AI could not place it: corner dragging, read only after "Gotowe"', async () => {
+    placeFails = true;
+    expect(await addOwnMapFiles([scan], { auto: true })).toBe('done');
+    expect(fitStarted).toEqual(['m1']);
+    expect(focused).toEqual([]);
+    expect(autoRead).not.toHaveBeenCalled();
   });
 
   it('a georeferenced map needs no fitting: Claude starts reading it at once', async () => {
     importResult = 'placed';
     expect(await addOwnMapFiles([scan])).toBe('done');
-    expect(fitted).toEqual([]);
-    expect(autoRead).toHaveBeenCalledWith('m1');
+    expect(fitStarted).toEqual([]);
+    await vi.waitFor(() => expect(autoRead).toHaveBeenCalledWith('m1'));
   });
 
   it('a georeference in an unknown system asks for it; the task ends either way', async () => {

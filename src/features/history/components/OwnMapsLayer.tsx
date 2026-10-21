@@ -11,15 +11,19 @@ import { shownMaps } from '../utils/shownMaps';
 export function OwnMapsLayer() {
   const all = useOwnMapsStore((s) => s.maps);
   const years = useOwnMapsStore((s) => s.years);
-  // the ones on the map, marked visible so their images are decoded
+  const fittingId = useOwnMapsStore((s) => s.fitting?.id ?? null);
+  // the ones on the map, marked visible so their images are decoded; while fitting only that one
   const maps = useMemo(
-    () => shownMaps(all, years).map((m) => ({ ...m, visible: true })),
-    [all, years],
+    () =>
+      (fittingId ? all.filter((m) => m.id === fittingId) : shownMaps(all, years)).map((m) => ({
+        ...m,
+        visible: true,
+      })),
+    [all, years, fittingId],
   );
   const images = useOwnMapImages(maps);
   // one opacity for all old maps (Warstwy); the map being fitted keeps its own
   const opacity = useLayersStore((s) => s.historicalOpacity);
-  const fittingId = useOwnMapsStore((s) => s.fitting?.id ?? null);
 
   useEffect(() => {
     void useOwnMapsStore.getState().load();

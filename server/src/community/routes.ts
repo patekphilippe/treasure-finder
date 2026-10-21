@@ -7,6 +7,7 @@ import { consumeDaily } from '../submissions/dailyLimit';
 import { memberFrom } from './auth';
 import { communityMaps } from './maps';
 import {
+  cleanMoves,
   cleanObject,
   MAX_OBJECTS_PER_ANSWER,
   MEMBER_DAILY_WRITES,
@@ -79,6 +80,23 @@ export async function communityRoutes(
       .bind(id, obj.kind, obj.label, obj.lat, obj.lng, obj.radiusM, obj.source, member.id, now, now)
       .run();
     return json({ id }, 201, cors);
+  }
+
+  // the author's objects follow their map placed better after reading (all in one write)
+  if (request.method === 'POST' && path === 'objects/moves') {
+    const moves = cleanMoves(await request.json().catch(() => null));
+    if (!moves) return fail(400, 'Nieprawidłowe położenia (najwyżej 1000, w Polsce)', cors);
+    if (!(await write()))
+      return fail(429, 'Dzienny limit zmian został wykorzystany, spróbuj jutro', cors);
+    const results = await env.DB.batch(
+      moves.map((m) =>
+        env.DB.prepare(
+          `UPDATE community_objects SET lat = ?, lng = ?, updated_at = ?
+           WHERE id = ? AND author_id = ? AND removed_at IS NULL`,
+        ).bind(m.lat, m.lng, now, m.id, member.id),
+      ),
+    );
+    return json({ moved: results.reduce((s, r) => s + (r.meta.changes ?? 0), 0) }, 200, cors);
   }
 
   const one = /^objects\/([A-Za-z0-9_-]+)(\/vote)?$/.exec(path);

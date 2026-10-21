@@ -6,7 +6,6 @@ import {
   FitCornersLayer,
   OwnMapsLayer,
   ProposalsLayer,
-  useOwnMapsStore,
 } from '@/features/history';
 import { FollowButton, MapCrosshair, MapView } from '@/features/map';
 import { GuidancePanel } from '@/features/navigation';
@@ -50,8 +49,7 @@ export function FieldLayout() {
           const offline = useOfflineStore.getState();
           if (offline.selecting && offline.progress) return;
           offline.stopSelecting();
-          // the same for fitting a scan: opening a sheet cancels it
-          useOwnMapsStore.getState().cancelFit();
+          // fitting a scan goes on under the sheet: only "Gotowe" or "Anuluj" end it
           toggleSheet(id);
         }}
       />

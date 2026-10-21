@@ -31,6 +31,9 @@ export const communityApi = {
   add: (o: NewCommunityObject) =>
     call<{ id: string }>('objects', { method: 'POST', body: JSON.stringify(o) }),
   remove: (id: string) => call<void>(`objects/${id}`, { method: 'DELETE' }),
+  /** the member's own objects follow their map placed better after reading */
+  move: (moves: { id: string; lat: number; lng: number }[]) =>
+    call<{ moved: number }>('objects/moves', { method: 'POST', body: JSON.stringify({ moves }) }),
   vote: (id: string, vote: -1 | 0 | 1, note = '') =>
     call<void>(`objects/${id}/vote`, { method: 'POST', body: JSON.stringify({ vote, note }) }),
 };

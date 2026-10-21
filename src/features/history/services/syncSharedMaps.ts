@@ -26,7 +26,9 @@ async function run(): Promise<void> {
   if (!BACKEND_ENABLED || !useMembership.getState().email) return;
   const store = useOwnMapsStore.getState();
   const plan = planMapSync(store.maps, await sharedMapsApi.list());
-  for (const { id, patch } of plan.update) await store.update(id, patch);
+  // the map being fitted here keeps the corners being dragged
+  for (const { id, patch } of plan.update)
+    if (store.fitting?.id !== id) await store.update(id, patch);
   for (const id of plan.remove) await store.remove(id);
   // maps here only: to the community too (not the one being fitted right now)
   for (const id of plan.upload) if (store.fitting?.id !== id) await shareMap(id);

@@ -3,7 +3,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
-import { useUiStore } from '@/shared/store/useUiStore';
 import type { OwnMap } from '@/shared/types/domain';
 import { ConfirmDialog, Icon, useToastStore } from '@/shared/ui';
 import { OWN_MAP_ACCEPT } from '../config/ownMaps';
@@ -14,23 +13,20 @@ import { OwnMapImportDialog } from './OwnMapImportDialog';
 import { OwnMapItem } from './OwnMapItem';
 import { removeOwnMap } from '../services/removeOwnMap';
 import { shareMap } from '../services/shareMap';
+import { startFitting } from '../services/startFitting';
 
 /**
  * Dane: own historical maps loaded from files (a GeoTIFF, an image with a world file or a plain
  * scan), placed and managed here; Warstwy only shows them.
  */
 export function OwnMapsSection() {
-  const { maps, update, startFit } = useOwnMapsStore();
+  const { maps, update } = useOwnMapsStore();
   const busy = useOwnMapsStore((s) => s.importing !== null);
-  const closeSheet = useUiStore((s) => s.closeSheet);
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<{ files: File[]; mode: 'crs' | 'scan' } | null>(null);
   const [toDelete, setToDelete] = useState<OwnMap | null>(null);
 
-  const fit = (id: string) => {
-    closeSheet();
-    startFit(id);
-  };
+  const fit = (id: string) => void startFitting(id);
 
   const run = async (files: File[], opts: AddOwnMapOptions = {}) => {
     if ((await addOwnMapFiles(files, opts)) === 'needCrs') setPending({ files, mode: 'crs' });
