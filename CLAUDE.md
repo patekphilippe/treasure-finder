@@ -128,7 +128,7 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
   tylko zalogowani członkowie, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
   (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera
-  (docs/BACKEND.md, „Profile odczytu”); mapa wojskowa daje kontekst `wojsko` i `grob_wojenny`
+  (docs/BACKEND.md, „Profile odczytu”); arkusze 1:100 000 mają własny profil `arkusz100` (legenda skrótów, bez `inne`), wybierany sam dla map rzadszych niż 4 m/px (`utils/profileForMap.ts`); „Przeczytaj od nowa” przy mapie (`rereadOwnMap.ts`) usuwa obiekty widziane tylko na niej i czyta ją ponownie; mapa wojskowa daje kontekst `wojsko` i `grob_wojenny`
   (ostrzeżenia, ochrona przy mogiłach w `shared/lib/detect/militaryNearby.ts`). Propozycje trafiają do kontekstu
   dopiero po „Przyjmij”. Adres backendu: `shared/config/backend.ts`. Analizy na serwerze (odczyt, zgłoszenia,
   umieszczanie skanu) wymagają logowania: bez niego zamiast nich jest `SignInPrompt` z `@/shared/ui`.

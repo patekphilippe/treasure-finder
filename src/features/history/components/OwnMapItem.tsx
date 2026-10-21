@@ -14,9 +14,11 @@ interface OwnMapItemProps {
   onShow: () => void;
   onFit: () => void;
   onDelete: () => void;
+  /** throw away its AI reading and read it again; only for a map already read */
+  onReread?: () => void;
 }
 
-export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapItemProps) {
+export function OwnMapItem({ map, onChange, onShow, onFit, onDelete, onReread }: OwnMapItemProps) {
   // someone else's shared map: shown and switched here, changed only by its author
   const editable = !map.shared || map.shared.mine;
   return (
@@ -41,6 +43,11 @@ export function OwnMapItem({ map, onChange, onShow, onFit, onDelete }: OwnMapIte
         {editable && (
           <IconButton size="small" aria-label="Dopasuj narożnikami" onClick={onFit}>
             <Icon name="vector-square" size={18} />
+          </IconButton>
+        )}
+        {editable && onReread && map.readAt && (
+          <IconButton size="small" aria-label="Przeczytaj od nowa (AI)" onClick={onReread}>
+            <Icon name="redo" size={18} />
           </IconButton>
         )}
         {editable && (

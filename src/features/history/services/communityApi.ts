@@ -31,6 +31,12 @@ export const communityApi = {
   add: (o: NewCommunityObject) =>
     call<{ id: string }>('objects', { method: 'POST', body: JSON.stringify(o) }),
   remove: (id: string) => call<void>(`objects/${id}`, { method: 'DELETE' }),
+  /** the member's own objects of a bad reading thrown away at once */
+  removeMany: (ids: string[]) =>
+    call<{ removed: number }>('objects/removals', {
+      method: 'POST',
+      body: JSON.stringify({ ids }),
+    }),
   /** the member's own objects follow their map placed better after reading */
   move: (moves: { id: string; lat: number; lng: number }[]) =>
     call<{ moved: number }>('objects/moves', { method: 'POST', body: JSON.stringify({ moves }) }),

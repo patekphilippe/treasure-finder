@@ -53,6 +53,14 @@ export function cleanMoves(raw: unknown): { id: string; lat: number; lng: number
   return moves.every((m) => m !== null) ? moves : null;
 }
 
+/** `{ ids: [...] }` of objects to remove at once (a map's reading thrown away), or null. */
+export function cleanRemovals(raw: unknown): string[] | null {
+  const list = (raw as { ids?: unknown } | null)?.ids;
+  if (!Array.isArray(list) || !list.length || list.length > MAX_MOVES) return null;
+  const ids = list.map((id) => String(id ?? ''));
+  return ids.every((id) => /^[A-Za-z0-9_-]{1,40}$/.test(id)) ? ids : null;
+}
+
 /** `s,w,n,e` → bbox, or null when malformed or larger than MAX_BBOX_DEG. */
 export function parseBbox(text: string | null) {
   const v = (text ?? '').split(',').map(Number);

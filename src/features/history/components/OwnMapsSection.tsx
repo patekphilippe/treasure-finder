@@ -3,6 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
+import { useMembership } from '@/shared/store/useMembership';
 import type { OwnMap } from '@/shared/types/domain';
 import { ConfirmDialog, Icon, useToastStore } from '@/shared/ui';
 import { OWN_MAP_ACCEPT } from '../config/ownMaps';
@@ -13,6 +14,7 @@ import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { OwnMapImportDialog } from './OwnMapImportDialog';
 import { OwnMapItem } from './OwnMapItem';
 import { removeOwnMap } from '../services/removeOwnMap';
+import { rereadOwnMap } from '../services/rereadOwnMap';
 import { shareMap } from '../services/shareMap';
 import { startFitting } from '../services/startFitting';
 import { readableMapName } from '../utils/readableMapName';
@@ -28,6 +30,8 @@ export function OwnMapsSection() {
   const folderRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<{ files: File[]; mode: 'crs' | 'scan' } | null>(null);
   const [toDelete, setToDelete] = useState<OwnMap | null>(null);
+  const [toReread, setToReread] = useState<OwnMap | null>(null);
+  const member = useMembership((st) => st.email !== null);
 
   const fit = (id: string) => void startFitting(id);
 
@@ -66,6 +70,7 @@ export function OwnMapsSection() {
           }}
           onFit={() => fit(m.id)}
           onDelete={() => setToDelete(m)}
+          onReread={member ? () => setToReread(m) : undefined}
         />
       ))}
       <input
@@ -130,6 +135,17 @@ export function OwnMapsSection() {
           }}
         />
       )}
+      <ConfirmDialog
+        open={toReread !== null}
+        title="Przeczytać mapę od nowa?"
+        confirmLabel="Przeczytaj od nowa"
+        message={`${toReread?.name ?? ''}. Obiekty odczytane tylko z tej mapy znikną (także Twoje we wspólnej bazie), a AI przeczyta ją ponownie. Mapy 1:100 000 czyta wtedy według ich legendy.`}
+        onConfirm={() => {
+          if (toReread) void rereadOwnMap(toReread.id);
+          setToReread(null);
+        }}
+        onCancel={() => setToReread(null)}
+      />
       <ConfirmDialog
         open={toDelete !== null}
         title="Usunąć mapę?"

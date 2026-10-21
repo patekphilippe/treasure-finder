@@ -8,6 +8,7 @@ import { memberFrom } from './auth';
 import { communityMaps } from './maps';
 import {
   cleanMoves,
+  cleanRemovals,
   cleanObject,
   MAX_OBJECTS_PER_ANSWER,
   MEMBER_DAILY_WRITES,
@@ -97,6 +98,23 @@ export async function communityRoutes(
       ),
     );
     return json({ moved: results.reduce((s, r) => s + (r.meta.changes ?? 0), 0) }, 200, cors);
+  }
+
+  // the author throws away a whole bad reading of their map (all in one write)
+  if (request.method === 'POST' && path === 'objects/removals') {
+    const ids = cleanRemovals(await request.json().catch(() => null));
+    if (!ids) return fail(400, 'Nieprawidłowa lista obiektów (najwyżej 1000)', cors);
+    if (!(await write()))
+      return fail(429, 'Dzienny limit zmian został wykorzystany, spróbuj jutro', cors);
+    const results = await env.DB.batch(
+      ids.map((id) =>
+        env.DB.prepare(
+          `UPDATE community_objects SET removed_at = ?, updated_at = ?
+           WHERE id = ? AND author_id = ? AND removed_at IS NULL`,
+        ).bind(now, now, id, member.id),
+      ),
+    );
+    return json({ removed: results.reduce((s, r) => s + (r.meta.changes ?? 0), 0) }, 200, cors);
   }
 
   const one = /^objects\/([A-Za-z0-9_-]+)(\/vote)?$/.exec(path);

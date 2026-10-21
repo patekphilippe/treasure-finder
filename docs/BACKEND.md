@@ -100,7 +100,8 @@ brody, drogi). Bazę widzą i zmieniają tylko zaproszeni członkowie.
   autor może go usunąć, właściciel usuwa i przywraca w panelu (Wspólna baza). Limit 300 zmian dziennie
   na członka. Po poprawce narożników mapy już przeczytanej autor przesuwa swoje obiekty z tej mapy jednym
   wywołaniem (`POST /api/community/objects/moves`, do 1000 położeń, liczy się jako jedna zmiana; cudze
-  obiekty zostają na miejscu).
+  obiekty zostają na miejscu). „Przeczytaj od nowa” przy mapie usuwa autorowi jego obiekty widziane tylko
+  na niej też jednym wywołaniem (`POST /api/community/objects/removals`, do 1000 id, jedna zmiana).
 - **Głosy:** „Potwierdzam” / „Nie zgadza się” z notatką, jeden głos na osobę. Obiekt z co najmniej dwoma
   głosami „nie” więcej niż „tak” jest zakwestionowany: aplikacja pokazuje go na szaro i nie liczy do oceny
   kandydatów NMT; właściciel widzi go z notatkami w panelu.
@@ -197,6 +198,12 @@ odpowiedzi. Leżą w `src/shared/lib/history/readProfiles.ts`, wspólne dla apli
 
 - `topo` (domyślny, `readPrompt.ts`): Messtischblatt, WIG i podobne mapy topograficzne; budynki,
   młyny, karczmy, folwarki i inne obiekty; widok do ok. 3 km.
+- `arkusz100` (`sheet100Prompt.ts`): arkusze 1:100 000 (KdDR, WIG); skróty z legendy (M., Wm. młyn,
+  Whs., Krug karczma, Gut, Vw. folwark, Fh. leśniczówka, Zgl. cegielnia, K., Kap. kaplica, Furt bród)
+  i całe wsie (`wies`, środek zabudowy); położenie przy znaku, nie przy napisie; bez rodzaju `inne`
+  (w `topo` AI stawiało nim pinezki na nazwach wsi). W aplikacji wieś zostaje tylko zaginiona (brak
+  budynków BDOT10k do 150 m). Własne mapy rzadsze niż 4 m/piksel czyta się nim same
+  (`history/utils/profileForMap.ts`); widok do ok. 12 km.
 - `wojskowa` (`militaryPrompt.ts`): mapy sztabowe z II wojny; linia frontu, okopy, stanowiska, punkty
   dowodzenia, przeprawy, pola minowe, mogiły; linie jako ciąg punktów; widok do ok. 12 km. W
   aplikacji pozycje dają kontekst `wojsko` (ostrzeżenie o niewybuchach u kandydatów do 300 m), mogiły

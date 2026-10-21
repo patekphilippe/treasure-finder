@@ -139,6 +139,24 @@ describe('community', () => {
     expect((await move(dora.auth, { moves: [] })).status).toBe(400);
   });
 
+  it('the author throws away a bad reading at once; others cannot', async () => {
+    const hela = await invite('Hela');
+    const igor = await invite('Igor');
+    const ids = await Promise.all(
+      [0, 1].map(async (k) => {
+        const res = await add(hela.auth, { ...mill, lat: 50.7 + k / 100 });
+        return ((await res.json()) as { id: string }).id;
+      }),
+    );
+    const removals = (auth: string, body: unknown) =>
+      call('community/objects/removals', auth, { method: 'POST', body: JSON.stringify(body) });
+    expect(await (await removals(igor.auth, { ids })).json()).toEqual({ removed: 0 });
+    expect(await (await removals(hela.auth, { ids })).json()).toEqual({ removed: 2 });
+    expect((await list(igor.auth)).filter((o) => ids.includes(o.id))).toEqual([]);
+    expect((await removals(hela.auth, { ids: [] })).status).toBe(400);
+    expect((await removals(hela.auth, { ids: ['../x'] })).status).toBe(400);
+  });
+
   it('bad objects and huge areas are refused', async () => {
     const d = await invite('Darek');
     expect((await add(d.auth, { ...mill, kind: 'znalezisko' })).status).toBe(400);
