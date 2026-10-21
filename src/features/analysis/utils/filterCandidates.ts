@@ -1,6 +1,15 @@
 import { PRIORITIES } from '@/shared/lib/detect';
 import type { Candidate } from '@/shared/types/domain';
-import type { CandidateFilters } from '../config/filters';
+import { BEST_MIN_SCORE, type CandidateFilters } from '../config/filters';
+
+/** worth going out for; what the user chose by hand (a priority, a kind, natural) is shown anyway */
+const isBest = (c: Candidate, f: CandidateFilters) =>
+  c.decision === 'przyjety' ||
+  c.priority === 'chroniony' ||
+  c.priority === 'naturalne' ||
+  f.priorities.includes(c.priority) ||
+  f.interpretations.includes(c.interpretation) ||
+  c.score >= (BEST_MIN_SCORE[c.priority] ?? Infinity);
 
 /** Candidates passing the filters: highest priority first, then best score. */
 export function filterCandidates(
@@ -10,6 +19,7 @@ export function filterCandidates(
   return candidates
     .filter(
       (c) =>
+        (!f.onlyBest || isBest(c, f)) &&
         c.score >= f.minScore &&
         (f.interpretations.length === 0 || f.interpretations.includes(c.interpretation)) &&
         (f.priorities.length === 0 || f.priorities.includes(c.priority)) &&

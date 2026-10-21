@@ -29,12 +29,10 @@ describe('filterCandidates', () => {
     makeCandidate({ id: 'rej', score: 85, decision: 'odrzucony' }),
   ];
 
+  const all = { ...DEFAULT_FILTERS, onlyBest: false };
+
   it('sorts by priority, then score; hides natural and rejected by default', () => {
-    expect(filterCandidates(list, DEFAULT_FILTERS).map((c) => c.id)).toEqual([
-      'top',
-      'low',
-      'prot',
-    ]);
+    expect(filterCandidates(list, all).map((c) => c.id)).toEqual(['top', 'low', 'prot']);
   });
 
   it('filters by priority and interpretation, can show natural', () => {
@@ -48,5 +46,23 @@ describe('filterCandidates', () => {
         interpretations: ['wykrot'],
       }).map((c) => c.id),
     ).toEqual(['nat']);
+  });
+
+  it('only the best by default: a low priority and a weak score go, chosen by hand they stay', () => {
+    const more = [
+      ...list,
+      makeCandidate({ id: 'okop-weak', score: 20, priority: 'wysoki', interpretation: 'okop' }),
+      makeCandidate({ id: 'okop', score: 40, priority: 'wysoki', interpretation: 'okop' }),
+      makeCandidate({ id: 'kept', score: 10, priority: 'niski', decision: 'przyjety' }),
+    ];
+    expect(filterCandidates(more, DEFAULT_FILTERS).map((c) => c.id)).toEqual([
+      'top',
+      'okop',
+      'kept',
+      'prot',
+    ]);
+    expect(
+      filterCandidates(more, { ...DEFAULT_FILTERS, priorities: ['niski'] }).map((c) => c.id),
+    ).toEqual(['low', 'kept']);
   });
 });

@@ -8,6 +8,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { INTERPRETATIONS, PRIORITIES } from '@/shared/lib/detect';
 import type { Interpretation, Priority } from '@/shared/types/domain';
+import { BEST_MIN_SCORE } from '../config/filters';
 import { PRIORITY_COLOR } from '../config/interpretationStyle';
 import { useAnalysisStore } from '../store/useAnalysisStore';
 
@@ -72,6 +73,9 @@ export function CandidateFiltersBar() {
         ))}
       </Select>
       <Stack direction="row" sx={{ gap: 0.75, flexWrap: 'wrap' }}>
+        {toggle('Tylko najlepsze', filters.onlyBest, () =>
+          setFilters({ onlyBest: !filters.onlyBest }),
+        )}
         {SEARCHABLE.map((p) => {
           const on = filters.priorities.includes(p);
           return (
@@ -95,6 +99,13 @@ export function CandidateFiltersBar() {
           setFilters({ showRejected: !filters.showRejected }),
         )}
       </Stack>
+      {filters.onlyBest && (
+        <Typography variant="caption" color="text.secondary">
+          Tylko najlepsze: najwyższy priorytet z oceną od {BEST_MIN_SCORE.najwyzszy}, wysoki od{' '}
+          {BEST_MIN_SCORE.wysoki}, średni od {BEST_MIN_SCORE.sredni}; niski tylko, gdy podniosła go
+          stara mapa. Przyjęte i chronione zawsze.
+        </Typography>
+      )}
     </Stack>
   );
 }

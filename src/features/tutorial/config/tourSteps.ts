@@ -482,7 +482,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'analysis-filters',
     title: 'Filtry',
     content:
-      'Zawężają listę według priorytetu i rodzaju formy. Możesz też pokazać odrzucone, naturalne i chronione miejsca.',
+      'Domyślnie widać tylko najlepszych kandydatów: wysoki priorytet z dobrą oceną albo miejsca potwierdzone starą mapą. Wyłącz „Tylko najlepsze”, żeby zobaczyć wszystko. Zawężasz też według priorytetu i rodzaju formy, możesz pokazać odrzucone, naturalne i chronione miejsca.',
     mode: 'analysis',
     when: 'candidates',
   },

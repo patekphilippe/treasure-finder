@@ -22,6 +22,16 @@ Przegląd: dla każdej interpretacji losowe przykłady na ortofotomapie i LRM.
 | Mielerz                | 24    | 2   | wydłużony nasyp przy drodze                  | kolistość ≥ 0,7                                                                                                                     |
 | Leje, wyrobiska        |       |     | wyglądają wiarygodnie (doły z wałem w lesie) | bez zmian                                                                                                                           |
 
+## Selekcja (21.10.2026)
+
+- Kandydaci: filtr „Tylko najlepsze” włączony domyślnie (`BEST_MIN_SCORE` w
+  `features/analysis/config/filters.ts`): najwyższy od oceny 30, wysoki od 35, średni od 50, niski
+  tylko podniesiony przez kontekst mapy. Przyjęte, chronione i to, co wybrane ręcznie, widać zawsze.
+  Progi bez sprawdzenia w terenie: do poprawy po pierwszych wynikach.
+- Obiekty z map (`PROPOSAL_OPTIONS`): pewność odczytu od 0,5 (było 0,35); na mapach rzadszych niż
+  4 m/piksel (1:100 000) tylko przysiółki i wsie, bez pojedynczych zagród; kościół, leśniczówka,
+  kuźnia itp. tylko gdy dziś nie ma tam zabudowy (młyn, karczma, folwark i bród zawsze).
+
 ## Otwarte
 
 - **Dawne pola** (56): wzór równoległych garbów co 5–8 m pojawia się na dzisiejszych polach uprawnych.
