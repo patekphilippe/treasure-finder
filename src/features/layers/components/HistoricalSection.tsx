@@ -14,12 +14,14 @@ import { findHistoricalLayer } from '../utils/findHistoricalLayer';
 const NONE = 'brak';
 
 interface HistoricalSectionProps {
+  /** the time slider over all historical maps, owned by history (composed in the app shell) */
+  timeline?: ReactNode;
   /** own maps and archival objects, owned by history (composed in the app shell) */
   children?: ReactNode;
 }
 
 /** Warstwy: the online historical map shown, then (from history) own maps and objects. */
-export function HistoricalSection({ children }: HistoricalSectionProps) {
+export function HistoricalSection({ timeline, children }: HistoricalSectionProps) {
   const historicalId = useLayersStore((s) => s.historicalId);
   const opacity = useLayersStore((s) => s.historicalOpacity);
   const year = useLayersStore((s) => s.historicalYear);
@@ -38,6 +40,23 @@ export function HistoricalSection({ children }: HistoricalSectionProps) {
             {HISTORICAL_ONLINE_NOTE}
           </Typography>
         </Stack>
+      </Stack>
+      {timeline}
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pr: 1 }}>
+        <Typography variant="caption" color="text.secondary" sx={{ minWidth: 92 }}>
+          Krycie starych map
+        </Typography>
+        <Slider
+          size="small"
+          min={0.1}
+          max={1}
+          step={0.05}
+          value={opacity}
+          onChange={(_, v) => setOpacity(v as number)}
+          valueLabelDisplay="auto"
+          valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
+          aria-label="Krycie starych map"
+        />
       </Stack>
       <TextField
         select
@@ -76,21 +95,6 @@ export function HistoricalSection({ children }: HistoricalSectionProps) {
               />
             </Stack>
           )}
-          <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 4.5, pr: 1 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
-              Krycie
-            </Typography>
-            <Slider
-              size="small"
-              min={0.1}
-              max={1}
-              step={0.05}
-              value={opacity}
-              onChange={(_, v) => setOpacity(v as number)}
-              valueLabelDisplay="auto"
-              valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
-            />
-          </Stack>
           <Typography variant="caption" color="text.secondary" sx={{ pl: 4.5 }}>
             {layer.coverage}. {layer.minZoom && 'Widać po przybliżeniu mapy. '}
             <Link href={layer.termsUrl} target="_blank" rel="noreferrer">

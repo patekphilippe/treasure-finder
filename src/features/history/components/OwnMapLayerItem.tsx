@@ -1,4 +1,3 @@
-import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
@@ -9,7 +8,7 @@ interface OwnMapLayerItemProps {
   onChange: (patch: Partial<OwnMap>) => void;
 }
 
-/** An own map in Warstwy: shown or not, and how opaque. */
+/** An own map in Warstwy: shown or not (the opacity is common to all old maps). */
 export function OwnMapLayerItem({ map, onChange }: OwnMapLayerItemProps) {
   return (
     <Stack spacing={0.25}>
@@ -25,22 +24,6 @@ export function OwnMapLayerItem({ map, onChange }: OwnMapLayerItemProps) {
           slotProps={{ input: { 'aria-label': `Pokaż: ${map.name}` } }}
         />
       </Stack>
-      {map.visible && (
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pr: 1 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
-            Krycie
-          </Typography>
-          <Slider
-            size="small"
-            min={0.1}
-            max={1}
-            step={0.05}
-            value={map.opacity}
-            onChange={(_, v) => onChange({ opacity: v as number })}
-            aria-label={`Krycie: ${map.name}`}
-          />
-        </Stack>
-      )}
     </Stack>
   );
 }

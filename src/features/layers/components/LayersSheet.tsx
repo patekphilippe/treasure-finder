@@ -24,12 +24,14 @@ interface LayersSheetProps {
   onClose: () => void;
   /** own maps shown or hidden (history; layers must not import it) */
   ownMaps?: ReactNode;
+  /** the time slider over all historical maps (history) */
+  timeline?: ReactNode;
   /** archival objects on the map (history) */
   contextObjects?: ReactNode;
 }
 
 /** What the map shows: base, relief, historical maps and objects, overlays. Nothing is loaded here. */
-export function LayersSheet({ onClose, ownMaps, contextObjects }: LayersSheetProps) {
+export function LayersSheet({ onClose, ownMaps, timeline, contextObjects }: LayersSheetProps) {
   const {
     baseLayer,
     nmtOn,
@@ -109,7 +111,7 @@ export function LayersSheet({ onClose, ownMaps, contextObjects }: LayersSheetPro
 
         <Divider />
 
-        <HistoricalSection>
+        <HistoricalSection timeline={timeline}>
           {ownMaps}
           {contextObjects}
         </HistoricalSection>

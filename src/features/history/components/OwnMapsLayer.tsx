@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { useLayersStore } from '@/features/layers';
 import { WarpedImageLayer, type WarpedImage } from '@/features/map';
 import { crsTransform } from '@/shared/lib/geo';
 import { invertHomography } from '@/shared/lib/georef';
@@ -16,6 +17,9 @@ export function OwnMapsLayer() {
     [all, years],
   );
   const images = useOwnMapImages(maps);
+  // one opacity for all old maps (Warstwy); the map being fitted keeps its own
+  const opacity = useLayersStore((s) => s.historicalOpacity);
+  const fittingId = useOwnMapsStore((s) => s.fitting?.id ?? null);
 
   useEffect(() => {
     void useOwnMapsStore.getState().load();
@@ -35,10 +39,10 @@ export function OwnMapsLayer() {
             sourceToPixel: invertHomography(m.pixelToSource),
             crs,
           };
-          return { id: m.id, source, opacity: m.opacity };
+          return { id: m.id, source, opacity: fittingId === m.id ? m.opacity : opacity };
         })
         .filter((l) => l !== null),
-    [maps, images],
+    [maps, images, opacity, fittingId],
   );
 
   return layers.map((l) => (

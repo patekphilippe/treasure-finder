@@ -14,8 +14,6 @@ export interface TourConditions {
   compare: boolean;
   /** something runs: the activity chip is in the top bar */
   activity: boolean;
-  /** own maps of at least two years: the year slider is in Warstwy */
-  mapYears: boolean;
   platform: Platform;
 }
 
@@ -29,7 +27,6 @@ const applies = (step: TourStep, c: TourConditions) => {
   if (step.when === 'wholeMap') return c.wholeMap;
   if (step.when === 'compare') return c.compare;
   if (step.when === 'activity') return c.activity;
-  if (step.when === 'mapYears') return c.mapYears;
   return true;
 };
 

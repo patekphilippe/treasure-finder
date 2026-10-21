@@ -28,8 +28,7 @@ export interface TourStep {
     | 'relief'
     | 'wholeMap'
     | 'compare'
-    | 'activity'
-    | 'mapYears';
+    | 'activity';
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
@@ -185,7 +184,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-historical',
     title: 'Mapa historyczna',
     content:
-      'Dawne mapy na mapie: przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Suwakiem zmienisz krycie. Warstwy tylko pokazują mapy; własne skany wczytujesz w Danych.',
+      'Dawne mapy na mapie: przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Jeden suwak krycia działa na wszystkie stare mapy, także Twoje. Warstwy tylko pokazują mapy; własne skany wczytujesz w Danych.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -194,19 +193,18 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-own-maps',
     title: 'Własne mapy',
     content:
-      'Twoje skany i GeoTIFF-y: tu je włączasz i ustawiasz krycie. Wczytujesz, dopasowujesz narożnikami i usuwasz je w Danych.',
+      'Twoje skany i GeoTIFF-y: tu je włączasz, a krycie wszystkich starych map ustawiasz jednym suwakiem wyżej. Wczytujesz, dopasowujesz narożnikami i usuwasz je w Danych.',
     mode: 'field',
     sheet: 'layers',
   },
   {
     id: 'maps-year',
     target: 'maps-year',
-    title: 'Rok mapy',
+    title: 'Suwak lat',
     content:
-      'Masz mapy z różnych lat: na liście wybierasz jeden albo kilka lat (wpisz, żeby znaleźć), a suwakiem przechodzisz rok po roku. Widać mapy z tych lat i wyraźnie obiekty z nich odczytane, reszta jest przygaszona. „Wszystkie” wraca do przełączników.',
+      'Przesuwasz rok, a mapa się zmienia: widać Twoje mapy z tego roku i mapę z internetu z tego czasu (Messtischblatt, ortofotomapa z danego roku), a obiekty odczytane z map tego roku są wyraźne. W polu „Pokazane mapy” zaznaczasz, które Twoje mapy widać (wpisz nazwę albo rok, kliknięcie roku zaznacza wszystkie jego mapy). „Wyłącz” wraca do zwykłych przełączników.',
     mode: 'field',
     sheet: 'layers',
-    when: 'mapYears',
   },
   {
     id: 'history-filter',

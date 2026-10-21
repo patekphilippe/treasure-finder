@@ -1,6 +1,7 @@
 export { ContextDetailsSheet } from './components/ContextDetailsSheet';
 export { ContextLayer } from './components/ContextLayer';
 export { HistorySheet } from './components/HistorySheet';
+export { MapTimeSlider } from './components/MapTimeSlider';
 export { useContextStore } from './store/useContextStore';
 export { addSightedObjects } from './services/addSightedObjects';
 export { addedToast } from './utils/addedToast';

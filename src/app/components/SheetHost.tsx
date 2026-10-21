@@ -4,6 +4,7 @@ import {
   ContextDetailsSheet,
   ContextLayerRow,
   HistorySheet,
+  MapTimeSlider,
   OwnMapsVisibility,
 } from '@/features/history';
 import { LayersSheet } from '@/features/layers';
@@ -47,6 +48,7 @@ export function SheetHost() {
         <LayersSheet
           onClose={closeSheet}
           ownMaps={<OwnMapsVisibility />}
+          timeline={<MapTimeSlider />}
           contextObjects={<ContextLayerRow />}
         />
       );
