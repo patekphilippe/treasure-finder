@@ -55,6 +55,21 @@ Konto i społeczność (z przeklikania aplikacji):
   - Do przemyślenia przez Ciebie: dlaczego identyfikatory, a nie polskie zdania.
 - [do sprawdzenia] Co robi zwykły członek: skąd biorą się obiekty we wspólnej bazie i kto je dodaje.
 
+## Projekt API „Zgłoś błąd” (wersja robocza 1, Twoja)
+
+```
+zgłoś błąd:        POST ???   { reason*: wrong_category | not_on_map | wrong_position | other, reason_description }   błędy: 404, ?
+rozpatrz zgłoszenie: POST ???   { approved*: boolean }   błędy: 404, ?
+```
+
+Do poprawy po review (robisz Ty, wersja 2):
+- Adresy: zasoby jako rzeczowniki, akcja wyrażona metodą HTTP (zgłoszenie należy do obiektu; rozpatrzenie zmienia zgłoszenie).
+- Brakuje akcji: właściciel musi zobaczyć listę zgłoszeń do rozpatrzenia.
+- Co wraca z każdego wywołania (kod sukcesu i treść).
+- `approved: boolean` jest niejednoznaczne (zatwierdzam zgłoszenie = usuwam obiekt?); nazwa mówiąca, co się stało.
+- Kto zgłasza: z tokenu logowania, nie z treści zapytania.
+- Błędy: niezalogowany, nie-właściciel, „Inne” bez opisu, drugie zgłoszenie, zgłoszenie już rozpatrzone, obiekt usunięty.
+
 ## Na później (świadomie odłożone)
 
 - Powiadomienia dla zgłaszającego o decyzji właściciela: skrzynka w aplikacji (bez Web Push), gotowy tekst
