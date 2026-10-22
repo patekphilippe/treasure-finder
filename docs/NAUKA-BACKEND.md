@@ -85,6 +85,25 @@ Review wersji 2:
 - [do poprawy] Błędy: wypisane kody i sytuacje, ale bez przypisania „sytuacja → kod”.
 - [brakuje] Lista zgłoszeń dla właściciela, rozpatrzenie (nazwa pola zamiast `approved: boolean`), co wraca z każdej akcji.
 
+### Wersja 3 (po review, gotowa do implementacji)
+
+```
+POST /api/points/{pointId}/reports
+  kto:      zalogowany członek (tożsamość z tokenu)
+  wysyła:   { reason: wrong_category | not_on_map | wrong_position | other, reason_description?: string }
+  sukces:   201 Created  { id, point_id, reason, reason_description, status: "pending", created_at }
+  błędy:    401  niezalogowany
+            404  nie ma takiego obiektu (albo jest usunięty)
+            409  ta osoba już zgłosiła ten obiekt
+            422  powód spoza listy / „other” bez opisu (walidacja Pydantic)
+```
+
+Lekcje z tej rundy: POST tworzy, PATCH zmienia; kolekcja w liczbie mnogiej; 201 + utworzony obiekt;
+błędy są **per endpoint** (403 i „już rozpatrzone” należą do endpointów właściciela, nie do zgłaszania);
+404 = brak zasobu z adresu, 422 = złe dane w treści.
+
+Następne (robisz Ty, tym samym wzorem): lista zgłoszeń dla właściciela i rozpatrzenie zgłoszenia.
+
 ## Na później (świadomie odłożone)
 
 - Powiadomienia dla zgłaszającego o decyzji właściciela: skrzynka w aplikacji (bez Web Push), gotowy tekst
