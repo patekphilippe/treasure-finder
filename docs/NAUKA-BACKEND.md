@@ -70,6 +70,21 @@ Do poprawy po review (robisz Ty, wersja 2):
 - Kto zgłasza: z tokenu logowania, nie z treści zapytania.
 - Błędy: niezalogowany, nie-właściciel, „Inne” bez opisu, drugie zgłoszenie, zgłoszenie już rozpatrzone, obiekt usunięty.
 
+### Wersja robocza 2 (Twoja)
+
+```
+zgłoś błąd:  PATCH /api/points/{pointId}/report
+             { reason*: wrong_category | not_on_map | wrong_position | other, reason_description }
+             błędy: 400, 401, 403, 404, 409, 422 (bez przypisania do sytuacji)
+```
+
+Review wersji 2:
+- [lepiej] Adres jest zasobem pod obiektem (`/points/{pointId}/...`), a akcja zniknęła z nazwy.
+- [do poprawy] Metoda: zgłoszenie to **nowa** rzecz, a PATCH zmienia istniejącą. PATCH przyda się przy rozpatrzeniu.
+- [do poprawy] `report` vs `reports`: jeden obiekt może mieć wiele zgłoszeń (od różnych osób), więc to kolekcja.
+- [do poprawy] Błędy: wypisane kody i sytuacje, ale bez przypisania „sytuacja → kod”.
+- [brakuje] Lista zgłoszeń dla właściciela, rozpatrzenie (nazwa pola zamiast `approved: boolean`), co wraca z każdej akcji.
+
 ## Na później (świadomie odłożone)
 
 - Powiadomienia dla zgłaszającego o decyzji właściciela: skrzynka w aplikacji (bez Web Push), gotowy tekst
