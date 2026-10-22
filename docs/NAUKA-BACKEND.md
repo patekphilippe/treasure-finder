@@ -102,7 +102,32 @@ Lekcje z tej rundy: POST tworzy, PATCH zmienia; kolekcja w liczbie mnogiej; 201 
 błędy są **per endpoint** (403 i „już rozpatrzone” należą do endpointów właściciela, nie do zgłaszania);
 404 = brak zasobu z adresu, 422 = złe dane w treści.
 
-Następne (robisz Ty, tym samym wzorem): lista zgłoszeń dla właściciela i rozpatrzenie zgłoszenia.
+Endpointy właściciela (po dwóch rundach review):
+
+```
+GET /api/reports?status=pending
+  kto:      tylko właściciel
+  sukces:   200 OK  [ { id, point_id, reason, reason_description, status, created_at }, ... ]
+  błędy:    401  niezalogowany
+            403  zalogowany, ale nie właściciel
+            422  status spoza listy
+
+PATCH /api/reports/{reportId}
+  kto:      tylko właściciel
+  wysyła:   { decision: point_removed | rejected }
+  sukces:   200 OK  { id, point_id, reason, reason_description, status: "point_removed" | "rejected", decided_at }
+  błędy:    401  niezalogowany
+            403  zalogowany, ale nie właściciel
+            404  nie ma zgłoszenia o takim id
+            409  zgłoszenie już rozpatrzone
+            422  decyzja spoza listy
+```
+
+Lekcje: zgłaszający wysyła **powód**, właściciel wysyła **decyzję** — każdy endpoint ma własne dane;
+adres wskazuje rzecz, którą zmieniasz (zgłoszenie, nie obiekt); GET nie ma treści, filtruje parametrem `?status=`.
+Uwaga: `point_removed` w jednej transakcji zmienia zgłoszenie i usuwa obiekt (temat na etap bazy danych).
+
+Projekt „Zgłoś błąd” zamknięty. Dalej nauka idzie przez kod: etap 0 i 1, a FastAPI pokaże te endpointy pod `/docs`.
 
 ## Na później (świadomie odłożone)
 
