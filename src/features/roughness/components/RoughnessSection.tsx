@@ -3,18 +3,20 @@ import ButtonBase from '@mui/material/ButtonBase';
 import Collapse from '@mui/material/Collapse';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { useUiStore } from '@/shared/store/useUiStore';
-import { Icon } from '@/shared/ui';
+import { Icon, ToggleRow } from '@/shared/ui';
 import { useAreasStore } from '../store/useAreasStore';
 import { useRoughnessStore } from '../store/useRoughnessStore';
 import { AreaListItem } from './AreaListItem';
 
 const LIST_LIMIT = 30;
 
-/** Uneven ground on the map: the last analysis (started in Analizy) and the marked places. */
+/**
+ * Warstwy: uneven ground on the map (the last analysis, counted in Analizy) and the numbered
+ * places marked from it, each as one switch.
+ */
 export function RoughnessSection() {
   const { status, result, visible, opacity, clear, setVisible, setOpacity } = useRoughnessStore();
   const areas = useAreasStore((s) => s.areas);
@@ -27,35 +29,29 @@ export function RoughnessSection() {
   const sorted = [...areas].sort((a, b) => b.strength - a.strength);
 
   return (
-    <Stack data-tour="layers-roughness" spacing={1.25}>
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
-        <Icon name="fire" size={22} />
-        <Stack sx={{ flex: 1 }}>
-          <Typography variant="subtitle2">Teren nierówny</Typography>
-          <Typography variant="caption" color="text.secondary">
-            Z cieniowania NMT: gdzie jest dużo dołków, kopców i rowów. Zabudowa i podwórza są
-            pomijane.
-          </Typography>
-        </Stack>
-        {result && <Switch checked={visible} onChange={(e) => setVisible(e.target.checked)} />}
-      </Stack>
-      <Stack direction="row" sx={{ gap: 1, alignItems: 'center' }}>
-        <Button
-          color="inherit"
-          sx={{ flex: 1, justifyContent: 'flex-start' }}
-          startIcon={<Icon name="microscope" size={18} />}
-          onClick={() => showAnalyses('roughness')}
-        >
-          {status === 'loading' ? 'Analiza trwa, zobacz w Analizach' : 'Nowa analiza w Analizach'}
-        </Button>
-        {result && (
-          <Button color="inherit" onClick={clear}>
-            Ukryj mapę
-          </Button>
-        )}
-      </Stack>
-      {result && visible && (
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 2, pl: 4.5, pr: 1 }}>
+    <>
+      <ToggleRow
+        data-tour="layers-roughness"
+        icon="fire"
+        title="Teren nierówny"
+        caption={
+          result
+            ? 'Gdzie jest dużo dołków, kopców i rowów'
+            : status === 'loading'
+              ? 'Liczy się w Analizach'
+              : 'Najpierw policz go w Analizach'
+        }
+        checked={result !== null && visible}
+        onChange={result ? setVisible : undefined}
+        action={
+          result ? undefined : (
+            <Button size="small" color="inherit" onClick={() => showAnalyses('roughness')}>
+              {status === 'loading' ? 'Zobacz' : 'Policz'}
+            </Button>
+          )
+        }
+      >
+        <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
             Krycie
           </Typography>
@@ -66,39 +62,49 @@ export function RoughnessSection() {
             step={0.05}
             value={opacity}
             onChange={(_, v) => setOpacity(v as number)}
+            aria-label="Krycie terenu nierównego"
           />
         </Stack>
-      )}
+        <Stack direction="row" sx={{ gap: 1 }}>
+          <Button
+            size="small"
+            color="inherit"
+            startIcon={<Icon name="microscope" size={16} />}
+            onClick={() => showAnalyses('roughness')}
+          >
+            Policz od nowa
+          </Button>
+          <Button size="small" color="inherit" onClick={clear}>
+            Usuń wynik
+          </Button>
+        </Stack>
+      </ToggleRow>
       {areas.length > 0 && (
-        <Stack>
-          <Stack direction="row" sx={{ alignItems: 'center' }}>
-            <ButtonBase
-              onClick={() => setListOpen(!listOpen)}
-              aria-expanded={listOpen}
-              sx={{ flex: 1, justifyContent: 'flex-start', gap: 0.5, borderRadius: '8px' }}
-            >
-              <Typography variant="overline" color="text.secondary">
-                Oznaczone miejsca ({areas.length})
-              </Typography>
-              <Icon name={listOpen ? 'angle-up' : 'angle-down'} size={16} />
-            </ButtonBase>
-            <Switch
-              size="small"
-              checked={placesVisible}
-              onChange={(e) => setPlacesVisible(e.target.checked)}
-            />
-          </Stack>
+        <ToggleRow
+          icon="dot-circle"
+          title={`Miejsca do sprawdzenia (${areas.length})`}
+          caption="Kółka z numerami z terenu nierównego"
+          checked={placesVisible}
+          onChange={setPlacesVisible}
+        >
+          <ButtonBase
+            onClick={() => setListOpen(!listOpen)}
+            aria-expanded={listOpen}
+            sx={{ justifyContent: 'flex-start', gap: 0.5, borderRadius: '8px', py: 0.5 }}
+          >
+            <Typography variant="body2">{listOpen ? 'Schowaj listę' : 'Pokaż listę'}</Typography>
+            <Icon name={listOpen ? 'angle-up' : 'angle-down'} size={16} />
+          </ButtonBase>
           <Collapse in={listOpen}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-              Wskazówki, gdzie patrzeć. Formy rozpoznaje dopiero arkusz NMT (Analizy, karta Formy
-              terenu z arkusza NMT).
+              Wskazówki, gdzie patrzeć. Formy terenu rozpoznaje dopiero arkusz NMT w Analizach.
             </Typography>
             {sorted.slice(0, LIST_LIMIT).map((a) => (
               <AreaListItem key={a.id} area={a} onClick={() => showArea(a.id)} />
             ))}
           </Collapse>
-        </Stack>
+        </ToggleRow>
       )}
-    </Stack>
+    </>
   );
 }

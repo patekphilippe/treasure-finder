@@ -11,7 +11,6 @@ export const AVG_TILE_BYTES = {
   ortho: 8_000,
   nmt: 180_000,
   relief: 35_000,
-  custom: 20_000,
 } as const;
 /** Parallel requests while downloading: Geoportal has no stated limit, its servers are often busy. */
 export const DOWNLOAD_CONCURRENCY = 4;

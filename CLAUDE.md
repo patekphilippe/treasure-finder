@@ -76,11 +76,15 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   `useMapViewStore` (w tym fly-to z przesunięciem nad arkusz), `useCoverageStore` (szerokość pasa),
   `useActivityStore` (długie zadania całej aplikacji).
   Funkcje nie importują z `app/`. `zones` i `safety` nie importują innych funkcji (unikamy cykli).
-- Panele docka: **Warstwy tylko pokazują** (podkład, mapy historyczne i własne: włączanie i krycie, obiekty
-  z map, wyniki analiz), **Analizy** liczą, **Dane** wczytują i zapisują (kopie, pliki GeoJSON, własne mapy
-  historyczne: wczytanie, umieszczenie, rok, narożniki, usuwanie; mapy offline). Wyjątki zostawione w Warstwach:
-  własne warstwy XYZ/WMS po adresie i import stref (Strefy → Zarządzaj). Komponenty `history` trafiają do
-  `LayersSheet` przez sloty z `SheetHost` (layers nie importuje history).
+- Dock: Trasa, Punkty, Dodaj punkt (środkowy), Warstwy, Analizy, Kopia. Interfejs ma być łopatologiczny:
+  krótkie nazwy bez żargonu, jedno zdanie opisu, bez funkcji dla zaawansowanych (własne warstwy XYZ/WMS
+  usunięte w listopadzie 2026). **Warstwy** to wszystko o mapie w trzech grupach: Tło mapy, Stare mapy (suwak
+  lat, Twoje mapy, mapa z internetu, krycie, przycisk do arkusza `ownMaps` „Twoje stare mapy”: dodawanie,
+  folder, rok, narożniki, usuwanie) i Na mapie (lista `ToggleRow` z `shared/ui`: przełącznik, a ustawienia
+  pod nim tylko gdy włączony), na końcu Bez internetu (mapy offline). **Analizy** liczą. **Kopia** (arkusz
+  `data`) tylko zapisuje kopię ZIP i ją wczytuje (także GeoJSON z QGIS). Arkusze otwierane z Warstw
+  (Twoje stare mapy, Zgody i zakazy, Obiekty ze starych map) mają strzałkę wstecz (`Sheet` `onBack`).
+  Komponenty `history` i `offline` trafiają do `LayersSheet` przez sloty z `SheetHost` (layers ich nie importuje).
 - Analizy (`app/components/AnalysesSheet.tsx`) tylko układają karty funkcji w ramie `AnalysisCard`
   (`shared/ui`, jedna otwarta naraz: `useUiStore.analysesCard`, `showAnalyses(card)`): `NmtAnalysisCard`
   (`analysis/field.ts`; field.ts nie może importować history), `RoughnessCard`, `AiReadingCard` (history),
@@ -117,7 +121,7 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Dodanie mapy (`history/services/addOwnMapFiles.ts`): skan umieszczony przez AI albo plik z georeferencją jest od razu
   pokazany sam (`focusOwnMap`: suwak lat i mapa z internetu wyłączone, inne Twoje mapy ukryte), udostępniony i czytany
   przez AI cały w tle (`autoReadMap.ts`, raz: `readAt`, w rozdzielczości skanu `utils/readResM.ts`); obiekty idą od razu
-  do kontekstu i do wspólnej bazy. Narożniki są tylko opcją (toast „Popraw narożniki”, Dane). „Wczytaj folder” (`addOwnMapFolder.ts`) bierze po kolei każdą mapę z folderu (pomija już wczytane po nazwie): umieszcza ją backend z arkuszem z nazwy pliku jako wskazówką (`shared/lib/georef/sheetFromName.ts`), AI czyta ją całą przed następną; bez logowania albo gdy umieszczenie się nie uda, tylko z numeru arkusza i bez odczytu do poprawy narożników. Gdy skończy się limit dzienny albo budżet, zatrzymuje się; ten sam folder wskazany ponownie najpierw doczytuje mapy przerwane (udostępnione, bez `readAt`), potem bierze następne. Przeciąganie narożników
+  do kontekstu i do wspólnej bazy. Narożniki są tylko opcją (toast „Popraw narożniki”, Twoje stare mapy). „Wczytaj folder” (`addOwnMapFolder.ts`) bierze po kolei każdą mapę z folderu (pomija już wczytane po nazwie): umieszcza ją backend z arkuszem z nazwy pliku jako wskazówką (`shared/lib/georef/sheetFromName.ts`), AI czyta ją całą przed następną; bez logowania albo gdy umieszczenie się nie uda, tylko z numeru arkusza i bez odczytu do poprawy narożników. Gdy skończy się limit dzienny albo budżet, zatrzymuje się; ten sam folder wskazany ponownie najpierw doczytuje mapy przerwane (udostępnione, bez `readAt`), potem bierze następne. Przeciąganie narożników
   (`startFitting`/`finishFitting`) trwa mimo otwierania arkuszy, do „Gotowe” albo „Anuluj”; inne stare mapy są wtedy
   schowane. Poprawka mapy już przeczytanej przesuwa obiekty widziane tylko na niej (`moveObjectsWithMap`, we wspólnej
   bazie przez `POST /api/community/objects/moves`); czytanie w toku dopasowuje znalezione obiekty na końcu. Sekcja „Stare mapy” w Warstwach jest ułożona pod telefon: kafel roku (`MapTimeSlider`, `utils/timeSelection.ts`)
@@ -128,7 +132,7 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
   tylko zalogowani członkowie, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
   (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera
-  (docs/BACKEND.md, „Profile odczytu”); arkusze 1:100 000 mają własny profil `arkusz100` (legenda skrótów, bez `inne`), wybierany sam dla map rzadszych niż 4 m/px (`utils/profileForMap.ts`); przed odczytem mapy jej legenda z marginesu (`readMapLegend.ts`, profil `legenda`) idzie do każdego odczytu; arkusz czytany tylko wewnątrz ramki, a każde miejsce sprawdzane na powiększonym wycinku (`checkSheet100.ts`, profil `arkusz100_sprawdz`); „Przeczytaj od nowa” przy mapie (`rereadOwnMap.ts`) usuwa obiekty widziane tylko na niej i czyta ją ponownie; usunięcie mapy zabiera te obiekty (`removeObjects.ts`, Twoje także ze wspólnej bazy), a pozostałe po wcześniej usuniętych mapach sprząta przycisk w Danych (`removeOrphanObjects.ts`); `ContextLayer` rysuje obiekty dopiero od przybliżenia 12 (obszar miasta, `CONTEXT_MIN_ZOOM`) i tylko przy widoku; do 13 albo przy ponad 250 w widoku jako kropki na kanwie; mapa wojskowa daje kontekst `wojsko` i `grob_wojenny`
+  (docs/BACKEND.md, „Profile odczytu”); arkusze 1:100 000 mają własny profil `arkusz100` (legenda skrótów, bez `inne`), wybierany sam dla map rzadszych niż 4 m/px (`utils/profileForMap.ts`); przed odczytem mapy jej legenda z marginesu (`readMapLegend.ts`, profil `legenda`) idzie do każdego odczytu; arkusz czytany tylko wewnątrz ramki, a każde miejsce sprawdzane na powiększonym wycinku (`checkSheet100.ts`, profil `arkusz100_sprawdz`); „Przeczytaj od nowa” przy mapie (`rereadOwnMap.ts`) usuwa obiekty widziane tylko na niej i czyta ją ponownie; usunięcie mapy zabiera te obiekty (`removeObjects.ts`, Twoje także ze wspólnej bazy), a pozostałe po wcześniej usuniętych mapach sprząta przycisk w Twoich starych mapach (`removeOrphanObjects.ts`); `ContextLayer` rysuje obiekty dopiero od przybliżenia 12 (obszar miasta, `CONTEXT_MIN_ZOOM`) i tylko przy widoku; do 13 albo przy ponad 250 w widoku jako kropki na kanwie; mapa wojskowa daje kontekst `wojsko` i `grob_wojenny`
   (ostrzeżenia, ochrona przy mogiłach w `shared/lib/detect/militaryNearby.ts`). Propozycje trafiają do kontekstu
   dopiero po „Przyjmij”. Adres backendu: `shared/config/backend.ts`. Analizy na serwerze (odczyt, zgłoszenia,
   umieszczanie skanu) wymagają logowania: bez niego zamiast nich jest `SignInPrompt` z `@/shared/ui`.

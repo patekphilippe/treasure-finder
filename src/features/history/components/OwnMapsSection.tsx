@@ -24,8 +24,8 @@ import { startFitting } from '../services/startFitting';
 import { readableMapName } from '../utils/readableMapName';
 
 /**
- * Dane: own historical maps loaded from files (a GeoTIFF, an image with a world file or a plain
- * scan), placed and managed here; Warstwy only shows them.
+ * Twoje stare mapy (opened from Warstwy): own historical maps loaded from files (a GeoTIFF, an
+ * image with a world file or a plain scan), placed and managed here; Warstwy shows them.
  */
 export function OwnMapsSection() {
   const { maps, update } = useOwnMapsStore();
@@ -62,29 +62,11 @@ export function OwnMapsSection() {
 
   return (
     <Stack data-tour="own-maps" spacing={1}>
-      <Typography variant="overline" color="text.secondary">
-        Mapy historyczne ({maps.length})
-      </Typography>
       <Typography variant="body2" color="text.secondary">
-        Skan albo GeoTIFF dawnej mapy, np. z PZGiK, SLUB albo mapywig.org. GeoTIFF i obraz z plikiem
-        world file trafiają od razu na miejsce, zwykły skan dopasujesz 4 narożnikami. Mapy zostają
-        na tym urządzeniu i działają bez internetu; włączasz je w Warstwach.
+        Skan albo GeoTIFF starej mapy. GeoTIFF od razu trafia na miejsce. Zwykły skan po zalogowaniu
+        umieści i przeczyta AI, a bez logowania ustawisz go 4 narożnikami. Mapy zostają w tym
+        urządzeniu i działają bez internetu.
       </Typography>
-      {maps.map((m) => (
-        <OwnMapItem
-          key={m.id}
-          map={m}
-          // a year or name changed on a shared map goes to the community too
-          onChange={(patch) => void update(m.id, patch).then(() => shareMap(m.id))}
-          onShow={() => {
-            if (!m.visible) void update(m.id, { visible: true });
-            showOwnMap(m);
-          }}
-          onFit={() => fit(m.id)}
-          onDelete={() => setToDelete(m)}
-          onReread={member ? () => setToReread(m) : undefined}
-        />
-      ))}
       <input
         ref={inputRef}
         type="file"
@@ -98,11 +80,9 @@ export function OwnMapsSection() {
         }}
       />
       <Button
-        variant="outlined"
-        color="inherit"
+        variant="contained"
         disabled={busy}
-        sx={{ mt: maps.length ? 0.5 : 0 }}
-        startIcon={busy ? <CircularProgress size={16} /> : <Icon name="file-image" size={20} />}
+        startIcon={busy ? <CircularProgress size={16} /> : <Icon name="plus" size={20} />}
         onClick={() => inputRef.current?.click()}
       >
         Dodaj mapę
@@ -127,8 +107,33 @@ export function OwnMapsSection() {
         startIcon={<Icon name="folder-open" size={20} />}
         onClick={() => folderRef.current?.click()}
       >
-        Wczytaj folder
+        Dodaj cały folder
       </Button>
+      <Typography variant="caption" color="text.secondary">
+        Obraz z plikiem .jgw, .pgw albo .tfw: wybierz oba pliki naraz. Z folderu wczytują się po
+        kolei wszystkie skany (numer arkusza w nazwie pliku, np. P47_S40, pomaga je umieścić), a
+        mapy już dodane są pomijane.
+      </Typography>
+      {maps.length > 0 && (
+        <Typography variant="overline" color="text.secondary" sx={{ pt: 1 }}>
+          Twoje mapy ({maps.length})
+        </Typography>
+      )}
+      {maps.map((m) => (
+        <OwnMapItem
+          key={m.id}
+          map={m}
+          // a year or name changed on a shared map goes to the community too
+          onChange={(patch) => void update(m.id, patch).then(() => shareMap(m.id))}
+          onShow={() => {
+            if (!m.visible) void update(m.id, { visible: true });
+            showOwnMap(m);
+          }}
+          onFit={() => fit(m.id)}
+          onDelete={() => setToDelete(m)}
+          onReread={member ? () => setToReread(m) : undefined}
+        />
+      ))}
       {mine > 1 && (
         <Button
           variant="outlined"
@@ -150,11 +155,6 @@ export function OwnMapsSection() {
           Usuń {orphans} obiektów z usuniętych map
         </Button>
       )}
-      <Typography variant="caption" color="text.secondary">
-        Obraz z plikiem world file (.jgw, .pgw, .tfw): wybierz oba pliki naraz. Folder: wszystkie
-        skany po kolei, arkusz WIG z nazwy pliku (np. P47_S40), każdy umieszczony i przeczytany
-        przez AI; mapy już wczytane są pomijane.
-      </Typography>
       {pending && (
         <OwnMapImportDialog
           mode={pending.mode}

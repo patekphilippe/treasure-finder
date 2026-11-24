@@ -10,13 +10,11 @@ import { glass, Icon, useToastStore } from '@/shared/ui';
 import { MAX_AREA_TILES } from '../config/offlineAreas';
 import { useAreaPlan } from '../hooks/useAreaPlan';
 import { useOfflineStore } from '../store/useOfflineStore';
-import { downloadableLayers } from '../utils/downloadableLayers';
 
 /** Bottom bar while framing an area: layers, tile count and size, download with progress. */
 export function AreaDownloadBar() {
   const { layers, progress, setLayers, stopSelecting, download, cancelDownload } =
     useOfflineStore();
-  const customLayers = downloadableLayers(useLayersStore((s) => s.customLayers));
   const baseLayer = useLayersStore((s) => s.baseLayer);
   const showToast = useToastStore((s) => s.show);
   const { plan, layerNames } = useAreaPlan();
@@ -74,18 +72,10 @@ export function AreaDownloadBar() {
       })}
     >
       <Stack spacing={1}>
-        <Typography variant="subtitle2">Mapa offline: ustaw obszar w ramce</Typography>
+        <Typography variant="subtitle2">Mapa bez internetu: ustaw obszar w ramce</Typography>
         <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 0.75 }}>
-          {toggle(layers.ortho, 'Ortofotomapa', () => setLayers({ ortho: !layers.ortho }))}
-          {toggle(layers.nmt, 'Cieniowanie NMT', () => setLayers({ nmt: !layers.nmt }))}
-          {customLayers.map((l) => {
-            const on = layers.custom.includes(l.id);
-            return toggle(on, l.name, () =>
-              setLayers({
-                custom: on ? layers.custom.filter((id) => id !== l.id) : [...layers.custom, l.id],
-              }),
-            );
-          })}
+          {toggle(layers.ortho, 'Zdjęcia', () => setLayers({ ortho: !layers.ortho }))}
+          {toggle(layers.nmt, 'Rzeźba terenu', () => setLayers({ nmt: !layers.nmt }))}
         </Stack>
         {progress ? (
           <Stack spacing={0.5}>
@@ -103,7 +93,7 @@ export function AreaDownloadBar() {
           <Typography variant="caption" color="text.secondary">
             {baseLayer === 'osm'
               ? 'Podkład OpenStreetMap nie jest pobierany: jego serwery zabraniają masowego pobierania.'
-              : 'Mapa topograficzna działa tylko z internetem: warunki usługi Geoportalu zabraniają jej pobierania. Bez zasięgu przełącz podkład na Ortofoto.'}
+              : 'Mapa topograficzna działa tylko z internetem: warunki usługi Geoportalu zabraniają jej pobierania. Bez zasięgu przełącz tło mapy na Zdjęcia.'}
           </Typography>
         )}
         <Stack direction="row" sx={{ justifyContent: 'flex-end', gap: 1 }}>

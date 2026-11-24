@@ -3,9 +3,9 @@ import type { SheetId } from '@/shared/store/useUiStore';
 
 export const DOCK_ITEMS: readonly DockItem<SheetId>[] = [
   { id: 'tracks', icon: 'route', label: 'Trasa' },
-  { id: 'points', icon: 'list-ul', label: 'Lista' },
-  { id: 'addPoint', icon: 'map-marker-alt', label: 'Punkt', primary: true },
+  { id: 'points', icon: 'list-ul', label: 'Punkty' },
+  { id: 'addPoint', icon: 'map-marker-alt', label: 'Dodaj punkt', primary: true },
   { id: 'layers', icon: 'layer-group', label: 'Warstwy' },
   { id: 'analyses', icon: 'microscope', label: 'Analizy' },
-  { id: 'data', icon: 'exchange-alt', label: 'Dane' },
+  { id: 'data', icon: 'save', label: 'Kopia' },
 ];

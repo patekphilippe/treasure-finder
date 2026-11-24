@@ -14,9 +14,11 @@ import { ZoneListItem } from './ZoneListItem';
 
 interface ZonesSheetProps {
   onClose: () => void;
+  /** back to Warstwy, where it was opened from */
+  onBack?: () => void;
 }
 
-export function ZonesSheet({ onClose }: ZonesSheetProps) {
+export function ZonesSheet({ onClose, onBack }: ZonesSheetProps) {
   const zones = useZonesStore((s) => s.zones);
   const saveMany = useZonesStore((s) => s.saveMany);
   const showZone = useUiStore((s) => s.showZone);
@@ -50,7 +52,7 @@ export function ZonesSheet({ onClose }: ZonesSheetProps) {
   );
 
   return (
-    <Sheet title="Strefy" onClose={onClose}>
+    <Sheet title="Zgody i zakazy" onClose={onClose} onBack={onBack}>
       <Stack spacing={2}>
         {sorted.length === 0 ? (
           <EmptyState

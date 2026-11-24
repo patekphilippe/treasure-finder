@@ -14,10 +14,12 @@ interface SheetProps {
   children: ReactNode;
   /** keeps the sheet (and its state) mounted but invisible */
   hidden?: boolean;
+  /** a sheet opened from another one: an arrow back to it */
+  onBack?: () => void;
 }
 
 /** Floating card that slides up above the dock. */
-export function Sheet({ title, onClose, children, hidden = false }: SheetProps) {
+export function Sheet({ title, onClose, children, hidden = false, onBack }: SheetProps) {
   return (
     <Slide direction="up" in mountOnEnter appear>
       <Box
@@ -54,6 +56,16 @@ export function Sheet({ title, onClose, children, hidden = false }: SheetProps) 
             sx={{ width: 36, height: 4, borderRadius: 2, bgcolor: 'divider', mx: 'auto', mt: 1 }}
           />
           <Stack direction="row" sx={{ alignItems: 'center', px: 2.5, pt: 1, pb: 0.5 }}>
+            {onBack && (
+              <IconButton
+                size="small"
+                onClick={onBack}
+                aria-label="Wstecz"
+                sx={{ ml: -1, mr: 0.5 }}
+              >
+                <Icon name="angle-left" size={20} />
+              </IconButton>
+            )}
             <Typography variant="h6" sx={{ flex: 1 }}>
               {title}
             </Typography>

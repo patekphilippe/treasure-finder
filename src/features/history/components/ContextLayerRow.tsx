@@ -1,11 +1,10 @@
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import Typography from '@mui/material/Typography';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
-import { Icon } from '@/shared/ui';
+import { Icon, ToggleRow } from '@/shared/ui';
 import { CONTEXT_MIN_ZOOM } from '../config/contextKinds';
 import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useContextStore } from '../store/useContextStore';
@@ -26,37 +25,30 @@ export function ContextLayerRow() {
   const tooFar = useMapViewStore((s) => s.zoom < CONTEXT_MIN_ZOOM);
 
   return (
-    <Stack spacing={0.75} sx={{ px: 0.5 }}>
-      <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-        <Typography variant="overline" color="text.secondary" sx={{ flex: 1 }}>
-          Obiekty z map ({count})
-        </Typography>
-        <Switch
-          size="small"
-          checked={visible}
-          onChange={(e) => setVisible(e.target.checked)}
-          slotProps={{ input: { 'aria-label': 'Pokaż obiekty z map' } }}
-        />
-      </Stack>
-      {visible && tooFar && count > 0 && (
+    <ToggleRow
+      data-tour="history-filter"
+      icon="map-marked-alt"
+      title={`Obiekty ze starych map (${count})`}
+      caption="Młyny, karczmy, dawne wsie i inne ślady"
+      checked={visible}
+      onChange={setVisible}
+    >
+      {tooFar && count > 0 && (
         <Typography variant="caption" color="text.secondary">
-          Przybliż mapę do obszaru wielkości miasta, a obiekty się pokażą. Analiza liczy je zawsze.
+          Przybliż mapę do obszaru wielkości miasta, a obiekty się pokażą.
         </Typography>
       )}
-      <Stack
-        data-tour="history-filter"
-        direction="row"
-        sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
-      >
-        <Chip
-          size="small"
-          icon={<Icon name="filter" size={14} />}
-          label={`Tylko z widocznej mapy (${seenOnView?.size ?? 0})`}
-          color={filter ? 'primary' : 'default'}
-          variant={filter ? 'filled' : 'outlined'}
-          disabled={!seenOnView}
-          onClick={() => setOnlyViewMap(!onlyViewMap)}
-        />
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+        {seenOnView && (
+          <Chip
+            size="small"
+            icon={<Icon name="filter" size={14} />}
+            label={`Tylko z widocznej mapy (${seenOnView.size})`}
+            color={filter ? 'primary' : 'default'}
+            variant={filter ? 'filled' : 'outlined'}
+            onClick={() => setOnlyViewMap(!onlyViewMap)}
+          />
+        )}
         <Button
           size="small"
           color="inherit"
@@ -66,6 +58,6 @@ export function ContextLayerRow() {
           Lista i dodawanie
         </Button>
       </Stack>
-    </Stack>
+    </ToggleRow>
   );
 }

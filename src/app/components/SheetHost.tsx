@@ -5,9 +5,11 @@ import {
   ContextLayerRow,
   HistorySheet,
   MapTimeSlider,
+  OwnMapsSheet,
   OwnMapsVisibility,
 } from '@/features/history';
 import { LayersSheet } from '@/features/layers';
+import { OfflineAreasSection } from '@/features/offline';
 import { AddPointSheet, PointDetailsSheet, PointsListSheet } from '@/features/points';
 import { AreaSheet } from '@/features/roughness';
 import { TracksSheet, useTracksStore } from '@/features/tracks';
@@ -18,11 +20,14 @@ import { AnalysesSheet } from './AnalysesSheet';
 export function SheetHost() {
   const activeSheet = useUiStore((s) => s.activeSheet);
   const closeSheet = useUiStore((s) => s.closeSheet);
+  const showSheet = useUiStore((s) => s.showSheet);
   const selectedPointId = useUiStore((s) => s.selectedPointId);
   const selectedZoneId = useUiStore((s) => s.selectedZoneId);
   const tracks = useTracksStore((s) => s.tracks);
   const selectedAreaId = useUiStore((s) => s.selectedAreaId);
   const selectedContextId = useUiStore((s) => s.selectedContextId);
+  // sheets opened from Warstwy go back to it
+  const backToLayers = () => showSheet('layers');
 
   switch (activeSheet) {
     case 'tracks':
@@ -34,13 +39,13 @@ export function SheetHost() {
     case 'pointDetails':
       return <PointDetailsSheet key={selectedPointId} onClose={closeSheet} />;
     case 'zones':
-      return <ZonesSheet onClose={closeSheet} />;
+      return <ZonesSheet onClose={closeSheet} onBack={backToLayers} />;
     case 'zoneDetails':
       return <ZoneDetailsSheet key={selectedZoneId} onClose={closeSheet} tracks={tracks} />;
     case 'area':
       return <AreaSheet key={selectedAreaId} onClose={closeSheet} />;
     case 'history':
-      return <HistorySheet onClose={closeSheet} />;
+      return <HistorySheet onClose={closeSheet} onBack={backToLayers} />;
     case 'contextDetails':
       return <ContextDetailsSheet key={selectedContextId} onClose={closeSheet} />;
     case 'layers':
@@ -50,8 +55,11 @@ export function SheetHost() {
           ownMaps={<OwnMapsVisibility />}
           timeline={<MapTimeSlider />}
           contextObjects={<ContextLayerRow />}
+          offline={<OfflineAreasSection />}
         />
       );
+    case 'ownMaps':
+      return <OwnMapsSheet onClose={closeSheet} onBack={backToLayers} />;
     case 'analyses':
       return <AnalysesSheet onClose={closeSheet} />;
     case 'data':

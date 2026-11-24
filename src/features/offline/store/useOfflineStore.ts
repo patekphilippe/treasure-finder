@@ -10,8 +10,6 @@ import { listAreas } from '../utils/listAreas';
 export interface LayerChoice {
   ortho: boolean;
   nmt: boolean;
-  /** ids of custom XYZ layers */
-  custom: string[];
 }
 
 interface OfflineState {
@@ -37,7 +35,7 @@ export const useOfflineStore = create<OfflineState>((set, get) => ({
   areas: [],
   selecting: false,
   selection: null,
-  layers: { ortho: true, nmt: true, custom: [] },
+  layers: { ortho: true, nmt: true },
   progress: null,
   abort: null,
   load: async () => set({ areas: await listAreas() }),

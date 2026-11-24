@@ -61,7 +61,7 @@ prowadzi Cloudflare.
 - **Stary adres** `patekphilippe.github.io/treasure-finder/` działa dalej (ten sam workflow buduje go z
   `APP_BASE=/treasure-finder/`) i pokazuje pasek z nowym adresem (`offline/components/MovedNotice.tsx`).
   Przeglądarka trzyma dane osobno dla każdego adresu, więc przenosi się je kopią ZIP: na starym
-  adresie Dane → Pobierz kopię, na nowym Dane → Import. Kopia od wersji 4 zawiera własne mapy. Obszary
+  adresie Kopia → Zapisz kopię, na nowym Kopia → Wczytaj kopię. Kopia od wersji 4 zawiera własne mapy. Obszary
   offline trzeba pobrać na nowo, a aplikację zainstalować jeszcze raz.
 
 ### Przeniesienie domen (jednorazowo)

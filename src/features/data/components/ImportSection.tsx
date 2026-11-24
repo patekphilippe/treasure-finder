@@ -56,15 +56,21 @@ export function ImportSection() {
   };
 
   return (
-    <Stack data-tour="data-import" spacing={1.25}>
-      <Typography variant="overline" color="text.secondary">
-        Import
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Kopia ZIP z tej aplikacji lub z wersji 1, sam plik kopia.json albo GeoJSON z QGIS (układ
-        EPSG:4326): punkty, kontekst z map archiwalnych (pole kind) lub wody z BDOT10k. Dane są
-        łączone, nic nie zostanie usunięte.
-      </Typography>
+    <Stack
+      data-tour="data-import"
+      spacing={1.25}
+      sx={{ bgcolor: 'action.hover', borderRadius: '12px', p: 1.5 }}
+    >
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+        <Icon name="file-import" size={22} />
+        <Stack sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle2">Wczytaj kopię</Typography>
+          <Typography variant="caption" color="text.secondary">
+            Kopia ZIP z innego urządzenia albo plik GeoJSON z QGIS. Wczytane dane dochodzą do
+            Twoich, nic nie znika.
+          </Typography>
+        </Stack>
+      </Stack>
       <input
         ref={inputRef}
         type="file"
@@ -83,7 +89,7 @@ export function ImportSection() {
         startIcon={busy ? <CircularProgress size={16} /> : <Icon name="file-import" size={20} />}
         onClick={() => inputRef.current?.click()}
       >
-        {busy ? 'Wczytuję…' : 'Wczytaj plik'}
+        {busy ? 'Wczytuję…' : 'Wybierz plik'}
       </Button>
       {result?.ok && (
         <Alert

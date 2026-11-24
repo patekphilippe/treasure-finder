@@ -14,8 +14,8 @@ import { readableMapName } from '../utils/readableMapName';
 
 /**
  * Warstwy: which of your maps are shown, in one field grouped by year (by name or year, a whole
- * year at once); the others are hidden. Choosing here turns the year slider off. Maps are loaded
- * and fitted in Dane.
+ * year at once); the others are hidden. Choosing here turns the year slider off. The button
+ * under it opens Twoje stare mapy, where they are added, fitted and removed.
  */
 export function OwnMapsVisibility() {
   const maps = useOwnMapsStore((s) => s.maps);
@@ -114,17 +114,17 @@ export function OwnMapsVisibility() {
         />
       ) : (
         <Typography variant="body2" color="text.secondary">
-          Nie masz jeszcze własnych map. Skan albo GeoTIFF wczytasz w Danych.
+          Masz skan albo zdjęcie starej mapy? Dodaj je, a pokażą się na mapie.
         </Typography>
       )}
       <Button
-        size="small"
+        variant="outlined"
         color="inherit"
-        startIcon={<Icon name="exchange-alt" size={16} />}
-        onClick={() => showSheet('data')}
-        sx={{ alignSelf: 'flex-start' }}
+        startIcon={<Icon name={maps.length ? 'pen' : 'plus'} size={18} />}
+        onClick={() => showSheet('ownMaps')}
+        sx={{ mt: 0.5 }}
       >
-        {maps.length ? 'Wczytaj albo dopasuj w Danych' : 'Otwórz Dane'}
+        {maps.length ? 'Dodaj albo popraw swoje mapy' : 'Dodaj swoją mapę'}
       </Button>
     </Stack>
   );

@@ -1,9 +1,11 @@
+import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import type { ReliefKind } from '@/shared/types/domain';
+import { Icon } from '@/shared/ui';
 import { RELIEF_OPTIONS } from '../config/reliefKinds';
 import { useReliefStore } from '../store/useReliefStore';
 
@@ -15,10 +17,18 @@ export function SheetReliefSection() {
   const hint = RELIEF_OPTIONS.find((o) => o.id === kind)?.hint;
 
   return (
-    <Stack data-tour="sheet-relief" spacing={0.75}>
-      <Typography variant="overline" color="text.secondary">
-        Relief z arkusza ({sheets})
-      </Typography>
+    <Stack data-tour="sheet-relief" spacing={0.75} sx={{ py: 0.75 }}>
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{ color: kind ? 'primary.main' : 'text.secondary', display: 'flex' }}>
+          <Icon name="layer-group" size={22} />
+        </Box>
+        <Stack sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle2">Teren z Twojego arkusza NMT</Typography>
+          <Typography variant="caption" color="text.secondary">
+            Wczytane arkusze: {sheets}. Działa bez internetu.
+          </Typography>
+        </Stack>
+      </Stack>
       <ToggleButtonGroup
         exclusive
         fullWidth

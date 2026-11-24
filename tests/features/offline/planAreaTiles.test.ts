@@ -4,7 +4,7 @@ import { planAreaTiles } from '@/features/offline/utils/planAreaTiles';
 
 // about 1 km × 1 km near Legnica
 const small = { south: 51.29, west: 16.12, north: 51.299, east: 16.134 };
-const none = { ortho: false, nmt: false, custom: [] };
+const none = { ortho: false, nmt: false };
 
 describe('planAreaTiles', () => {
   it('lists orthophoto tiles for zooms 12–19 without duplicates', () => {
@@ -41,16 +41,6 @@ describe('planAreaTiles', () => {
   it('never lists the topographic map (its service forbids harvesting)', () => {
     const plan = planAreaTiles(small, { ...none, ortho: true, nmt: true }, 2);
     expect(plan.urls.some((u) => u.includes('wmts/TOPO'))).toBe(false);
-  });
-
-  it('custom XYZ tiles stop at their native zoom', () => {
-    const plan = planAreaTiles(
-      small,
-      { ...none, custom: [{ url: 'https://t.example/{z}/{x}/{y}.png', maxNativeZoom: 16 }] },
-      1,
-    );
-    expect(plan.urls.some((u) => u.startsWith('https://t.example/16/'))).toBe(true);
-    expect(plan.urls.some((u) => u.startsWith('https://t.example/17/'))).toBe(false);
   });
 
   it('a large area is only counted and marked too large', () => {

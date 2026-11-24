@@ -47,7 +47,7 @@ export function FitCornersBar() {
         </Typography>
         <Typography variant="caption" color="text.secondary">
           Przeciągaj zielone narożniki 1–4, aż drogi, rzeki i wsie na skanie pokryją się z
-          ortofotomapą. Najlepiej przy podkładzie Ortofoto i dużym przybliżeniu.
+          ortofotomapą. Najlepiej przy tle Zdjęcia i dużym przybliżeniu.
         </Typography>
         <Stack direction="row" sx={{ alignItems: 'center', gap: 2, px: 0.5 }}>
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>

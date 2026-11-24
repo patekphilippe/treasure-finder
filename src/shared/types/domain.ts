@@ -249,18 +249,6 @@ export interface Zone {
   validUntil?: number;
 }
 
-/** localStorage, as in version 1 */
-export interface CustomLayer {
-  id: string;
-  name: string;
-  kind: 'xyz' | 'wms';
-  url: string;
-  layers?: string;
-  maxNativeZoom: number;
-  opacity: number;
-  on: boolean;
-}
-
 /** store: maps — a historical map from the user's own file, placed on the map */
 export interface OwnMap {
   id: string;

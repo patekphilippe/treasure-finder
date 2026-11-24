@@ -11,7 +11,7 @@ import { OfflineAreaItem } from './OfflineAreaItem';
 
 const SHOW_ZOOM = 16;
 
-/** Section in Dane: download a map area for work without signal, and the saved areas. */
+/** Warstwy: download a map area for work without signal, and the saved areas. */
 export function OfflineAreasSection() {
   const { areas, load, startSelecting, remove } = useOfflineStore();
   const closeSheet = useUiStore((s) => s.closeSheet);
@@ -25,11 +25,10 @@ export function OfflineAreasSection() {
   return (
     <Stack data-tour="data-offline" spacing={1.25}>
       <Typography variant="overline" color="text.secondary">
-        Mapy offline
+        Bez internetu
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        Ortofotomapa i cieniowanie NMT wybranego obszaru (przybliżenia 12–19) do pracy w terenie bez
-        zasięgu. Mapa topograficzna działa tylko z internetem.
+        Jedziesz tam, gdzie nie ma zasięgu? Zapisz wcześniej zdjęcia i rzeźbę terenu tego miejsca.
       </Typography>
       {areas.length > 0 && (
         <Stack>
@@ -59,7 +58,7 @@ export function OfflineAreasSection() {
           startSelecting();
         }}
       >
-        Pobierz obszar mapy
+        Zapisz obszar mapy
       </Button>
       <ConfirmDialog
         open={toDelete !== null}

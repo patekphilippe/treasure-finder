@@ -103,7 +103,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'dock',
     title: 'Dolny pasek',
     content:
-      'Sześć przycisków otwiera panele: Trasa, Lista, Punkt, Warstwy (co widać na mapie), Analizy (co aplikacja może policzyć) i Dane (wczytywanie i kopie). Dotknięcie przycisku otwartego panelu zamyka go.',
+      'Trasa nagrywa, gdzie chodzisz. Punkty to lista Twoich punktów, a zielony przycisk dodaje nowy. Warstwy mówią, co widać na mapie, Analizy liczą, a Kopia zapisuje Twoje dane do pliku. Dotknięcie przycisku otwartego panelu zamyka go.',
     mode: 'field',
     placement: 'top',
   },
@@ -121,7 +121,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'saved-tracks',
     title: 'Zapisane trasy',
     content:
-      'Zakończone trasy są tutaj i na mapie. Z tras powstaje też mapa pokrycia, którą włączysz w Warstwach.',
+      'Zakończone trasy są tutaj i na mapie. W Warstwach włączysz je jako przeszukane pasy, żeby widzieć luki.',
     mode: 'field',
     sheet: 'tracks',
   },
@@ -164,18 +164,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: 'layers-base',
     target: 'layers-base',
-    title: 'Podkład',
+    title: 'Tło mapy',
     content:
-      'Mapa (OpenStreetMap), Ortofoto, czyli zdjęcia lotnicze z Geoportalu, albo Topo, czyli mapa topograficzna 1:10 000 z poziomicami, ścieżkami i rowami (tylko z internetem).',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
-    id: 'layers-nmt',
-    target: 'layers-nmt',
-    title: 'Cieniowanie NMT',
-    content:
-      'Cieniowany model terenu z Geoportalu w siatce 1 m. Z bliska światło pada z 16 kierunków, jak w analizie arkusza, a kafelki przychodzą gotowe z naszego serwera. Pokazuje dołki, wały i rowy, także pod lasem. Suwakiem zmienisz krycie.',
+      'Co jest pod spodem: zwykła Mapa, Zdjęcia lotnicze z Geoportalu albo Topo, czyli mapa topograficzna z poziomicami, ścieżkami i rowami (tylko z internetem).',
     mode: 'field',
     sheet: 'layers',
   },
@@ -184,16 +175,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-historical',
     title: 'Stare mapy',
     content:
-      'Dawne mapy na mapie: Twoje skany, przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Jeden suwak krycia działa na wszystkie stare mapy. Warstwy tylko pokazują mapy; własne skany wczytujesz w Danych.',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
-    id: 'layers-own-maps',
-    target: 'layers-own-maps',
-    title: 'Twoje mapy',
-    content:
-      'Twoje skany i GeoTIFF-y: w tym polu wybierasz, które widać. Wpisz nazwę albo rok; dotknięcie roku na liście pokazuje wszystkie jego mapy, krzyżyk przy mapie ją chowa. Wczytujesz, dopasowujesz narożnikami i usuwasz je w Danych.',
+      'Dawne mapy na mapie: Twoje skany, przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Jeden suwak krycia działa na wszystkie stare mapy.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -207,11 +189,47 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'layers',
   },
   {
+    id: 'layers-own-maps',
+    target: 'layers-own-maps',
+    title: 'Twoje mapy',
+    content:
+      'Twoje skany i GeoTIFF-y: w tym polu wybierasz, które widać. Wpisz nazwę albo rok; dotknięcie roku na liście pokazuje wszystkie jego mapy, krzyżyk przy mapie ją chowa. Przycisk pod polem dodaje nowe mapy i poprawia te, które już masz.',
+    mode: 'field',
+    sheet: 'layers',
+  },
+  {
+    id: 'own-maps',
+    target: 'own-maps',
+    title: 'Twoje stare mapy',
+    content:
+      'Tu dodajesz własną dawną mapę: GeoTIFF albo skan, np. z mapywig.org. Po zalogowaniu skan sam trafia na miejsce, a AI od razu odczytuje z niego obiekty. Narożniki poprawiasz tylko, jeśli chcesz; obiekty z mapy przesuną się razem z nią. Wpisz rok mapy: obiekty z niej będą go pamiętać.',
+    mode: 'field',
+    sheet: 'ownMaps',
+  },
+  {
+    id: 'own-maps-folder',
+    target: 'own-maps-folder',
+    title: 'Cały folder map',
+    content:
+      'Wskaż folder ze skanami, np. arkusze WIG pobrane z mapywig.org. Aplikacja wczyta je po kolei: każdy umieści (numer arkusza z nazwy pliku, np. P47_S40), a AI go przeczyta. Mapy już wczytane pomija, więc po dograniu plików wskaż folder jeszcze raz.',
+    mode: 'field',
+    sheet: 'ownMaps',
+  },
+  {
+    id: 'layers-nmt',
+    target: 'layers-nmt',
+    title: 'Rzeźba terenu',
+    content:
+      'Cieniowany model terenu z Geoportalu w siatce 1 m: widać dołki, wały i rowy, także pod lasem. Po włączeniu pod przełącznikiem pojawia się suwak krycia.',
+    mode: 'field',
+    sheet: 'layers',
+  },
+  {
     id: 'history-filter',
     target: 'history-filter',
     title: 'Obiekty z map',
     content:
-      'Obiekty to jedna wspólna warstwa: każdy liczy się w analizie NMT, bez względu na to, którą mapę oglądasz. Tylko z widocznej mapy przyciemnia obiekty, których nie widziano na włączonej mapie. Lista i dodawanie otwiera listę obiektów i ręczne zaznaczanie.',
+      'Młyny, karczmy i dawne wsie odczytane ze starych map. Każdy liczy się w analizie NMT, nawet gdy są schowane. Po włączeniu możesz zostawić tylko te z widocznej mapy, a Lista i dodawanie pozwala zaznaczyć nowe ręcznie.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -243,11 +261,20 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'layers',
   },
   {
+    id: 'layers-coverage',
+    target: 'layers-coverage',
+    title: 'Przeszukane pasy',
+    content:
+      'Pokazuje nagrane trasy jako przeszukane pasy, więc od razu widać luki. Po włączeniu suwakiem ustawisz szerokość pasa, np. zasięg cewki wykrywacza.',
+    mode: 'field',
+    sheet: 'layers',
+  },
+  {
     id: 'layers-roughness',
     target: 'layers-roughness',
     title: 'Teren nierówny',
     content:
-      'Wynik analizy nierówności: mapa ciepła, jej krycie i lista oznaczonych miejsc z numerami na mapie. Nową analizę widoku uruchamiasz w Analizach.',
+      'Mapa ciepła: gdzie jest dużo dołków, kopców i rowów. Liczysz ją w Analizach, a tu ją włączasz i wyłączasz. Pod nią są miejsca do sprawdzenia z numerami na mapie.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -261,28 +288,20 @@ export const TOUR_STEPS: readonly TourStep[] = [
     when: 'legend',
   },
   {
-    id: 'layers-coverage',
-    target: 'layers-coverage',
-    title: 'Mapa pokrycia',
-    content:
-      'Pokazuje nagrane trasy jako przeszukane pasy, więc od razu widać luki. Suwakiem ustawisz szerokość pasa, np. zasięg cewki wykrywacza.',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
     id: 'layers-zones',
     target: 'layers-zones',
     title: 'Strefy zgód i zakazów',
     content:
-      'Wczytaj z pliku GeoJSON tereny ze zgodą właściciela i miejsca, gdzie szukać nie wolno. Gdy wejdziesz do strefy zakazu albo wyjdziesz poza zgodę, u góry ekranu pojawi się ostrzeżenie.',
+      'Tereny ze zgodą właściciela i miejsca, gdzie szukać nie wolno, wczytane z pliku GeoJSON. Gdy wejdziesz do strefy zakazu albo wyjdziesz poza zgodę, u góry ekranu pojawi się ostrzeżenie.',
     mode: 'field',
     sheet: 'layers',
   },
   {
-    id: 'layers-custom',
-    target: 'layers-custom',
-    title: 'Własne warstwy',
-    content: 'Dodaj podkład XYZ albo usługę WMS, np. mapę archiwalną z własnego serwera.',
+    id: 'data-offline',
+    target: 'data-offline',
+    title: 'Bez internetu',
+    content:
+      'Zapisz zdjęcia i rzeźbę terenu wybranego obszaru, zanim pojedziesz w teren bez zasięgu. Ustawiasz obszar w ramce na mapie, a aplikacja przed pobraniem pokazuje, ile to zajmie.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -377,54 +396,18 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: 'data-export',
     target: 'data-export',
-    title: 'Eksport',
+    title: 'Zapisz kopię',
     content:
-      'Jeden plik ZIP z punktami, trasami i zdjęciami: GeoJSON i GPX do QGIS oraz kopia zapasowa. Dane są tylko na tym urządzeniu, więc rób kopię regularnie.',
+      'Jeden plik ZIP z punktami, trasami, zdjęciami i Twoimi mapami. Dane są tylko w tym urządzeniu, więc rób kopię regularnie. Plik otworzysz też w QGIS.',
     mode: 'field',
     sheet: 'data',
   },
   {
     id: 'data-import',
     target: 'data-import',
-    title: 'Import',
+    title: 'Wczytaj kopię',
     content:
-      'Wczytaj kopię z innego urządzenia albo GeoJSON z QGIS: punkty, kontekst z map archiwalnych lub wody z BDOT10k. Dane są łączone, nic nie zostanie usunięte.',
-    mode: 'field',
-    sheet: 'data',
-  },
-  {
-    id: 'own-maps',
-    target: 'own-maps',
-    title: 'Własne mapy',
-    content:
-      'Wczytaj własną dawną mapę: GeoTIFF albo skan z PZGiK, SLUB czy mapywig.org. Po zalogowaniu skan sam trafia na miejsce (AI czyta ramkę arkusza i nazwy), a potem AI od razu odczytuje z niego obiekty. Narożniki poprawiasz tylko, jeśli chcesz; obiekty z mapy przesuną się razem z nią. Wpisz rok mapy: obiekty z niej będą go pamiętać. Mapa zostaje w telefonie i działa bez internetu.',
-    mode: 'field',
-    sheet: 'data',
-  },
-  {
-    id: 'own-maps-folder',
-    target: 'own-maps-folder',
-    title: 'Cały folder map',
-    content:
-      'Wskaż folder ze skanami, np. arkusze WIG pobrane z mapywig.org. Aplikacja wczyta je po kolei: każdy umieści (numer arkusza z nazwy pliku, np. P47_S40), a AI go przeczyta. Mapy już wczytane pomija, więc po dograniu plików wskaż folder jeszcze raz.',
-    mode: 'field',
-    sheet: 'data',
-  },
-  {
-    id: 'data-nmt',
-    target: 'data-nmt',
-    title: 'Arkusz NMT',
-    content:
-      'Arkusz NMT wczytujesz w Analizach, bo wczytanie od razu go analizuje. Ten przycisk tam prowadzi.',
-    mode: 'field',
-    sheet: 'data',
-  },
-  {
-    id: 'data-offline',
-    target: 'data-offline',
-    title: 'Mapy offline',
-    content:
-      'Zapisz ortofotomapę i cieniowanie NMT wybranego obszaru, zanim pojedziesz w teren bez zasięgu. Ustawiasz obszar w ramce na mapie, aplikacja pokazuje liczbę kafelków i rozmiar przed pobraniem.',
+      'Kopia z innego telefonu albo komputera, albo plik GeoJSON z QGIS. Wczytane dane dochodzą do Twoich, nic nie znika.',
     mode: 'field',
     sheet: 'data',
   },
@@ -511,7 +494,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: 'Zainstaluj aplikację',
     content: '',
     contentByPlatform: {
-      ios: 'W Safari dotknij Udostępnij (kwadrat ze strzałką), potem Do ekranu początkowego i Dodaj. Aplikacja otworzy się z ikony na pełnym ekranie i zadziała bez internetu. Najpierw zrób kopię w Dane, bo zainstalowana aplikacja na iPhonie ma osobne dane.',
+      ios: 'W Safari dotknij Udostępnij (kwadrat ze strzałką), potem Do ekranu początkowego i Dodaj. Aplikacja otworzy się z ikony na pełnym ekranie i zadziała bez internetu. Najpierw zrób kopię (przycisk Kopia), bo zainstalowana aplikacja na iPhonie ma osobne dane.',
       android:
         'W Chrome dotknij menu ⋮ i wybierz Zainstaluj aplikację. Aplikacja otworzy się z ikony na pełnym ekranie i zadziała bez internetu.',
       desktop:

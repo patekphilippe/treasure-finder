@@ -45,14 +45,21 @@ export function ExportSection() {
   };
 
   return (
-    <Stack data-tour="data-export" spacing={1.25}>
-      <Typography variant="overline" color="text.secondary">
-        Eksport
-      </Typography>
-      <Typography variant="body2" color="text.secondary">
-        {countPoints(pointCount)} i {countTracks(trackCount)} w jednym pliku ZIP: GeoJSON i GPX do
-        QGIS, zdjęcia, własne mapy oraz kopia do przeniesienia na inne urządzenie.
-      </Typography>
+    <Stack
+      data-tour="data-export"
+      spacing={1.25}
+      sx={{ bgcolor: 'action.hover', borderRadius: '12px', p: 1.5 }}
+    >
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1.5 }}>
+        <Icon name="download" size={22} />
+        <Stack sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle2">Zapisz kopię</Typography>
+          <Typography variant="caption" color="text.secondary">
+            {countPoints(pointCount)} i {countTracks(trackCount)} w jednym pliku ZIP. Otworzysz go
+            też w QGIS.
+          </Typography>
+        </Stack>
+      </Stack>
       <Stack direction="row" sx={{ gap: 1 }}>
         <Button
           variant="contained"
@@ -67,7 +74,7 @@ export function ExportSection() {
           }
           onClick={() => run('download')}
         >
-          Pobierz kopię ZIP
+          Pobierz plik
         </Button>
         {canShareFiles() && (
           <Button

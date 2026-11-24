@@ -16,20 +16,14 @@ import {
   MAX_AREA_TILES,
 } from '../config/offlineAreas';
 
-export interface XyzSource {
-  url: string;
-  maxNativeZoom: number;
-}
-
 export interface AreaLayers {
   ortho: boolean;
   nmt: boolean;
-  custom: readonly XyzSource[];
 }
 
 export interface AreaPlan {
   urls: string[];
-  counts: { ortho: number; nmt: number; custom: number };
+  counts: { ortho: number; nmt: number };
   /** estimate before downloading */
   bytes: number;
   total: number;
@@ -82,8 +76,7 @@ function sourceTiles(b: Bounds, source: Wmts2180Source, dpr: number): string[] {
 }
 
 /**
- * Every tile URL the map will request for the area at zooms 12–19: orthophoto and custom
- * XYZ tiles directly; the shading as our relief tiles when the backend is there (zoom 12 and
+ * Every tile URL the map will request for the area at zooms 12–19: orthophoto tiles directly; the shading as our relief tiles when the backend is there (zoom 12 and
  * up is ours), otherwise as the EPSG:2180 Geoportal tiles its layer draws from. The topographic
  * map is left out on purpose: its service forbids automated downloading (harvesting).
  * Too large an area is only counted, never listed.
@@ -110,12 +103,11 @@ export function planAreaTiles(
     return n;
   };
   const orthoCount = layers.ortho ? countFor(ORTHO_MAX_NATIVE_ZOOM) : 0;
-  const customCount = layers.custom.reduce((s, l) => s + countFor(l.maxNativeZoom), 0);
   const reliefCount = layers.nmt && reliefUrl ? countFor(RELIEF_MAX_NATIVE_ZOOM) : 0;
-  const xyzCount = orthoCount + customCount + reliefCount;
+  const xyzCount = orthoCount + reliefCount;
   // EPSG:2180 layers need far fewer tiles than map tiles; huge areas are not enumerated
   const grid2180 = layers.nmt && !reliefUrl;
-  const empty = { ortho: orthoCount, nmt: reliefCount, custom: customCount };
+  const empty = { ortho: orthoCount, nmt: reliefCount };
   if (xyzCount > MAX_AREA_TILES || (grid2180 && mapTiles > MAX_AREA_TILES * 4)) {
     const total = xyzCount + (grid2180 ? mapTiles : 0);
     return { urls: [], counts: empty, bytes: 0, total, tooLarge: true };
@@ -131,21 +123,15 @@ export function planAreaTiles(
     }
   };
   if (layers.ortho) add(ORTHO_WMTS_URL, ORTHO_MAX_NATIVE_ZOOM);
-  for (const l of layers.custom) add(l.url, l.maxNativeZoom);
   if (reliefCount) add(reliefUrl, RELIEF_MAX_NATIVE_ZOOM);
 
   const nmtUrls = grid2180 ? sourceTiles(b, NMT_SOURCE, dpr) : [];
   for (const u of nmtUrls) urls.add(u);
 
-  const counts = {
-    ortho: orthoCount,
-    nmt: reliefCount || nmtUrls.length,
-    custom: customCount,
-  };
+  const counts = { ortho: orthoCount, nmt: reliefCount || nmtUrls.length };
   const total = urls.size;
   const bytes =
     counts.ortho * AVG_TILE_BYTES.ortho +
-    counts.nmt * (reliefCount ? AVG_TILE_BYTES.relief : AVG_TILE_BYTES.nmt) +
-    counts.custom * AVG_TILE_BYTES.custom;
+    counts.nmt * (reliefCount ? AVG_TILE_BYTES.relief : AVG_TILE_BYTES.nmt);
   return { urls: [...urls], counts, bytes, total, tooLarge: total > MAX_AREA_TILES };
 }

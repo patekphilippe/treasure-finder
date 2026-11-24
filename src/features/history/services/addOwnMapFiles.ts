@@ -17,7 +17,7 @@ export interface AddOwnMapOptions extends Partial<Omit<ImportOptions, 'view'>> {
 /**
  * Reads the chosen files as an own map and puts it on the map. A scan is placed by the backend
  * (AI) when asked: then it is shown alone, shared and read by AI at once, and the corners are
- * only an option ("Popraw narożniki" on the toast, or in Dane). A map with a georeference goes
+ * only an option ("Popraw narożniki" on the toast, or in Twoje stare mapy). A map with a georeference goes
  * the same way. Only a scan the AI could not place (or placed by hand) opens corner dragging,
  * and is read after "Gotowe". A task on the activity chip from start to end: closing the sheet
  * or changing layers meanwhile loses nothing. 'needCrs': the file's system has to be told.
@@ -36,7 +36,7 @@ export async function addOwnMapFiles(
         id: 'own-map',
         label: `Mapa ${name}`,
         short: 'Wczytuję mapę',
-        open: { mode: 'field', sheet: 'data' },
+        open: { mode: 'field', sheet: 'ownMaps' },
       },
       async (update) => {
         let placed: Partial<ImportOptions> = {};

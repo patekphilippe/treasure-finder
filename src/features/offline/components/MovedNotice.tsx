@@ -43,7 +43,7 @@ export function MovedNotice() {
         <Stack spacing={1} sx={{ flex: 1 }}>
           <Typography variant="body2">
             Aplikacja ma nowy adres: <b>{APP_HOST}</b>. Twoje dane zostały pod tym adresem: pobierz
-            kopię ZIP i wczytaj ją tam w Dane → Import. Aplikację zainstaluj na nowo.
+            kopię i wczytaj ją tam w Kopia, Wczytaj kopię. Aplikację zainstaluj na nowo.
           </Typography>
           <Stack direction="row" sx={{ gap: 1, flexWrap: 'wrap' }}>
             <Button

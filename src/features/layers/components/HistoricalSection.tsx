@@ -6,7 +6,6 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
 import { HISTORICAL_ONLINE_NOTE } from '@/features/safety';
-import { Icon } from '@/shared/ui';
 import { HISTORICAL_LAYERS } from '../config/historicalLayers';
 import { useLayersStore } from '../store/useLayersStore';
 import { findHistoricalLayer } from '../utils/findHistoricalLayer';
@@ -16,17 +15,15 @@ const NONE = 'brak';
 interface HistoricalSectionProps {
   /** the time slider over all historical maps, owned by history (composed in the app shell) */
   timeline?: ReactNode;
-  /** which own maps are shown, owned by history */
+  /** which own maps are shown and the way to adding them, owned by history */
   ownMaps?: ReactNode;
-  /** archival objects, owned by history */
-  children?: ReactNode;
 }
 
 /**
  * Warstwy: old maps, laid out for a phone: the year, your maps, the online map, one opacity for
- * all of them, then (from history) the objects read from maps.
+ * all of them.
  */
-export function HistoricalSection({ timeline, ownMaps, children }: HistoricalSectionProps) {
+export function HistoricalSection({ timeline, ownMaps }: HistoricalSectionProps) {
   const historicalId = useLayersStore((s) => s.historicalId);
   const opacity = useLayersStore((s) => s.historicalOpacity);
   const year = useLayersStore((s) => s.historicalYear);
@@ -37,15 +34,9 @@ export function HistoricalSection({ timeline, ownMaps, children }: HistoricalSec
 
   return (
     <Stack data-tour="layers-historical" spacing={1.5}>
-      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-        <Icon name="history" size={22} />
-        <Stack sx={{ flex: 1 }}>
-          <Typography variant="subtitle2">Stare mapy</Typography>
-          <Typography variant="caption" color="text.secondary">
-            Twoje skany i mapy z internetu
-          </Typography>
-        </Stack>
-      </Stack>
+      <Typography variant="overline" color="text.secondary" sx={{ mb: -0.5 }}>
+        Stare mapy
+      </Typography>
       {timeline}
       {ownMaps}
       <Stack spacing={0.75}>
@@ -91,16 +82,15 @@ export function HistoricalSection({ timeline, ownMaps, children }: HistoricalSec
             />
           </Stack>
         )}
-        <Typography variant="caption" color="text.secondary" sx={{ px: 0.5 }}>
-          {layer && `${layer.years}, ${layer.coverage}. `}
-          {layer?.minZoom ? 'Widać po przybliżeniu mapy. ' : ''}
-          {HISTORICAL_ONLINE_NOTE}{' '}
-          {layer && (
+        {layer && (
+          <Typography variant="caption" color="text.secondary" sx={{ px: 0.5 }}>
+            {layer.years}, {layer.coverage}. {layer.minZoom ? 'Widać po przybliżeniu mapy. ' : ''}
+            {HISTORICAL_ONLINE_NOTE}{' '}
             <Link href={layer.termsUrl} target="_blank" rel="noreferrer">
               Źródło i warunki
             </Link>
-          )}
-        </Typography>
+          </Typography>
+        )}
       </Stack>
       <Stack direction="row" sx={{ alignItems: 'center', gap: 2, px: 0.5 }}>
         <Typography variant="body2" sx={{ minWidth: 52 }}>
@@ -123,7 +113,6 @@ export function HistoricalSection({ timeline, ownMaps, children }: HistoricalSec
           {Math.round(opacity * 100)}%
         </Typography>
       </Stack>
-      {children}
     </Stack>
   );
 }

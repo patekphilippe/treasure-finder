@@ -17,7 +17,6 @@ import { ReliefLayer } from '../layers/ReliefLayer';
 import { TopoLayer } from '../layers/TopoLayer';
 import { AreaMarkers } from './AreaMarkers';
 import { CoverageLayer } from './CoverageLayer';
-import { CustomLayers } from './CustomLayers';
 import { HistoricalMapLayer } from './HistoricalMapLayer';
 import { DraftMarker } from './DraftMarker';
 import { GuidanceLine } from './GuidanceLine';
@@ -68,7 +67,6 @@ export function MapView({ children }: MapViewProps) {
       )}
       {baseLayer === 'topo' && <TopoLayer key="topo" maxZoom={MAX_ZOOM} />}
       <HistoricalMapLayer />
-      <CustomLayers />
       <RoughnessOverlay />
       {/* with the backend our own shading (Geoportal's below zoom 12 and as a stand-in) */}
       {nmtOn &&

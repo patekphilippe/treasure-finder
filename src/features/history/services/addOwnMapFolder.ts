@@ -125,7 +125,7 @@ export async function addOwnMapFolder(files: readonly File[]): Promise<FolderRes
         cancel: () => {
           stop = true;
         },
-        open: { mode: 'field', sheet: 'data' },
+        open: { mode: 'field', sheet: 'ownMaps' },
       },
       async (update) => {
         let i = 0;

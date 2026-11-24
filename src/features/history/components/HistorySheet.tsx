@@ -33,10 +33,12 @@ import { CommunitySection } from './CommunitySection';
 
 interface HistorySheetProps {
   onClose: () => void;
+  /** back to Warstwy, where it was opened from */
+  onBack?: () => void;
 }
 
 /** Objects from archival maps: the community base, marking at the crosshair, the list. */
-export function HistorySheet({ onClose }: HistorySheetProps) {
+export function HistorySheet({ onClose, onBack }: HistorySheetProps) {
   const { features, setVisible, onlyViewMap } = useContextStore();
   const seenOnView = useSeenOnView();
   const picking = usePointDraftStore((s) => s.picking);
@@ -79,7 +81,7 @@ export function HistorySheet({ onClose }: HistorySheetProps) {
   return (
     <>
       {picking && <PickLocationBar />}
-      <Sheet title="Obiekty historyczne" onClose={onClose} hidden={picking}>
+      <Sheet title="Obiekty ze starych map" onClose={onClose} onBack={onBack} hidden={picking}>
         <Stack spacing={2}>
           <CommunitySection />
 

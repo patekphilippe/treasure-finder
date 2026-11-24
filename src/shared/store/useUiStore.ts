@@ -9,6 +9,7 @@ export type SheetId =
   | 'pointDetails'
   | 'layers'
   | 'data'
+  | 'ownMaps'
   | 'zones'
   | 'zoneDetails'
   | 'area'
