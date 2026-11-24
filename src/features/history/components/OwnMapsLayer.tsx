@@ -5,21 +5,21 @@ import { crsTransform } from '@/shared/lib/geo';
 import { invertHomography } from '@/shared/lib/georef';
 import { useOwnMapImages } from '../hooks/useOwnMapImages';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
-import { shownMaps } from '../utils/shownMaps';
 
 /** The user's own historical maps, warped onto the map above the base layer. */
 export function OwnMapsLayer() {
   const all = useOwnMapsStore((s) => s.maps);
-  const years = useOwnMapsStore((s) => s.years);
   const fittingId = useOwnMapsStore((s) => s.fitting?.id ?? null);
   // the ones on the map, marked visible so their images are decoded; while fitting only that one
   const maps = useMemo(
     () =>
-      (fittingId ? all.filter((m) => m.id === fittingId) : shownMaps(all, years)).map((m) => ({
-        ...m,
-        visible: true,
-      })),
-    [all, years, fittingId],
+      (fittingId ? all.filter((m) => m.id === fittingId) : all.filter((m) => m.visible)).map(
+        (m) => ({
+          ...m,
+          visible: true,
+        }),
+      ),
+    [all, fittingId],
   );
   const images = useOwnMapImages(maps);
   // one opacity for all old maps (Warstwy); the map being fitted keeps its own

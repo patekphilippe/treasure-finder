@@ -1,7 +1,6 @@
 export { ContextDetailsSheet } from './components/ContextDetailsSheet';
 export { ContextLayer } from './components/ContextLayer';
 export { HistorySheet } from './components/HistorySheet';
-export { MapTimeSlider } from './components/MapTimeSlider';
 export { useContextStore } from './store/useContextStore';
 export { addSightedObjects } from './services/addSightedObjects';
 export { addedToast } from './utils/addedToast';
@@ -16,5 +15,5 @@ export { useSharedMapsSync } from './hooks/useSharedMapsSync';
 export { CONTEXT_KINDS } from './config/contextKinds';
 export { AiReadingCard } from './components/AiReadingCard';
 export { ContextLayerRow } from './components/ContextLayerRow';
-export { OwnMapsVisibility } from './components/OwnMapsVisibility';
+export { OldMapPicker } from './components/OldMapPicker';
 export { OwnMapsSheet } from './components/OwnMapsSheet';

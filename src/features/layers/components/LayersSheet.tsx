@@ -6,22 +6,20 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import type { ReactNode } from 'react';
-import { SheetReliefSection } from '@/features/analysis/field';
+import { SheetReliefSection, useAnalysisStore } from '@/features/analysis/field';
 import { RoughnessSection } from '@/features/roughness';
+import { useTracksStore } from '@/features/tracks';
 import { useZonesStore } from '@/features/zones';
 import { SWATH_MAX_M, SWATH_MIN_M, useCoverageStore } from '@/shared/store/useCoverageStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { Icon, Sheet, ToggleRow } from '@/shared/ui';
 import { BASE_LAYER_OPTIONS } from '../config/baseLayers';
 import { useLayersStore } from '../store/useLayersStore';
-import { HistoricalSection } from './HistoricalSection';
 
 interface LayersSheetProps {
   onClose: () => void;
-  /** own maps shown or hidden (history; layers must not import it) */
-  ownMaps?: ReactNode;
-  /** the time slider over all historical maps (history) */
-  timeline?: ReactNode;
+  /** which old map lies on top (history; layers must not import it) */
+  oldMaps?: ReactNode;
   /** archival objects on the map (history) */
   contextObjects?: ReactNode;
   /** downloading an area for work without signal (offline) */
@@ -29,22 +27,21 @@ interface LayersSheetProps {
 }
 
 /**
- * Everything about the map in three plain groups: what is under it, old maps, and a list of
- * switches for what is drawn on it; at the end, saving an area for work without signal.
+ * Everything about the map in three plain groups: what is under it, which old map lies on top,
+ * and switches for what is drawn on it (only those with something to show); at the end, saving
+ * an area for work without signal.
  */
-export function LayersSheet({
-  onClose,
-  ownMaps,
-  timeline,
-  contextObjects,
-  offline,
-}: LayersSheetProps) {
+export function LayersSheet({ onClose, oldMaps, contextObjects, offline }: LayersSheetProps) {
   const { baseLayer, nmtOn, nmtOpacity, setBaseLayer, setNmtOn, setNmtOpacity } = useLayersStore();
   const zoneCount = useZonesStore((s) => s.zones.length);
   const showSheet = useUiStore((s) => s.showSheet);
   const searchZonesOn = useLayersStore((s) => s.searchZonesOn);
   const setSearchZonesOn = useLayersStore((s) => s.setSearchZonesOn);
   const { swathM, showCoverage, setSwathM, setShowCoverage } = useCoverageStore();
+  const hasTracks = useTracksStore((s) => s.tracks.length > 0);
+  const hasSearchZones = useAnalysisStore((s) =>
+    s.candidates.some((c) => c.decision === 'przyjety' && c.searchZone),
+  );
 
   return (
     <Sheet title="Warstwy" onClose={onClose}>
@@ -71,11 +68,11 @@ export function LayersSheet({
 
         <Divider />
 
-        <HistoricalSection timeline={timeline} ownMaps={ownMaps} />
+        {oldMaps}
 
         <Divider />
 
-        <Stack>
+        <Stack data-tour="layers-on-map">
           <Typography variant="overline" color="text.secondary">
             Na mapie
           </Typography>
@@ -105,37 +102,39 @@ export function LayersSheet({
             </Stack>
           </ToggleRow>
           {contextObjects}
-          <ToggleRow
-            data-tour="layers-search-zones"
-            icon="bullseye"
-            title="Strefy poszukiwań"
-            caption="Miejsca przyjęte w Kandydatach"
-            checked={searchZonesOn}
-            onChange={setSearchZonesOn}
-          />
-          <ToggleRow
-            data-tour="layers-coverage"
-            icon="route"
-            title="Przeszukane pasy"
-            caption="Twoje trasy jako pasy: widać, gdzie jeszcze nie byłeś"
-            checked={showCoverage}
-            onChange={setShowCoverage}
-          >
-            <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ minWidth: 80 }}>
-                Pas {swathM.toLocaleString('pl-PL', { maximumFractionDigits: 1 })} m
-              </Typography>
-              <Slider
-                size="small"
-                min={SWATH_MIN_M}
-                max={SWATH_MAX_M}
-                step={0.1}
-                value={swathM}
-                onChange={(_, v) => setSwathM(v as number)}
-                aria-label="Szerokość pasa przeszukania"
-              />
-            </Stack>
-          </ToggleRow>
+          {hasSearchZones && (
+            <ToggleRow
+              icon="bullseye"
+              title="Strefy poszukiwań"
+              caption="Miejsca przyjęte w Kandydatach"
+              checked={searchZonesOn}
+              onChange={setSearchZonesOn}
+            />
+          )}
+          {hasTracks && (
+            <ToggleRow
+              icon="route"
+              title="Przeszukane pasy"
+              caption="Twoje trasy jako pasy: widać, gdzie jeszcze nie byłeś"
+              checked={showCoverage}
+              onChange={setShowCoverage}
+            >
+              <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ minWidth: 80 }}>
+                  Pas {swathM.toLocaleString('pl-PL', { maximumFractionDigits: 1 })} m
+                </Typography>
+                <Slider
+                  size="small"
+                  min={SWATH_MIN_M}
+                  max={SWATH_MAX_M}
+                  step={0.1}
+                  value={swathM}
+                  onChange={(_, v) => setSwathM(v as number)}
+                  aria-label="Szerokość pasa przeszukania"
+                />
+              </Stack>
+            </ToggleRow>
+          )}
           <RoughnessSection />
           <SheetReliefSection />
           <ToggleRow

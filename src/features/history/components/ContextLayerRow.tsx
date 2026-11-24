@@ -11,7 +11,8 @@ import { useContextStore } from '../store/useContextStore';
 
 /**
  * Warstwy: archival objects on the map, optionally only those seen on the visible map (the
- * rest dimmed; the analysis still counts them all), and the way to their list.
+ * rest dimmed; the analysis still counts them all), and the way to their list. Hidden while
+ * there are none.
  */
 export function ContextLayerRow() {
   const count = useContextStore((s) => s.features.length);
@@ -23,10 +24,11 @@ export function ContextLayerRow() {
   const showSheet = useUiStore((s) => s.showSheet);
   const filter = onlyViewMap && seenOnView;
   const tooFar = useMapViewStore((s) => s.zoom < CONTEXT_MIN_ZOOM);
+  // no objects yet: no row
+  if (count === 0) return null;
 
   return (
     <ToggleRow
-      data-tour="history-filter"
       icon="map-marked-alt"
       title={`Obiekty ze starych map (${count})`}
       caption="Młyny, karczmy, dawne wsie i inne ślady"

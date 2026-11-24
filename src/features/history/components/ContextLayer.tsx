@@ -7,8 +7,6 @@ import { useUiStore } from '@/shared/store/useUiStore';
 import { CONTEXT_KINDS, CONTEXT_MIN_ZOOM } from '../config/contextKinds';
 import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useContextStore } from '../store/useContextStore';
-import { useOwnMapsStore } from '../store/useOwnMapsStore';
-import { idsSeenInYears } from '../utils/idsSeenInYears';
 import { contextIcon } from '../utils/contextIcon';
 import { representativePoint } from '../utils/representativePoint';
 
@@ -33,14 +31,7 @@ export function ContextLayer() {
   const visible = useContextStore((s) => s.visible);
   const onlyViewMap = useContextStore((s) => s.onlyViewMap);
   const seenOnView = useSeenOnView();
-  const years = useOwnMapsStore((s) => s.years);
-  // years chosen: what was read from maps of those years stands out; with the view filter both
-  const filter = useMemo(() => {
-    const byView = onlyViewMap ? seenOnView : null;
-    const byYear = years === null ? null : idsSeenInYears(features, years);
-    if (byView && byYear) return new Set([...byYear].filter((id) => byView.has(id)));
-    return byYear ?? byView;
-  }, [onlyViewMap, seenOnView, years, features]);
+  const filter = onlyViewMap ? seenOnView : null;
   const showContext = useUiStore((s) => s.showContext);
   const selectedId = useUiStore((s) =>
     s.activeSheet === 'contextDetails' ? s.selectedContextId : null,

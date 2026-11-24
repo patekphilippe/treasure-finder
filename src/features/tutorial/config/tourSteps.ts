@@ -173,27 +173,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: 'layers-historical',
     target: 'layers-historical',
-    title: 'Stare mapy',
+    title: 'Stara mapa',
     content:
-      'Dawne mapy na mapie: Twoje skany, przedwojenne mapy Messtischblatt Dolnego Śląska i zdjęcia lotnicze z wybranego roku. Pokazują osady, młyny i drogi, których dziś nie ma. Jeden suwak krycia działa na wszystkie stare mapy.',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
-    id: 'maps-year',
-    target: 'maps-year',
-    title: 'Suwak lat',
-    content:
-      'Przesuwasz rok, a mapa się zmienia: widać Twoje mapy z tego roku i mapę z internetu z tego czasu (Messtischblatt, ortofotomapa z danego roku), a obiekty odczytane z map tego roku są wyraźne. Suwak zatrzymuje się tylko na latach, z których jest jakaś mapa; strzałki przechodzą do następnej. „Wyłącz suwak” wraca do wyboru w polu „Twoje mapy”.',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
-    id: 'layers-own-maps',
-    target: 'layers-own-maps',
-    title: 'Twoje mapy',
-    content:
-      'Twoje skany i GeoTIFF-y: w tym polu wybierasz, które widać. Wpisz nazwę albo rok; dotknięcie roku na liście pokazuje wszystkie jego mapy, krzyżyk przy mapie ją chowa. Przycisk pod polem dodaje nowe mapy i poprawia te, które już masz.',
+      'Dotknij jednej pozycji, a ta stara mapa położy się na dzisiejszej. Zielona jest ta, którą teraz widać. Bez starej mapy wraca zwykły widok. Pod listą dodasz swoją mapę i ustawisz, jak mocno ją widać.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -216,20 +198,11 @@ export const TOUR_STEPS: readonly TourStep[] = [
     sheet: 'ownMaps',
   },
   {
-    id: 'layers-nmt',
-    target: 'layers-nmt',
-    title: 'Rzeźba terenu',
+    id: 'layers-on-map',
+    target: 'layers-on-map',
+    title: 'Na mapie',
     content:
-      'Cieniowany model terenu z Geoportalu w siatce 1 m: widać dołki, wały i rowy, także pod lasem. Po włączeniu pod przełącznikiem pojawia się suwak krycia.',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
-    id: 'history-filter',
-    target: 'history-filter',
-    title: 'Obiekty z map',
-    content:
-      'Młyny, karczmy i dawne wsie odczytane ze starych map. Każdy liczy się w analizie NMT, nawet gdy są schowane. Po włączeniu możesz zostawić tylko te z widocznej mapy, a Lista i dodawanie pozwala zaznaczyć nowe ręcznie.',
+      'Przełączniki: włączony pokazuje coś na mapie, wyłączony chowa. Rzeźba terenu pokazuje dołki, wały i rowy, także pod lasem. Gdy nagrasz trasę albo policzysz analizę, pojawią się tu kolejne przełączniki.',
     mode: 'field',
     sheet: 'layers',
   },
@@ -250,33 +223,6 @@ export const TOUR_STEPS: readonly TourStep[] = [
       'Widzisz na dawnej mapie młyn, karczmę albo wieś, której dziś nie ma? Wybierz rodzaj i wskaż miejsce celownikiem. Kandydaci z analizy NMT w pobliżu od razu dostaną wyższy wynik; liczy się rodzaj obiektu (osada działa najdalej).',
     mode: 'field',
     sheet: 'history',
-  },
-  {
-    id: 'layers-search-zones',
-    target: 'layers-search-zones',
-    title: 'Strefy poszukiwań',
-    content:
-      'Miejsca przyjęte w trybie Kandydaci razem z obszarem wokół formy terenu, gdzie warto szukać.',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
-    id: 'layers-coverage',
-    target: 'layers-coverage',
-    title: 'Przeszukane pasy',
-    content:
-      'Pokazuje nagrane trasy jako przeszukane pasy, więc od razu widać luki. Po włączeniu suwakiem ustawisz szerokość pasa, np. zasięg cewki wykrywacza.',
-    mode: 'field',
-    sheet: 'layers',
-  },
-  {
-    id: 'layers-roughness',
-    target: 'layers-roughness',
-    title: 'Teren nierówny',
-    content:
-      'Mapa ciepła: gdzie jest dużo dołków, kopców i rowów. Liczysz ją w Analizach, a tu ją włączasz i wyłączasz. Pod nią są miejsca do sprawdzenia z numerami na mapie.',
-    mode: 'field',
-    sheet: 'layers',
   },
   {
     id: 'legend',

@@ -76,12 +76,16 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   `useMapViewStore` (w tym fly-to z przesunięciem nad arkusz), `useCoverageStore` (szerokość pasa),
   `useActivityStore` (długie zadania całej aplikacji).
   Funkcje nie importują z `app/`. `zones` i `safety` nie importują innych funkcji (unikamy cykli).
-- Dock: Trasa, Punkty, Dodaj punkt (środkowy), Warstwy, Analizy, Kopia. Interfejs ma być łopatologiczny:
-  krótkie nazwy bez żargonu, jedno zdanie opisu, bez funkcji dla zaawansowanych (własne warstwy XYZ/WMS
-  usunięte w listopadzie 2026). **Warstwy** to wszystko o mapie w trzech grupach: Tło mapy, Stare mapy (suwak
-  lat, Twoje mapy, mapa z internetu, krycie, przycisk do arkusza `ownMaps` „Twoje stare mapy”: dodawanie,
-  folder, rok, narożniki, usuwanie) i Na mapie (lista `ToggleRow` z `shared/ui`: przełącznik, a ustawienia
-  pod nim tylko gdy włączony), na końcu Bez internetu (mapy offline). **Analizy** liczą. **Kopia** (arkusz
+- Dock: Trasa, Punkty, Dodaj punkt (środkowy), Warstwy, Analizy, Kopia. Interfejs ma być łopatologiczny,
+  tak żeby dziecko wiedziało, jak go obsłużyć: jeden sposób na jedną rzecz, krótkie nazwy bez żargonu, jedno
+  zdanie opisu, nie pokazujemy przełączników, które nie mają nic do pokazania, bez funkcji dla zaawansowanych
+  (własne warstwy XYZ/WMS, suwak lat i pole wyboru map usunięte w listopadzie 2026). **Warstwy** to wszystko o
+  mapie: Tło mapy; Stara mapa (`history/components/OldMapPicker.tsx`): jedna lista kafli, jeden wybór naraz
+  (Bez starej mapy, Twoje mapy z jednego roku, każda mapa z internetu), zapisany w `visible` map i w
+  `historicalId` (`services/chooseOldMap.ts`, `utils/pickedOldMap.ts`), pod listą „Jak mocno widać starą mapę”
+  i przycisk do arkusza `ownMaps` „Twoje stare mapy” (dodawanie, folder, rok, narożniki, usuwanie); Na mapie
+  (lista `ToggleRow` z `shared/ui`: przełącznik, a ustawienia pod nim tylko gdy włączony; obiekty, strefy
+  poszukiwań, pasy i teren nierówny tylko gdy jest co pokazać), na końcu Bez internetu (mapy offline). **Analizy** liczą. **Kopia** (arkusz
   `data`) tylko zapisuje kopię ZIP i ją wczytuje (także GeoJSON z QGIS). Arkusze otwierane z Warstw
   (Twoje stare mapy, Zgody i zakazy, Obiekty ze starych map) mają strzałkę wstecz (`Sheet` `onBack`).
   Komponenty `history` i `offline` trafiają do `LayersSheet` przez sloty z `SheetHost` (layers ich nie importuje).
@@ -119,16 +123,12 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   pomijany (`shared/lib/history/mergeSighting.ts`). Etykiety i odniesienia map tworzy tylko
   `features/history/utils/toViewSource.ts`.
 - Dodanie mapy (`history/services/addOwnMapFiles.ts`): skan umieszczony przez AI albo plik z georeferencją jest od razu
-  pokazany sam (`focusOwnMap`: suwak lat i mapa z internetu wyłączone, inne Twoje mapy ukryte), udostępniony i czytany
+  pokazany sam (`focusOwnMap`: mapa z internetu wyłączona, inne Twoje mapy ukryte), udostępniony i czytany
   przez AI cały w tle (`autoReadMap.ts`, raz: `readAt`, w rozdzielczości skanu `utils/readResM.ts`); obiekty idą od razu
   do kontekstu i do wspólnej bazy. Narożniki są tylko opcją (toast „Popraw narożniki”, Twoje stare mapy). „Wczytaj folder” (`addOwnMapFolder.ts`) bierze po kolei każdą mapę z folderu (pomija już wczytane po nazwie): umieszcza ją backend z arkuszem z nazwy pliku jako wskazówką (`shared/lib/georef/sheetFromName.ts`), AI czyta ją całą przed następną; bez logowania albo gdy umieszczenie się nie uda, tylko z numeru arkusza i bez odczytu do poprawy narożników. Gdy skończy się limit dzienny albo budżet, zatrzymuje się; ten sam folder wskazany ponownie najpierw doczytuje mapy przerwane (udostępnione, bez `readAt`), potem bierze następne. Przeciąganie narożników
   (`startFitting`/`finishFitting`) trwa mimo otwierania arkuszy, do „Gotowe” albo „Anuluj”; inne stare mapy są wtedy
   schowane. Poprawka mapy już przeczytanej przesuwa obiekty widziane tylko na niej (`moveObjectsWithMap`, we wspólnej
-  bazie przez `POST /api/community/objects/moves`); czytanie w toku dopasowuje znalezione obiekty na końcu. Sekcja „Stare mapy” w Warstwach jest ułożona pod telefon: kafel roku (`MapTimeSlider`, `utils/timeSelection.ts`)
-  obejmuje własne mapy i mapy z internetu, zatrzymuje się tylko na latach z jakąś mapą (`utils/yearStops.ts`), strzałki
-  przechodzą do następnej; rok pokazuje Twoje mapy z tego roku i mapę online z tego czasu. Pole „Twoje mapy”
-  (`OwnMapsVisibility`, pogrupowane według lat) ukrywa i pokazuje mapy z wybranych lat i wyróżnia obiekty z nich
-  odczytane (`utils/idsSeenInYears.ts`); dalej mapa z internetu i jedno krycie dla wszystkich.
+  bazie przez `POST /api/community/objects/moves`); czytanie w toku dopasowuje znalezione obiekty na końcu. Wybór starej mapy w Warstwach opisuje punkt o docku wyżej.
 - Odczyt map przez AI (`features/history/services/readMapWithAi.ts`): przez backend (`POST /api/readings`,
   tylko zalogowani członkowie, limit dzienny, wspólny budżet), wysyłany jest wyłącznie obraz mapy z widoku. Profile odczytu
   (rodzaj mapy: prompt, schemat, skala) w `shared/lib/history/readProfiles.ts`, wspólne dla aplikacji i workera

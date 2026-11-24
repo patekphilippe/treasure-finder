@@ -50,5 +50,5 @@ async function run(): Promise<void> {
   if (fromOthers)
     useToastStore
       .getState()
-      .show(`Nowe wspólne mapy: ${fromOthers}. Włączysz je w Warstwach albo suwakiem lat`);
+      .show(`Nowe wspólne mapy: ${fromOthers}. Wybierzesz je w Warstwach, w Stara mapa`);
 }

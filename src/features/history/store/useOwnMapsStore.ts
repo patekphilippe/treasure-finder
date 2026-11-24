@@ -18,12 +18,6 @@ interface OwnMapsState {
   fitting: Fitting | null;
   /** file name of the map being read or placed right now */
   importing: string | null;
-  /** the years chosen in Warstwy (slider or list): only maps of those years; null: the switches decide */
-  years: number[] | null;
-  setYears: (years: number[] | null) => void;
-  /** the year on the time slider (all historical maps), or null when it is off */
-  timeYear: number | null;
-  setTimeYear: (year: number | null) => void;
   load: () => Promise<void>;
   add: (map: OwnMap) => Promise<void>;
   update: (id: string, patch: Partial<OwnMap>) => Promise<void>;
@@ -47,10 +41,6 @@ export const useOwnMapsStore = create<OwnMapsState>()((set, get) => ({
   maps: [],
   fitting: null,
   importing: null,
-  years: null,
-  setYears: (years) => set({ years }),
-  timeYear: null,
-  setTimeYear: (timeYear) => set({ timeYear }),
   load: async () => set({ maps: await mapsRepo.getAll() }),
   add: async (map) => {
     await mapsRepo.put(map);

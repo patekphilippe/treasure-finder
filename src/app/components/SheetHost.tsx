@@ -4,9 +4,8 @@ import {
   ContextDetailsSheet,
   ContextLayerRow,
   HistorySheet,
-  MapTimeSlider,
+  OldMapPicker,
   OwnMapsSheet,
-  OwnMapsVisibility,
 } from '@/features/history';
 import { LayersSheet } from '@/features/layers';
 import { OfflineAreasSection } from '@/features/offline';
@@ -52,8 +51,7 @@ export function SheetHost() {
       return (
         <LayersSheet
           onClose={closeSheet}
-          ownMaps={<OwnMapsVisibility />}
-          timeline={<MapTimeSlider />}
+          oldMaps={<OldMapPicker />}
           contextObjects={<ContextLayerRow />}
           offline={<OfflineAreasSection />}
         />

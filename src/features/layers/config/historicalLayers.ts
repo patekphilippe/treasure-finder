@@ -8,6 +8,8 @@ import type { YearSpan } from '@/shared/types/domain';
 export interface HistoricalLayer {
   id: string;
   label: string;
+  /** how Warstwy names it, in plain words: a title and one line under it */
+  plain: { title: string; about: string };
   /** years shown under the name */
   years: string;
   /** the years the layer's maps come from (an object seen on it gets them) */
@@ -39,9 +41,16 @@ const UMWD_ATTRIBUTION =
 const UMWD_TERMS = 'https://geoportal.dolnyslask.pl/userreg/regulamin-pl.html';
 
 /** Lower Silesian geoportal, ArcGIS WMS: layer "1" is the image (2 and 3 are footprints). */
-const umwd = (id: string, label: string, from: number, to: number): HistoricalLayer => ({
+const umwd = (
+  id: string,
+  label: string,
+  title: string,
+  from: number,
+  to: number,
+): HistoricalLayer => ({
   id,
   label,
+  plain: { title, about: `Messtischblatt ${from}–${to}, Dolny Śląsk` },
   years: `${from}–${to}`,
   yearSpan: { from, to },
   coverage: 'Dolny Śląsk',
@@ -61,11 +70,24 @@ export const ORTHO_ARCHIVE_ID = 'orto-archiwalna';
 
 // IH PAN „Mapy z przeszłością” (WIG, Messtischblatt, mapy rosyjskie): czeka na zgodę, docs/MAPY_HISTORYCZNE.md
 export const HISTORICAL_LAYERS: readonly HistoricalLayer[] = [
-  umwd('UMWD_Messtischblat_starsze', 'Messtischblatt Dolny Śląsk, starsze wydania', 1883, 1942),
-  umwd('UMWD_Messtischblat_nowsze', 'Messtischblatt Dolny Śląsk, nowsze wydania', 1905, 1944),
+  umwd(
+    'UMWD_Messtischblat_starsze',
+    'Messtischblatt Dolny Śląsk, starsze wydania',
+    'Niemiecka mapa, starsze wydania',
+    1883,
+    1942,
+  ),
+  umwd(
+    'UMWD_Messtischblat_nowsze',
+    'Messtischblatt Dolny Śląsk, nowsze wydania',
+    'Niemiecka mapa, nowsze wydania',
+    1905,
+    1944,
+  ),
   {
     id: ORTHO_ARCHIVE_ID,
     label: 'Ortofotomapa archiwalna',
+    plain: { title: 'Dawne zdjęcia lotnicze', about: 'Od 1995, cała Polska, rok do wyboru' },
     years: 'od 1995',
     coverage: 'Cała Polska, roczniki różne dla obszarów',
     url: 'https://mapy.geoportal.gov.pl/wss/service/PZGIK/ORTO/WMS/StandardResolutionTime',

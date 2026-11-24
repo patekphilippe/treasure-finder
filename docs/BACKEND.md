@@ -175,10 +175,10 @@ cieniowania), a nazwa, rok, georeferencja, autor i znacznik odczytu AI w tabeli 
   zmiany umieszczenia, roku i nazwy. Mapy dodane wcześniej wysyła sama przy synchronizacji.
 - **Pobieranie:** przy starcie i po każdym powrocie do aplikacji (zalogowany członek) lista
   (`GET /api/community/maps`), brakujące skany (`…/<id>/image`). Własne mapy z innego urządzenia są
-  od razu widoczne, mapy innych członków do włączenia w Warstwach albo suwakiem lat.
+  od razu widoczne, mapy innych członków do wybrania w Warstwach (Stara mapa).
 - **Zmiany i usuwanie:** tylko autor (i właściciel). Usunięcie swojej mapy usuwa ją u wszystkich.
 - **Odczyt AI raz:** `read_at` mówi innym urządzeniom, że mapa jest już przeczytana; jej obiekty są we
-  wspólnej bazie, z tym samym id mapy, więc filtry „Tylko z widocznej mapy” i suwak lat działają wszędzie.
+  wspólnej bazie, z tym samym id mapy, więc filtr „Tylko z widocznej mapy” działa wszędzie.
 - **Limity:** skan do 30 MB (mapa w aplikacji ma najwyżej ok. 16 Mpx), 30 nowych skanów dziennie na
   członka. Skany widzą tylko zaproszeni członkowie.
 

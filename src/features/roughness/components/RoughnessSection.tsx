@@ -15,7 +15,7 @@ const LIST_LIMIT = 30;
 
 /**
  * Warstwy: uneven ground on the map (the last analysis, counted in Analizy) and the numbered
- * places marked from it, each as one switch.
+ * places marked from it, each as one switch; nothing until something was counted.
  */
 export function RoughnessSection() {
   const { status, result, visible, opacity, clear, setVisible, setOpacity } = useRoughnessStore();
@@ -27,26 +27,21 @@ export function RoughnessSection() {
   const [listOpen, setListOpen] = useState(false);
 
   const sorted = [...areas].sort((a, b) => b.strength - a.strength);
+  // nothing counted yet: no row (the analysis is in Analizy)
+  if (!result && status !== 'loading' && areas.length === 0) return null;
 
   return (
     <>
       <ToggleRow
-        data-tour="layers-roughness"
         icon="fire"
         title="Teren nierówny"
-        caption={
-          result
-            ? 'Gdzie jest dużo dołków, kopców i rowów'
-            : status === 'loading'
-              ? 'Liczy się w Analizach'
-              : 'Najpierw policz go w Analizach'
-        }
+        caption={result ? 'Gdzie jest dużo dołków, kopców i rowów' : 'Liczy się w Analizach'}
         checked={result !== null && visible}
         onChange={result ? setVisible : undefined}
         action={
           result ? undefined : (
             <Button size="small" color="inherit" onClick={() => showAnalyses('roughness')}>
-              {status === 'loading' ? 'Zobacz' : 'Policz'}
+              Zobacz
             </Button>
           )
         }
