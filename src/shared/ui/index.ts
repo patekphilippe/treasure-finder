@@ -3,6 +3,7 @@ export { ConfirmDialog } from './ConfirmDialog/ConfirmDialog';
 export { Dock, type DockItem } from './Dock/Dock';
 export { EmptyState } from './EmptyState/EmptyState';
 export { Icon } from './Icon/Icon';
+export { OpacitySlider } from './OpacitySlider/OpacitySlider';
 export { Sheet } from './Sheet/Sheet';
 export { SignInPrompt } from './SignInPrompt/SignInPrompt';
 export { StatusChips } from './StatusChips/StatusChips';

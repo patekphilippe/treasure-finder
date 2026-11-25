@@ -20,7 +20,6 @@ import {
   MANUAL_SOURCE,
   type ContextKind,
 } from '../config/contextKinds';
-import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useViewSource } from '../hooks/useViewSource';
 import { addSightedObjects } from '../services/addSightedObjects';
 import { useContextStore } from '../store/useContextStore';
@@ -39,8 +38,7 @@ interface HistorySheetProps {
 
 /** Objects from archival maps: the community base, marking at the crosshair, the list. */
 export function HistorySheet({ onClose, onBack }: HistorySheetProps) {
-  const { features, setVisible, onlyViewMap } = useContextStore();
-  const seenOnView = useSeenOnView();
+  const { features, setVisible } = useContextStore();
   const picking = usePointDraftStore((s) => s.picking);
   const startPicking = usePointDraftStore((s) => s.startPicking);
   const showContext = useUiStore((s) => s.showContext);
@@ -73,10 +71,9 @@ export function HistorySheet({ onClose, onBack }: HistorySheetProps) {
   // closing the sheet mid-way must not leave the crosshair on the map
   useEffect(() => () => usePointDraftStore.getState().reset(), []);
 
-  const filter = onlyViewMap && seenOnView;
-  const sorted = features
-    .filter((f) => !filter || filter.has(f.id))
-    .sort((a, b) => CONTEXT_KIND_ORDER.indexOf(a.kind) - CONTEXT_KIND_ORDER.indexOf(b.kind));
+  const sorted = [...features].sort(
+    (a, b) => CONTEXT_KIND_ORDER.indexOf(a.kind) - CONTEXT_KIND_ORDER.indexOf(b.kind),
+  );
 
   return (
     <>
@@ -92,11 +89,6 @@ export function HistorySheet({ onClose, onBack }: HistorySheetProps) {
             wyższy wynik, bez względu na to, którą mapę oglądasz. Zaznacz je, patrząc na mapę
             historyczną; obiekt pamięta, na których mapach go widziano.
           </Typography>
-          {filter && (
-            <Typography variant="caption" color="text.secondary">
-              Lista pokazuje tylko obiekty z widocznej mapy (filtr w Warstwach).
-            </Typography>
-          )}
 
           <Divider />
 

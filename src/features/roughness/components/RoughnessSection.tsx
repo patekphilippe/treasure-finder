@@ -1,12 +1,10 @@
 import Button from '@mui/material/Button';
-import ButtonBase from '@mui/material/ButtonBase';
 import Collapse from '@mui/material/Collapse';
-import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 import { useUiStore } from '@/shared/store/useUiStore';
-import { Icon, ToggleRow } from '@/shared/ui';
+import { Icon, OpacitySlider, ToggleRow } from '@/shared/ui';
 import { useAreasStore } from '../store/useAreasStore';
 import { useRoughnessStore } from '../store/useRoughnessStore';
 import { AreaListItem } from './AreaListItem';
@@ -27,69 +25,64 @@ export function RoughnessSection() {
   const [listOpen, setListOpen] = useState(false);
 
   const sorted = [...areas].sort((a, b) => b.strength - a.strength);
-  // nothing counted yet: no row (the analysis is in Analizy)
+  // nothing counted yet: no tile (the analysis is in Analizy)
   if (!result && status !== 'loading' && areas.length === 0) return null;
 
   return (
     <>
-      <ToggleRow
-        icon="fire"
-        title="Teren nierówny"
-        caption={result ? 'Gdzie jest dużo dołków, kopców i rowów' : 'Liczy się w Analizach'}
-        checked={result !== null && visible}
-        onChange={result ? setVisible : undefined}
-        action={
-          result ? undefined : (
-            <Button size="small" color="inherit" onClick={() => showAnalyses('roughness')}>
-              Zobacz
+      {result ? (
+        <ToggleRow
+          icon="fire"
+          title="Teren nierówny"
+          caption="Gdzie jest dużo dołków, kopców i rowów"
+          checked={visible}
+          onChange={setVisible}
+        >
+          <OpacitySlider value={opacity} onChange={setOpacity} min={0.2} of="teren nierówny" />
+          <Stack direction="row" sx={{ gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              color="inherit"
+              startIcon={<Icon name="microscope" size={16} />}
+              onClick={() => showAnalyses('roughness')}
+            >
+              Policz od nowa
             </Button>
-          )
-        }
-      >
-        <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
-          <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
-            Krycie
-          </Typography>
-          <Slider
-            size="small"
-            min={0.2}
-            max={1}
-            step={0.05}
-            value={opacity}
-            onChange={(_, v) => setOpacity(v as number)}
-            aria-label="Krycie terenu nierównego"
+            <Button size="small" color="inherit" onClick={clear}>
+              Usuń wynik
+            </Button>
+          </Stack>
+        </ToggleRow>
+      ) : (
+        status === 'loading' && (
+          <ToggleRow
+            icon="fire"
+            title="Teren nierówny"
+            caption="Liczy się teraz. Dotknij, żeby zobaczyć postęp."
+            onOpen={() => showAnalyses('roughness')}
           />
-        </Stack>
-        <Stack direction="row" sx={{ gap: 1 }}>
-          <Button
-            size="small"
-            color="inherit"
-            startIcon={<Icon name="microscope" size={16} />}
-            onClick={() => showAnalyses('roughness')}
-          >
-            Policz od nowa
-          </Button>
-          <Button size="small" color="inherit" onClick={clear}>
-            Usuń wynik
-          </Button>
-        </Stack>
-      </ToggleRow>
+        )
+      )}
       {areas.length > 0 && (
         <ToggleRow
           icon="dot-circle"
           title={`Miejsca do sprawdzenia (${areas.length})`}
-          caption="Kółka z numerami z terenu nierównego"
+          caption="Kółka z numerami na mapie"
           checked={placesVisible}
           onChange={setPlacesVisible}
         >
-          <ButtonBase
-            onClick={() => setListOpen(!listOpen)}
+          <Button
+            variant="outlined"
+            size="small"
+            color="inherit"
             aria-expanded={listOpen}
-            sx={{ justifyContent: 'flex-start', gap: 0.5, borderRadius: '8px', py: 0.5 }}
+            startIcon={<Icon name={listOpen ? 'angle-up' : 'list-ul'} size={16} />}
+            onClick={() => setListOpen(!listOpen)}
+            sx={{ alignSelf: 'flex-start' }}
           >
-            <Typography variant="body2">{listOpen ? 'Schowaj listę' : 'Pokaż listę'}</Typography>
-            <Icon name={listOpen ? 'angle-up' : 'angle-down'} size={16} />
-          </ButtonBase>
+            {listOpen ? 'Schowaj listę' : 'Pokaż listę'}
+          </Button>
           <Collapse in={listOpen}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
               Wskazówki, gdzie patrzeć. Formy terenu rozpoznaje dopiero arkusz NMT w Analizach.

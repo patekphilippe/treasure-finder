@@ -1,14 +1,13 @@
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
-import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useMemo } from 'react';
 import { HISTORICAL_LAYERS, useLayersStore } from '@/features/layers';
 import { HISTORICAL_ONLINE_NOTE } from '@/features/safety';
 import { useUiStore } from '@/shared/store/useUiStore';
-import { Icon } from '@/shared/ui';
+import { Icon, OpacitySlider } from '@/shared/ui';
 import { chooseOldMap } from '../services/chooseOldMap';
 import { useOwnMapsStore } from '../store/useOwnMapsStore';
 import { oldMapGroups } from '../utils/oldMapGroups';
@@ -18,7 +17,7 @@ import { OldMapOption } from './OldMapOption';
 
 /**
  * Warstwy: which old map lies on top, one tap on one tile: none, your maps of one year, or one
- * map from the internet. Under the list: how strongly the old map shows, then adding your own.
+ * map from the internet. Under the list: its opacity, then adding your own.
  */
 export function OldMapPicker() {
   const maps = useOwnMapsStore((s) => s.maps);
@@ -96,27 +95,7 @@ export function OldMapPicker() {
           </Typography>
         </OldMapOption>
       ))}
-      {!picked.none && (
-        <Stack spacing={0.25} sx={{ pt: 0.5 }}>
-          <Typography variant="subtitle2">Jak mocno widać starą mapę</Typography>
-          <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
-            <Typography variant="caption" color="text.secondary">
-              słabo
-            </Typography>
-            <Slider
-              min={0.1}
-              max={1}
-              step={0.05}
-              value={opacity}
-              onChange={(_, v) => setOpacity(v as number)}
-              aria-label="Jak mocno widać starą mapę"
-            />
-            <Typography variant="caption" color="text.secondary">
-              mocno
-            </Typography>
-          </Stack>
-        </Stack>
-      )}
+      {!picked.none && <OpacitySlider value={opacity} onChange={setOpacity} of="stara mapa" />}
       <Stack direction="row" sx={{ gap: 1, pt: 1 }}>
         <Button
           variant="outlined"

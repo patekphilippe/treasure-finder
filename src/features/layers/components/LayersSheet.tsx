@@ -1,4 +1,3 @@
-import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
@@ -12,7 +11,7 @@ import { useTracksStore } from '@/features/tracks';
 import { useZonesStore } from '@/features/zones';
 import { SWATH_MAX_M, SWATH_MIN_M, useCoverageStore } from '@/shared/store/useCoverageStore';
 import { useUiStore } from '@/shared/store/useUiStore';
-import { Icon, Sheet, ToggleRow } from '@/shared/ui';
+import { Icon, OpacitySlider, Sheet, ToggleRow } from '@/shared/ui';
 import { BASE_LAYER_OPTIONS } from '../config/baseLayers';
 import { useLayersStore } from '../store/useLayersStore';
 
@@ -72,10 +71,15 @@ export function LayersSheet({ onClose, oldMaps, contextObjects, offline }: Layer
 
         <Divider />
 
-        <Stack data-tour="layers-on-map">
-          <Typography variant="overline" color="text.secondary">
-            Na mapie
-          </Typography>
+        <Stack data-tour="layers-on-map" spacing={1}>
+          <Stack>
+            <Typography variant="overline" color="text.secondary">
+              Na mapie
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Dotknij, żeby włączyć albo wyłączyć. Zielone widać na mapie.
+            </Typography>
+          </Stack>
           <ToggleRow
             data-tour="layers-nmt"
             icon="mountain"
@@ -84,22 +88,7 @@ export function LayersSheet({ onClose, oldMaps, contextObjects, offline }: Layer
             checked={nmtOn}
             onChange={setNmtOn}
           >
-            <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
-              <Typography variant="caption" color="text.secondary" sx={{ minWidth: 40 }}>
-                Krycie
-              </Typography>
-              <Slider
-                size="small"
-                min={0.1}
-                max={1}
-                step={0.05}
-                value={nmtOpacity}
-                onChange={(_, value) => setNmtOpacity(value as number)}
-                valueLabelDisplay="auto"
-                valueLabelFormat={(v) => `${Math.round(v * 100)}%`}
-                aria-label="Krycie rzeźby terenu"
-              />
-            </Stack>
+            <OpacitySlider value={nmtOpacity} onChange={setNmtOpacity} of="rzeźba terenu" />
           </ToggleRow>
           {contextObjects}
           {hasSearchZones && (
@@ -115,13 +104,13 @@ export function LayersSheet({ onClose, oldMaps, contextObjects, offline }: Layer
             <ToggleRow
               icon="route"
               title="Przeszukane pasy"
-              caption="Twoje trasy jako pasy: widać, gdzie jeszcze nie byłeś"
+              caption="Gdzie już chodziłeś, widać luki"
               checked={showCoverage}
               onChange={setShowCoverage}
             >
               <Stack direction="row" sx={{ alignItems: 'center', gap: 2 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ minWidth: 80 }}>
-                  Pas {swathM.toLocaleString('pl-PL', { maximumFractionDigits: 1 })} m
+                <Typography variant="body2" sx={{ minWidth: 88 }}>
+                  Szerokość {swathM.toLocaleString('pl-PL', { maximumFractionDigits: 1 })} m
                 </Typography>
                 <Slider
                   size="small"
@@ -144,11 +133,7 @@ export function LayersSheet({ onClose, oldMaps, contextObjects, offline }: Layer
             caption={
               zoneCount ? `Wczytane strefy: ${zoneCount}` : 'Tereny ze zgodą właściciela i zakazane'
             }
-            action={
-              <Button size="small" color="inherit" onClick={() => showSheet('zones')}>
-                Otwórz
-              </Button>
-            }
+            onOpen={() => showSheet('zones')}
           />
         </Stack>
 

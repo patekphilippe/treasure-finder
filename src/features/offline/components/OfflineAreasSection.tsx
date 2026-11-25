@@ -1,10 +1,9 @@
-import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from 'react';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
-import { ConfirmDialog, Icon } from '@/shared/ui';
+import { ConfirmDialog, ToggleRow } from '@/shared/ui';
 import type { OfflineArea } from '../types';
 import { useOfflineStore } from '../store/useOfflineStore';
 import { OfflineAreaItem } from './OfflineAreaItem';
@@ -27,9 +26,15 @@ export function OfflineAreasSection() {
       <Typography variant="overline" color="text.secondary">
         Bez internetu
       </Typography>
-      <Typography variant="body2" color="text.secondary">
-        Jedziesz tam, gdzie nie ma zasięgu? Zapisz wcześniej zdjęcia i rzeźbę terenu tego miejsca.
-      </Typography>
+      <ToggleRow
+        icon="download"
+        title="Zapisz obszar mapy"
+        caption="Jedziesz tam, gdzie nie ma zasięgu? Zapisz wcześniej zdjęcia i rzeźbę terenu."
+        onOpen={() => {
+          closeSheet();
+          startSelecting();
+        }}
+      />
       {areas.length > 0 && (
         <Stack>
           {areas.map((a) => (
@@ -49,17 +54,6 @@ export function OfflineAreasSection() {
           ))}
         </Stack>
       )}
-      <Button
-        variant="outlined"
-        color="inherit"
-        startIcon={<Icon name="download" size={20} />}
-        onClick={() => {
-          closeSheet();
-          startSelecting();
-        }}
-      >
-        Zapisz obszar mapy
-      </Button>
       <ConfirmDialog
         open={toDelete !== null}
         title="Usunąć obszar?"

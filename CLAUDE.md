@@ -84,8 +84,10 @@ Funkcje: `map`, `gps`, `tracks`, `points`, `navigation`, `layers`, `data`, `anal
   (Bez starej mapy, Twoje mapy z jednego roku, każda mapa z internetu), zapisany w `visible` map i w
   `historicalId` (`services/chooseOldMap.ts`, `utils/pickedOldMap.ts`), pod listą „Jak mocno widać starą mapę”
   i przycisk do arkusza `ownMaps` „Twoje stare mapy” (dodawanie, folder, rok, narożniki, usuwanie); Na mapie
-  (lista `ToggleRow` z `shared/ui`: przełącznik, a ustawienia pod nim tylko gdy włączony; obiekty, strefy
-  poszukiwań, pasy i teren nierówny tylko gdy jest co pokazać), na końcu Bez internetu (mapy offline). **Analizy** liczą. **Kopia** (arkusz
+  (kafle `ToggleRow` z `shared/ui`: dotknięcie całego kafla włącza, włączony jest zielony jak wybrana stara
+  mapa, a jego ustawienia są w środku tylko gdy włączony; kafel z `onOpen` otwiera arkusz i ma strzałkę;
+  obiekty, strefy poszukiwań, pasy i teren nierówny tylko gdy jest co pokazać), na końcu Bez internetu (mapy
+  offline). Krycie wszędzie przez `OpacitySlider` (`shared/ui`): „Krycie”, suwak, procent. **Analizy** liczą. **Kopia** (arkusz
   `data`) tylko zapisuje kopię ZIP i ją wczytuje (także GeoJSON z QGIS). Arkusze otwierane z Warstw
   (Twoje stare mapy, Zgody i zakazy, Obiekty ze starych map) mają strzałkę wstecz (`Sheet` `onBack`).
   Komponenty `history` i `offline` trafiają do `LayersSheet` przez sloty z `SheetHost` (layers ich nie importuje).

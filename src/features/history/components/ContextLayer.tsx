@@ -5,13 +5,10 @@ import { isDisputed } from '@/shared/types/community';
 import { useMapViewStore } from '@/shared/store/useMapViewStore';
 import { useUiStore } from '@/shared/store/useUiStore';
 import { CONTEXT_KINDS, CONTEXT_MIN_ZOOM } from '../config/contextKinds';
-import { useSeenOnView } from '../hooks/useSeenOnView';
 import { useContextStore } from '../store/useContextStore';
 import { contextIcon } from '../utils/contextIcon';
 import { representativePoint } from '../utils/representativePoint';
 
-/** opacity of objects not seen on the visible map ("Tylko z widocznej mapy") or not of the slider's year */
-const DIMMED = 0.35;
 /** icons from this zoom; between CONTEXT_MIN_ZOOM and here dots on one canvas, cheap to zoom */
 const ICON_MIN_ZOOM = 14;
 /** more icons than this in view also fall back to dots: each icon is an element of its own */
@@ -23,15 +20,11 @@ const VIEW_PAD = 0.5;
  * Archival objects: an icon per object, plus the line or outline when it is not a point. Only
  * from about a town's area on the screen (CONTEXT_MIN_ZOOM) and only near the view; a little
  * further out, or with many in view, coloured dots on a canvas instead of icons (hundreds of
- * icons made zooming stutter). The selected object is drawn at any zoom. With "Tylko z widocznej mapy" the objects not
- * seen on the visible map are dimmed, not hidden: they still count in the analysis.
+ * icons made zooming stutter). The selected object is drawn at any zoom.
  */
 export function ContextLayer() {
   const features = useContextStore((s) => s.features);
   const visible = useContextStore((s) => s.visible);
-  const onlyViewMap = useContextStore((s) => s.onlyViewMap);
-  const seenOnView = useSeenOnView();
-  const filter = onlyViewMap ? seenOnView : null;
   const showContext = useUiStore((s) => s.showContext);
   const selectedId = useUiStore((s) =>
     s.activeSheet === 'contextDetails' ? s.selectedContextId : null,
@@ -85,14 +78,12 @@ export function ContextLayer() {
             color: CONTEXT_KINDS[f.kind].color,
             weight: 3,
             dashArray: '6 6',
-            opacity: filter && !filter.has(f.id) ? DIMMED : 1,
-            fillOpacity: filter && !filter.has(f.id) ? 0.03 : 0.1,
+            fillOpacity: 0.1,
           }}
           eventHandlers={{ click: () => showContext(f.id) }}
         />
       ))}
       {near.map(({ f, at }) => {
-        const opacity = filter && !filter.has(f.id) ? DIMMED : 1;
         if (!icons && f.id !== selectedId)
           return (
             <CircleMarker
@@ -103,9 +94,8 @@ export function ContextLayer() {
                 renderer,
                 color: '#ffffff',
                 weight: 2.5,
-                opacity,
                 fillColor: CONTEXT_KINDS[f.kind].color,
-                fillOpacity: opacity,
+                fillOpacity: 1,
               }}
               eventHandlers={{ click: () => showContext(f.id) }}
             />
@@ -120,7 +110,6 @@ export function ContextLayer() {
               !f.community ? 'local' : isDisputed(f.community) ? 'disputed' : 'shared',
             )}
             title={CONTEXT_KINDS[f.kind].label}
-            opacity={opacity}
             zIndexOffset={f.id === selectedId ? 900 : -200}
             eventHandlers={{ click: () => showContext(f.id) }}
           />

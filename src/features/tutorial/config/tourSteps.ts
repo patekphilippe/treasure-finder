@@ -202,7 +202,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     target: 'layers-on-map',
     title: 'Na mapie',
     content:
-      'Przełączniki: włączony pokazuje coś na mapie, wyłączony chowa. Rzeźba terenu pokazuje dołki, wały i rowy, także pod lasem. Gdy nagrasz trasę albo policzysz analizę, pojawią się tu kolejne przełączniki.',
+      'Dotknij kafla, żeby go włączyć albo wyłączyć. Zielony kafel widać na mapie, a w środku ma swoje krycie. Rzeźba terenu pokazuje dołki, wały i rowy, także pod lasem. Gdy nagrasz trasę albo policzysz analizę, pojawią się tu kolejne kafle.',
     mode: 'field',
     sheet: 'layers',
   },
